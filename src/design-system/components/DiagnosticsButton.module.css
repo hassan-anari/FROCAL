@@ -1,0 +1,43 @@
+.button {
+  position: absolute;
+  z-index: 120;
+  top: calc(.72rem + var(--safe-top));
+  right: calc(.72rem + var(--safe-right));
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid rgba(139, 183, 255, .28);
+  border-radius: 13px;
+  color: rgba(232, 239, 255, .82);
+  background: rgba(5, 10, 24, .66);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .08),
+    0 12px 30px rgba(0, 0, 0, .28);
+  backdrop-filter: blur(16px);
+  cursor: pointer;
+  transition:
+    transform var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    background var(--motion-fast) ease;
+}
+
+.button:active {
+  transform: scale(.95);
+}
+
+.button:hover {
+  border-color: rgba(112, 225, 255, .56);
+  background: rgba(10, 18, 39, .82);
+}
+
+.button svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

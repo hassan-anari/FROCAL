@@ -1,49 +1,53 @@
-# Phase 0 v0.2 — Correction Report
+# Dalexio Mini App — Phase 0 v0.3
 
-## Reason for the revision
+## Status
 
-The first checkpoint was technically useful but visually behaved like a responsive landing page. It expanded to a desktop composition, exposed diagnostics in the user-facing screen and mixed development information with the game shell.
+Phase 0 has been revised as a mobile-first Telegram Mini App foundation. This checkpoint does not start Phase 1.
 
-Version 0.2 corrects Phase 0 before any Phase 1 work begins.
+## User-facing intro
 
-## Corrected product behavior
+- Removed the animated rotating foundation core.
+- Removed foundation verification and confirmation UI.
+- Removed connection badges, user handle, phase status rail, and development copy from the intro.
+- Rebuilt the intro as a clean Dexo Land hero with cinematic typography.
+- Added the primary `Enter Dexo Land` action.
+- The action emits the `dalexio:enter-dexo-land` browser event and triggers Telegram haptics. Phase 1 will bind this event to the onboarding route instead of adding a temporary fake screen.
 
-- The Mini App is portrait-first and mobile-only.
-- The product canvas supports 320–460px widths.
-- A desktop browser or Vercel preview shows a centered mobile canvas.
-- A real Telegram launch fills the available Mini App WebView.
-- The root route no longer contains a diagnostics button or desktop status rail.
-- Diagnostics remain available only at `/diagnostics`.
-- Foundation progress is no longer incorrectly derived from player XP.
+## Diagnostics access
 
-## Telegram corrections
+- Added a compact diagnostics control to the global product shell.
+- It appears on every route in both Telegram and browser/Vercel previews.
+- On normal pages it opens `/diagnostics`.
+- On `/diagnostics` it returns to Dexo Land.
+- Telegram's native Back Button remains active on the diagnostics route.
 
-- Telegram is detected from real launch context (`initData`, user or start parameter), not simply from loading `telegram-web-app.js`.
-- Client platform is exposed separately from runtime mode.
-- `safeAreaInset` and `contentSafeAreaInset` are read and synchronized to CSS.
-- Safe-area update events are subscribed to.
-- Stable viewport height remains synchronized.
-- Native Back Button is used on the diagnostics route.
+## Diagnostics cleanup
 
-## Vercel corrections
+- Removed the large Back button from the diagnostics content.
+- Removed the Phase 1 completion contract panel.
+- Retained only runtime, safe-area, asset registry, mock contract, and experience guardrail checks.
 
-- Added `vercel.json` SPA rewrite.
-- Phase 0 requires no environment variables.
-- Direct refresh of `/diagnostics` is supported after deployment.
-- The recommended validation flow is GitHub → Vercel → test Telegram bot.
+## Preserved foundation
 
-## Validation completed in the build environment
+- Telegram launch context and user recognition.
+- Stable viewport and safe-area events.
+- Theme synchronization and haptic adapter.
+- Portrait-first product canvas and Vercel desktop preview frame.
+- Asset registry, Zod contracts, mock scenarios, Query, Router, Zustand, reduced motion, error and loading systems.
+- Vercel SPA rewrite.
 
-Passed:
+## Validation performed
 
-- core structure validation;
-- required Phase 0 asset validation;
-- internal import validation;
-- TypeScript/TSX transpilation syntax validation;
-- CSS structural validation.
+Passed in this environment:
 
-The package registry returned HTTP 503 in the build environment, so dependency installation, full TypeScript semantic checking, Vitest, Playwright and the Vite production build must be run by Vercel or the reviewer environment. The relevant test cases and build scripts are included.
+- Project structure validation.
+- Phase 0 asset validation.
+- Local import validation.
+- TypeScript/TSX syntax transpilation for 31 source files.
+- CSS parsing for 11 stylesheets.
 
-## Phase 0 status
+Full dependency installation timed out in this environment, so `npm run check` and the production Vite build must also run in Vercel or on a machine with npm registry access.
 
-Phase 0 should only be considered approved after the corrected version is deployed to Vercel and verified inside the test Telegram bot at mobile WebView dimensions.
+## Phase boundary
+
+Phase 1 must not begin until the deployed v0.3 intro and diagnostics navigation are approved inside the Telegram test bot.

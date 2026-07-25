@@ -4,7 +4,7 @@
   padding:
     calc(1rem + var(--safe-top))
     calc(1rem + var(--safe-right))
-    calc(2rem + var(--safe-bottom))
+    calc(1.5rem + var(--safe-bottom))
     calc(1rem + var(--safe-left));
   background:
     radial-gradient(circle at 84% 0%, rgba(120, 82, 255, .17), transparent 25rem),
@@ -14,13 +14,14 @@
 
 .header {
   display: grid;
-  gap: .55rem;
-  margin-bottom: 1.25rem;
+  gap: .5rem;
+  margin-bottom: 1.15rem;
+  padding-right: 46px;
 }
 
 .header > span {
   color: var(--color-cyan-soft);
-  font-size: .65rem;
+  font-size: .64rem;
   font-weight: 850;
   letter-spacing: .13em;
   text-transform: uppercase;
@@ -28,29 +29,24 @@
 
 .header h1 {
   margin: 0;
-  font-size: clamp(1.8rem, 9vw, 2.55rem);
+  font-size: clamp(1.82rem, 9vw, 2.45rem);
   line-height: 1;
   letter-spacing: -.05em;
 }
 
 .header p {
-  margin: 0 0 .55rem;
+  margin: 0;
   color: var(--color-text-muted);
-  font-size: .84rem;
+  font-size: .82rem;
   line-height: 1.55;
-}
-
-.header button {
-  justify-self: start;
 }
 
 .stack {
   display: grid;
-  gap: .85rem;
+  gap: .82rem;
 }
 
-.stack article,
-.contract {
+.stack article {
   padding: 1rem;
   border: 1px solid var(--color-line);
   border-radius: 22px;
@@ -59,13 +55,13 @@
 }
 
 .stack h2 {
-  margin: .8rem 0 .7rem;
+  margin: .78rem 0 .68rem;
   font-size: 1rem;
 }
 
 .stack dl {
   display: grid;
-  gap: .48rem;
+  gap: .46rem;
   margin: 0;
 }
 
@@ -80,7 +76,7 @@
 .stack dt,
 .stack li {
   color: var(--color-text-muted);
-  font-size: .79rem;
+  font-size: .78rem;
 }
 
 .stack dd {
@@ -88,41 +84,13 @@
   margin: 0;
   overflow-wrap: anywhere;
   color: var(--color-cyan-soft);
-  font-size: .79rem;
+  font-size: .78rem;
   text-align: right;
 }
 
 .stack ul {
   display: grid;
-  gap: .55rem;
+  gap: .52rem;
   margin: 0;
   padding-left: 1.05rem;
-}
-
-.contract {
-  margin-top: .85rem;
-  border-color: rgba(140, 98, 255, .34);
-  background: linear-gradient(145deg, rgba(18, 24, 62, .94), rgba(7, 12, 30, .9));
-  box-shadow: var(--shadow-violet);
-}
-
-.contract span {
-  color: var(--color-violet-soft);
-  font-size: .63rem;
-  font-weight: 850;
-  letter-spacing: .13em;
-  text-transform: uppercase;
-}
-
-.contract h2 {
-  margin: .55rem 0;
-  font-size: 1.35rem;
-  line-height: 1.18;
-}
-
-.contract p {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: .8rem;
-  line-height: 1.58;
 }

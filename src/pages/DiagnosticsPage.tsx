@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/design-system/primitives/Button";
 import { StatusChip } from "@/design-system/primitives/StatusChip";
 import { assetRegistry, listAssetsForPhase } from "@/assets/registry";
 import { useScenarioStore } from "@/game/scenarios/scenarioStore";
@@ -30,7 +29,6 @@ export function DiagnosticsPage() {
         <span>Phase 0 / Foundation</span>
         <h1>{content.diagnostics.title}</h1>
         <p>{content.diagnostics.subtitle}</p>
-        <Button tone="secondary" onClick={() => navigate({ to: "/" })}>Back to world</Button>
       </header>
 
       <section className={styles.stack} aria-label="Foundation diagnostics">
@@ -91,12 +89,6 @@ export function DiagnosticsPage() {
             <li>Browser and Vercel preview fallback</li>
           </ul>
         </article>
-      </section>
-
-      <section className={styles.contract}>
-        <span>Phase 0 completion contract</span>
-        <h2>Ready for the Dexo Land entry flow.</h2>
-        <p>Phase 1 will add onboarding, Dexo acquisition, Base navigation and the first playable vertical slice.</p>
       </section>
     </main>
   );
