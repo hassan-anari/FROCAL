@@ -51,6 +51,8 @@
   --motion-slow: 700ms;
   --motion-cinematic: 1200ms;
 
+  --miniapp-max-width: 460px;
+
   --safe-top: max(env(safe-area-inset-top), var(--tg-safe-area-inset-top, 0px), var(--tg-content-safe-area-inset-top, 0px));
   --safe-right: max(env(safe-area-inset-right), var(--tg-safe-area-inset-right, 0px), var(--tg-content-safe-area-inset-right, 0px));
   --safe-bottom: max(env(safe-area-inset-bottom), var(--tg-safe-area-inset-bottom, 0px), var(--tg-content-safe-area-inset-bottom, 0px));
@@ -64,4 +66,5 @@
   --tg-theme-button-text: #ffffff;
   --tg-theme-secondary-bg: #0b1430;
   --tg-theme-accent: #45ddff;
+  --tg-theme-bottom-bar: #03050d;
 }

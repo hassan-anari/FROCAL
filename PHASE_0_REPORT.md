@@ -1,69 +1,49 @@
-# Phase 0 Completion Report
+# Phase 0 v0.2 — Correction Report
 
-## Objective
+## Reason for the revision
 
-Create a stable, Telegram-aware, asset-driven frontend foundation that can support the complete Dexo Land game without rebuilding architecture during later phases.
+The first checkpoint was technically useful but visually behaved like a responsive landing page. It expanded to a desktop composition, exposed diagnostics in the user-facing screen and mixed development information with the game shell.
 
-## Delivered
+Version 0.2 corrects Phase 0 before any Phase 1 work begins.
 
-### Application foundation
+## Corrected product behavior
 
-- React and TypeScript application powered by Vite
-- TanStack Router with explicit `/` and `/diagnostics` routes
-- TanStack Query provider and query-key conventions
-- Zustand scenario store for deterministic UI testing
-- Motion provider with user reduced-motion support
-- global error boundary and boot loader
+- The Mini App is portrait-first and mobile-only.
+- The product canvas supports 320–460px widths.
+- A desktop browser or Vercel preview shows a centered mobile canvas.
+- A real Telegram launch fills the available Mini App WebView.
+- The root route no longer contains a diagnostics button or desktop status rail.
+- Diagnostics remain available only at `/diagnostics`.
+- Foundation progress is no longer incorrectly derived from player XP.
 
-### Telegram integration
+## Telegram corrections
 
-- one adapter is the only gateway to `window.Telegram.WebApp`
-- browser fallback for development outside Telegram
-- ready, expand, theme, stable height, haptics, external links, and back button support
-- CSS theme and viewport synchronization
+- Telegram is detected from real launch context (`initData`, user or start parameter), not simply from loading `telegram-web-app.js`.
+- Client platform is exposed separately from runtime mode.
+- `safeAreaInset` and `contentSafeAreaInset` are read and synchronized to CSS.
+- Safe-area update events are subscribed to.
+- Stable viewport height remains synchronized.
+- Native Back Button is used on the diagnostics route.
 
-### Design system
+## Vercel corrections
 
-- Inter-first typography
-- Dalexio Navy, Graphite, Silver, Cyan, and Violet tokens
-- reusable button, status chip, asset image, loader, and error UI
-- safe-area and stable viewport variables
-- immersive Dexo Land world foundation instead of a dashboard shell
+- Added `vercel.json` SPA rewrite.
+- Phase 0 requires no environment variables.
+- Direct refresh of `/diagnostics` is supported after deployment.
+- The recommended validation flow is GitHub → Vercel → test Telegram bot.
 
-### Data and contracts
+## Validation completed in the build environment
 
-- Zod schemas for bootstrap, player, and Dexo progression
-- in-memory fixture mode that works without a backend or service worker
-- optional MSW request mode
-- mock scenario switcher covering future gameplay states
+Passed:
 
-### Asset system
+- core structure validation;
+- required Phase 0 asset validation;
+- internal import validation;
+- TypeScript/TSX transpilation syntax validation;
+- CSS structural validation.
 
-- centralized JSON manifest
-- typed registry helpers
-- required-per-phase metadata
-- missing-asset fallback
-- automated validation for Phase 0 required files
+The package registry returned HTTP 503 in the build environment, so dependency installation, full TypeScript semantic checking, Vitest, Playwright and the Vite production build must be run by Vercel or the reviewer environment. The relevant test cases and build scripts are included.
 
-### Quality system
+## Phase 0 status
 
-- unit tests for Telegram fallback, asset registry, and scenario state
-- Playwright smoke tests for mobile and desktop
-- asset and architecture validation scripts
-- production build and test commands in one `npm run check`
-
-## Acceptance criteria
-
-Phase 0 is ready for approval when:
-
-1. `npm install` succeeds on the review machine.
-2. `npm run check` completes successfully.
-3. The app boots at browser and Telegram viewport sizes.
-4. `/diagnostics` reports the expected runtime values.
-5. The Dev scenario panel changes the validated bootstrap state.
-6. Missing future assets do not break the shell.
-7. Reduced motion and safe areas behave correctly.
-
-## Known environment limitation during artifact creation
-
-Package installation could not complete in the build container because registry access timed out. Therefore the artifact was validated with structural checks, asset checks, JSON parsing, TypeScript syntax transpilation, and a standalone visual smoke preview. The review machine should run `npm run check` after installing dependencies; any dependency-level issue should be reported before Phase 1 begins.
+Phase 0 should only be considered approved after the corrected version is deployed to Vercel and verified inside the test Telegram bot at mobile WebView dimensions.

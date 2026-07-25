@@ -1,63 +1,128 @@
 .root {
+  width: 100%;
   min-height: var(--app-height);
-  padding: calc(1.2rem + var(--safe-top)) calc(1.2rem + var(--safe-right)) calc(2rem + var(--safe-bottom)) calc(1.2rem + var(--safe-left));
+  padding:
+    calc(1rem + var(--safe-top))
+    calc(1rem + var(--safe-right))
+    calc(2rem + var(--safe-bottom))
+    calc(1rem + var(--safe-left));
   background:
-    radial-gradient(circle at 80% 0%, rgba(120, 82, 255, .18), transparent 34%),
-    radial-gradient(circle at 10% 30%, rgba(69, 221, 255, .1), transparent 30%),
+    radial-gradient(circle at 84% 0%, rgba(120, 82, 255, .17), transparent 25rem),
+    radial-gradient(circle at 4% 28%, rgba(69, 221, 255, .08), transparent 20rem),
     var(--color-bg-950);
 }
 
 .header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1.5rem;
-  width: min(100%, 1080px);
-  margin: 0 auto 2rem;
-}
-
-.header span { color: var(--color-cyan-soft); font-size: .7rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
-.header h1 { margin: .5rem 0; font-size: clamp(2rem, 6vw, 4rem); letter-spacing: -.05em; }
-.header p { max-width: 640px; margin: 0; color: var(--color-text-muted); line-height: 1.6; }
-
-.grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-  width: min(100%, 1080px);
-  margin: 0 auto;
+  gap: .55rem;
+  margin-bottom: 1.25rem;
 }
 
-.grid article {
-  padding: 1.25rem;
+.header > span {
+  color: var(--color-cyan-soft);
+  font-size: .65rem;
+  font-weight: 850;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 9vw, 2.55rem);
+  line-height: 1;
+  letter-spacing: -.05em;
+}
+
+.header p {
+  margin: 0 0 .55rem;
+  color: var(--color-text-muted);
+  font-size: .84rem;
+  line-height: 1.55;
+}
+
+.header button {
+  justify-self: start;
+}
+
+.stack {
+  display: grid;
+  gap: .85rem;
+}
+
+.stack article,
+.contract {
+  padding: 1rem;
   border: 1px solid var(--color-line);
-  border-radius: var(--radius-xl);
-  background: var(--gradient-panel);
-  box-shadow: var(--shadow-soft);
+  border-radius: 22px;
+  background: linear-gradient(145deg, rgba(12, 23, 50, .94), rgba(7, 13, 29, .88));
+  box-shadow: 0 18px 44px rgba(0, 0, 0, .26);
 }
 
-.grid h2 { margin: 1rem 0 .8rem; font-size: 1.15rem; }
-.grid dl { display: grid; gap: .55rem; margin: 0; }
-.grid dl div { display: flex; justify-content: space-between; gap: 1rem; padding-bottom: .45rem; border-bottom: 1px solid rgba(255,255,255,.05); }
-.grid dt, .grid li { color: var(--color-text-muted); }
-.grid dd { margin: 0; color: var(--color-cyan-soft); text-align: right; }
-.grid ul { display: grid; gap: .65rem; margin: 0; padding-left: 1.1rem; }
+.stack h2 {
+  margin: .8rem 0 .7rem;
+  font-size: 1rem;
+}
+
+.stack dl {
+  display: grid;
+  gap: .48rem;
+  margin: 0;
+}
+
+.stack dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: .8rem;
+  padding-bottom: .42rem;
+  border-bottom: 1px solid rgba(255, 255, 255, .05);
+}
+
+.stack dt,
+.stack li {
+  color: var(--color-text-muted);
+  font-size: .79rem;
+}
+
+.stack dd {
+  max-width: 55%;
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--color-cyan-soft);
+  font-size: .79rem;
+  text-align: right;
+}
+
+.stack ul {
+  display: grid;
+  gap: .55rem;
+  margin: 0;
+  padding-left: 1.05rem;
+}
 
 .contract {
-  width: min(100%, 1080px);
-  margin: 1rem auto 0;
-  padding: clamp(1.4rem, 5vw, 2.2rem);
-  border: 1px solid rgba(140, 98, 255, .34);
-  border-radius: var(--radius-xl);
-  background: linear-gradient(135deg, rgba(18, 24, 62, .92), rgba(7, 12, 30, .85));
+  margin-top: .85rem;
+  border-color: rgba(140, 98, 255, .34);
+  background: linear-gradient(145deg, rgba(18, 24, 62, .94), rgba(7, 12, 30, .9));
   box-shadow: var(--shadow-violet);
 }
-.contract span { color: var(--color-violet-soft); font-size: .7rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
-.contract h2 { margin: .6rem 0; font-size: clamp(1.4rem, 4vw, 2.3rem); }
-.contract p { max-width: 760px; margin: 0; color: var(--color-text-muted); line-height: 1.65; }
 
-@media (max-width: 720px) {
-  .header { align-items: stretch; flex-direction: column; }
-  .header button { align-self: flex-start; }
-  .grid { grid-template-columns: 1fr; }
+.contract span {
+  color: var(--color-violet-soft);
+  font-size: .63rem;
+  font-weight: 850;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+.contract h2 {
+  margin: .55rem 0;
+  font-size: 1.35rem;
+  line-height: 1.18;
+}
+
+.contract p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: .8rem;
+  line-height: 1.58;
 }

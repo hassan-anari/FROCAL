@@ -1,0 +1,56 @@
+.host {
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(92, 78, 255, .16), transparent 32rem),
+    #01030a;
+}
+
+.viewport {
+  position: relative;
+  width: 100%;
+  min-width: 320px;
+  height: var(--app-height);
+  min-height: 560px;
+  margin: 0 auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  background: var(--color-bg-950);
+}
+
+.viewport::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 520px) {
+  .host {
+    display: grid;
+    place-items: start center;
+    padding: 24px;
+  }
+
+  .viewport {
+    width: min(100%, var(--miniapp-max-width));
+    height: min(var(--app-height), 920px);
+    min-height: 560px;
+    border: 1px solid rgba(136, 166, 255, .18);
+    border-radius: 28px;
+    box-shadow:
+      0 34px 90px rgba(0, 0, 0, .62),
+      0 0 70px rgba(84, 70, 255, .12);
+  }
+
+  :global(html[data-runtime="telegram"]) .host {
+    display: block;
+    padding: 0;
+  }
+
+  :global(html[data-runtime="telegram"]) .viewport {
+    width: 100%;
+    height: var(--app-height);
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}

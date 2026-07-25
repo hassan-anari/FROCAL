@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { createTelegramAdapter, type TelegramAdapter } from "./adapter";
+import { createTelegramAdapter, type TelegramAdapter, type TelegramInsets } from "./adapter";
 import type { TelegramThemeParams } from "./types";
 
 interface TelegramContextValue {
@@ -7,14 +7,34 @@ interface TelegramContextValue {
   theme: TelegramThemeParams;
   colorScheme: "light" | "dark";
   stableHeight: number;
+  insets: TelegramInsets;
 }
 
 const TelegramContext = createContext<TelegramContextValue | null>(null);
 
-function applyTheme(theme: TelegramThemeParams, colorScheme: "light" | "dark", stableHeight: number) {
+function setInsetVariables(prefix: string, inset: TelegramInsets["safeArea"]) {
+  const root = document.documentElement;
+  root.style.setProperty(`${prefix}-top`, `${inset.top}px`);
+  root.style.setProperty(`${prefix}-right`, `${inset.right}px`);
+  root.style.setProperty(`${prefix}-bottom`, `${inset.bottom}px`);
+  root.style.setProperty(`${prefix}-left`, `${inset.left}px`);
+}
+
+function applyTelegramEnvironment(
+  adapter: TelegramAdapter,
+  theme: TelegramThemeParams,
+  colorScheme: "light" | "dark",
+  stableHeight: number,
+  insets: TelegramInsets,
+) {
   const root = document.documentElement;
   root.dataset.telegram = colorScheme;
+  root.dataset.runtime = adapter.platform;
+  root.dataset.telegramPlatform = adapter.getClientPlatform();
   root.style.setProperty("--tg-stable-height", `${stableHeight}px`);
+
+  setInsetVariables("--tg-safe-area-inset", insets.safeArea);
+  setInsetVariables("--tg-content-safe-area-inset", insets.contentSafeArea);
 
   const mapping: Array<[keyof TelegramThemeParams, string]> = [
     ["bg_color", "--tg-theme-bg"],
@@ -24,6 +44,7 @@ function applyTheme(theme: TelegramThemeParams, colorScheme: "light" | "dark", s
     ["button_text_color", "--tg-theme-button-text"],
     ["secondary_bg_color", "--tg-theme-secondary-bg"],
     ["accent_text_color", "--tg-theme-accent"],
+    ["bottom_bar_bg_color", "--tg-theme-bottom-bar"],
   ];
 
   for (const [key, variable] of mapping) {
@@ -37,6 +58,7 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState(() => adapter.getTheme());
   const [colorScheme, setColorScheme] = useState(() => adapter.getColorScheme());
   const [stableHeight, setStableHeight] = useState(() => adapter.getStableHeight());
+  const [insets, setInsets] = useState(() => adapter.getInsets());
 
   useEffect(() => {
     const updateTheme = () => {
@@ -44,26 +66,36 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
       setColorScheme(adapter.getColorScheme());
     };
     const updateViewport = () => setStableHeight(adapter.getStableHeight());
+    const updateInsets = () => setInsets(adapter.getInsets());
 
-    const unsubscribeTheme = adapter.subscribe("themeChanged", updateTheme);
-    const unsubscribeViewport = adapter.subscribe("viewportChanged", updateViewport);
+    const unsubscribers = [
+      adapter.subscribe("themeChanged", updateTheme),
+      adapter.subscribe("viewportChanged", updateViewport),
+      adapter.subscribe("safeAreaChanged", updateInsets),
+      adapter.subscribe("contentSafeAreaChanged", updateInsets),
+    ];
+
+    const onBrowserResize = () => {
+      if (!adapter.isTelegram) setStableHeight(adapter.getStableHeight());
+    };
+    window.addEventListener("resize", onBrowserResize, { passive: true });
 
     adapter.ready();
     adapter.expand();
-    adapter.setChromeColors("#050914", "#050914");
+    adapter.setChromeColors("#03050d", "#03050d", "#03050d");
 
     return () => {
-      unsubscribeTheme();
-      unsubscribeViewport();
+      unsubscribers.forEach((unsubscribe) => unsubscribe());
+      window.removeEventListener("resize", onBrowserResize);
     };
   }, [adapter]);
 
   useEffect(() => {
-    applyTheme(theme, colorScheme, stableHeight);
-  }, [theme, colorScheme, stableHeight]);
+    applyTelegramEnvironment(adapter, theme, colorScheme, stableHeight, insets);
+  }, [adapter, theme, colorScheme, stableHeight, insets]);
 
   return (
-    <TelegramContext.Provider value={{ adapter, theme, colorScheme, stableHeight }}>
+    <TelegramContext.Provider value={{ adapter, theme, colorScheme, stableHeight, insets }}>
       {children}
     </TelegramContext.Provider>
   );

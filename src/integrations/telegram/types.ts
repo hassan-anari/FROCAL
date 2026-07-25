@@ -12,6 +12,14 @@ export interface TelegramThemeParams {
   section_header_text_color?: string;
   subtitle_text_color?: string;
   destructive_text_color?: string;
+  bottom_bar_bg_color?: string;
+}
+
+export interface TelegramSafeAreaInset {
+  top?: number;
+  right?: number;
+  bottom?: number;
+  left?: number;
 }
 
 export interface TelegramUser {
@@ -24,23 +32,40 @@ export interface TelegramUser {
   photo_url?: string;
 }
 
+export type TelegramEvent =
+  | "themeChanged"
+  | "viewportChanged"
+  | "safeAreaChanged"
+  | "contentSafeAreaChanged"
+  | "activated"
+  | "deactivated";
+
 export interface TelegramWebAppLike {
   initData?: string;
   initDataUnsafe?: { user?: TelegramUser; start_param?: string };
+  version?: string;
+  platform?: string;
   colorScheme?: "light" | "dark";
   themeParams?: TelegramThemeParams;
   viewportHeight?: number;
   viewportStableHeight?: number;
+  safeAreaInset?: TelegramSafeAreaInset;
+  contentSafeAreaInset?: TelegramSafeAreaInset;
   isExpanded?: boolean;
+  isActive?: boolean;
+  isFullscreen?: boolean;
   ready?: () => void;
   expand?: () => void;
   close?: () => void;
+  disableVerticalSwipes?: () => void;
+  enableVerticalSwipes?: () => void;
   setHeaderColor?: (color: string) => void;
   setBackgroundColor?: (color: string) => void;
+  setBottomBarColor?: (color: string) => void;
   openTelegramLink?: (url: string) => void;
   openLink?: (url: string, options?: { try_instant_view?: boolean }) => void;
-  onEvent?: (event: string, handler: () => void) => void;
-  offEvent?: (event: string, handler: () => void) => void;
+  onEvent?: (event: TelegramEvent, handler: () => void) => void;
+  offEvent?: (event: TelegramEvent, handler: () => void) => void;
   BackButton?: {
     show: () => void;
     hide: () => void;

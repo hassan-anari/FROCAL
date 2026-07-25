@@ -12,6 +12,7 @@ const required = [
   "src/assets/manifest.json",
   "src/game/domain/schemas.ts",
   "src/mocks/handlers/bootstrap.handlers.ts",
+  "vercel.json",
 ];
 
 const missing = [];

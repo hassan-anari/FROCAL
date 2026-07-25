@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/design-system/primitives/Button";
@@ -13,32 +14,47 @@ import styles from "./DiagnosticsPage.module.css";
 export function DiagnosticsPage() {
   const navigate = useNavigate();
   const scenario = useScenarioStore((state) => state.activeScenario);
-  const { adapter, colorScheme, stableHeight } = useTelegram();
+  const { adapter, colorScheme, stableHeight, insets } = useTelegram();
   const bootstrap = useQuery({
     queryKey: queryKeys.bootstrap(scenario),
     queryFn: () => loadBootstrap(scenario, adapter.platform),
   });
 
+  useEffect(() => adapter.showBackButton(() => navigate({ to: "/" })), [adapter, navigate]);
+
+  const safeArea = insets.contentSafeArea;
+
   return (
     <main className={styles.root}>
       <header className={styles.header}>
-        <div>
-          <span>Phase 0 / Foundation</span>
-          <h1>{content.diagnostics.title}</h1>
-          <p>{content.diagnostics.subtitle}</p>
-        </div>
+        <span>Phase 0 / Foundation</span>
+        <h1>{content.diagnostics.title}</h1>
+        <p>{content.diagnostics.subtitle}</p>
         <Button tone="secondary" onClick={() => navigate({ to: "/" })}>Back to world</Button>
       </header>
 
-      <section className={styles.grid} aria-label="Foundation diagnostics">
+      <section className={styles.stack} aria-label="Foundation diagnostics">
         <article>
           <StatusChip>Runtime ready</StatusChip>
           <h2>Telegram adapter</h2>
           <dl>
-            <div><dt>Platform</dt><dd>{adapter.platform}</dd></div>
+            <div><dt>Runtime</dt><dd>{adapter.platform}</dd></div>
+            <div><dt>Client</dt><dd>{adapter.getClientPlatform()}</dd></div>
             <div><dt>Theme</dt><dd>{colorScheme}</dd></div>
             <div><dt>Stable height</dt><dd>{Math.round(stableHeight)}px</dd></div>
-            <div><dt>User</dt><dd>{adapter.getUser()?.username ?? "browser fallback"}</dd></div>
+            <div><dt>User</dt><dd>{adapter.getUser()?.username ?? adapter.getUser()?.first_name ?? "browser"}</dd></div>
+            <div><dt>Start param</dt><dd>{adapter.getStartParam() ?? "—"}</dd></div>
+          </dl>
+        </article>
+
+        <article>
+          <StatusChip>Safe area ready</StatusChip>
+          <h2>Viewport insets</h2>
+          <dl>
+            <div><dt>Top</dt><dd>{safeArea.top}px</dd></div>
+            <div><dt>Right</dt><dd>{safeArea.right}px</dd></div>
+            <div><dt>Bottom</dt><dd>{safeArea.bottom}px</dd></div>
+            <div><dt>Left</dt><dd>{safeArea.left}px</dd></div>
           </dl>
         </article>
 
@@ -65,21 +81,22 @@ export function DiagnosticsPage() {
         </article>
 
         <article>
-          <StatusChip>Motion ready</StatusChip>
-          <h2>Experience guardrails</h2>
+          <StatusChip>Guardrails ready</StatusChip>
+          <h2>Experience checks</h2>
           <ul>
+            <li>Portrait-first product canvas</li>
+            <li>Telegram stable viewport</li>
+            <li>Telegram safe-area events</li>
             <li>Reduced motion respected</li>
-            <li>Safe-area aware</li>
-            <li>Stable Telegram viewport</li>
-            <li>Browser fallback supported</li>
+            <li>Browser and Vercel preview fallback</li>
           </ul>
         </article>
       </section>
 
       <section className={styles.contract}>
         <span>Phase 0 completion contract</span>
-        <h2>Ready to build the Dexo Land entry flow.</h2>
-        <p>The next approved phase adds onboarding, Dexo acquisition, Base navigation and the first complete playable vertical slice.</p>
+        <h2>Ready for the Dexo Land entry flow.</h2>
+        <p>Phase 1 will add onboarding, Dexo acquisition, Base navigation and the first playable vertical slice.</p>
       </section>
     </main>
   );
