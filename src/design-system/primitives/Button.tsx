@@ -5,13 +5,15 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   tone?: "primary" | "secondary" | "ghost";
   size?: "sm" | "md" | "lg";
   leadingIcon?: ReactNode;
+  trailingIcon?: ReactNode;
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ tone = "primary", size = "md", leadingIcon, className = "", children, ...props }, ref) => (
+  ({ tone = "primary", size = "md", leadingIcon, trailingIcon, className = "", children, ...props }, ref) => (
     <button ref={ref} className={`${styles.button} ${styles[tone]} ${styles[size]} ${className}`} {...props}>
-      {leadingIcon ? <span className={styles.icon}>{leadingIcon}</span> : null}
-      <span>{children}</span>
+      {leadingIcon ? <span className={styles.leadingIcon}>{leadingIcon}</span> : null}
+      <span className={styles.label}>{children}</span>
+      {trailingIcon ? <span className={styles.trailingIcon}>{trailingIcon}</span> : null}
     </button>
   ),
 );

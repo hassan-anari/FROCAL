@@ -1,9 +1,9 @@
 export const content = {
   foundation: {
-    eyebrow: "Welcome to the world of",
+    eyebrow: "Your journey begins here",
     titlePrimary: "Dexo",
     titleSecondary: "Land",
-    subtitle: "A living world shaped by your missions, growth, clans and seasonal journey.",
+    subtitle: "Enter a living world where every mission shapes your Dexo, your clan and your season.",
     enter: "Enter Dexo Land",
   },
   diagnostics: {

@@ -1,36 +1,38 @@
 .root {
   display: grid;
-  place-items: center;
-  gap: 1rem;
+  align-content: center;
+  justify-items: center;
+  gap: .8rem;
   min-height: var(--app-height);
-  background: radial-gradient(circle at 50% 48%, rgba(94, 70, 255, .16), transparent 36%), var(--color-bg-950);
-  color: var(--color-text-muted);
-  font-size: .72rem;
-  font-weight: 750;
+  background:
+    radial-gradient(circle at 50% 46%, rgba(94, 70, 255, .13), transparent 30%),
+    var(--color-bg-950);
+  color: var(--color-text-dim);
+  font-size: .62rem;
+  font-weight: 680;
   letter-spacing: .15em;
   text-transform: uppercase;
 }
 
-.core {
-  position: relative;
-  width: 74px;
-  height: 74px;
+.logo {
+  width: 112px;
+  height: auto;
+  opacity: .9;
 }
 
-.ring {
-  position: absolute;
-  inset: 0;
-  border: 1px solid rgba(99, 217, 255, .46);
-  border-top-color: var(--color-violet-soft);
-  border-radius: 50%;
-  box-shadow: var(--shadow-cyan);
+.track {
+  width: 108px;
+  height: 2px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(132, 161, 221, .13);
 }
 
-.gem {
-  position: absolute;
-  inset: 22px;
-  transform: rotate(45deg);
-  border: 1px solid rgba(255,255,255,.6);
-  background: var(--gradient-brand);
-  box-shadow: var(--shadow-violet);
+.track span {
+  display: block;
+  width: 42%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, var(--color-cyan), var(--color-violet-soft), transparent);
+  box-shadow: 0 0 16px rgba(100, 164, 255, .42);
 }

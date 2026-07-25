@@ -1,53 +1,38 @@
-# Dalexio Mini App — Phase 0 v0.3
+# Phase 0 v0.4 — Final Visual Refinement
 
-## Status
+## Completed
 
-Phase 0 has been revised as a mobile-first Telegram Mini App foundation. This checkpoint does not start Phase 1.
+- Rebuilt the Dexo Land intro typography with Inter Variable.
+- Restored ambient background motion: camera drift, core breathing, light sweep and sparse particles.
+- Replaced the oversized pill CTA with a compact, polished game CTA.
+- Added Hugeicons Stroke Rounded to the production stack.
+- Replaced custom arrow/diagnostics SVGs with Hugeicons components.
+- Kept the diagnostics trigger globally accessible on every route.
+- Removed user-facing foundation verification copy and technical clutter.
+- Tightened the product canvas to a 440px maximum browser preview.
+- Polished the diagnostics layout while preserving runtime data.
+- Kept Telegram user detection, stable viewport and safe-area support.
 
-## User-facing intro
+## Asset replacement contract
 
-- Removed the animated rotating foundation core.
-- Removed foundation verification and confirmation UI.
-- Removed connection badges, user handle, phase status rail, and development copy from the intro.
-- Rebuilt the intro as a clean Dexo Land hero with cinematic typography.
-- Added the primary `Enter Dexo Land` action.
-- The action emits the `dalexio:enter-dexo-land` browser event and triggers Telegram haptics. Phase 1 will bind this event to the onboarding route instead of adding a temporary fake screen.
+The intro scene is controlled by one stable path:
 
-## Diagnostics access
+```text
+public/assets/world/dexo-land-foundation.webp
+```
 
-- Added a compact diagnostics control to the global product shell.
-- It appears on every route in both Telegram and browser/Vercel previews.
-- On normal pages it opens `/diagnostics`.
-- On `/diagnostics` it returns to Dexo Land.
-- Telegram's native Back Button remains active on the diagnostics route.
+The included image is a temporary clean preview. Replace it with the final cleaned WebP using the same filename.
 
-## Diagnostics cleanup
+## Server configuration
 
-- Removed the large Back button from the diagnostics content.
-- Removed the Phase 1 completion contract panel.
-- Retained only runtime, safe-area, asset registry, mock contract, and experience guardrail checks.
-
-## Preserved foundation
-
-- Telegram launch context and user recognition.
-- Stable viewport and safe-area events.
-- Theme synchronization and haptic adapter.
-- Portrait-first product canvas and Vercel desktop preview frame.
-- Asset registry, Zod contracts, mock scenarios, Query, Router, Zustand, reduced motion, error and loading systems.
-- Vercel SPA rewrite.
+No `.env` is required for Phase 0. Vercel uses the internal local fixture mode unless `VITE_DATA_SOURCE` is explicitly changed.
 
 ## Validation performed
 
-Passed in this environment:
+- Structure validation
+- Phase 0 asset validation
+- Local import validation
+- TypeScript/TSX syntax transpilation for 32 files
+- Visual checkpoint review at 390×844
 
-- Project structure validation.
-- Phase 0 asset validation.
-- Local import validation.
-- TypeScript/TSX syntax transpilation for 31 source files.
-- CSS parsing for 11 stylesheets.
-
-Full dependency installation timed out in this environment, so `npm run check` and the production Vite build must also run in Vercel or on a machine with npm registry access.
-
-## Phase boundary
-
-Phase 1 must not begin until the deployed v0.3 intro and diagnostics navigation are approved inside the Telegram test bot.
+Full dependency typecheck, unit tests and Vite build run after `npm install` or in the Vercel deployment pipeline.

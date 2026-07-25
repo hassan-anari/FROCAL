@@ -1,24 +1,37 @@
-# Dexo Land Design System — Foundation Notes
+# Dexo Land Design Foundation
 
-The Mini App should feel like entering a living game world, not opening a financial dashboard.
+## Typography
 
-## Core visual language
+- Family: Inter Variable
+- Display: 900 weight, tight tracking, short cinematic lines
+- UI/body: 440–760 weight depending on hierarchy
 
-- deep Navy and Graphite world surfaces
-- Silver and cool-white typography
-- controlled Cyan and Violet energy accents
-- Magenta reserved for premium moments
-- Gold reserved for rare founder or champion states
-- layered depth, soft bloom, and restrained holographic UI
+## Palette
 
-## Interface rule
+- Graphite/navy world surfaces
+- Cyan and violet core light
+- Magenta only as a controlled terminal accent
+- Soft silver/white primary typography
 
-The world and Dexo remain visually dominant. UI components should feel mounted into the world: thin status rails, floating labels, energy-backed controls, and scene-aware overlays. Avoid large collections of generic cards.
+## Iconography
 
-## Motion rule
+- Hugeicons free Stroke Rounded set
+- React renderer: `@hugeicons/react`
+- Core pack: `@hugeicons/core-free-icons`
+- Default stroke width: 1.8–1.9
 
-Motion communicates system state and progression. It must remain meaningful, interruptible, and safe on low-end devices. All major effects require a reduced-motion fallback.
+## Product Canvas
 
-## Asset rule
+- Portrait-first
+- Target: 390px
+- Supported: 320–440px
+- Browser/Vercel desktop is only a centered preview shell
+- Telegram runtime occupies the complete WebView
 
-Characters, rooms, rewards, battle scenes, and medals must use production assets. CSS can provide atmosphere, lighting, particles, and layout, but should not imitate an unavailable game asset.
+## Motion
+
+- Slow camera drift
+- Core light breathing
+- Controlled light sweep
+- Sparse ambient particles
+- Full reduced-motion fallback

@@ -1,6 +1,6 @@
-# Dalexio Mini App — Phase 0 v0.3
+# Dalexio Mini App — Phase 0 v0.4
 
-Mobile-first foundation for the Dexo Land Telegram Mini App.
+Mobile-first Telegram Mini App foundation for Dexo Land.
 
 ## Run
 
@@ -9,29 +9,27 @@ npm install
 npm run dev
 ```
 
-## Full validation
+Production verification:
 
 ```bash
 npm run check
 ```
 
-## Vercel
-
-No environment variable is required for the Phase 0 local mock data source. The included `vercel.json` rewrites SPA routes to `index.html`.
+No environment variable is required for the Phase 0 local/mock data mode.
 
 ## Routes
 
-- `/` — completed Phase 0 Dexo Land intro.
-- `/diagnostics` — technical deployment diagnostics.
+- `/` — polished Dexo Land intro
+- `/diagnostics` — Telegram/runtime diagnostics
 
-A compact diagnostics button is available on every page, including inside Telegram where the URL cannot be manually edited.
+A small Hugeicons diagnostics control is available globally on every route.
 
-## Entry handoff
+## Replace the intro artwork
 
-The `Enter Dexo Land` button dispatches:
+Replace this file without changing any component:
 
 ```text
-dalexio:enter-dexo-land
+public/assets/world/dexo-land-foundation.webp
 ```
 
-Phase 1 will bind this handoff to the final onboarding route. No temporary unfinished gameplay page is included in Phase 0.
+Recommended export: portrait WebP, 900×1350 or larger, without baked typography.
