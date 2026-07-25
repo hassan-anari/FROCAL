@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "assets": [
+    { "key": "brand.logo", "path": "/assets/brand/dalexio-logo.svg", "alt": "Dalexio", "category": "brand", "requiredInPhase": 0 },
+    { "key": "brand.logoTagline", "path": "/assets/brand/dalexio-logo-tagline.svg", "alt": "Dalexio — Play Grow Unite Compete", "category": "brand", "requiredInPhase": 0 },
+    { "key": "world.foundationBackdrop", "path": "/assets/world/dexo-land-foundation.webp", "alt": "Dexo Land futuristic city", "category": "world", "requiredInPhase": 0 },
+    { "key": "system.missing", "path": "/assets/system/missing-asset.svg", "alt": "Asset placeholder", "category": "system", "requiredInPhase": 0 },
+
+    { "key": "dexo.base", "path": "/assets/dexo/dexo-base-companion.webp", "alt": "Dexo base companion", "category": "dexo", "requiredInPhase": 1 },
+    { "key": "dexo.guide01", "path": "/assets/dexo/dexo-guide-pose-01.webp", "alt": "Dexo guide pose one", "category": "dexo", "requiredInPhase": 1 },
+    { "key": "dexo.guide02", "path": "/assets/dexo/dexo-guide-pose-02.webp", "alt": "Dexo guide pose two", "category": "dexo", "requiredInPhase": 1 },
+    { "key": "dexo.guide03", "path": "/assets/dexo/dexo-guide-pose-03.webp", "alt": "Dexo guide pose three", "category": "dexo", "requiredInPhase": 1 },
+    { "key": "dexo.level01", "path": "/assets/dexo/levels/dexo-level-01-newborn.webp", "alt": "Dexo level one newborn", "category": "dexo-level", "requiredInPhase": 2 },
+    { "key": "dexo.level05", "path": "/assets/dexo/levels/dexo-level-05-explorer.webp", "alt": "Dexo level five explorer", "category": "dexo-level", "requiredInPhase": 2 },
+    { "key": "dexo.level10", "path": "/assets/dexo/levels/dexo-level-10-connector.webp", "alt": "Dexo level ten connector", "category": "dexo-level", "requiredInPhase": 2 },
+    { "key": "dexo.level15", "path": "/assets/dexo/levels/dexo-level-15-specialist.webp", "alt": "Dexo level fifteen specialist", "category": "dexo-level", "requiredInPhase": 2 },
+    { "key": "dexo.level20", "path": "/assets/dexo/levels/dexo-level-20-vanguard.webp", "alt": "Dexo level twenty vanguard", "category": "dexo-level", "requiredInPhase": 2 },
+    { "key": "dexo.level30", "path": "/assets/dexo/levels/dexo-level-30-legend.webp", "alt": "Dexo level thirty legend", "category": "dexo-level", "requiredInPhase": 2 },
+    { "key": "dexo.roleMember", "path": "/assets/dexo/roles/dexo-role-member.webp", "alt": "Dexo clan member", "category": "dexo-role", "requiredInPhase": 5 },
+    { "key": "dexo.roleOfficer", "path": "/assets/dexo/roles/dexo-role-officer.webp", "alt": "Dexo clan officer", "category": "dexo-role", "requiredInPhase": 5 },
+    { "key": "dexo.roleCaptain", "path": "/assets/dexo/roles/dexo-role-captain.webp", "alt": "Dexo clan captain", "category": "dexo-role", "requiredInPhase": 5 },
+
+    { "key": "mission.daily", "path": "/assets/missions/mission-daily.webp", "alt": "Daily mission", "category": "mission", "requiredInPhase": 2 },
+    { "key": "mission.typing", "path": "/assets/missions/mission-typing.webp", "alt": "Typing challenge", "category": "mission", "requiredInPhase": 2 },
+    { "key": "mission.referral", "path": "/assets/missions/mission-referral.webp", "alt": "Referral mission", "category": "mission", "requiredInPhase": 2 },
+    { "key": "reward.capsule", "path": "/assets/rewards/seasonal-reward-capsule.webp", "alt": "Seasonal reward capsule", "category": "reward", "requiredInPhase": 2 },
+    { "key": "reward.levelUp", "path": "/assets/rewards/fx-level-up.webp", "alt": "Level up effect", "category": "reward", "requiredInPhase": 2 },
+    { "key": "reward.achievement", "path": "/assets/rewards/achievement-first-victory.webp", "alt": "Achievement badge", "category": "reward", "requiredInPhase": 3 },
+    { "key": "profile.framePremium", "path": "/assets/profile/profile-frame-premium.webp", "alt": "Premium avatar frame", "category": "profile", "requiredInPhase": 3 },
+    { "key": "profile.medalChampion", "path": "/assets/profile/seasonal-medal-champion.webp", "alt": "Season champion medal", "category": "profile", "requiredInPhase": 3 },
+
+    { "key": "inventory.hub", "path": "/assets/inventory/inventory-hub.webp", "alt": "Inventory hub", "category": "inventory", "requiredInPhase": 4 },
+    { "key": "inventory.booster", "path": "/assets/inventory/booster-energy.webp", "alt": "Energy booster", "category": "inventory", "requiredInPhase": 4 },
+    { "key": "inventory.defence", "path": "/assets/inventory/defence-firewall.webp", "alt": "Firewall defence item", "category": "inventory", "requiredInPhase": 4 },
+    { "key": "inventory.utility", "path": "/assets/inventory/utility-reroll.webp", "alt": "Mission reroll token", "category": "inventory", "requiredInPhase": 4 },
+
+    { "key": "clan.hq", "path": "/assets/clan/clan-hq.webp", "alt": "Clan headquarters", "category": "clan", "requiredInPhase": 5 },
+    { "key": "clan.roster", "path": "/assets/clan/clan-room-roster.webp", "alt": "Clan roster room", "category": "clan", "requiredInPhase": 5 },
+    { "key": "clan.treasury", "path": "/assets/clan/clan-room-treasury.webp", "alt": "Clan treasury room", "category": "clan", "requiredInPhase": 5 },
+    { "key": "clan.operations", "path": "/assets/clan/clan-room-operations.webp", "alt": "Clan operations room", "category": "clan", "requiredInPhase": 5 },
+    { "key": "clan.inventory", "path": "/assets/clan/clan-room-inventory.webp", "alt": "Clan inventory room", "category": "clan", "requiredInPhase": 5 },
+    { "key": "clan.alliance", "path": "/assets/clan/clan-room-alliance.webp", "alt": "Clan alliance room", "category": "clan", "requiredInPhase": 5 },
+
+    { "key": "war.matchmaking", "path": "/assets/war/war-matchmaking.webp", "alt": "War matchmaking", "category": "war", "requiredInPhase": 6 },
+    { "key": "war.opponent", "path": "/assets/war/war-opponent-found.webp", "alt": "Opponent found", "category": "war", "requiredInPhase": 6 },
+    { "key": "war.preparation", "path": "/assets/war/war-preparation.webp", "alt": "War preparation", "category": "war", "requiredInPhase": 6 },
+    { "key": "war.countdown", "path": "/assets/war/war-countdown.webp", "alt": "Battle countdown", "category": "war", "requiredInPhase": 6 },
+    { "key": "war.active", "path": "/assets/war/war-active-battle.webp", "alt": "Active battle", "category": "war", "requiredInPhase": 6 },
+    { "key": "war.victory", "path": "/assets/war/war-victory.webp", "alt": "War victory", "category": "war", "requiredInPhase": 6 },
+    { "key": "war.defeat", "path": "/assets/war/war-defeat.webp", "alt": "War defeat", "category": "war", "requiredInPhase": 6 },
+
+    { "key": "alliance.invitation", "path": "/assets/alliance/alliance-invitation.webp", "alt": "Alliance invitation", "category": "alliance", "requiredInPhase": 7 },
+    { "key": "alliance.formed", "path": "/assets/alliance/alliance-formed.webp", "alt": "Alliance formed", "category": "alliance", "requiredInPhase": 7 },
+    { "key": "world.eventHub", "path": "/assets/world/world-event-hub.webp", "alt": "World event hub", "category": "world-event", "requiredInPhase": 7 },
+    { "key": "world.milestone", "path": "/assets/world/world-event-milestone.webp", "alt": "World event milestone", "category": "world-event", "requiredInPhase": 7 },
+
+    { "key": "season.medalUnlock", "path": "/assets/season/fx-seasonal-medal-unlock.webp", "alt": "Seasonal medal unlock", "category": "season", "requiredInPhase": 8 },
+    { "key": "season.completed", "path": "/assets/season/fx-season-completed.webp", "alt": "Season completed", "category": "season", "requiredInPhase": 8 },
+    { "key": "season.archive", "path": "/assets/season/season-archive-token.webp", "alt": "Season archive token", "category": "season", "requiredInPhase": 8 }
+  ]
+}

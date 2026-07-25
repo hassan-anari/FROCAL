@@ -1,0 +1,63 @@
+.root {
+  min-height: var(--app-height);
+  padding: calc(1.2rem + var(--safe-top)) calc(1.2rem + var(--safe-right)) calc(2rem + var(--safe-bottom)) calc(1.2rem + var(--safe-left));
+  background:
+    radial-gradient(circle at 80% 0%, rgba(120, 82, 255, .18), transparent 34%),
+    radial-gradient(circle at 10% 30%, rgba(69, 221, 255, .1), transparent 30%),
+    var(--color-bg-950);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  width: min(100%, 1080px);
+  margin: 0 auto 2rem;
+}
+
+.header span { color: var(--color-cyan-soft); font-size: .7rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.header h1 { margin: .5rem 0; font-size: clamp(2rem, 6vw, 4rem); letter-spacing: -.05em; }
+.header p { max-width: 640px; margin: 0; color: var(--color-text-muted); line-height: 1.6; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  width: min(100%, 1080px);
+  margin: 0 auto;
+}
+
+.grid article {
+  padding: 1.25rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-xl);
+  background: var(--gradient-panel);
+  box-shadow: var(--shadow-soft);
+}
+
+.grid h2 { margin: 1rem 0 .8rem; font-size: 1.15rem; }
+.grid dl { display: grid; gap: .55rem; margin: 0; }
+.grid dl div { display: flex; justify-content: space-between; gap: 1rem; padding-bottom: .45rem; border-bottom: 1px solid rgba(255,255,255,.05); }
+.grid dt, .grid li { color: var(--color-text-muted); }
+.grid dd { margin: 0; color: var(--color-cyan-soft); text-align: right; }
+.grid ul { display: grid; gap: .65rem; margin: 0; padding-left: 1.1rem; }
+
+.contract {
+  width: min(100%, 1080px);
+  margin: 1rem auto 0;
+  padding: clamp(1.4rem, 5vw, 2.2rem);
+  border: 1px solid rgba(140, 98, 255, .34);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(135deg, rgba(18, 24, 62, .92), rgba(7, 12, 30, .85));
+  box-shadow: var(--shadow-violet);
+}
+.contract span { color: var(--color-violet-soft); font-size: .7rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.contract h2 { margin: .6rem 0; font-size: clamp(1.4rem, 4vw, 2.3rem); }
+.contract p { max-width: 760px; margin: 0; color: var(--color-text-muted); line-height: 1.65; }
+
+@media (max-width: 720px) {
+  .header { align-items: stretch; flex-direction: column; }
+  .header button { align-self: flex-start; }
+  .grid { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,20 @@
+.root {
+  display: grid;
+  place-items: center;
+  min-height: var(--app-height);
+  padding: 1.25rem;
+  background: radial-gradient(circle at 50% 30%, rgba(255, 70, 128, .13), transparent 40%), var(--color-bg-950);
+}
+
+.panel {
+  width: min(100%, 460px);
+  padding: 1.6rem;
+  border: 1px solid rgba(255, 111, 145, .34);
+  border-radius: var(--radius-xl);
+  background: var(--gradient-panel);
+  box-shadow: var(--shadow-soft);
+}
+
+.panel h1 { margin: .5rem 0; font-size: clamp(1.55rem, 6vw, 2.2rem); }
+.panel p { margin: 0 0 1.25rem; color: var(--color-text-muted); line-height: 1.6; }
+.eyebrow { color: var(--color-danger); font-size: .7rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }

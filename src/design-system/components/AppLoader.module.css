@@ -1,0 +1,36 @@
+.root {
+  display: grid;
+  place-items: center;
+  gap: 1rem;
+  min-height: var(--app-height);
+  background: radial-gradient(circle at 50% 48%, rgba(94, 70, 255, .16), transparent 36%), var(--color-bg-950);
+  color: var(--color-text-muted);
+  font-size: .72rem;
+  font-weight: 750;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+
+.core {
+  position: relative;
+  width: 74px;
+  height: 74px;
+}
+
+.ring {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(99, 217, 255, .46);
+  border-top-color: var(--color-violet-soft);
+  border-radius: 50%;
+  box-shadow: var(--shadow-cyan);
+}
+
+.gem {
+  position: absolute;
+  inset: 22px;
+  transform: rotate(45deg);
+  border: 1px solid rgba(255,255,255,.6);
+  background: var(--gradient-brand);
+  box-shadow: var(--shadow-violet);
+}

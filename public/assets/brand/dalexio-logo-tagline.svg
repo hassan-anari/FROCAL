@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 132" role="img" aria-label="Dalexio">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#53e7ff"/><stop offset=".52" stop-color="#7c68ff"/><stop offset="1" stop-color="#c456ff"/></linearGradient></defs>
+  <path d="M34 48 58 13l24 35-24 35L34 48Zm24-20L45 48l13 20 13-20-13-20Z" fill="url(#g)"/>
+  <text x="104" y="61" fill="#f4f7ff" font-family="Inter,Arial,sans-serif" font-size="44" font-weight="750" letter-spacing="6">DALEXIO</text>
+  <text x="106" y="101" fill="#8895b7" font-family="Inter,Arial,sans-serif" font-size="15" font-weight="600" letter-spacing="4">PLAY • GROW • UNITE • COMPETE</text>
+</svg>
