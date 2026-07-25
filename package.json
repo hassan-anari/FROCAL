@@ -1,7 +1,7 @@
 {
   "name": "dalexio-miniapp-phase0",
   "private": true,
-  "version": "0.5.0",
+  "version": "0.4.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
