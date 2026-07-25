@@ -1,38 +1,25 @@
-# Phase 0 v0.4 — Final Visual Refinement
+# Phase 0 Report — v0.5
 
-## Completed
+## Scope
+- Final polish pass for Phase 0 before entering Phase 1
+- Refined the **DEXO LAND** hero wordmark into a more conceptual composition
+- Kept the cinematic background motion
+- Preserved the lightweight Telegram-first intro flow and diagnostics access
+- Switched delivery approach to **asset-map only** for product assets already maintained in the main source repository
 
-- Rebuilt the Dexo Land intro typography with Inter Variable.
-- Restored ambient background motion: camera drift, core breathing, light sweep and sparse particles.
-- Replaced the oversized pill CTA with a compact, polished game CTA.
-- Added Hugeicons Stroke Rounded to the production stack.
-- Replaced custom arrow/diagnostics SVGs with Hugeicons components.
-- Kept the diagnostics trigger globally accessible on every route.
-- Removed user-facing foundation verification copy and technical clutter.
-- Tightened the product canvas to a 440px maximum browser preview.
-- Polished the diagnostics layout while preserving runtime data.
-- Kept Telegram user detection, stable viewport and safe-area support.
+## What changed
+1. **Hero typography polish**
+   - Added a stroked ghost layer behind the main wordmark
+   - Increased vertical spacing between `DEXO` and `LAND`
+   - Refined the gradient treatment on `LAND`
+   - Added a subtle conceptual meta line: `PLAY · GROW · UNITE · COMPETE`
+2. **Asset delivery cleanup**
+   - Removed bundled brand/world artwork from this checkpoint package
+   - Kept the asset registry and manifest paths intact so the main repository can provide the real files
+3. **No functional route changes**
+   - Intro interaction and diagnostics access remain unchanged
 
-## Asset replacement contract
-
-The intro scene is controlled by one stable path:
-
-```text
-public/assets/world/dexo-land-foundation.webp
-```
-
-The included image is a temporary clean preview. Replace it with the final cleaned WebP using the same filename.
-
-## Server configuration
-
-No `.env` is required for Phase 0. Vercel uses the internal local fixture mode unless `VITE_DATA_SOURCE` is explicitly changed.
-
-## Validation performed
-
-- Structure validation
-- Phase 0 asset validation
-- Local import validation
-- TypeScript/TSX syntax transpilation for 32 files
-- Visual checkpoint review at 390×844
-
-Full dependency typecheck, unit tests and Vite build run after `npm install` or in the Vercel deployment pipeline.
+## Notes
+- This checkpoint intentionally ships **without the actual brand/world image assets**.
+- Expected source of truth remains the main project asset folder referenced by `src/assets/manifest.json`.
+- If local standalone preview is required, place the real files back at the paths listed in the manifest.

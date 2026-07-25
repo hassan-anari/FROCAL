@@ -75,10 +75,14 @@ export function FoundationPage() {
         >
           <span className={styles.eyebrow}>{content.foundation.eyebrow}</span>
           <div className={styles.titleAura} aria-hidden="true" />
-          <h1 id="foundation-title" className={styles.title} aria-label="Dexo Land">
-            <span className={styles.titlePrimary}>{content.foundation.titlePrimary}</span>
-            <span className={styles.titleSecondary}>{content.foundation.titleSecondary}</span>
-          </h1>
+          <div className={styles.titleStack}>
+            <span className={styles.titleGhost} aria-hidden="true">{content.foundation.titlePrimary}</span>
+            <h1 id="foundation-title" className={styles.title} aria-label="Dexo Land">
+              <span className={styles.titlePrimary}>{content.foundation.titlePrimary}</span>
+              <span className={styles.titleSecondary}>{content.foundation.titleSecondary}</span>
+            </h1>
+            <span className={styles.titleMeta} aria-hidden="true">PLAY · GROW · UNITE · COMPETE</span>
+          </div>
           <p className={styles.subtitle}>{content.foundation.subtitle}</p>
         </motion.div>
 
