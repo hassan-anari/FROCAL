@@ -6,7 +6,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { preloadAssets } from "@/assets/preload";
 import { AssetImage } from "@/design-system/components/AssetImage";
 import { AppLoader } from "@/design-system/components/AppLoader";
@@ -31,29 +31,29 @@ const guideScenes: Array<{
     eyebrow: "PLAY",
     title: "Complete missions.",
     body: "Every action creates momentum for you and Dexo.",
-    asset: "dexo.guide01",
-    scale: .9,
+    asset: "dexo.guide02",
+    scale: 1.02,
   },
   {
     eyebrow: "GROW",
     title: "Evolve together.",
     body: "Levels, achievements and seasons shape your companion.",
     asset: "dexo.personalityFocused",
-    scale: .86,
+    scale: .98,
   },
   {
     eyebrow: "UNITE",
     title: "Build with your clan.",
     body: "Shared progress becomes a stronger world for everyone.",
-    asset: "dexo.guide02",
-    scale: .9,
+    asset: "dexo.guide03",
+    scale: 1.02,
   },
   {
     eyebrow: "COMPETE",
     title: "Rise through the season.",
     body: "Your consistency and teamwork define your legacy.",
-    asset: "dexo.personalityVictory",
-    scale: .84,
+    asset: "dexo.personalityCurious",
+    scale: .97,
   },
 ];
 
@@ -63,28 +63,28 @@ const stepContent = {
     title: "Your journey is about to begin.",
     body: "A new world is online — and someone has been waiting for you.",
     asset: "dexo.guide01" as AssetKey,
-    scale: .9,
+    scale: 1.04,
   },
   meet: {
     eyebrow: "MEET DEXO",
     title: "A companion that grows with you.",
     body: "Dexo reacts to your progress, your achievements and every season you complete.",
     asset: "dexo.base" as AssetKey,
-    scale: .91,
+    scale: 1.05,
   },
   acquired: {
     eyebrow: "COMPANION ACQUIRED",
     title: "Dexo joined your journey.",
     body: "From this moment forward, every mission shapes both of you.",
     asset: "dexo.personalityHappy" as AssetKey,
-    scale: .82,
+    scale: .96,
   },
   ready: {
     eyebrow: "DEXO LAND ONLINE",
     title: "Your world is ready.",
     body: "Step into Base and begin building your seasonal legacy.",
     asset: "dexo.personalityVictory" as AssetKey,
-    scale: .84,
+    scale: .96,
   },
 };
 
@@ -93,6 +93,8 @@ const onboardingAssets = [
   "dexo.base",
   "dexo.guide01",
   "dexo.guide02",
+  "dexo.guide03",
+  "dexo.personalityCurious",
   "dexo.personalityFocused",
   "dexo.personalityHappy",
   "dexo.personalityVictory",
@@ -103,6 +105,7 @@ export function OnboardingPage() {
   const scenario = useScenarioStore((state) => state.activeScenario);
   const { adapter } = useTelegram();
   const onboarding = useOnboardingStore();
+  const [assetsReady, setAssetsReady] = useState(false);
   const bootstrap = useQuery({
     queryKey: queryKeys.bootstrap(scenario),
     queryFn: () => loadBootstrap(scenario, adapter.platform),
@@ -118,7 +121,13 @@ export function OnboardingPage() {
   }, [onboarding]);
 
   useEffect(() => {
-    void preloadAssets(onboardingAssets);
+    let active = true;
+    void preloadAssets(onboardingAssets).then(() => {
+      if (active) setAssetsReady(true);
+    });
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -143,7 +152,7 @@ export function OnboardingPage() {
 
   const progress = useMemo(() => ((stepIndex + 1) / onboardingStepOrder.length) * 100, [stepIndex]);
 
-  if (bootstrap.isPending) return <AppLoader />;
+  if (bootstrap.isPending || !assetsReady) return <AppLoader />;
 
   const handleNext = () => {
     adapter.hapticImpact("light");

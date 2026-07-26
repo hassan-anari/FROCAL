@@ -139,7 +139,8 @@
 
 .dexoStage {
   align-self: center;
-  margin-top: .25rem;
+  width: min(100%, 350px);
+  margin-top: .1rem;
 }
 
 .footer {
@@ -185,7 +186,7 @@
   .sceneInner { padding-top: .5rem; }
   .copy h1 { font-size: clamp(1.68rem, 7.2vw, 2.2rem); }
   .copy p { font-size: .75rem; }
-  .dexoStage { width: min(100%, 278px); margin-top: .1rem; }
+  .dexoStage { width: min(100%, 310px); margin-top: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {

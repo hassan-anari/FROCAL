@@ -37,10 +37,10 @@ export function DexoStage({
       <motion.div
         key={character}
         className={styles.characterLayer}
-        initial={{ opacity: 0, scale: .985 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 1.01 }}
-        transition={{ duration: .34, ease: [0.22, 1, 0.36, 1] }}
+        initial={{ opacity: 0, scale: .97, filter: "blur(5px)" }}
+        animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+        exit={{ opacity: 0, scale: 1.025, filter: "blur(4px)" }}
+        transition={{ duration: .46, ease: [0.22, 1, 0.36, 1] }}
       >
         <AssetImage assetKey={character} className={styles.character} draggable={false} />
       </motion.div>

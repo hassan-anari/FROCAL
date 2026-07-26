@@ -49,12 +49,6 @@ export function FoundationPage() {
     void preloadAssets(onboardingAssets);
   }, []);
 
-  useEffect(() => {
-    if (onboardingStatus === "completed") {
-      void navigate({ to: "/base", replace: true });
-    }
-  }, [navigate, onboardingStatus]);
-
   if (bootstrap.isPending) return <AppLoader />;
 
   if (bootstrap.isError) {
