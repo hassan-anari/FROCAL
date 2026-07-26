@@ -5,6 +5,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { preloadAssets } from "@/assets/preload";
+import { getAssetPath } from "@/assets/registry";
 import type { AssetKey } from "@/assets/registry";
 import { DexoStage } from "@/design-system/components/DexoStage";
 import { GameHeader } from "@/design-system/components/GameHeader";
@@ -70,12 +71,14 @@ export function BasePage() {
   const scenario = useScenarioStore((state) => state.activeScenario);
   const onboarding = useOnboardingStore();
   const criticalActionVisible = useBaseUiStore((state) => state.criticalActionVisible);
+  const promoBannerVisible = useBaseUiStore((state) => state.promoBannerVisible);
   const { adapter } = useTelegram();
   const bootstrap = useQuery({ queryKey: queryKeys.bootstrap(scenario), queryFn: () => loadBootstrap(scenario, adapter.platform) });
   const [activeReaction, setActiveReaction] = useState<ReactionKey | null>(null);
   const [dialogue, setDialogue] = useState<string | null>(null);
   const [typedDialogue, setTypedDialogue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [promoAssetReady, setPromoAssetReady] = useState(false);
   const reactionCursor = useRef(0);
   const dialogueCursor = useRef<Record<ReactionKey, number>>({ curious: 0, happy: 0, focused: 0, surprised: 0, victory: 0 });
   const resetTimer = useRef<number | null>(null);
@@ -133,6 +136,34 @@ export function BasePage() {
     <GameShell>
       <main className={styles.page}>
         <GameHeader />
+
+        <AnimatePresence initial={false}>
+          {promoBannerVisible ? (
+            <motion.aside
+              className={styles.promoSlot}
+              initial={{ opacity: 0, height: 0, y: -8 }}
+              animate={{ opacity: 1, height: "auto", y: 0 }}
+              exit={{ opacity: 0, height: 0, y: -6 }}
+              transition={{ duration: .3, ease: [0.22, 1, 0.36, 1] }}
+              aria-label="Promotional banner placement"
+            >
+              <div className={styles.promoBanner}>
+                <div className={`${styles.promoPlaceholder} ${promoAssetReady ? styles.promoPlaceholderHidden : ""}`}>
+                  <span>Optional promotion</span>
+                  <strong>BASE PROMO BANNER</strong>
+                  <small>1200 × 260 WEBP</small>
+                </div>
+                <img
+                  className={`${styles.promoImage} ${promoAssetReady ? styles.promoImageReady : ""}`}
+                  src={getAssetPath("base.promoBanner")}
+                  alt="Dalexio Base promotional banner"
+                  onLoad={() => setPromoAssetReady(true)}
+                  onError={() => setPromoAssetReady(false)}
+                />
+              </div>
+            </motion.aside>
+          ) : null}
+        </AnimatePresence>
 
         <section className={styles.hero} aria-label="Personal Dexo base">
           <div className={styles.dexoMeta}>

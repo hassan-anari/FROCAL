@@ -135,3 +135,7 @@
   width: 100%;
   padding-inline: .62rem;
 }
+
+.actions > button:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}

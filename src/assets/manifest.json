@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "assets": [
     {
       "key": "brand.logo",
@@ -11,7 +11,7 @@
     {
       "key": "brand.logoTagline",
       "path": "/assets/brand/dalexio-logo-tagline.svg",
-      "alt": "Dalexio \u2014 Play Grow Unite Compete",
+      "alt": "Dalexio — Play Grow Unite Compete",
       "category": "brand",
       "requiredInPhase": 0
     },
@@ -427,6 +427,13 @@
       "alt": "Season archive token",
       "category": "season",
       "requiredInPhase": 8
+    },
+    {
+      "key": "base.promoBanner",
+      "path": "/assets/banners/base-promo-banner.webp",
+      "alt": "Dalexio Base promotional banner",
+      "category": "banner",
+      "requiredInPhase": 2
     }
   ]
 }

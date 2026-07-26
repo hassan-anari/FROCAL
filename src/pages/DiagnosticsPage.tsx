@@ -21,7 +21,9 @@ export function DiagnosticsPage() {
   const scenario = useScenarioStore((state) => state.activeScenario);
   const onboarding = useOnboardingStore();
   const criticalActionVisible = useBaseUiStore((state) => state.criticalActionVisible);
+  const promoBannerVisible = useBaseUiStore((state) => state.promoBannerVisible);
   const toggleCriticalAction = useBaseUiStore((state) => state.toggleCriticalAction);
+  const togglePromoBanner = useBaseUiStore((state) => state.togglePromoBanner);
   const { adapter, colorScheme, stableHeight, insets } = useTelegram();
   const bootstrap = useQuery({
     queryKey: queryKeys.bootstrap(scenario),
@@ -45,7 +47,7 @@ export function DiagnosticsPage() {
   return (
     <main className={styles.root}>
       <header className={styles.header}>
-        <span>Phase 2.1 / Base Polish</span>
+        <span>Phase 2.6 / Base Closeout</span>
         <h1>System diagnostics</h1>
         <p>Runtime, navigation and Base-state controls.</p>
       </header>
@@ -56,12 +58,17 @@ export function DiagnosticsPage() {
           <h2>Dynamic Base content</h2>
           <dl>
             <div><dt>Critical action</dt><dd>{criticalActionVisible ? "visible" : "hidden"}</dd></div>
+            <div><dt>Promo banner</dt><dd>{promoBannerVisible ? "visible" : "hidden"}</dd></div>
+            <div><dt>Banner source</dt><dd>1200 × 260</dd></div>
             <div><dt>Notification samples</dt><dd>4</dd></div>
             <div><dt>Season shortcut</dt><dd>triple tap</dd></div>
           </dl>
           <div className={styles.actions}>
             <Button tone="secondary" size="sm" onClick={toggleCriticalAction}>
               {criticalActionVisible ? "Hide critical action" : "Show critical action"}
+            </Button>
+            <Button tone="secondary" size="sm" onClick={togglePromoBanner}>
+              {promoBannerVisible ? "Hide promo banner" : "Show promo banner"}
             </Button>
             <Button tone="secondary" size="sm" onClick={() => navigate({ to: "/base" })}>
               Open Base
