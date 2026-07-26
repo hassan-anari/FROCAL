@@ -122,7 +122,7 @@
   font-weight: 780;
   cursor: pointer;
 }
-.primaryButton { border: 1px solid rgba(210,235,255,.22); color: white; background: linear-gradient(105deg, #46d6ff, #8669ff 55%, #cd54ff); box-shadow: 0 12px 32px rgba(91, 84, 255, .25); }
+.primaryButton { overflow: hidden; border: 1px solid transparent; color: white; background: linear-gradient(105deg, #46d6ff, #8669ff 55%, #cd54ff) padding-box, linear-gradient(105deg, rgba(168,235,255,.55), rgba(177,123,255,.48), rgba(242,123,255,.52)) border-box; background-clip: padding-box, border-box; box-shadow: 0 12px 32px rgba(91, 84, 255, .25), inset 0 1px 0 rgba(255,255,255,.22); }
 .secondaryButton { border: 1px solid rgba(139, 181, 245, .2); color: rgba(229,236,255,.82); background: rgba(6, 13, 31, .64); }
 
 .heroLock {

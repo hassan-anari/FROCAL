@@ -1,12 +1,11 @@
 .header {
   position: relative;
-  z-index: 30;
+  z-index: 70;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: .7rem;
+  gap: .6rem;
   min-height: 48px;
-  padding-right: 44px;
 }
 
 .identity {
@@ -51,7 +50,7 @@
 }
 
 .identity strong {
-  max-width: 105px;
+  max-width: 92px;
   overflow: hidden;
   color: #f6f8ff;
   font-size: .86rem;
@@ -61,56 +60,280 @@
   white-space: nowrap;
 }
 
+.seasonControl {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  display: inline-flex;
+  align-items: center;
+  gap: .42rem;
+  height: 36px;
+  padding: .22rem .62rem .22rem .25rem;
+  border: 1px solid rgba(141, 174, 240, .16);
+  border-radius: 13px;
+  color: #eef2ff;
+  background: rgba(7, 13, 31, .72);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 10px 24px rgba(0,0,0,.2);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.seasonControl:active { scale: .97; }
+
+.seasonControl span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  color: #151025;
+  font-size: .62rem;
+  font-weight: 850;
+  background: linear-gradient(135deg, #ffce73, #ff8fb9 68%, #c96bff);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.45);
+}
+
+.seasonControl strong {
+  max-width: 70px;
+  overflow: hidden;
+  font-size: .57rem;
+  font-weight: 760;
+  letter-spacing: .055em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
 .actions {
   display: flex;
   align-items: center;
-  gap: .4rem;
+  gap: .38rem;
+  margin-left: auto;
 }
 
-.season,
+.level,
+.iconButton {
+  height: 36px;
+  border: 1px solid rgba(138, 171, 239, .17);
+  border-radius: 12px;
+  background: rgba(6, 12, 29, .68);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+}
+
 .level {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 30px;
+  min-width: 48px;
   padding: 0 .58rem;
-  border: 1px solid rgba(140, 169, 236, .15);
-  border-radius: 11px;
-  color: rgba(221, 229, 250, .7);
-  font-size: .58rem;
-  font-weight: 780;
-  letter-spacing: .04em;
-  background: rgba(7, 13, 31, .62);
-}
-
-.season {
-  color: #151025;
-  border-color: rgba(255,255,255,.14);
-  background: linear-gradient(135deg, #ffcb72, #ff8dbf);
+  color: rgba(225, 232, 250, .72);
+  font-size: .59rem;
+  font-weight: 790;
+  letter-spacing: .035em;
 }
 
 .iconButton {
   position: relative;
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 36px;
   padding: 0;
-  border: 1px solid rgba(138, 171, 239, .17);
-  border-radius: 12px;
-  color: rgba(231, 237, 255, .78);
-  background: rgba(6, 12, 29, .62);
+  color: rgba(231, 237, 255, .82);
+  cursor: pointer;
 }
 
 .iconButton i {
   position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #d65cff;
-  box-shadow: 0 0 10px rgba(214, 92, 255, .8);
+  top: -4px;
+  right: -4px;
+  display: grid;
+  place-items: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border: 2px solid #070b1a;
+  border-radius: 999px;
+  color: #fff;
+  font-size: .48rem;
+  font-style: normal;
+  font-weight: 850;
+  background: linear-gradient(145deg, #dc55ff, #8e64ff);
+  box-shadow: 0 0 13px rgba(207, 79, 255, .6);
+}
+
+.notificationBackdrop {
+  position: fixed;
+  z-index: 500;
+  inset: 0;
+  width: min(100%, var(--miniapp-max-width));
+  height: var(--app-height);
+  margin-inline: auto;
+  background: rgba(1, 3, 11, .68);
+  backdrop-filter: blur(13px) saturate(.86);
+}
+
+.notificationPanel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  max-height: min(78%, 650px);
+  overflow: hidden;
+  padding:
+    calc(.85rem + var(--safe-top))
+    calc(.82rem + var(--safe-right))
+    1rem
+    calc(.82rem + var(--safe-left));
+  border-bottom: 1px solid rgba(139, 181, 245, .17);
+  border-radius: 0 0 26px 26px;
+  background:
+    radial-gradient(circle at 82% 0%, rgba(176, 77, 255, .13), transparent 34%),
+    linear-gradient(180deg, rgba(9, 15, 35, .985), rgba(3, 7, 19, .98));
+  box-shadow: 0 24px 70px rgba(0,0,0,.48), inset 0 -1px 0 rgba(255,255,255,.025);
+}
+
+.notificationHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .7rem;
+  margin-bottom: .8rem;
+}
+
+.notificationHeader > div:first-child {
+  display: grid;
+  gap: .18rem;
+}
+
+.notificationHeader span {
+  color: #87ebff;
+  font-size: .54rem;
+  font-weight: 790;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.notificationHeader h2 {
+  margin: 0;
+  color: #f7f9ff;
+  font-size: 1.25rem;
+  font-weight: 810;
+  letter-spacing: -.04em;
+}
+
+.notificationHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+}
+
+.notificationHeaderActions > button:first-child {
+  min-height: 32px;
+  padding: 0 .66rem;
+  border: 1px solid rgba(136, 190, 255, .16);
+  border-radius: 10px;
+  color: #86eaff;
+  font-size: .56rem;
+  font-weight: 730;
+  background: rgba(8, 16, 36, .7);
+}
+
+.closeButton {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0 0 2px;
+  border: 1px solid rgba(136, 190, 255, .16);
+  border-radius: 11px;
+  color: rgba(234, 240, 255, .76);
+  font-size: 1.3rem;
+  font-weight: 320;
+  background: rgba(8, 16, 36, .7);
+}
+
+.notificationList {
+  display: grid;
+  gap: .52rem;
+  max-height: calc(var(--app-height) * .58);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.notificationList::-webkit-scrollbar { display: none; }
+
+.notificationItem {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: .68rem;
+  width: 100%;
+  min-height: 78px;
+  padding: .68rem .72rem;
+  border: 1px solid rgba(137, 174, 241, .15);
+  border-radius: 17px;
+  color: rgba(231, 237, 255, .75);
+  text-align: left;
+  background: linear-gradient(145deg, rgba(15, 27, 58, .82), rgba(5, 11, 27, .88));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+}
+
+.notificationItem:active { scale: .985; }
+.notificationRead { opacity: .62; }
+
+.notificationGlyph {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  color: white;
+  font-size: .67rem;
+  font-weight: 850;
+  background: rgba(91, 112, 185, .2);
+  box-shadow: inset 0 0 0 1px rgba(170, 205, 255, .12);
+}
+
+.mission { background: linear-gradient(145deg, rgba(61, 215, 255, .28), rgba(63, 99, 255, .24)); }
+.progress { background: linear-gradient(145deg, rgba(158, 88, 255, .3), rgba(72, 201, 255, .18)); }
+.clan { background: linear-gradient(145deg, rgba(255, 117, 185, .26), rgba(145, 80, 255, .24)); }
+.notificationGlyph.season { background: linear-gradient(145deg, rgba(255, 190, 91, .28), rgba(255, 111, 177, .25)); }
+
+.notificationCopy {
+  display: grid;
+  min-width: 0;
+  gap: .14rem;
+}
+
+.notificationCopy > span {
+  color: #86eaff;
+  font-size: .5rem;
+  font-weight: 790;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.notificationCopy strong {
+  overflow: hidden;
+  color: #f2f5ff;
+  font-size: .71rem;
+  font-weight: 650;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+}
+
+.notificationCopy small {
+  color: rgba(166, 181, 215, .46);
+  font-size: .53rem;
 }
 
 .compact { min-height: 42px; }
+
+@media (max-width: 370px) {
+  .seasonControl strong { display: none; }
+  .seasonControl { padding-right: .25rem; }
+  .identity strong { max-width: 74px; }
+  .level { min-width: 43px; padding-inline: .44rem; }
+}

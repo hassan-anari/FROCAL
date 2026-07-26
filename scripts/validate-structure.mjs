@@ -15,6 +15,7 @@ const required = [
   "src/assets/manifest.json",
   "src/game/domain/schemas.ts",
   "src/game/onboarding/onboardingStore.ts",
+  "src/game/ui/baseUiStore.ts",
   "src/pages/FoundationPage.tsx",
   "src/pages/OnboardingPage.tsx",
   "src/pages/BasePage.tsx",

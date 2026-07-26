@@ -6,6 +6,7 @@ import { Button } from "@/design-system/primitives/Button";
 import { assetRegistry, listAssetsForPhase } from "@/assets/registry";
 import { useOnboardingStore } from "@/game/onboarding/onboardingStore";
 import { useScenarioStore } from "@/game/scenarios/scenarioStore";
+import { useBaseUiStore } from "@/game/ui/baseUiStore";
 import { loadBootstrap } from "@/integrations/api/bootstrap";
 import { queryKeys } from "@/integrations/api/queryKeys";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
@@ -13,10 +14,14 @@ import styles from "./DiagnosticsPage.module.css";
 
 const returnPathKey = "dalexio-diagnostics-return-path";
 
+type ReturnPath = "/" | "/onboarding" | "/base" | "/earn" | "/clan" | "/arena" | "/profile";
+
 export function DiagnosticsPage() {
   const navigate = useNavigate();
   const scenario = useScenarioStore((state) => state.activeScenario);
   const onboarding = useOnboardingStore();
+  const criticalActionVisible = useBaseUiStore((state) => state.criticalActionVisible);
+  const toggleCriticalAction = useBaseUiStore((state) => state.toggleCriticalAction);
   const { adapter, colorScheme, stableHeight, insets } = useTelegram();
   const bootstrap = useQuery({
     queryKey: queryKeys.bootstrap(scenario),
@@ -24,8 +29,8 @@ export function DiagnosticsPage() {
   });
 
   useEffect(() => {
-    const returnPath = sessionStorage.getItem(returnPathKey) ?? "/";
-    return adapter.showBackButton(() => navigate({ to: returnPath as "/" | "/onboarding" | "/base" }));
+    const returnPath = (sessionStorage.getItem(returnPathKey) ?? "/base") as ReturnPath;
+    return adapter.showBackButton(() => navigate({ to: returnPath }));
   }, [adapter, navigate]);
 
   const safeArea = insets.contentSafeArea;
@@ -40,12 +45,30 @@ export function DiagnosticsPage() {
   return (
     <main className={styles.root}>
       <header className={styles.header}>
-        <span>Phase 2 / App Shell</span>
+        <span>Phase 2.1 / Base Polish</span>
         <h1>System diagnostics</h1>
-        <p>Runtime, navigation and shell diagnostics.</p>
+        <p>Runtime, navigation and Base-state controls.</p>
       </header>
 
-      <section className={styles.stack} aria-label="Phase 1 diagnostics">
+      <section className={styles.stack} aria-label="Phase 2 diagnostics">
+        <article>
+          <StatusChip>Base controls ready</StatusChip>
+          <h2>Dynamic Base content</h2>
+          <dl>
+            <div><dt>Critical action</dt><dd>{criticalActionVisible ? "visible" : "hidden"}</dd></div>
+            <div><dt>Notification samples</dt><dd>4</dd></div>
+            <div><dt>Season shortcut</dt><dd>triple tap</dd></div>
+          </dl>
+          <div className={styles.actions}>
+            <Button tone="secondary" size="sm" onClick={toggleCriticalAction}>
+              {criticalActionVisible ? "Hide critical action" : "Show critical action"}
+            </Button>
+            <Button tone="secondary" size="sm" onClick={() => navigate({ to: "/base" })}>
+              Open Base
+            </Button>
+          </div>
+        </article>
+
         <article>
           <StatusChip>Journey ready</StatusChip>
           <h2>Onboarding state</h2>
@@ -56,12 +79,8 @@ export function DiagnosticsPage() {
             <div><dt>Completed</dt><dd>{onboarding.completedAt ? "yes" : "no"}</dd></div>
           </dl>
           <div className={styles.actions}>
-            <Button tone="secondary" size="sm" onClick={resetJourney}>
-              Reset journey
-            </Button>
-            <Button tone="secondary" size="sm" onClick={() => navigate({ to: onboarding.status === "completed" ? "/base" : "/onboarding" })}>
-              Open experience
-            </Button>
+            <Button tone="secondary" size="sm" onClick={resetJourney}>Reset journey</Button>
+            <Button tone="secondary" size="sm" onClick={() => navigate({ to: onboarding.status === "completed" ? "/base" : "/onboarding" })}>Open experience</Button>
           </div>
         </article>
 
@@ -108,7 +127,7 @@ export function DiagnosticsPage() {
             <div><dt>Manifest version</dt><dd>{assetRegistry.version}</dd></div>
             <div><dt>Total keys</dt><dd>{assetRegistry.assets.length}</dd></div>
             <div><dt>Phase 2 registry</dt><dd>{listAssetsForPhase(2).length}</dd></div>
-            <div><dt>Character pack</dt><dd>25 files</dd></div>
+            <div><dt>Character pack</dt><dd>external</dd></div>
           </dl>
         </article>
 

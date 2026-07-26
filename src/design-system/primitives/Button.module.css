@@ -7,6 +7,7 @@
   gap: .7rem;
   overflow: hidden;
   border: 1px solid transparent;
+  background-clip: padding-box, border-box;
   cursor: pointer;
   font-weight: 750;
   letter-spacing: -.015em;
@@ -23,7 +24,7 @@
   content: "";
   position: absolute;
   z-index: 0;
-  inset: 1px;
+  inset: 0;
   border-radius: inherit;
   pointer-events: none;
   background: linear-gradient(180deg, rgba(255,255,255,.12), transparent 38%);
@@ -41,10 +42,11 @@
 
 .primary {
   color: #fff;
-  border-color: rgba(191, 231, 255, .26);
+  border-color: transparent;
   border-radius: 18px;
   background:
-    linear-gradient(108deg, #42cfff 0%, #756cff 51%, #c84cff 100%) padding-box;
+    linear-gradient(108deg, #42cfff 0%, #756cff 51%, #c84cff 100%) padding-box,
+    linear-gradient(108deg, rgba(151, 235, 255, .62), rgba(167, 120, 255, .56), rgba(242, 124, 255, .58)) border-box;
   box-shadow:
     0 15px 40px rgba(83, 86, 255, .34),
     0 4px 16px rgba(52, 213, 255, .12),
