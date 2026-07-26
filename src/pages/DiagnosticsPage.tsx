@@ -40,9 +40,9 @@ export function DiagnosticsPage() {
   return (
     <main className={styles.root}>
       <header className={styles.header}>
-        <span>Phase 1 / Entry & Base</span>
+        <span>Phase 2 / App Shell</span>
         <h1>System diagnostics</h1>
-        <p>Runtime checks and repeatable onboarding controls.</p>
+        <p>Runtime, navigation and shell diagnostics.</p>
       </header>
 
       <section className={styles.stack} aria-label="Phase 1 diagnostics">
@@ -63,6 +63,18 @@ export function DiagnosticsPage() {
               Open experience
             </Button>
           </div>
+        </article>
+
+        <article>
+          <StatusChip>Shell ready</StatusChip>
+          <h2>Main navigation</h2>
+          <dl>
+            <div><dt>Base</dt><dd>active</dd></div>
+            <div><dt>Earn</dt><dd>active</dd></div>
+            <div><dt>Clan</dt><dd>reserved</dd></div>
+            <div><dt>Arena</dt><dd>reserved</dd></div>
+            <div><dt>Profile</dt><dd>active</dd></div>
+          </dl>
         </article>
 
         <article>
@@ -95,7 +107,7 @@ export function DiagnosticsPage() {
           <dl>
             <div><dt>Manifest version</dt><dd>{assetRegistry.version}</dd></div>
             <div><dt>Total keys</dt><dd>{assetRegistry.assets.length}</dd></div>
-            <div><dt>Phase 1 required</dt><dd>{listAssetsForPhase(1).length}</dd></div>
+            <div><dt>Phase 2 registry</dt><dd>{listAssetsForPhase(2).length}</dd></div>
             <div><dt>Character pack</dt><dd>25 files</dd></div>
           </dl>
         </article>

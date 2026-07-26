@@ -16,7 +16,7 @@ export function DiagnosticsButton() {
     adapter.hapticImpact("light");
     if (isDiagnostics) {
       const returnPath = sessionStorage.getItem(returnPathKey) ?? "/";
-      void navigate({ to: returnPath as "/" | "/onboarding" | "/base" });
+      void navigate({ to: returnPath as "/" | "/onboarding" | "/base" | "/earn" | "/clan" | "/arena" | "/profile" });
       return;
     }
     sessionStorage.setItem(returnPathKey, pathname);

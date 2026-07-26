@@ -1,38 +1,17 @@
-# Dalexio Mini App — Phase 1.1 Polish
+# Dalexio Mini App — Phase 2
 
-Telegram-first React/Vite vertical slice covering:
-
-- Approved Dexo Land intro from Phase 0
-- Soft Intro-to-onboarding transition
-- First-name greeting
-- Dexo reveal and acquisition
-- Play / Grow / Unite / Compete guide
-- Persistent onboarding state
-- Returning-player routing
-- Dark-navy Personal Base with stable Dexo interaction
-- Phase 1 diagnostics and onboarding reset
+Telegram-first Dexo Land mini app with the approved Phase 0 intro, Phase 1 onboarding and the Phase 2 main app shell.
 
 ## Run
-
 ```bash
 npm install
-npm run check
 npm run dev
 ```
 
-## Routes
+## Production check
+```bash
+npm run check
+```
 
-- `/` — approved Dexo Land intro
-- `/onboarding` — first-time journey
-- `/base` — personal Base
-- `/diagnostics` — runtime and reset controls
-
-## Asset delivery rule
-
-This checkpoint intentionally excludes all repository-maintained artwork:
-
-- Dalexio logos
-- Approved Dexo Land background
-- Dexo character and platform WebP files
-
-Their paths remain in `src/assets/manifest.json`. Keep the existing files in the main repository when applying this checkpoint.
+## Asset ownership
+Brand, Dexo and Dexo Land artwork are intentionally not bundled. Keep the existing files in your main repository at the paths declared in `src/assets/manifest.json`.

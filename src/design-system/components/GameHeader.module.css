@@ -1,0 +1,116 @@
+.header {
+  position: relative;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .7rem;
+  min-height: 48px;
+  padding-right: 44px;
+}
+
+.identity {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: .58rem;
+}
+
+.identity img,
+.avatarFallback {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(142, 193, 255, .25);
+  border-radius: 13px;
+  object-fit: cover;
+  box-shadow: 0 9px 22px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.avatarFallback {
+  display: grid;
+  place-items: center;
+  color: white;
+  font-size: .82rem;
+  font-weight: 820;
+  background: linear-gradient(145deg, #48d9ff, #806cff 58%, #cf56ff);
+}
+
+.identity > div {
+  display: grid;
+  min-width: 0;
+  gap: .08rem;
+}
+
+.identity span {
+  color: rgba(173, 190, 225, .52);
+  font-size: .55rem;
+  font-weight: 720;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
+.identity strong {
+  max-width: 105px;
+  overflow: hidden;
+  color: #f6f8ff;
+  font-size: .86rem;
+  font-weight: 760;
+  letter-spacing: -.025em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+
+.season,
+.level {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 0 .58rem;
+  border: 1px solid rgba(140, 169, 236, .15);
+  border-radius: 11px;
+  color: rgba(221, 229, 250, .7);
+  font-size: .58rem;
+  font-weight: 780;
+  letter-spacing: .04em;
+  background: rgba(7, 13, 31, .62);
+}
+
+.season {
+  color: #151025;
+  border-color: rgba(255,255,255,.14);
+  background: linear-gradient(135deg, #ffcb72, #ff8dbf);
+}
+
+.iconButton {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid rgba(138, 171, 239, .17);
+  border-radius: 12px;
+  color: rgba(231, 237, 255, .78);
+  background: rgba(6, 12, 29, .62);
+}
+
+.iconButton i {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #d65cff;
+  box-shadow: 0 0 10px rgba(214, 92, 255, .8);
+}
+
+.compact { min-height: 42px; }

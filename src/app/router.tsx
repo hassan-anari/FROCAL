@@ -3,6 +3,10 @@ import { RootLayout } from "./routes/RootLayout";
 import { FoundationPage } from "@/pages/FoundationPage";
 import { OnboardingPage } from "@/pages/OnboardingPage";
 import { BasePage } from "@/pages/BasePage";
+import { EarnPage } from "@/pages/EarnPage";
+import { ClanPage } from "@/pages/ClanPage";
+import { ArenaPage } from "@/pages/ArenaPage";
+import { ProfilePage } from "@/pages/ProfilePage";
 import { DiagnosticsPage } from "@/pages/DiagnosticsPage";
 
 const rootRoute = createRootRoute({ component: RootLayout });
@@ -25,13 +29,46 @@ const baseRoute = createRoute({
   component: BasePage,
 });
 
+const earnRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/earn",
+  component: EarnPage,
+});
+
+const clanRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/clan",
+  component: ClanPage,
+});
+
+const arenaRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/arena",
+  component: ArenaPage,
+});
+
+const profileRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/profile",
+  component: ProfilePage,
+});
+
 const diagnosticsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/diagnostics",
   component: DiagnosticsPage,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, onboardingRoute, baseRoute, diagnosticsRoute]);
+const routeTree = rootRoute.addChildren([
+  indexRoute,
+  onboardingRoute,
+  baseRoute,
+  earnRoute,
+  clanRoute,
+  arenaRoute,
+  profileRoute,
+  diagnosticsRoute,
+]);
 
 export const router = createRouter({
   routeTree,
