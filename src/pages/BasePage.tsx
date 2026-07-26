@@ -5,7 +5,6 @@ import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { preloadAssets } from "@/assets/preload";
-import { AppLoader } from "@/design-system/components/AppLoader";
 import { DexoStage } from "@/design-system/components/DexoStage";
 import { Button } from "@/design-system/primitives/Button";
 import { useOnboardingStore } from "@/game/onboarding/onboardingStore";
@@ -117,7 +116,8 @@ export function BasePage() {
   });
   const [activeReaction, setActiveReaction] = useState<ReactionKey | null>(null);
   const [dialogue, setDialogue] = useState<string | null>(null);
-  const [assetsReady, setAssetsReady] = useState(false);
+  const [typedDialogue, setTypedDialogue] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
   const reactionCursor = useRef(0);
   const dialogueCursor = useRef<Record<ReactionKey, number>>({ curious: 0, happy: 0, focused: 0, surprised: 0, victory: 0 });
   const resetTimer = useRef<number | null>(null);
@@ -132,28 +132,55 @@ export function BasePage() {
   }, [adapter]);
 
   useEffect(() => {
-    let active = true;
-    void preloadAssets(baseReactionAssets).then(() => {
-      if (active) setAssetsReady(true);
-    });
-    return () => {
-      active = false;
-    };
+    void preloadAssets(baseReactionAssets);
   }, []);
+
+  useEffect(() => {
+    if (!dialogue) {
+      setTypedDialogue("");
+      setIsTyping(false);
+      return;
+    }
+
+    let cursor = 0;
+    setTypedDialogue("");
+    setIsTyping(true);
+
+    const timer = window.setInterval(() => {
+      cursor += 1;
+      setTypedDialogue(dialogue.slice(0, cursor));
+      if (cursor >= dialogue.length) {
+        window.clearInterval(timer);
+        setIsTyping(false);
+      }
+    }, 24);
+
+    return () => window.clearInterval(timer);
+  }, [dialogue]);
 
   useEffect(() => () => {
     if (resetTimer.current !== null) window.clearTimeout(resetTimer.current);
   }, []);
 
-  const player = bootstrap.data?.player;
-  const firstName = adapter.getUser()?.first_name ?? player?.firstName ?? "Explorer";
+  const telegramFirstName = adapter.getUser()?.first_name ?? "Explorer";
+  const player = bootstrap.data?.player ?? {
+    id: "pending-player",
+    firstName: telegramFirstName,
+    displayName: telegramFirstName,
+    telegramUsername: null,
+    avatarUrl: null,
+    level: 1,
+    xp: 0,
+    xpToNextLevel: 500,
+    seasonScore: 0,
+    clanId: null,
+  };
+  const firstName = adapter.getUser()?.first_name ?? player.firstName ?? "Explorer";
   const initials = firstName.trim().slice(0, 1).toUpperCase();
-  const xpPercent = useMemo(() => {
-    if (!player) return 0;
-    return Math.min(100, Math.round((player.xp / player.xpToNextLevel) * 100));
-  }, [player]);
-
-  if (bootstrap.isPending || !player || !assetsReady) return <AppLoader />;
+  const xpPercent = useMemo(
+    () => Math.min(100, Math.round((player.xp / player.xpToNextLevel) * 100)),
+    [player.xp, player.xpToNextLevel],
+  );
 
   const levelAsset = getLevelAsset(player.level);
   const displayedCharacter = activeReaction ? reactionLibrary[activeReaction].asset : levelAsset;
@@ -235,9 +262,13 @@ export function BasePage() {
               transition={{ duration: .34, ease: [0.22, 1, 0.36, 1] }}
               role="status"
               aria-live="polite"
+              aria-label={`Dexo says: ${dialogue}`}
             >
               <span className={styles.speaker}>DEXO</span>
-              <span>{dialogue}</span>
+              <span className={styles.dialogueText} aria-hidden="true">
+                {typedDialogue}
+                {isTyping ? <i className={styles.typingCursor} /> : null}
+              </span>
             </motion.div>
           ) : null}
         </AnimatePresence>

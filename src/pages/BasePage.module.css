@@ -150,20 +150,23 @@
 .reaction {
   position: absolute;
   z-index: 7;
-  left: clamp(.2rem, 3vw, 1rem);
-  top: 26%;
+  left: 50%;
+  top: clamp(4.25rem, 14%, 5.5rem);
+  translate: -50% 0;
   display: grid;
   gap: .2rem;
-  width: min(59%, 220px);
-  padding: .72rem .82rem;
+  width: min(82%, 284px);
+  min-height: 58px;
+  padding: .72rem .88rem .78rem;
   border: 1px solid rgba(135, 198, 255, .2);
-  border-radius: 17px 17px 17px 5px;
-  color: rgba(237, 242, 255, .88);
-  font-size: .7rem;
+  border-radius: 17px 17px 14px 14px;
+  color: rgba(237, 242, 255, .9);
+  font-size: .72rem;
   font-weight: 560;
   line-height: 1.42;
   letter-spacing: -.01em;
-  background: linear-gradient(145deg, rgba(13, 23, 51, .9), rgba(5, 10, 27, .84));
+  text-align: center;
+  background: linear-gradient(145deg, rgba(13, 23, 51, .93), rgba(5, 10, 27, .88));
   box-shadow: 0 14px 34px rgba(0, 0, 0, .3), inset 0 1px 0 rgba(255,255,255,.05);
   backdrop-filter: blur(16px);
 }
@@ -171,21 +174,39 @@
 .reaction::after {
   content: "";
   position: absolute;
-  left: 18px;
+  left: 50%;
   bottom: -7px;
   width: 13px;
   height: 13px;
   border-right: 1px solid rgba(135, 198, 255, .16);
   border-bottom: 1px solid rgba(135, 198, 255, .16);
-  background: rgba(7, 13, 31, .9);
-  transform: rotate(45deg);
+  background: rgba(7, 13, 31, .92);
+  transform: translateX(-50%) rotate(45deg);
 }
+
 
 .speaker {
   color: #83eaff;
   font-size: .54rem;
   font-weight: 800;
   letter-spacing: .16em;
+}
+
+.dialogueText {
+  display: block;
+  min-height: 1.42em;
+}
+
+.typingCursor {
+  display: inline-block;
+  width: 5px;
+  height: 1em;
+  margin-left: 3px;
+  border-radius: 999px;
+  vertical-align: -.14em;
+  background: #73e8ff;
+  box-shadow: 0 0 9px rgba(79, 220, 255, .7);
+  animation: typingBlink .72s steps(1, end) infinite;
 }
 
 
@@ -294,5 +315,10 @@
   }
 
   .hud { gap: .62rem; padding: .76rem; }
-  .reaction { top: 22%; width: min(60%, 206px); }
+  .reaction { top: 3.4rem; width: min(84%, 270px); }
+}
+
+@keyframes typingBlink {
+  0%, 48% { opacity: 1; }
+  49%, 100% { opacity: .15; }
 }

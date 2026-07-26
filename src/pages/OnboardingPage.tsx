@@ -6,10 +6,9 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { preloadAssets } from "@/assets/preload";
 import { AssetImage } from "@/design-system/components/AssetImage";
-import { AppLoader } from "@/design-system/components/AppLoader";
 import { DexoStage } from "@/design-system/components/DexoStage";
 import { Button } from "@/design-system/primitives/Button";
 import { useOnboardingStore, onboardingStepOrder } from "@/game/onboarding/onboardingStore";
@@ -105,7 +104,6 @@ export function OnboardingPage() {
   const scenario = useScenarioStore((state) => state.activeScenario);
   const { adapter } = useTelegram();
   const onboarding = useOnboardingStore();
-  const [assetsReady, setAssetsReady] = useState(false);
   const bootstrap = useQuery({
     queryKey: queryKeys.bootstrap(scenario),
     queryFn: () => loadBootstrap(scenario, adapter.platform),
@@ -121,13 +119,7 @@ export function OnboardingPage() {
   }, [onboarding]);
 
   useEffect(() => {
-    let active = true;
-    void preloadAssets(onboardingAssets).then(() => {
-      if (active) setAssetsReady(true);
-    });
-    return () => {
-      active = false;
-    };
+    void preloadAssets(onboardingAssets);
   }, []);
 
   useEffect(() => {
@@ -151,8 +143,6 @@ export function OnboardingPage() {
   }, [adapter, onboarding.step]);
 
   const progress = useMemo(() => ((stepIndex + 1) / onboardingStepOrder.length) * 100, [stepIndex]);
-
-  if (bootstrap.isPending || !assetsReady) return <AppLoader />;
 
   const handleNext = () => {
     adapter.hapticImpact("light");

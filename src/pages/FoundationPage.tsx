@@ -17,14 +17,22 @@ import { content } from "@/content/en";
 import styles from "./FoundationPage.module.css";
 
 const particles = Array.from({ length: 8 }, (_, index) => index);
-const onboardingAssets = [
+const phaseOneAssets = [
   "dexo.platform",
   "dexo.base",
   "dexo.guide01",
   "dexo.guide02",
   "dexo.guide03",
+  "dexo.level01",
+  "dexo.level05",
+  "dexo.level10",
+  "dexo.level15",
+  "dexo.level20",
+  "dexo.level30",
+  "dexo.personalityCurious",
   "dexo.personalityFocused",
   "dexo.personalityHappy",
+  "dexo.personalitySurprised",
   "dexo.personalityVictory",
 ] as const;
 
@@ -46,7 +54,7 @@ export function FoundationPage() {
   }, [adapter]);
 
   useEffect(() => {
-    void preloadAssets(onboardingAssets);
+    void preloadAssets(phaseOneAssets);
   }, []);
 
   if (bootstrap.isPending) return <AppLoader />;

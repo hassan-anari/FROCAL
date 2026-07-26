@@ -1,23 +1,17 @@
-# Phase 1 — Final Polish v1.2
+# Phase 1 — v1.3 Final
 
-## Scope completed
-- Intro always remains the first screen.
-- New players enter onboarding after pressing `Enter Dexo Land`.
-- Returning players press the same button and go directly to Base.
-- Onboarding characters are larger and each scene uses a distinct Dexo asset.
-- Onboarding and Base character assets preload and decode before interaction.
-- Base defaults to the player level character; Level 1 uses `dexo.level01`.
-- Tapping Dexo cycles through Curious, Happy, Focused, Surprised and Victory reactions.
-- Every reaction has rotating dialogue lines without immediate repetition.
-- Dialogue appears as a speech bubble near Dexo and disappears with the reaction.
-- After 10 seconds without another interaction, Dexo returns to the current level character.
-- Character changes use a smooth blur/fade crossfade.
-- Dexo is larger in onboarding and Base; platform scale and spacing were corrected.
+## Final fixes
+- Moved Dexo dialogue above the character so it no longer covers the artwork.
+- Added a typewriter speaking effect with a subtle animated cursor.
+- Kept the 10-second return to the player level character.
+- Retained non-repeating dialogue rotation per reaction.
+- Improved asset preloading: decoded image objects are retained in memory for instant reaction swaps.
+- Phase 1 onboarding and Base assets begin preloading as soon as the Intro is mounted.
+- Removed the asset-readiness full-screen preloader from Onboarding and Base.
+- Base now renders immediately with safe fallback player data if the bootstrap query is still resolving.
 
 ## Asset policy
-- No Dexo artwork, logo or main background files are included in this delivery.
-- Existing paths remain in `src/assets/manifest.json`.
-- `missing-asset.svg` remains bundled for development/error handling.
+No logos, main background, Dexo artwork, or Dexo platform files are bundled. Their existing manifest paths remain unchanged.
 
-## Next phase
-Phase 2: Main App Shell and Core Navigation — Base, Earn, Clan, Arena and Profile navigation foundation, Objective/Next Action UI, status area and first mission-loop surfaces.
+## Phase status
+Phase 1 is ready for final Vercel and Telegram review.
