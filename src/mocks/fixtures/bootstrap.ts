@@ -7,11 +7,12 @@ const basePayload: BootstrapPayload = {
   environment: "browser",
   season: {
     id: "season-1",
-    name: "Genesis Season",
+    name: "Season One",
     status: "prelaunch",
   },
   player: {
     id: "demo-player",
+    firstName: "Explorer",
     displayName: "Dexo Explorer",
     telegramUsername: null,
     avatarUrl: null,

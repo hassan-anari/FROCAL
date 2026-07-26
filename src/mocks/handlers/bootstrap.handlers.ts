@@ -17,5 +17,5 @@ export const bootstrapHandlers = [
 
     return HttpResponse.json(createBootstrapFixture(scenario, "browser"));
   }),
-  http.get("/api/health", () => HttpResponse.json({ status: "ok", phase: 0 })),
+  http.get("/api/health", () => HttpResponse.json({ status: "ok", phase: 1 })),
 ];

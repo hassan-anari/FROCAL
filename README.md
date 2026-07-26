@@ -1,35 +1,34 @@
-# Dalexio Mini App — Phase 0 v0.4
+# Dalexio Mini App — Phase 1
 
-Mobile-first Telegram Mini App foundation for Dexo Land.
+Telegram-first React/Vite vertical slice covering:
+
+- Approved Dexo Land intro from Phase 0
+- Portal transition
+- First-name greeting
+- Dexo reveal and acquisition
+- Play / Grow / Unite / Compete guide
+- Persistent onboarding state
+- Returning-player routing
+- Personal Base with Dexo interaction
+- Phase 1 diagnostics and onboarding reset
 
 ## Run
 
 ```bash
 npm install
+npm run check
 npm run dev
 ```
 
-Production verification:
-
-```bash
-npm run check
-```
-
-No environment variable is required for the Phase 0 local/mock data mode.
-
 ## Routes
 
-- `/` — polished Dexo Land intro
-- `/diagnostics` — Telegram/runtime diagnostics
+- `/` — approved Dexo Land intro
+- `/onboarding` — first-time journey
+- `/base` — personal Base
+- `/diagnostics` — runtime and reset controls
 
-A small Hugeicons diagnostics control is available globally on every route.
+## Asset delivery rule
 
-## Replace the intro artwork
+The ZIP intentionally does **not** contain the existing Dalexio logo files or the approved Dexo Land background. Those paths remain in `src/assets/manifest.json` and are expected to stay in the main repository.
 
-Replace this file without changing any component:
-
-```text
-public/assets/world/dexo-land-foundation.webp
-```
-
-Recommended export: portrait WebP, 900×1350 or larger, without baked typography.
+The supplied 25-file Dexo character pack is included under `public/assets/dexo/`.

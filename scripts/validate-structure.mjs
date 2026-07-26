@@ -9,8 +9,14 @@ const required = [
   "src/integrations/telegram/adapter.ts",
   "src/integrations/api/bootstrap.ts",
   "src/design-system/styles/tokens.css",
+  "src/design-system/components/DexoStage.tsx",
   "src/assets/manifest.json",
   "src/game/domain/schemas.ts",
+  "src/game/onboarding/onboardingStore.ts",
+  "src/pages/FoundationPage.tsx",
+  "src/pages/OnboardingPage.tsx",
+  "src/pages/BasePage.tsx",
+  "src/pages/DiagnosticsPage.tsx",
   "src/mocks/handlers/bootstrap.handlers.ts",
   "vercel.json",
 ];
@@ -25,7 +31,7 @@ for (const file of required) {
 }
 
 if (missing.length) {
-  console.error("Missing Phase 0 architecture files:\n" + missing.join("\n"));
+  console.error("Missing Phase 1 architecture files:\n" + missing.join("\n"));
   process.exit(1);
 }
-console.log(`Structure validation passed: ${required.length} core files found.`);
+console.log(`Structure validation passed: ${required.length} Phase 1 files found.`);

@@ -7,7 +7,7 @@ export const content = {
     enter: "Enter Dexo Land",
   },
   diagnostics: {
-    title: "Foundation diagnostics",
-    subtitle: "Technical checks for the deployed Telegram Mini App.",
+    title: "System diagnostics",
+    subtitle: "Runtime checks and repeatable onboarding controls.",
   },
 } as const;

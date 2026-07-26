@@ -22,13 +22,13 @@ test("opens diagnostics from the global Hugeicons control", async ({ page }) => 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await page.getByRole("button", { name: /Open diagnostics/i }).click();
-  await expect(page.getByRole("heading", { name: /Foundation diagnostics/i })).toBeVisible();
-  await expect(page.getByRole("button", { name: /Back to Dexo Land/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /System diagnostics/i })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Back to previous screen/i })).toBeVisible();
 });
 
 test("returns from diagnostics using the global control", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/diagnostics");
-  await page.getByRole("button", { name: /Back to Dexo Land/i }).click();
+  await page.getByRole("button", { name: /Back to previous screen/i }).click();
   await expect(page.getByRole("heading", { name: /Dexo Land/i })).toBeVisible();
 });

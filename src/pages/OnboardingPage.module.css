@@ -1,0 +1,220 @@
+.stage {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  width: 100%;
+  height: var(--app-height);
+  min-height: 560px;
+  overflow: hidden;
+  padding:
+    calc(.8rem + var(--safe-top))
+    calc(.9rem + var(--safe-right))
+    calc(.9rem + var(--safe-bottom))
+    calc(.9rem + var(--safe-left));
+  background: #02040d;
+}
+
+.backdrop {
+  position: absolute;
+  z-index: -8;
+  inset: -7% -8%;
+  width: 116%;
+  height: 114%;
+  object-fit: cover;
+  object-position: 50% 62%;
+  filter: brightness(.42) saturate(.9) contrast(1.12);
+  animation: onboardingCamera 18s ease-in-out infinite alternate;
+}
+
+.scrim {
+  position: absolute;
+  z-index: -7;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(2, 4, 13, .94), rgba(2, 4, 13, .35) 25%, rgba(2, 4, 13, .24) 61%, rgba(2, 4, 13, .96) 100%),
+    radial-gradient(circle at 50% 48%, rgba(113, 76, 255, .1), transparent 44%);
+}
+
+.energyColumn {
+  position: absolute;
+  z-index: -5;
+  left: 50%;
+  top: 13%;
+  width: 28%;
+  height: 66%;
+  translate: -50% 0;
+  background: linear-gradient(180deg, transparent, rgba(102, 220, 255, .12), rgba(155, 81, 255, .2), transparent);
+  filter: blur(28px);
+  animation: energyBreathe 5.6s ease-in-out infinite;
+}
+
+.grid {
+  position: absolute;
+  z-index: -4;
+  inset: 49% -30% -28%;
+  transform: perspective(420px) rotateX(68deg);
+  transform-origin: 50% 0;
+  background-image:
+    linear-gradient(rgba(116, 210, 255, .07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(116, 210, 255, .07) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: linear-gradient(180deg, transparent, #000 26%, transparent 86%);
+  opacity: .55;
+}
+
+.header {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  align-items: center;
+  gap: .75rem;
+  min-height: 36px;
+  padding-right: 45px;
+}
+
+.backButton {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid rgba(156, 192, 255, .2);
+  border-radius: 12px;
+  color: rgba(239, 245, 255, .82);
+  background: rgba(6, 12, 28, .58);
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+}
+
+.progressTrack {
+  position: relative;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(153, 180, 255, .13);
+}
+
+.progressTrack i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #55dfff, #8f72ff, #d05cff);
+  box-shadow: 0 0 14px rgba(102, 207, 255, .48);
+}
+
+.stepCount {
+  color: rgba(199, 213, 245, .56);
+  font-size: .64rem;
+  font-weight: 720;
+  letter-spacing: .1em;
+}
+
+.scene {
+  min-height: 0;
+}
+
+.sceneInner {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+  padding-top: clamp(1.1rem, 3.2vh, 1.8rem);
+}
+
+.copy {
+  position: relative;
+  z-index: 4;
+  max-width: 344px;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.eyebrow {
+  display: inline-block;
+  color: #8deeff;
+  font-size: .61rem;
+  font-weight: 780;
+  letter-spacing: .18em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  text-shadow: 0 5px 18px rgba(0, 0, 0, .7);
+}
+
+.copy h1 {
+  max-width: 350px;
+  margin: .7rem auto .58rem;
+  color: #f7f8ff;
+  font-size: clamp(1.9rem, 8.2vw, 2.7rem);
+  font-weight: 860;
+  line-height: .99;
+  letter-spacing: -.055em;
+  text-wrap: balance;
+  text-shadow: 0 14px 38px rgba(0, 0, 0, .62);
+}
+
+.copy p {
+  max-width: 312px;
+  margin: 0 auto;
+  color: rgba(220, 228, 250, .7);
+  font-size: clamp(.78rem, 3.35vw, .9rem);
+  font-weight: 450;
+  line-height: 1.56;
+  text-wrap: balance;
+}
+
+.dexoStage {
+  align-self: center;
+  margin-top: -1.2rem;
+}
+
+.footer {
+  position: relative;
+  z-index: 6;
+  display: grid;
+  justify-items: center;
+  gap: .75rem;
+}
+
+.nextButton {
+  width: min(100%, 316px);
+}
+
+.guideDots {
+  display: inline-flex;
+  gap: .48rem;
+}
+
+.guideDots button {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(182, 200, 246, .25);
+  cursor: pointer;
+  transition: width var(--motion-base) ease, background var(--motion-base) ease, box-shadow var(--motion-base) ease;
+}
+
+.guideDots .activeDot {
+  width: 24px;
+  background: linear-gradient(90deg, #55dfff, #a06bff);
+  box-shadow: 0 0 12px rgba(83, 205, 255, .34);
+}
+
+@keyframes onboardingCamera {
+  from { transform: scale(1.06) translate3d(-.5%, -.2%, 0); }
+  to { transform: scale(1.1) translate3d(.5%, .5%, 0); }
+}
+
+@keyframes energyBreathe {
+  0%, 100% { opacity: .48; scale: .92; }
+  50% { opacity: 1; scale: 1.06; }
+}
+
+@media (max-height: 690px) {
+  .sceneInner { padding-top: .6rem; }
+  .copy h1 { font-size: clamp(1.7rem, 7.4vw, 2.25rem); }
+  .copy p { font-size: .76rem; }
+  .dexoStage { width: min(100%, 300px); margin-top: -1.7rem; }
+}

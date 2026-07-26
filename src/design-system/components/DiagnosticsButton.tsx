@@ -4,6 +4,8 @@ import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import styles from "./DiagnosticsButton.module.css";
 
+const returnPathKey = "dalexio-diagnostics-return-path";
+
 export function DiagnosticsButton() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
@@ -12,7 +14,13 @@ export function DiagnosticsButton() {
 
   const handleClick = () => {
     adapter.hapticImpact("light");
-    void navigate({ to: isDiagnostics ? "/" : "/diagnostics" });
+    if (isDiagnostics) {
+      const returnPath = sessionStorage.getItem(returnPathKey) ?? "/";
+      void navigate({ to: returnPath as "/" | "/onboarding" | "/base" });
+      return;
+    }
+    sessionStorage.setItem(returnPathKey, pathname);
+    void navigate({ to: "/diagnostics" });
   };
 
   return (
@@ -20,8 +28,8 @@ export function DiagnosticsButton() {
       type="button"
       className={styles.button}
       onClick={handleClick}
-      aria-label={isDiagnostics ? "Back to Dexo Land" : "Open diagnostics"}
-      title={isDiagnostics ? "Back to Dexo Land" : "Diagnostics"}
+      aria-label={isDiagnostics ? "Back to previous screen" : "Open diagnostics"}
+      title={isDiagnostics ? "Back" : "Diagnostics"}
     >
       <HugeiconsIcon
         icon={isDiagnostics ? ArrowLeft01Icon : DashboardSpeed01Icon}

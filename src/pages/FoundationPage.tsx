@@ -1,12 +1,14 @@
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { AssetImage } from "@/design-system/components/AssetImage";
 import { AppLoader } from "@/design-system/components/AppLoader";
 import { Button } from "@/design-system/primitives/Button";
 import { useScenarioStore } from "@/game/scenarios/scenarioStore";
+import { useOnboardingStore } from "@/game/onboarding/onboardingStore";
 import { loadBootstrap } from "@/integrations/api/bootstrap";
 import { queryKeys } from "@/integrations/api/queryKeys";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
@@ -16,8 +18,11 @@ import styles from "./FoundationPage.module.css";
 const particles = Array.from({ length: 8 }, (_, index) => index);
 
 export function FoundationPage() {
+  const navigate = useNavigate();
   const activeScenario = useScenarioStore((state) => state.activeScenario);
+  const onboardingStatus = useOnboardingStore((state) => state.status);
   const { adapter } = useTelegram();
+  const [isEntering, setIsEntering] = useState(false);
 
   const bootstrap = useQuery({
     queryKey: queryKeys.bootstrap(activeScenario),
@@ -28,6 +33,12 @@ export function FoundationPage() {
     adapter.disableVerticalSwipes();
     return () => adapter.enableVerticalSwipes();
   }, [adapter]);
+
+  useEffect(() => {
+    if (onboardingStatus === "completed") {
+      void navigate({ to: "/base", replace: true });
+    }
+  }, [navigate, onboardingStatus]);
 
   if (bootstrap.isPending) return <AppLoader />;
 
@@ -47,8 +58,12 @@ export function FoundationPage() {
   }
 
   const enterDexoLand = () => {
+    if (isEntering) return;
     adapter.hapticImpact("medium");
-    window.dispatchEvent(new CustomEvent("dalexio:enter-dexo-land"));
+    setIsEntering(true);
+    window.setTimeout(() => {
+      void navigate({ to: onboardingStatus === "completed" ? "/base" : "/onboarding" });
+    }, 760);
   };
 
   return (
@@ -61,6 +76,15 @@ export function FoundationPage() {
       <div className={styles.particles} aria-hidden="true">
         {particles.map((particle) => <i key={particle} />)}
       </div>
+      {isEntering ? (
+        <motion.div
+          className={styles.portalTransition}
+          initial={{ opacity: 0, scale: .42 }}
+          animate={{ opacity: [0, 1, 1], scale: [0.42, 1.08, 3.4] }}
+          transition={{ duration: .78, times: [0, .44, 1], ease: [0.22, 1, 0.36, 1] }}
+          aria-hidden="true"
+        />
+      ) : null}
 
       <header className={styles.header}>
         <AssetImage assetKey="brand.logo" className={styles.logo} />
@@ -93,6 +117,7 @@ export function FoundationPage() {
             className={styles.enterButton}
             trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={19} strokeWidth={1.9} />}
             onClick={enterDexoLand}
+            disabled={isEntering}
           >
             {content.foundation.enter}
           </Button>

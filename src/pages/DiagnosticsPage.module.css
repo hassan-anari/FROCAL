@@ -123,3 +123,15 @@
   margin: 0;
   padding-left: 1rem;
 }
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .55rem;
+  margin-top: .9rem;
+}
+
+.actions button {
+  width: 100%;
+  padding-inline: .62rem;
+}
