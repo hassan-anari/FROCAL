@@ -1,35 +1,60 @@
-# Phase 1 — Entry, Dexo Acquisition & Base
+# Phase 1.1 — Onboarding & Base Polish
 
-## Completed experience
+This checkpoint is a focused correction pass over Phase 1 v1.0. It does not add the main app navigation or new gameplay systems.
 
-1. Approved Phase 0 intro preserved.
-2. `Enter Dexo Land` now starts a real portal transition.
-3. Returning users are routed directly to Base.
-4. New users receive a persisted five-scene onboarding flow.
-5. Greeting uses Telegram `first_name`.
-6. Dexo reveal, acquisition and world-guide moments use the supplied final character assets.
-7. Base contains a live Dexo stage, level/XP HUD and a complete local interaction.
-8. Diagnostics includes onboarding state and reset controls.
+## Completed changes
 
-## Persistence
+### Intro transition
+- Removed the bright portal-flash transition.
+- The Intro content now fades and softens out.
+- The existing Dexo Land background darkens before the onboarding route appears.
+- Onboarding content fades in gently instead of entering with a hard horizontal slide.
 
-Local key: `dalexio-onboarding-v1`
+### Onboarding character presentation
+- Removed the circular orbit/halo behind Dexo.
+- Removed the repeating acquired burst animation.
+- Kept the upward micro-particles on the **Companion Acquired** scene only.
+- Corrected character/platform alignment and lowered the platform so it sits beneath the character.
+- Added per-pose character scale values for more consistent visual size.
+- Changed scene transitions to soft fade/vertical movement.
+- Added preloading for all Phase 1 onboarding character assets.
 
-States:
+### Base redesign
+- Removed the Dexo Land image from Base.
+- Replaced it with a static dark-navy design-system background.
+- Removed the scanning line, moving light column, and particles.
+- Corrected character and platform positioning.
+- Interaction is now restricted to the character itself, not the full stage.
+- Character pose changes crossfade without a blank/disappearing frame.
+- The action button no longer causes the character to disappear.
 
-- `not-started`
-- `in-progress`
-- `dexo-acquired`
-- `completed`
+### Asset policy
+The checkpoint ZIP does not include:
+- Dalexio logos
+- Dexo Land background
+- Any Dexo character artwork
 
-## Asset policy
+All existing paths remain in `src/assets/manifest.json`. The main repository remains the source of truth for artwork.
 
-Included:
-- 25 supplied Dexo WebP assets.
+## Phase 1 scope after this checkpoint
+- Intro to onboarding transition
+- First-name greeting
+- Dexo introduction and acquisition
+- Play / Grow / Unite / Compete guide
+- Persistent onboarding state
+- Personal Base entry
+- Dexo micro-interaction
+- Diagnostics reset flow
 
-Excluded from the delivery ZIP:
-- `public/assets/brand/dalexio-logo.svg`
-- `public/assets/brand/dalexio-logo-tagline.svg`
-- `public/assets/world/dexo-land-foundation.webp`
+## Next phase
+**Phase 2 — Main App Shell & Core Navigation**
 
-Their manifest paths remain unchanged so the files already maintained in the main repository continue to be used.
+Planned scope:
+- Bottom navigation
+- Base shell aligned with the approved app reference
+- Earn, Clan, Arena, and Profile route foundations
+- Notification/status areas
+- First objective and mission surfaces
+- Locked/coming-soon handling for incomplete modules
+
+Phase 2 will begin only after this Phase 1.1 checkpoint is approved.

@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { preloadAssets } from "@/assets/preload";
 import { AssetImage } from "@/design-system/components/AssetImage";
 import { AppLoader } from "@/design-system/components/AppLoader";
 import { Button } from "@/design-system/primitives/Button";
@@ -16,6 +17,16 @@ import { content } from "@/content/en";
 import styles from "./FoundationPage.module.css";
 
 const particles = Array.from({ length: 8 }, (_, index) => index);
+const onboardingAssets = [
+  "dexo.platform",
+  "dexo.base",
+  "dexo.guide01",
+  "dexo.guide02",
+  "dexo.guide03",
+  "dexo.personalityFocused",
+  "dexo.personalityHappy",
+  "dexo.personalityVictory",
+] as const;
 
 export function FoundationPage() {
   const navigate = useNavigate();
@@ -33,6 +44,10 @@ export function FoundationPage() {
     adapter.disableVerticalSwipes();
     return () => adapter.enableVerticalSwipes();
   }, [adapter]);
+
+  useEffect(() => {
+    void preloadAssets(onboardingAssets);
+  }, []);
 
   useEffect(() => {
     if (onboardingStatus === "completed") {
@@ -61,13 +76,14 @@ export function FoundationPage() {
     if (isEntering) return;
     adapter.hapticImpact("medium");
     setIsEntering(true);
+
     window.setTimeout(() => {
       void navigate({ to: onboardingStatus === "completed" ? "/base" : "/onboarding" });
-    }, 760);
+    }, 680);
   };
 
   return (
-    <main className={styles.stage}>
+    <main className={`${styles.stage} ${isEntering ? styles.isEntering : ""}`}>
       <AssetImage assetKey="world.foundationBackdrop" className={styles.backdrop} />
       <div className={styles.scrim} aria-hidden="true" />
       <div className={styles.cityGlow} aria-hidden="true" />
@@ -76,15 +92,7 @@ export function FoundationPage() {
       <div className={styles.particles} aria-hidden="true">
         {particles.map((particle) => <i key={particle} />)}
       </div>
-      {isEntering ? (
-        <motion.div
-          className={styles.portalTransition}
-          initial={{ opacity: 0, scale: .42 }}
-          animate={{ opacity: [0, 1, 1], scale: [0.42, 1.08, 3.4] }}
-          transition={{ duration: .78, times: [0, .44, 1], ease: [0.22, 1, 0.36, 1] }}
-          aria-hidden="true"
-        />
-      ) : null}
+      <div className={styles.entryVeil} aria-hidden="true" />
 
       <header className={styles.header}>
         <AssetImage assetKey="brand.logo" className={styles.logo} />

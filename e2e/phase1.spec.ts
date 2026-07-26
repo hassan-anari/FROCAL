@@ -41,3 +41,22 @@ test("keeps completed onboarding after refresh", async ({ page }) => {
   await page.reload();
   await expect(page.getByText(/Personal Base/i)).toBeVisible();
 });
+
+test("keeps Dexo visible through Base interactions", async ({ page }) => {
+  await page.evaluate(() => {
+    localStorage.setItem("dalexio-onboarding-v1", JSON.stringify({
+      state: { status: "completed", step: "ready", guideIndex: 3, completedAt: new Date().toISOString() },
+      version: 1,
+    }));
+  });
+  await page.goto("/base");
+
+  const dexoButton = page.getByRole("button", { name: /Interact with Dexo/i });
+  await expect(dexoButton).toBeVisible();
+  await dexoButton.click();
+  await expect(dexoButton).toBeVisible();
+
+  await page.getByRole("button", { name: /Say hello to Dexo/i }).click();
+  await expect(page.getByRole("button", { name: /Say hello again/i })).toBeVisible();
+  await expect(dexoButton).toBeVisible();
+});

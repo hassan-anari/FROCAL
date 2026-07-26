@@ -2,7 +2,7 @@
   position: relative;
   isolation: isolate;
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   width: 100%;
   height: var(--app-height);
   min-height: 560px;
@@ -18,13 +18,14 @@
 .backdrop {
   position: absolute;
   z-index: -8;
-  inset: -7% -8%;
+  inset: -6% -8%;
   width: 116%;
-  height: 114%;
+  height: 112%;
   object-fit: cover;
-  object-position: 50% 62%;
-  filter: brightness(.42) saturate(.9) contrast(1.12);
-  animation: onboardingCamera 18s ease-in-out infinite alternate;
+  object-position: 50% 63%;
+  filter: brightness(.31) saturate(.82) contrast(1.12);
+  transform: scale(1.065);
+  animation: onboardingCamera 20s ease-in-out infinite alternate;
 }
 
 .scrim {
@@ -32,35 +33,8 @@
   z-index: -7;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(2, 4, 13, .94), rgba(2, 4, 13, .35) 25%, rgba(2, 4, 13, .24) 61%, rgba(2, 4, 13, .96) 100%),
-    radial-gradient(circle at 50% 48%, rgba(113, 76, 255, .1), transparent 44%);
-}
-
-.energyColumn {
-  position: absolute;
-  z-index: -5;
-  left: 50%;
-  top: 13%;
-  width: 28%;
-  height: 66%;
-  translate: -50% 0;
-  background: linear-gradient(180deg, transparent, rgba(102, 220, 255, .12), rgba(155, 81, 255, .2), transparent);
-  filter: blur(28px);
-  animation: energyBreathe 5.6s ease-in-out infinite;
-}
-
-.grid {
-  position: absolute;
-  z-index: -4;
-  inset: 49% -30% -28%;
-  transform: perspective(420px) rotateX(68deg);
-  transform-origin: 50% 0;
-  background-image:
-    linear-gradient(rgba(116, 210, 255, .07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(116, 210, 255, .07) 1px, transparent 1px);
-  background-size: 34px 34px;
-  mask-image: linear-gradient(180deg, transparent, #000 26%, transparent 86%);
-  opacity: .55;
+    linear-gradient(180deg, rgba(2, 4, 13, .97), rgba(2, 4, 13, .62) 24%, rgba(2, 4, 13, .46) 60%, rgba(2, 4, 13, .98) 100%),
+    radial-gradient(ellipse at 50% 50%, rgba(87, 67, 177, .08), transparent 56%);
 }
 
 .header {
@@ -117,9 +91,9 @@
 
 .sceneInner {
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto minmax(0, 1fr);
   height: 100%;
-  padding-top: clamp(1.1rem, 3.2vh, 1.8rem);
+  padding-top: clamp(1rem, 3vh, 1.65rem);
 }
 
 .copy {
@@ -165,7 +139,7 @@
 
 .dexoStage {
   align-self: center;
-  margin-top: -1.2rem;
+  margin-top: .25rem;
 }
 
 .footer {
@@ -203,18 +177,19 @@
 }
 
 @keyframes onboardingCamera {
-  from { transform: scale(1.06) translate3d(-.5%, -.2%, 0); }
-  to { transform: scale(1.1) translate3d(.5%, .5%, 0); }
-}
-
-@keyframes energyBreathe {
-  0%, 100% { opacity: .48; scale: .92; }
-  50% { opacity: 1; scale: 1.06; }
+  from { transform: scale(1.065) translate3d(-.25%, -.15%, 0); }
+  to { transform: scale(1.085) translate3d(.25%, .25%, 0); }
 }
 
 @media (max-height: 690px) {
-  .sceneInner { padding-top: .6rem; }
-  .copy h1 { font-size: clamp(1.7rem, 7.4vw, 2.25rem); }
-  .copy p { font-size: .76rem; }
-  .dexoStage { width: min(100%, 300px); margin-top: -1.7rem; }
+  .sceneInner { padding-top: .5rem; }
+  .copy h1 { font-size: clamp(1.68rem, 7.2vw, 2.2rem); }
+  .copy p { font-size: .75rem; }
+  .dexoStage { width: min(100%, 278px); margin-top: .1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop {
+    animation: none;
+  }
 }

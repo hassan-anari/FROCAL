@@ -1,15 +1,15 @@
-# Dalexio Mini App — Phase 1
+# Dalexio Mini App — Phase 1.1 Polish
 
 Telegram-first React/Vite vertical slice covering:
 
 - Approved Dexo Land intro from Phase 0
-- Portal transition
+- Soft Intro-to-onboarding transition
 - First-name greeting
 - Dexo reveal and acquisition
 - Play / Grow / Unite / Compete guide
 - Persistent onboarding state
 - Returning-player routing
-- Personal Base with Dexo interaction
+- Dark-navy Personal Base with stable Dexo interaction
 - Phase 1 diagnostics and onboarding reset
 
 ## Run
@@ -29,6 +29,10 @@ npm run dev
 
 ## Asset delivery rule
 
-The ZIP intentionally does **not** contain the existing Dalexio logo files or the approved Dexo Land background. Those paths remain in `src/assets/manifest.json` and are expected to stay in the main repository.
+This checkpoint intentionally excludes all repository-maintained artwork:
 
-The supplied 25-file Dexo character pack is included under `public/assets/dexo/`.
+- Dalexio logos
+- Approved Dexo Land background
+- Dexo character and platform WebP files
+
+Their paths remain in `src/assets/manifest.json`. Keep the existing files in the main repository when applying this checkpoint.

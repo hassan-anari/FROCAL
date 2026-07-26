@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from "motion/react";
+import { type CSSProperties } from "react";
 import { AssetImage } from "./AssetImage";
 import type { AssetKey } from "@/assets/registry";
 import styles from "./DexoStage.module.css";
@@ -10,6 +11,8 @@ interface DexoStageProps {
   interactive?: boolean;
   onPress?: () => void;
   ariaLabel?: string;
+  characterScale?: number;
+  showParticles?: boolean;
 }
 
 const sparks = Array.from({ length: 7 }, (_, index) => index);
@@ -21,46 +24,51 @@ export function DexoStage({
   interactive = false,
   onPress,
   ariaLabel = "Dexo companion",
+  characterScale = 1,
+  showParticles,
 }: DexoStageProps) {
-  const content = (
-    <div className={`${styles.stage} ${styles[effect]} ${className}`}>
-      <div className={styles.ambientGlow} aria-hidden="true" />
+  const shouldShowParticles = showParticles ?? effect === "acquired";
+  const stageStyle = {
+    "--dexo-character-scale": characterScale,
+  } as CSSProperties;
+
+  const characterLayer = (
+    <AnimatePresence mode="sync" initial={false}>
       <motion.div
-        className={styles.orbit}
-        aria-hidden="true"
-        animate={{ rotate: 360 }}
-        transition={{ duration: 26, ease: "linear", repeat: Number.POSITIVE_INFINITY }}
-      />
-      <AssetImage assetKey="dexo.platform" className={styles.platform} aria-hidden="true" />
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.div
-          key={character}
-          className={styles.characterWrap}
-          initial={{ opacity: 0, y: 16, scale: .9, filter: "blur(8px)" }}
-          animate={{ opacity: 1, y: [0, -5, 0], scale: 1, filter: "blur(0px)" }}
-          exit={{ opacity: 0, y: -8, scale: .96, filter: "blur(5px)" }}
-          transition={{
-            opacity: { duration: .34 },
-            scale: { duration: .48, ease: [0.22, 1, 0.36, 1] },
-            filter: { duration: .35 },
-            y: { duration: 4.4, ease: "easeInOut", repeat: Number.POSITIVE_INFINITY },
-          }}
-        >
-          <AssetImage assetKey={character} className={styles.character} draggable={false} />
-        </motion.div>
-      </AnimatePresence>
-      <div className={styles.sparks} aria-hidden="true">
-        {sparks.map((spark) => <i key={spark} />)}
-      </div>
-      {effect === "acquired" ? <div className={styles.burst} aria-hidden="true" /> : null}
-    </div>
+        key={character}
+        className={styles.characterLayer}
+        initial={{ opacity: 0, scale: .985 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 1.01 }}
+        transition={{ duration: .34, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <AssetImage assetKey={character} className={styles.character} draggable={false} />
+      </motion.div>
+    </AnimatePresence>
   );
 
-  if (!interactive) return content;
-
   return (
-    <button type="button" className={styles.pressable} onClick={onPress} aria-label={ariaLabel}>
-      {content}
-    </button>
+    <div className={`${styles.stage} ${styles[effect]} ${className}`} style={stageStyle}>
+      <div className={styles.ambientGlow} aria-hidden="true" />
+      <AssetImage assetKey="dexo.platform" className={styles.platform} aria-hidden="true" />
+
+      <motion.div
+        className={styles.characterFloat}
+        animate={{ y: [0, -4, 0] }}
+        transition={{ duration: 4.8, ease: "easeInOut", repeat: Number.POSITIVE_INFINITY }}
+      >
+        {interactive ? (
+          <button type="button" className={styles.characterButton} onClick={onPress} aria-label={ariaLabel}>
+            {characterLayer}
+          </button>
+        ) : characterLayer}
+      </motion.div>
+
+      {shouldShowParticles ? (
+        <div className={styles.sparks} aria-hidden="true">
+          {sparks.map((spark) => <i key={spark} />)}
+        </div>
+      ) : null}
+    </div>
   );
 }

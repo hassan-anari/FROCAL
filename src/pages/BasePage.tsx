@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
-import { AssetImage } from "@/design-system/components/AssetImage";
+import { preloadAssets } from "@/assets/preload";
 import { AppLoader } from "@/design-system/components/AppLoader";
 import { DexoStage } from "@/design-system/components/DexoStage";
 import { Button } from "@/design-system/primitives/Button";
@@ -16,12 +16,20 @@ import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import type { AssetKey } from "@/assets/registry";
 import styles from "./BasePage.module.css";
 
-const reactions: AssetKey[] = [
+const reactions: Array<{ asset: AssetKey; scale: number; message: string }> = [
+  { asset: "dexo.base", scale: .9, message: "Tap Dexo to interact" },
+  { asset: "dexo.personalityCurious", scale: .87, message: "Dexo is curious about your next move." },
+  { asset: "dexo.personalityHappy", scale: .82, message: "Dexo is happy to see you." },
+  { asset: "dexo.personalityFocused", scale: .86, message: "Dexo is ready for the journey ahead." },
+];
+
+const baseAssets = [
+  "dexo.platform",
   "dexo.base",
   "dexo.personalityCurious",
   "dexo.personalityHappy",
   "dexo.personalityFocused",
-];
+] as const;
 
 export function BasePage() {
   const navigate = useNavigate();
@@ -33,7 +41,7 @@ export function BasePage() {
     queryFn: () => loadBootstrap(scenario, adapter.platform),
   });
   const [reactionIndex, setReactionIndex] = useState(0);
-  const [synced, setSynced] = useState(false);
+  const [greeted, setGreeted] = useState(false);
 
   useEffect(() => {
     if (onboarding.status !== "completed") void navigate({ to: "/onboarding" });
@@ -43,6 +51,10 @@ export function BasePage() {
     adapter.disableVerticalSwipes();
     return () => adapter.enableVerticalSwipes();
   }, [adapter]);
+
+  useEffect(() => {
+    void preloadAssets(baseAssets);
+  }, []);
 
   const player = bootstrap.data?.player;
   const firstName = adapter.getUser()?.first_name ?? player?.firstName ?? "Explorer";
@@ -54,23 +66,23 @@ export function BasePage() {
 
   if (bootstrap.isPending || !player) return <AppLoader />;
 
+  const currentReaction = reactions[reactionIndex];
+
   const reactToPlayer = () => {
+    setGreeted(false);
     setReactionIndex((value) => (value + 1) % reactions.length);
     adapter.hapticImpact("soft");
   };
 
   const sayHello = () => {
     setReactionIndex(2);
-    setSynced(true);
+    setGreeted(true);
     adapter.hapticNotice("success");
   };
 
   return (
     <main className={styles.stage}>
-      <AssetImage assetKey="world.foundationBackdrop" className={styles.backdrop} />
-      <div className={styles.scrim} aria-hidden="true" />
-      <div className={styles.baseGlow} aria-hidden="true" />
-      <div className={styles.scanline} aria-hidden="true" />
+      <div className={styles.ambientBackdrop} aria-hidden="true" />
 
       <header className={styles.header}>
         <div className={styles.playerIdentity}>
@@ -96,8 +108,10 @@ export function BasePage() {
           <strong>DEXO ONLINE</strong>
         </div>
         <DexoStage
-          character={reactions[reactionIndex]}
+          character={currentReaction.asset}
+          characterScale={currentReaction.scale}
           effect="base"
+          showParticles={false}
           interactive
           onPress={reactToPlayer}
           ariaLabel="Interact with Dexo"
@@ -105,14 +119,15 @@ export function BasePage() {
         />
         <AnimatePresence mode="wait">
           <motion.div
-            key={synced ? "synced" : reactionIndex}
+            key={`${greeted}-${reactionIndex}`}
             className={styles.reaction}
-            initial={{ opacity: 0, y: 6, scale: .96 }}
+            initial={{ opacity: 0, y: 6, scale: .97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: .28 }}
           >
             <i aria-hidden="true" />
-            {synced ? "Dexo is happy to see you." : "Tap Dexo to interact"}
+            {greeted ? "Dexo is happy to see you." : currentReaction.message}
           </motion.div>
         </AnimatePresence>
       </section>
@@ -141,11 +156,11 @@ export function BasePage() {
 
         <Button
           size="lg"
-          className={`${styles.actionButton} ${synced ? styles.actionComplete : ""}`}
+          className={styles.actionButton}
           trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={19} strokeWidth={1.9} />}
           onClick={sayHello}
         >
-          {synced ? "Connection synced" : "Say hello to Dexo"}
+          {greeted ? "Say hello again" : "Say hello to Dexo"}
         </Button>
       </section>
     </main>

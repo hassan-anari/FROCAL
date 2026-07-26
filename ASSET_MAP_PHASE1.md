@@ -1,8 +1,8 @@
 # Phase 1 Asset Map
 
-## Repository-maintained — intentionally NOT included in this ZIP
+Artwork is not bundled in this checkpoint. The following paths must remain in the main repository.
 
-These files must remain in the main repository and are still referenced by `src/assets/manifest.json`:
+## Repository-maintained Phase 0 assets
 
 ```text
 /assets/brand/dalexio-logo.svg
@@ -10,27 +10,19 @@ These files must remain in the main repository and are still referenced by `src/
 /assets/world/dexo-land-foundation.webp
 ```
 
-## Included character pack
-
-All 25 finalized Dexo WebP files supplied for Phase 1 are included under:
+## Repository-maintained Phase 1 Dexo assets
 
 ```text
-public/assets/dexo/
+/assets/dexo/dexo-place.webp
+/assets/dexo/dexo-base-companion.webp
+/assets/dexo/dexo-guide-pose-1.webp
+/assets/dexo/dexo-guide-pose-2.webp
+/assets/dexo/dexo-guide-pose-3.webp
+/assets/dexo/dexo-personality-curious.webp
+/assets/dexo/dexo-personality-focused.webp
+/assets/dexo/dexo-personality-happy.webp
+/assets/dexo/dexo-personality-surprised.webp
+/assets/dexo/dexo-personality-victory.webp
 ```
 
-Primary Phase 1 keys:
-
-```text
-dexo.platform
-dexo.base
-dexo.guide01
-dexo.guide02
-dexo.guide03
-dexo.personalityCurious
-dexo.personalityFocused
-dexo.personalityHappy
-dexo.personalitySurprised
-dexo.personalityVictory
-```
-
-The remaining level, role and customization assets are mapped now for later phases.
+The full list of future Dexo growth, role, and customization paths remains in `src/assets/manifest.json`.
