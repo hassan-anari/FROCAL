@@ -280,6 +280,10 @@
   min-height: 74px;
 }
 
+.objectiveItem:last-child {
+  min-height: 42px;
+}
+
 .objectiveItem:not(:last-child)::after {
   content: "";
   position: absolute;
@@ -354,11 +358,7 @@
 .activityList {
   display: grid;
   gap: 0;
-  margin-top: .72rem;
-  overflow: hidden;
-  border: 1px solid rgba(137, 169, 235, .12);
-  border-radius: 17px;
-  background: rgba(5, 11, 27, .52);
+  margin-top: .58rem;
 }
 
 .activityItem {
@@ -367,7 +367,7 @@
   align-items: center;
   gap: .65rem;
   min-height: 68px;
-  padding: .68rem .72rem;
+  padding: .72rem .1rem;
   border-bottom: 1px solid rgba(137, 169, 235, .09);
 }
 
