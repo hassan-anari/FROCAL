@@ -99,14 +99,6 @@
   filter: drop-shadow(0 0 14px rgba(89, 206, 255, .12));
 }
 
-.totalXpDisplay em {
-  color: #72e5ff;
-  font-size: .58rem;
-  font-style: normal;
-  font-weight: 820;
-  letter-spacing: .08em;
-}
-
 .dexoStage {
   position: absolute;
   left: 50%;
@@ -442,38 +434,24 @@
 .quickStats strong { color: #eff3ff; font-size: .74rem; font-weight: 760; }
 
 @media (max-height: 700px) {
-  .hero { height: 500px; }
-  .dexoStage { width: min(103%, 350px); top: 59%; }
-  .reaction { top: 4.95rem; }
+  .hero { height: 468px; }
+  .dexoStage { top: 51%; width: min(102%, 350px); }
+  .reaction { top: 3.85rem; width: min(80%, 286px); }
+  .progressFooter { bottom: .54rem; }
 }
 
 @media (max-width: 360px) {
-  .hero { height: 520px; }
-  .dexoStage { width: min(108%, 355px); }
+  .hero { height: 474px; }
+  .dexoStage { top: 51.5%; width: min(103%, 348px); }
+  .reaction { top: 3.9rem; width: min(82%, 276px); }
   .dexoMeta strong { font-size: .81rem; }
-  .totalXpBadge { min-width: 108px; padding-inline: .55rem; }
-  .totalXpBadge strong { font-size: .71rem; }
+  .totalXpDisplay strong { font-size: .92rem; }
+}
+
+@media (max-width: 360px) and (max-height: 700px) {
+  .hero { height: 456px; }
+  .dexoStage { top: 50.5%; width: min(101%, 340px); }
+  .reaction { top: 3.65rem; }
 }
 
 @keyframes typingBlink { 0%,48%{opacity:1}49%,100%{opacity:.15} }
-
-
-@media (max-width: 360px) {
-  .hero {
-    height: 492px;
-  }
-
-  .dexoStage {
-    top: 52%;
-    width: min(104%, 348px);
-  }
-
-  .reaction {
-    top: 4.25rem;
-    width: min(82%, 276px);
-  }
-
-  .totalXpDisplay strong {
-    font-size: .92rem;
-  }
-}

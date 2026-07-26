@@ -144,7 +144,6 @@ export function BasePage() {
               <span>Lifetime XP</span>
               <div>
                 <strong>{totalXp.toLocaleString()}</strong>
-                <em>XP</em>
               </div>
             </div>
           </div>
