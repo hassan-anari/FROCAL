@@ -140,9 +140,12 @@ export function BasePage() {
               <span>YOUR DEXO</span>
               <strong>{getDexoTitle(player.level)}</strong>
             </div>
-            <div className={styles.totalXpBadge} aria-label={`${totalXp.toLocaleString()} total XP`}>
-              <strong>{totalXp.toLocaleString()}</strong>
-              <span>XP</span>
+            <div className={styles.totalXpDisplay} aria-label={`${totalXp.toLocaleString()} total XP`}>
+              <span>Lifetime XP</span>
+              <div>
+                <strong>{totalXp.toLocaleString()}</strong>
+                <em>XP</em>
+              </div>
             </div>
           </div>
 
