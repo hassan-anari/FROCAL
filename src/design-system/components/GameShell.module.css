@@ -98,16 +98,6 @@
   transform: translateY(-1px);
 }
 
-.active::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  width: 18px;
-  height: 2px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #4ee3ff, #a86cff, #db5cff);
-  box-shadow: 0 0 12px rgba(114, 117, 255, .62);
-}
 
 @media (prefers-reduced-motion: reduce) {
   .content { transform: none !important; filter: none !important; }

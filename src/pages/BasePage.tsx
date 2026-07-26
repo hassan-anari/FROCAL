@@ -76,8 +76,6 @@ export function BasePage() {
   const [dialogue, setDialogue] = useState<string | null>(null);
   const [typedDialogue, setTypedDialogue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [tipOpen, setTipOpen] = useState(false);
-  const tipRef = useRef<HTMLDivElement | null>(null);
   const reactionCursor = useRef(0);
   const dialogueCursor = useRef<Record<ReactionKey, number>>({ curious: 0, happy: 0, focused: 0, surprised: 0, victory: 0 });
   const resetTimer = useRef<number | null>(null);
@@ -101,13 +99,6 @@ export function BasePage() {
     return () => window.clearInterval(timer);
   }, [dialogue]);
 
-  useEffect(() => {
-    const closeTip = (event: PointerEvent) => {
-      if (!tipRef.current?.contains(event.target as Node)) setTipOpen(false);
-    };
-    document.addEventListener("pointerdown", closeTip);
-    return () => document.removeEventListener("pointerdown", closeTip);
-  }, []);
 
   useEffect(() => () => {
     if (resetTimer.current !== null) window.clearTimeout(resetTimer.current);
@@ -115,6 +106,7 @@ export function BasePage() {
 
   const telegramFirstName = adapter.getUser()?.first_name ?? "Explorer";
   const player = bootstrap.data?.player ?? { id: "pending-player", firstName: telegramFirstName, displayName: telegramFirstName, telegramUsername: null, avatarUrl: null, level: 1, xp: 120, xpToNextLevel: 500, seasonScore: 0, clanId: null };
+  const totalXp = 2_356_254;
   const xpPercent = useMemo(() => Math.min(100, Math.round((player.xp / player.xpToNextLevel) * 100)), [player.xp, player.xpToNextLevel]);
   const levelAsset = getLevelAsset(player.level);
   const displayedCharacter = activeReaction ? reactionLibrary[activeReaction].asset : levelAsset;
@@ -143,29 +135,15 @@ export function BasePage() {
         <GameHeader />
 
         <section className={styles.hero} aria-label="Personal Dexo base">
-          <div className={styles.worldLabel}>
-            <span>PERSONAL BASE</span>
-            <div ref={tipRef} className={styles.onlineRow}>
-              <strong>DEXO ONLINE</strong>
-              <button type="button" className={styles.tipButton} onClick={() => setTipOpen((open) => !open)} aria-label="Dexo interaction tip">?</button>
-              <AnimatePresence>
-                {tipOpen ? (
-                  <motion.div className={styles.tipPopover} initial={{ opacity: 0, y: -5, scale: .97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -3, scale: .98 }} transition={{ duration: .22 }}>
-                    <span>Interaction tip</span>
-                    <p>Tap Dexo to discover different moods, reactions and dialogue.</p>
-                  </motion.div>
-                ) : null}
-              </AnimatePresence>
-            </div>
-          </div>
-
           <div className={styles.dexoMeta}>
             <div>
               <span>YOUR DEXO</span>
               <strong>{getDexoTitle(player.level)}</strong>
-              <small>Total XP · {player.xp}</small>
             </div>
-            <div className={styles.levelBadge}><span>LV.</span><strong>{player.level}</strong></div>
+            <div className={styles.totalXpBadge} aria-label={`${totalXp.toLocaleString()} total XP`}>
+              <strong>{totalXp.toLocaleString()}</strong>
+              <span>XP</span>
+            </div>
           </div>
 
           <AnimatePresence mode="wait">
