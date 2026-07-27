@@ -24,6 +24,7 @@ import {
 } from "@/game/earn/earnStore";
 import type { EarnMission, MissionId } from "@/game/earn/types";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
+import { mobileMotion } from "@/design-system/motion/mobileMotion";
 import styles from "./EarnPage.module.css";
 
 type EarnTab = "earn" | "network" | "typing";
@@ -249,9 +250,9 @@ export function EarnPage() {
     <motion.article
       key={mission.id}
       className={`${styles.missionCard} ${styles[`mission_${missionTone[mission.id]}`]} ${compact ? styles.missionCompact : ""}`}
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 7 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: .3, delay: index * .045 }}
+      transition={{ ...mobileMotion.reveal, delay: index * .025 }}
     >
       <div className={styles.missionHeader}>
         <span className={styles.missionNumber}>{missionNumber[mission.id]}</span>
@@ -309,14 +310,14 @@ export function EarnPage() {
           ))}
         </nav>
 
-        <AnimatePresence mode="wait" initial={false}>
+        <AnimatePresence mode="popLayout" initial={false}>
           <motion.div
             key={activeTab}
             className={styles.tabContent}
-            initial={{ opacity: 0, x: 12, filter: "blur(3px)" }}
-            animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-            exit={{ opacity: 0, x: -9, filter: "blur(2px)" }}
-            transition={{ duration: .28, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0, x: 7 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -5 }}
+            transition={mobileMotion.tab}
           >
             {activeTab === "earn" ? (
               <>
@@ -355,9 +356,9 @@ export function EarnPage() {
                     <strong>{claimedMissions}/{Object.keys(earn.missions).length}</strong>
                   </header>
                   <div className={styles.pathMeta}><span>Complete all starter missions</span><strong>{pathProgress}%</strong></div>
-                  <div className={styles.pathTrack}><motion.i animate={{ width: `${pathProgress}%` }} transition={{ duration: .55 }} /></div>
+                  <div className={styles.pathTrack}><motion.i animate={{ scaleX: pathProgress / 100 }} initial={false} style={{ transformOrigin: "0 50%" }} transition={mobileMotion.reveal} /></div>
                   <div className={styles.levelMeta}><span>Level {earn.level} progress</span><strong>{earn.levelXp} / {earn.xpToNextLevel} XP</strong></div>
-                  <div className={styles.levelTrack}><motion.i animate={{ width: `${levelProgress}%` }} transition={{ duration: .55 }} /></div>
+                  <div className={styles.levelTrack}><motion.i animate={{ scaleX: levelProgress / 100 }} initial={false} style={{ transformOrigin: "0 50%" }} transition={mobileMotion.reveal} /></div>
                 </section>
 
                 <section className={styles.missionsSection} aria-label="Active missions">
@@ -427,7 +428,7 @@ export function EarnPage() {
                         <article key={item.name} className={`${unlocked ? styles.tierUnlocked : ""} ${active ? styles.tierActive : ""}`}>
                           <div><strong>{item.name}</strong><span>{item.reward}</span></div>
                           <em>{active ? "Active" : unlocked ? "Unlocked" : `${earn.verifiedReferrals}/${item.target}`}</em>
-                          <i><motion.b animate={{ width: `${progress}%` }} /></i>
+                          <i><motion.b animate={{ scaleX: progress / 100 }} initial={false} style={{ transformOrigin: "0 50%" }} transition={mobileMotion.tab} /></i>
                         </article>
                       );
                     })}

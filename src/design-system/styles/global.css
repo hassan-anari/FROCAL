@@ -82,3 +82,11 @@ button {
     transition-duration: 0.01ms !important;
   }
 }
+
+
+/* Telegram WebView should stop ambient CSS work while hidden. */
+html.motion-page-hidden *,
+html.motion-page-hidden *::before,
+html.motion-page-hidden *::after {
+  animation-play-state: paused !important;
+}

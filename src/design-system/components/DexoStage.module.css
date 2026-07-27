@@ -11,12 +11,11 @@
   z-index: -3;
   left: 50%;
   bottom: 1%;
-  width: 62%;
-  height: 22%;
+  width: 72%;
+  height: 29%;
   translate: -50% 0;
   border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(118, 88, 255, .28), rgba(54, 209, 255, .08) 45%, transparent 76%);
-  filter: blur(22px);
+  background: radial-gradient(ellipse, rgba(118, 88, 255, .25), rgba(54, 209, 255, .07) 43%, transparent 72%);
   animation: dexoGlow 4.8s ease-in-out infinite;
 }
 
@@ -29,7 +28,7 @@
   height: auto;
   translate: -50% 0;
   opacity: .95;
-  filter: drop-shadow(0 0 22px rgba(145, 91, 255, .42));
+  filter: drop-shadow(0 0 12px rgba(145, 91, 255, .32));
   animation: platformPulse 4.2s ease-in-out infinite;
 }
 
@@ -38,7 +37,10 @@
   inset: 0 0 7%;
   display: grid;
   place-items: center;
+  transform: translate3d(0, 0, 0);
   transform-origin: 50% 72%;
+  will-change: transform;
+  animation: dexoFloat 4.8s ease-in-out infinite;
 }
 
 .characterButton {
@@ -55,7 +57,8 @@
 
 .characterLayer {
   position: absolute;
-  will-change: opacity, transform, filter;
+  backface-visibility: hidden;
+  will-change: opacity, transform;
   inset: 0;
   display: grid;
   place-items: center;
@@ -68,8 +71,8 @@
   transform: scale(var(--dexo-character-scale, 1));
   user-select: none;
   filter:
-    drop-shadow(0 20px 28px rgba(0, 0, 0, .4))
-    drop-shadow(0 0 16px rgba(76, 219, 255, .15));
+    drop-shadow(0 16px 22px rgba(0, 0, 0, .34))
+    drop-shadow(0 0 10px rgba(76, 219, 255, .12));
 }
 
 .sparks {
@@ -99,12 +102,17 @@
 
 .reveal .character {
   filter:
-    drop-shadow(0 20px 28px rgba(0, 0, 0, .4))
-    drop-shadow(0 0 20px rgba(104, 220, 255, .24));
+    drop-shadow(0 16px 22px rgba(0, 0, 0, .34))
+    drop-shadow(0 0 13px rgba(104, 220, 255, .2));
 }
 
 .base {
   width: min(100%, 354px);
+}
+
+@keyframes dexoFloat {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -4px, 0); }
 }
 
 @keyframes dexoGlow {
@@ -124,7 +132,16 @@
   100% { translate: 0 -34px; }
 }
 
+
+:global(html.motion-overlay-open) .characterFloat,
+:global(html.motion-overlay-open) .ambientGlow,
+:global(html.motion-overlay-open) .platform,
+:global(html.motion-overlay-open) .sparks i {
+  animation-play-state: paused;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .characterFloat,
   .ambientGlow,
   .platform,
   .sparks i {

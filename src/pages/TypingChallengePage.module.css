@@ -130,7 +130,14 @@
 .typingCard textarea:disabled { opacity: .62; }
 
 .challengeProgress { height: 5px; margin-top: .6rem; overflow: hidden; border-radius: 999px; background: rgba(130, 158, 221, .12); }
-.challengeProgress i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #48ddff, #876eff, #cf55ff); }
+.challengeProgress i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #48ddff, #876eff, #cf55ff);
+  will-change: transform;
+}
 
 .controls { margin-top: .68rem; }
 .controls button { width: 100%; }

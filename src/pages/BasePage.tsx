@@ -18,6 +18,7 @@ import { useBaseUiStore } from "@/game/ui/baseUiStore";
 import { loadBootstrap } from "@/integrations/api/bootstrap";
 import { queryKeys } from "@/integrations/api/queryKeys";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
+import { mobileMotion } from "@/design-system/motion/mobileMotion";
 import styles from "./BasePage.module.css";
 
 type ReactionKey = "curious" | "happy" | "focused" | "surprised" | "victory";
@@ -155,10 +156,10 @@ export function BasePage() {
           {promoBannerVisible ? (
             <motion.aside
               className={styles.promoSlot}
-              initial={{ opacity: 0, height: 0, y: -8 }}
-              animate={{ opacity: 1, height: "auto", y: 0 }}
-              exit={{ opacity: 0, height: 0, y: -6 }}
-              transition={{ duration: .3, ease: [0.22, 1, 0.36, 1] }}
+              initial={{ opacity: 0, y: -7 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -5 }}
+              transition={mobileMotion.reveal}
               aria-label="Promotional banner placement"
             >
               <div className={styles.promoBanner}>
@@ -193,9 +194,9 @@ export function BasePage() {
             </div>
           </div>
 
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="sync">
             {dialogue ? (
-              <motion.div key={dialogue} className={styles.reaction} initial={{ opacity: 0, y: 8, scale: .96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -5, scale: .98 }} transition={{ duration: .34, ease: [0.22, 1, 0.36, 1] }} role="status" aria-live="polite">
+              <motion.div key={dialogue} className={styles.reaction} initial={{ opacity: 0, y: 6, scale: .98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -4, scale: .99 }} transition={mobileMotion.reveal} role="status" aria-live="polite">
                 <span className={styles.speaker}>DEXO</span>
                 <span className={styles.dialogueText}>{typedDialogue}{isTyping ? <i className={styles.typingCursor} /> : null}</span>
               </motion.div>
@@ -206,13 +207,13 @@ export function BasePage() {
 
           <div className={styles.progressFooter}>
             <div className={styles.xpLabels}><span>Growth progress</span><strong>{currentLevelXp} / {currentLevelTarget} XP</strong></div>
-            <div className={styles.xpTrack}><motion.i initial={{ width: 0 }} animate={{ width: `${xpPercent}%` }} transition={{ duration: .85 }} /></div>
+            <div className={styles.xpTrack}><motion.i initial={{ scaleX: 0 }} animate={{ scaleX: xpPercent / 100 }} style={{ transformOrigin: "0 50%" }} transition={{ duration: .48, ease: mobileMotion.reveal.ease }} /></div>
           </div>
         </section>
 
         <AnimatePresence initial={false}>
           {criticalActionVisible ? (
-            <motion.section className={styles.criticalAction} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, height: 0, marginTop: 0 }} transition={{ duration: .32 }}>
+            <motion.section className={styles.criticalAction} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={mobileMotion.reveal}>
               <div className={styles.criticalHeader}>
                 <span>Next critical action</span>
                 <small>War in 42m</small>

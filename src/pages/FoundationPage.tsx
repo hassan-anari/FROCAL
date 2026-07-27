@@ -14,6 +14,7 @@ import { loadBootstrap } from "@/integrations/api/bootstrap";
 import { queryKeys } from "@/integrations/api/queryKeys";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import { content } from "@/content/en";
+import { mobileEase, mobileMotion } from "@/design-system/motion/mobileMotion";
 import styles from "./FoundationPage.module.css";
 
 const particles = Array.from({ length: 8 }, (_, index) => index);
@@ -81,7 +82,7 @@ export function FoundationPage() {
 
     window.setTimeout(() => {
       void navigate({ to: onboardingStatus === "completed" ? "/base" : "/onboarding" });
-    }, 680);
+    }, 520);
   };
 
   return (
@@ -103,9 +104,9 @@ export function FoundationPage() {
       <section className={styles.hero} aria-labelledby="foundation-title">
         <motion.div
           className={styles.heroCopy}
-          initial={{ opacity: 0, y: 18 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: .72 }}
+          transition={{ duration: mobileMotion.cinematic.duration, ease: mobileEase }}
         >
           <span className={styles.eyebrow}>{content.foundation.eyebrow}</span>
           <div className={styles.titleAura} aria-hidden="true" />
@@ -118,9 +119,9 @@ export function FoundationPage() {
 
         <motion.div
           className={styles.ctaArea}
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: .62, delay: .18 }}
+          transition={{ duration: .44, delay: .12, ease: mobileEase }}
         >
           <Button
             size="lg"

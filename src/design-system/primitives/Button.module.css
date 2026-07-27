@@ -16,8 +16,7 @@
   transition:
     transform var(--motion-fast) cubic-bezier(.22, 1, .36, 1),
     border-color var(--motion-base) ease,
-    box-shadow var(--motion-base) ease,
-    filter var(--motion-base) ease;
+    box-shadow var(--motion-base) ease;
 }
 
 .button::before {
@@ -139,4 +138,19 @@
   0%, 66% { transform: translateX(-68%); opacity: 0; }
   72% { opacity: .75; }
   88%, 100% { transform: translateX(68%); opacity: 0; }
+}
+
+
+@media (hover: none) {
+  .primary:hover:not(:disabled) {
+    filter: none;
+    box-shadow:
+      0 15px 40px rgba(83, 86, 255, .34),
+      0 4px 16px rgba(52, 213, 255, .12),
+      inset 0 1px 0 rgba(255, 255, 255, .34);
+  }
+}
+
+:global(html.motion-overlay-open) .primary::after {
+  animation-play-state: paused;
 }

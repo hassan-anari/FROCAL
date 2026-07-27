@@ -9,6 +9,8 @@ import { useEarnStore } from "@/game/earn/earnStore";
 import { loadBootstrap } from "@/integrations/api/bootstrap";
 import { queryKeys } from "@/integrations/api/queryKeys";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
+import { mobileMotion } from "@/design-system/motion/mobileMotion";
+import { usePauseBackgroundMotion } from "@/design-system/motion/usePauseBackgroundMotion";
 import styles from "./GameHeader.module.css";
 
 interface GameHeaderProps {
@@ -67,6 +69,7 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
   const scenario = useScenarioStore((state) => state.activeScenario);
   const { adapter } = useTelegram();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  usePauseBackgroundMotion(notificationsOpen);
   const [notifications, setNotifications] = useState(initialNotifications);
   const seasonTapCount = useRef(0);
   const seasonTapTimer = useRef<number | null>(null);
@@ -165,17 +168,17 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: .22 }}
+            transition={mobileMotion.micro}
             onPointerDown={(event) => {
               if (event.target === event.currentTarget) setNotificationsOpen(false);
             }}
           >
             <motion.section
               className={styles.notificationPanel}
-              initial={{ opacity: 0, y: -26, scale: .985 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -18, scale: .99 }}
-              transition={{ duration: .34, ease: [0.22, 1, 0.36, 1] }}
+              initial={{ opacity: 0, y: -16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={mobileMotion.overlay}
               aria-label="Notifications"
             >
               <header className={styles.notificationHeader}>

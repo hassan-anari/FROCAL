@@ -35,3 +35,8 @@
 - Controlled light sweep
 - Sparse ambient particles
 - Full reduced-motion fallback
+
+
+## Mobile Motion
+
+All product motion is Telegram mobile WebView-first. Primary transitions use only transform and opacity. Live animated blur, large backdrop filters and animated auto-height are prohibited by `npm run validate:motion`. See `MOBILE_MOTION_GUIDELINES.md`.

@@ -17,6 +17,7 @@ import { loadBootstrap } from "@/integrations/api/bootstrap";
 import { queryKeys } from "@/integrations/api/queryKeys";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import type { AssetKey } from "@/assets/registry";
+import { mobileMotion } from "@/design-system/motion/mobileMotion";
 import styles from "./OnboardingPage.module.css";
 
 const guideScenes: Array<{
@@ -174,7 +175,7 @@ export function OnboardingPage() {
       className={styles.stage}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: .62, ease: "easeOut" }}
+      transition={mobileMotion.reveal}
     >
       <AssetImage assetKey="world.foundationBackdrop" className={styles.backdrop} />
       <div className={styles.scrim} aria-hidden="true" />
@@ -184,20 +185,25 @@ export function OnboardingPage() {
           <HugeiconsIcon icon={ArrowLeft01Icon} size={18} strokeWidth={1.8} />
         </button>
         <div className={styles.progressTrack} aria-label={`Onboarding ${Math.round(progress)} percent complete`}>
-          <motion.i animate={{ width: `${progress}%` }} transition={{ duration: .45 }} />
+          <motion.i
+            animate={{ scaleX: progress / 100 }}
+            initial={false}
+            style={{ transformOrigin: "0 50%" }}
+            transition={mobileMotion.tab}
+          />
         </div>
         <span className={styles.stepCount}>{String(stepIndex + 1).padStart(2, "0")}/{String(onboardingStepOrder.length).padStart(2, "0")}</span>
       </header>
 
       <section className={styles.scene}>
-        <AnimatePresence mode="wait" initial={false}>
+        <AnimatePresence mode="popLayout" initial={false}>
           <motion.div
             key={`${onboarding.step}-${onboarding.guideIndex}`}
             className={styles.sceneInner}
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: .46, ease: [0.22, 1, 0.36, 1] }}
+            exit={{ opacity: 0, y: -5 }}
+            transition={mobileMotion.reveal}
           >
             <div className={styles.copy}>
               <span className={styles.eyebrow}>

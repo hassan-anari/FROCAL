@@ -132,10 +132,9 @@
 
 .dailyGlow {
   position: absolute;
-  inset: auto -12% -58% 32%;
-  height: 160px;
-  background: radial-gradient(ellipse, rgba(75, 214, 255, .18), rgba(185, 74, 255, .12), transparent 68%);
-  filter: blur(18px);
+  inset: auto -18% -72% 22%;
+  height: 205px;
+  background: radial-gradient(ellipse, rgba(75, 214, 255, .13), rgba(185, 74, 255, .085), transparent 66%);
   pointer-events: none;
 }
 
@@ -217,7 +216,14 @@
 .pathTrack,
 .levelTrack { height: 5px; margin-top: .28rem; overflow: hidden; border-radius: 999px; background: rgba(128, 155, 215, .12); }
 .pathTrack i,
-.levelTrack i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #49ddff, #856fff, #ce55ff); }
+.levelTrack i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #49ddff, #856fff, #ce55ff);
+  will-change: transform;
+}
 
 .missionsSection { display: grid; gap: .5rem; }
 .sectionHeader { display: flex; align-items: end; justify-content: space-between; gap: .7rem; padding: .05rem .02rem; }
@@ -334,7 +340,14 @@
 .tierList span { color: rgba(159, 178, 213, .48); font-size: .48rem; }
 .tierList em { color: rgba(133, 157, 200, .56); font-size: .49rem; font-style: normal; font-weight: 720; }
 .tierList i { grid-column: 1 / -1; height: 4px; overflow: hidden; border-radius: 999px; background: rgba(129, 155, 214, .11); }
-.tierList i b { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #50ddff, #9a6fff, #e0b05d); }
+.tierList i b {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #50ddff, #9a6fff, #e0b05d);
+  will-change: transform;
+}
 .tierList .tierUnlocked {
   border-color: rgba(130, 165, 225, .1);
 }

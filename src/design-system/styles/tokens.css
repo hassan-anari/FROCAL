@@ -46,10 +46,10 @@
   --shadow-cyan: 0 0 40px rgba(69, 221, 255, 0.22);
   --shadow-violet: 0 0 48px rgba(140, 98, 255, 0.32);
 
-  --motion-fast: 160ms;
-  --motion-base: 320ms;
-  --motion-slow: 700ms;
-  --motion-cinematic: 1200ms;
+  --motion-fast: 140ms;
+  --motion-base: 240ms;
+  --motion-slow: 480ms;
+  --motion-cinematic: 760ms;
 
   --miniapp-max-width: 440px;
 

@@ -8,6 +8,8 @@ import { DexoStage } from "@/design-system/components/DexoStage";
 import { Button } from "@/design-system/primitives/Button";
 import type { EarnHistoryEntry, LevelUpEvent, RewardEvent } from "@/game/earn/types";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
+import { mobileMotion } from "@/design-system/motion/mobileMotion";
+import { usePauseBackgroundMotion } from "@/design-system/motion/usePauseBackgroundMotion";
 import styles from "./EarnOverlays.module.css";
 
 interface OverlayShellProps {
@@ -19,6 +21,8 @@ interface OverlayShellProps {
 }
 
 function OverlayShell({ open, onClose, ariaLabel, children, placement = "sheet" }: OverlayShellProps) {
+  usePauseBackgroundMotion(open);
+
   useEffect(() => {
     if (!open) return;
     const previous = document.body.style.overflow;
@@ -38,7 +42,7 @@ function OverlayShell({ open, onClose, ariaLabel, children, placement = "sheet" 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: .22 }}
+          transition={mobileMotion.micro}
           role="presentation"
           onPointerDown={(event) => {
             if (event.target === event.currentTarget) onClose();
@@ -46,10 +50,10 @@ function OverlayShell({ open, onClose, ariaLabel, children, placement = "sheet" 
         >
           <motion.section
             className={`${styles.surface} ${styles[placement]}`}
-            initial={placement === "sheet" ? { opacity: 0, y: 38 } : { opacity: 0, scale: .92, y: 12 }}
+            initial={placement === "sheet" ? { opacity: 0, y: 22 } : { opacity: 0, scale: .975, y: 8 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={placement === "sheet" ? { opacity: 0, y: 28 } : { opacity: 0, scale: .96, y: 8 }}
-            transition={{ duration: .34, ease: [0.22, 1, 0.36, 1] }}
+            exit={placement === "sheet" ? { opacity: 0, y: 16 } : { opacity: 0, scale: .985, y: 6 }}
+            transition={mobileMotion.overlay}
             role="dialog"
             aria-modal="true"
             aria-label={ariaLabel}

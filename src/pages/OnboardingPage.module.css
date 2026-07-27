@@ -57,8 +57,7 @@
   border: 1px solid rgba(156, 192, 255, .2);
   border-radius: 12px;
   color: rgba(239, 245, 255, .82);
-  background: rgba(6, 12, 28, .58);
-  backdrop-filter: blur(12px);
+  background: rgba(6, 12, 28, .9);
   cursor: pointer;
 }
 
@@ -72,7 +71,8 @@
 
 .progressTrack i {
   position: absolute;
-  inset: 0 auto 0 0;
+  inset: 0;
+  width: 100%;
   border-radius: inherit;
   background: linear-gradient(90deg, #55dfff, #8f72ff, #d05cff);
   box-shadow: 0 0 14px rgba(102, 207, 255, .48);

@@ -13,6 +13,7 @@ import {
   useEarnStore,
 } from "@/game/earn/earnStore";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
+import { mobileMotion } from "@/design-system/motion/mobileMotion";
 import styles from "./TypingChallengePage.module.css";
 
 const phrases = [
@@ -216,13 +217,13 @@ export function TypingChallengePage() {
           />
 
           <div className={styles.challengeProgress}>
-            <motion.i animate={{ width: `${Math.min(100, (input.length / target.length) * 100)}%` }} transition={{ duration: .16 }} />
+            <motion.i animate={{ scaleX: Math.min(1, input.length / target.length) }} initial={false} style={{ transformOrigin: "0 50%" }} transition={mobileMotion.micro} />
           </div>
         </section>
 
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="popLayout">
           {result ? (
-            <motion.section key="result" className={`${styles.resultCard} ${result.passed ? styles.resultPassed : styles.resultFailed}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+            <motion.section key="result" className={`${styles.resultCard} ${result.passed ? styles.resultPassed : styles.resultFailed}`} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} transition={mobileMotion.reveal}>
               <span>{result.passed ? "ARENA CLEARED" : "RUN COMPLETE"}</span>
               <h2>{result.passed ? "Strong performance." : "Recalibrate and retry."}</h2>
               <div><strong>{Math.round(result.accuracy)}%</strong><small>accuracy</small><strong>{Math.round(result.wpm)}</strong><small>WPM</small></div>
@@ -233,7 +234,7 @@ export function TypingChallengePage() {
               </div>
             </motion.section>
           ) : (
-            <motion.div key="controls" className={styles.controls} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <motion.div key="controls" className={styles.controls} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={mobileMotion.tab}>
               {!started ? (
                 <Button size="lg" disabled={attemptsRemaining <= 0} trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={18} strokeWidth={1.8} />} onClick={begin}>
                   {attemptsRemaining > 0 ? "Start arena run" : "Daily limit reached"}

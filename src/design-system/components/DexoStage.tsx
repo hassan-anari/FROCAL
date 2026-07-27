@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "motion/react";
 import { type CSSProperties } from "react";
+import { mobileMotion } from "@/design-system/motion/mobileMotion";
 import { AssetImage } from "./AssetImage";
 import type { AssetKey } from "@/assets/registry";
 import styles from "./DexoStage.module.css";
@@ -39,10 +40,10 @@ export function DexoStage({
       <motion.div
         key={character}
         className={styles.characterLayer}
-        initial={{ opacity: 0, scale: .97, filter: "blur(5px)" }}
-        animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-        exit={{ opacity: 0, scale: 1.025, filter: "blur(4px)" }}
-        transition={{ duration: .46, ease: [0.22, 1, 0.36, 1] }}
+        initial={{ opacity: 0, scale: .975, y: 4 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 1.015, y: -3 }}
+        transition={mobileMotion.reveal}
       >
         <AssetImage assetKey={character} className={styles.character} draggable={false} />
       </motion.div>
@@ -54,17 +55,13 @@ export function DexoStage({
       <div className={styles.ambientGlow} aria-hidden="true" />
       {showPlatform ? <AssetImage assetKey="dexo.platform" className={styles.platform} aria-hidden="true" /> : null}
 
-      <motion.div
-        className={styles.characterFloat}
-        animate={{ y: [0, -4, 0] }}
-        transition={{ duration: 4.8, ease: "easeInOut", repeat: Number.POSITIVE_INFINITY }}
-      >
+      <div className={styles.characterFloat}>
         {interactive ? (
           <button type="button" className={styles.characterButton} onClick={onPress} aria-label={ariaLabel}>
             {characterLayer}
           </button>
         ) : characterLayer}
-      </motion.div>
+      </div>
 
       {shouldShowParticles ? (
         <div className={styles.sparks} aria-hidden="true">

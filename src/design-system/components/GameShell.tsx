@@ -9,6 +9,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import type { ReactNode } from "react";
+import { mobileMotion } from "@/design-system/motion/mobileMotion";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import styles from "./GameShell.module.css";
 
@@ -51,9 +52,9 @@ export function GameShell({ children, className = "", hideNavigation = false }: 
       <motion.div
         key={pathname}
         className={`${styles.content} ${hideNavigation ? styles.contentFull : ""}`}
-        initial={{ opacity: 0, x: direction * 18, filter: "blur(4px)" }}
-        animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-        transition={{ duration: .34, ease: [0.22, 1, 0.36, 1] }}
+        initial={{ opacity: 0, x: direction * 10, scale: 0.998 }}
+        animate={{ opacity: 1, x: 0, scale: 1 }}
+        transition={mobileMotion.page}
       >
         {children}
       </motion.div>
