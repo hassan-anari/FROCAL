@@ -100,6 +100,68 @@ export function HistorySheet({ open, onClose, history }: HistorySheetProps) {
   );
 }
 
+
+export type NetworkGuideKind = "referral" | "group";
+
+interface NetworkGuideSheetProps {
+  kind: NetworkGuideKind | null;
+  onClose: () => void;
+}
+
+const guideContent = {
+  referral: {
+    eyebrow: "REFERRAL GUIDE",
+    title: "Invite people. Grow together.",
+    description: "Your personal link connects every successful explorer to your network.",
+    steps: [
+      ["Share your personal link", "Send it directly or share it inside Telegram."],
+      ["Reach Level 5", "An invitation becomes successful after the new explorer reaches Level 5."],
+      ["Unlock shared rewards", "After verification, part of their eligible Earn activity is credited to you."],
+      ["Raise your tier", "More successful invitations increase your referral percentage."],
+    ],
+    note: "Only verified activity is counted. Duplicate, inactive, or suspicious accounts do not generate rewards.",
+  },
+  group: {
+    eyebrow: "CREATOR PROGRAM",
+    title: "Turn a community into a network.",
+    description: "This program is built for creators, community owners, and large Telegram groups or channels.",
+    steps: [
+      ["Connect the group", "Use the group button and choose the community you manage."],
+      ["Make Dalexio an admin", "Admin access is required so valid community activity can be verified."],
+      ["Register the creator", "Rewards belong only to the creator account that connected the group."],
+      ["Keep the community active", "Verified conversations and active members determine ongoing creator rewards."],
+    ],
+    note: "Other group administrators do not automatically share the creator reward. Ownership changes require a new verification.",
+  },
+} as const;
+
+export function NetworkGuideSheet({ kind, onClose }: NetworkGuideSheetProps) {
+  const content = kind ? guideContent[kind] : null;
+  return (
+    <OverlayShell open={content !== null} onClose={onClose} ariaLabel={kind === "group" ? "Group creator guide" : "Referral guide"}>
+      {content ? (
+        <div className={styles.guideSheet}>
+          <header className={styles.sheetHeader}>
+            <span>{content.eyebrow}</span>
+            <h2>{content.title}</h2>
+            <p>{content.description}</p>
+          </header>
+          <div className={styles.guideSteps}>
+            {content.steps.map(([title, description], index) => (
+              <article key={title}>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <div><strong>{title}</strong><p>{description}</p></div>
+              </article>
+            ))}
+          </div>
+          <aside>{content.note}</aside>
+          <Button size="lg" onClick={onClose}>Got it</Button>
+        </div>
+      ) : null}
+    </OverlayShell>
+  );
+}
+
 interface RewardRevealProps {
   reward: RewardEvent | null;
   onClose: () => void;

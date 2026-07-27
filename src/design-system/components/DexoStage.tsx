@@ -13,6 +13,7 @@ interface DexoStageProps {
   ariaLabel?: string;
   characterScale?: number;
   showParticles?: boolean;
+  showPlatform?: boolean;
 }
 
 const sparks = Array.from({ length: 7 }, (_, index) => index);
@@ -26,6 +27,7 @@ export function DexoStage({
   ariaLabel = "Dexo companion",
   characterScale = 1,
   showParticles,
+  showPlatform = true,
 }: DexoStageProps) {
   const shouldShowParticles = showParticles ?? effect === "acquired";
   const stageStyle = {
@@ -50,7 +52,7 @@ export function DexoStage({
   return (
     <div className={`${styles.stage} ${styles[effect]} ${className}`} style={stageStyle}>
       <div className={styles.ambientGlow} aria-hidden="true" />
-      <AssetImage assetKey="dexo.platform" className={styles.platform} aria-hidden="true" />
+      {showPlatform ? <AssetImage assetKey="dexo.platform" className={styles.platform} aria-hidden="true" /> : null}
 
       <motion.div
         className={styles.characterFloat}

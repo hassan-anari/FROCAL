@@ -15,7 +15,8 @@
   margin: .9rem 0 .72rem;
 }
 
-.pageHeader > div { display: grid; gap: .12rem; }
+.pageHeader > div { display: grid; gap: .12rem; min-width: 0; }
+.pageHeader > div > p { max-width: 280px; margin: .12rem 0 0; color: rgba(181, 196, 227, .56); font-size: .58rem; line-height: 1.45; }
 .pageHeader span,
 .sectionHeader > div > span,
 .dailyCard header span,
@@ -250,7 +251,7 @@
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: .66rem;
-  padding: .8rem;
+  padding: .68rem .8rem;
   border: 1px solid rgba(137, 176, 240, .15);
   border-radius: 20px;
   background:
@@ -258,8 +259,7 @@
     linear-gradient(145deg, rgba(13, 25, 55, .9), rgba(4, 9, 23, .96));
 }
 .networkIcon,
-.typingIcon,
-.groupIcon { display: grid; place-items: center; width: 43px; height: 43px; border: 1px solid rgba(116, 205, 255, .18); border-radius: 14px; color: #79e8ff; background: linear-gradient(145deg, rgba(57, 150, 204, .2), rgba(126, 72, 209, .25)); }
+.typingIcon { display: grid; place-items: center; width: 43px; height: 43px; border: 1px solid rgba(116, 205, 255, .18); border-radius: 14px; color: #79e8ff; background: linear-gradient(145deg, rgba(57, 150, 204, .2), rgba(126, 72, 209, .25)); }
 .networkHero > div,
 .typingHero > div,
 .groupCard > div,
@@ -358,4 +358,43 @@
 @media (prefers-reduced-motion: reduce) {
   .tabBar button,
   .missionAction { transition: none; }
+}
+
+
+.titleWithHelp { display: inline-flex !important; align-items: center; gap: .38rem !important; }
+.titleWithHelp > button { display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 1px solid rgba(112, 207, 255, .18); border-radius: 10px; color: #82eaff; background: rgba(7, 17, 39, .72); }
+.referralCard header em { display: grid; justify-items: end; gap: .08rem; }
+.referralCard header em small { color: rgba(155, 178, 216, .5); font-size: .4rem; font-style: normal; letter-spacing: .1em; }
+.tierList .tierActive { border-color: rgba(255, 211, 105, .32); background: linear-gradient(145deg, rgba(255, 196, 74, .08), rgba(4, 10, 24, .54)); box-shadow: inset 0 0 0 1px rgba(255, 215, 120, .04); }
+.referralRoster,
+.groupRoster { padding: .78rem; border: 1px solid rgba(137, 176, 240, .15); border-radius: 21px; background: linear-gradient(145deg, rgba(14, 25, 55, .9), rgba(4, 9, 23, .96)); box-shadow: inset 0 1px 0 rgba(255,255,255,.035); }
+.rosterList { display: grid; margin-top: .62rem; }
+.rosterList article { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; align-items: center; gap: .55rem; padding: .62rem .02rem; border-bottom: 1px solid rgba(137, 174, 235, .08); }
+.rosterList article:last-child { border-bottom: 0; }
+.avatar { display: grid; place-items: center; width: 38px; height: 38px; overflow: hidden; border: 1px solid rgba(255,255,255,.1); border-radius: 13px; color: white; font-size: .62rem; font-weight: 820; box-shadow: inset 0 1px 0 rgba(255,255,255,.12); }
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.avatar_cyan { background: linear-gradient(145deg, #1685a7, #37d3d7); }
+.avatar_violet { background: linear-gradient(145deg, #5a3db5, #a55bd8); }
+.avatar_gold { background: linear-gradient(145deg, #8e5e20, #dcac4d); }
+.avatar_blue { background: linear-gradient(145deg, #2357a5, #3c9bd3); }
+.avatar_pink { background: linear-gradient(145deg, #8d397d, #df669d); }
+.rosterIdentity { min-width: 0; display: grid; gap: .12rem; }
+.rosterIdentity strong { overflow: hidden; color: #eef4ff; font-size: .63rem; text-overflow: ellipsis; white-space: nowrap; }
+.rosterIdentity span { color: rgba(160, 179, 213, .48); font-size: .47rem; line-height: 1.35; }
+.rosterStatus { display: grid; justify-items: end; gap: .12rem; text-align: right; }
+.rosterStatus em { padding: .2rem .38rem; border-radius: 999px; font-size: .43rem; font-style: normal; font-weight: 770; white-space: nowrap; }
+.rosterStatus small { max-width: 88px; color: rgba(158, 177, 211, .48); font-size: .42rem; line-height: 1.3; }
+.statusActive { color: #64edbe; background: rgba(53, 207, 158, .09); }
+.statusPending { color: #ffd674; background: rgba(255, 199, 76, .09); }
+.groupCard { grid-template-columns: 1fr; }
+.groupCard > div:first-child { grid-column: 1 / -1; }
+.groupTitle { color: transparent !important; background: linear-gradient(92deg, #fff1bd, #f0c66a 54%, #d99c36); background-clip: text; -webkit-background-clip: text; filter: drop-shadow(0 0 12px rgba(224, 165, 60, .08)); }
+.networkHistory > .emptyState,
+.todayRuns > .emptyState { margin-top: .62rem; }
+
+@media (max-width: 360px) {
+  .rosterList article { grid-template-columns: 34px minmax(0, 1fr); }
+  .avatar { width: 34px; height: 34px; }
+  .rosterStatus { grid-column: 2; justify-items: start; text-align: left; }
+  .rosterStatus small { max-width: none; }
 }

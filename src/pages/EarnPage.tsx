@@ -1,6 +1,6 @@
 import {
   ArrowRight01Icon,
-  Home01Icon,
+  InformationCircleIcon,
   Sword01Icon,
   UserGroupIcon,
   Wallet01Icon,
@@ -13,7 +13,7 @@ import { preloadAssets } from "@/assets/preload";
 import { GameHeader } from "@/design-system/components/GameHeader";
 import { GameShell } from "@/design-system/components/GameShell";
 import { Button } from "@/design-system/primitives/Button";
-import { HistorySheet, LevelUpReveal, RewardReveal } from "@/features/earn/EarnOverlays";
+import { HistorySheet, LevelUpReveal, NetworkGuideSheet, RewardReveal, type NetworkGuideKind } from "@/features/earn/EarnOverlays";
 import {
   TYPING_DAILY_LIMIT,
   getStarterPathProgress,
@@ -78,10 +78,27 @@ function formatResultTime(value: string): string {
 }
 
 function referralTier(referrals: number) {
-  if (referrals >= 50) return "Gold";
-  if (referrals >= 20) return "Silver";
-  if (referrals >= 5) return "Bronze";
-  return "Starter";
+  if (referrals >= 20) return "Gold";
+  if (referrals >= 5) return "Silver";
+  return "Bronze";
+}
+
+const referralRows = [
+  { id: "ref-1", name: "Aria Moon", level: 8, status: "Active", invitedAt: "Jul 25", earnedXp: 84, useTelegramPhoto: true, tone: "cyan" },
+  { id: "ref-2", name: "Nova Reed", level: 6, status: "Active", invitedAt: "Jul 24", earnedXp: 56, tone: "violet" },
+  { id: "ref-3", name: "Liam Cross", level: 4, status: "Pending", invitedAt: "Jul 23", activation: "Level 4 / 5", tone: "gold" },
+  { id: "ref-4", name: "Mika Vale", level: 2, status: "Pending", invitedAt: "Jul 22", activation: "Level 2 / 5", tone: "blue" },
+  { id: "ref-5", name: "Sora Lin", level: 1, status: "Pending", invitedAt: "Jul 21", activation: "Level 1 / 5", tone: "pink" },
+] as const;
+
+const groupRows = [
+  { id: "group-1", name: "Dexo Explorers", members: 2840, admin: true, status: "Active", earnedXp: 1240, meta: "Active 12m ago", tone: "violet" },
+  { id: "group-2", name: "Future Builders", members: 1120, admin: true, status: "Review", earnedXp: 0, meta: "Connected Jul 24", tone: "cyan" },
+  { id: "group-3", name: "Web3 Creators", members: 7650, admin: false, status: "Needs admin", earnedXp: 0, meta: "Connected Jul 22", tone: "gold" },
+] as const;
+
+function initials(name: string): string {
+  return name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
 }
 
 export function EarnPage() {
@@ -93,6 +110,7 @@ export function EarnPage() {
     return stored === "network" || stored === "typing" ? stored : "earn";
   });
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [guideOpen, setGuideOpen] = useState<NetworkGuideKind | null>(null);
   const [copied, setCopied] = useState(false);
 
   const dailyAvailable = isDailyClaimAvailable(earn.lastClaimDate);
@@ -103,7 +121,8 @@ export function EarnPage() {
   const levelProgress = Math.min(100, Math.round((earn.levelXp / earn.xpToNextLevel) * 100));
   const typingToday = getTypingAttemptsToday(earn.typingAttemptDate, earn.typingAttempts);
   const typingRemaining = getTypingAttemptsRemaining(earn.typingAttemptDate, earn.typingAttempts);
-  const referralCode = adapter.getUser()?.id ?? "explorer";
+  const telegramUser = adapter.getUser();
+  const referralCode = telegramUser?.id ?? "explorer";
   const referralLink = `https://t.me/DalexioBot?start=dexoairdrop_${referralCode}`;
   const groupLink = "https://t.me/DalexioBot?startgroup=dexoairdrop";
   const networkHistory = earn.history.filter((entry) => entry.type === "referral" || entry.type === "group").slice(0, 5);
@@ -255,6 +274,7 @@ export function EarnPage() {
           <div>
             <span>EARN CENTER</span>
             <h1>Grow your journey.</h1>
+            <p>Claim daily rewards, complete missions, expand your network and sharpen your skills.</p>
           </div>
           <button type="button" onClick={() => setHistoryOpen(true)}>
             History
@@ -358,39 +378,43 @@ export function EarnPage() {
               <>
                 <section className={styles.networkHero}>
                   <span className={styles.networkIcon}><HugeiconsIcon icon={UserGroupIcon} size={24} strokeWidth={1.7} /></span>
-                  <div><span>YOUR NETWORK</span><h2>Grow with people and groups.</h2><p>Invite explorers, connect Telegram groups and unlock higher referral tiers.</p></div>
-                </section>
-
-                <section className={styles.networkMetrics} aria-label="Network metrics">
-                  <div><span>Invited</span><strong>{earn.referralCount}</strong></div>
-                  <div><span>Verified</span><strong>{earn.verifiedReferrals}</strong></div>
-                  <div><span>Referral XP</span><strong>{formatNumber(earn.referralXpEarned)}</strong></div>
+                  <div><span>YOUR NETWORK</span><h2>Grow with people and groups.</h2><p>Invite explorers, connect Telegram communities and unlock higher reward tiers.</p></div>
                 </section>
 
                 <section className={styles.referralCard}>
-                  <header><div><span>PERSONAL REFERRAL</span><h2>Invite explorers</h2></div><em>{tier}</em></header>
+                  <header>
+                    <div>
+                      <span>PERSONAL REFERRAL</span>
+                      <div className={styles.titleWithHelp}>
+                        <h2>Invite explorers</h2>
+                        <button type="button" aria-label="Open referral guide" onClick={() => setGuideOpen("referral")}><HugeiconsIcon icon={InformationCircleIcon} size={16} strokeWidth={1.8} /></button>
+                      </div>
+                    </div>
+                    <em><small>ACTIVE TIER</small>{tier}</em>
+                  </header>
                   <div className={styles.linkBox}><span>{referralLink.replace("https://", "")}</span></div>
                   <div className={styles.networkActions}>
                     <Button tone="secondary" onClick={copyReferral}>{copied ? "Copied" : "Copy link"}</Button>
                     <Button onClick={shareReferral}>Share in Telegram</Button>
                   </div>
-                  <small>{earn.referralSent ? `${earn.referralShares} share actions recorded · verification is pending for new joins.` : "Share your personal link to begin growing your network."}</small>
+                  <small>{earn.referralSent ? `${earn.referralShares} share actions recorded · new joins are verified after reaching Level 5.` : "Share your personal link to begin growing your network."}</small>
                 </section>
 
                 <section className={styles.tierCard}>
-                  <header><div><span>REFERRAL TIERS</span><h2>Tier progression</h2></div><strong>{tier}</strong></header>
+                  <header><div><span>REFERRAL TIERS</span><h2>Tier progression</h2></div></header>
                   <div className={styles.tierList}>
                     {[
-                      { name: "Bronze", target: 5, reward: "1.05× network XP" },
-                      { name: "Silver", target: 20, reward: "1.10× network XP" },
-                      { name: "Gold", target: 50, reward: "1.20× network XP" },
+                      { name: "Bronze", target: 0, reward: "5% referral rewards" },
+                      { name: "Silver", target: 5, reward: "7% referral rewards" },
+                      { name: "Gold", target: 20, reward: "10% referral rewards" },
                     ].map((item) => {
-                      const progress = Math.min(100, Math.round((earn.verifiedReferrals / item.target) * 100));
                       const unlocked = earn.verifiedReferrals >= item.target;
+                      const progress = item.target === 0 ? 100 : Math.min(100, Math.round((earn.verifiedReferrals / item.target) * 100));
+                      const active = tier === item.name;
                       return (
-                        <article key={item.name} className={unlocked ? styles.tierUnlocked : ""}>
+                        <article key={item.name} className={`${unlocked ? styles.tierUnlocked : ""} ${active ? styles.tierActive : ""}`}>
                           <div><strong>{item.name}</strong><span>{item.reward}</span></div>
-                          <em>{unlocked ? "Unlocked" : `${earn.verifiedReferrals}/${item.target}`}</em>
+                          <em>{active ? "Active" : unlocked ? "Unlocked" : `${earn.verifiedReferrals}/${item.target}`}</em>
                           <i><motion.b animate={{ width: `${progress}%` }} /></i>
                         </article>
                       );
@@ -398,11 +422,55 @@ export function EarnPage() {
                   </div>
                 </section>
 
+                <section className={styles.networkMetrics} aria-label="Referral metrics">
+                  <div><span>Invited</span><strong>{earn.referralCount}</strong></div>
+                  <div><span>Verified</span><strong>{earn.verifiedReferrals}</strong></div>
+                  <div><span>Referral XP</span><strong>{formatNumber(earn.referralXpEarned)}</strong></div>
+                </section>
+
+                <section className={styles.referralRoster}>
+                  <header className={styles.sectionHeader}><div><span>RECENT INVITES</span><h2>Latest explorers</h2></div><span>Last 5</span></header>
+                  <div className={styles.rosterList}>
+                    {referralRows.map((person) => {
+                      const photo = person.useTelegramPhoto ? telegramUser?.photo_url : undefined;
+                      const displayName = person.useTelegramPhoto
+                        ? [telegramUser?.first_name, telegramUser?.last_name].filter(Boolean).join(" ") || person.name
+                        : person.name;
+                      return (
+                        <article key={person.id}>
+                          <span className={`${styles.avatar} ${styles[`avatar_${person.tone}`]}`}>{photo ? <img src={photo} alt="" /> : initials(displayName)}</span>
+                          <div className={styles.rosterIdentity}><strong>{displayName}</strong><span>Level {person.level} · Invited {person.invitedAt}</span></div>
+                          <div className={styles.rosterStatus}><em className={person.status === "Active" ? styles.statusActive : styles.statusPending}>{person.status}</em><small>{person.status === "Active" ? `+${person.earnedXp ?? 0} XP earned` : person.activation}</small></div>
+                        </article>
+                      );
+                    })}
+                  </div>
+                </section>
+
                 <section className={styles.groupCard}>
-                  <span className={styles.groupIcon}><HugeiconsIcon icon={Home01Icon} size={22} strokeWidth={1.7} /></span>
-                  <div><span>GROUP EXPANSION</span><h2>Add Dalexio to a group</h2><p>Connect active Telegram groups and earn XP after verification.</p></div>
+                  <div>
+                    <span>GROUP EXPANSION</span>
+                    <div className={styles.titleWithHelp}>
+                      <h2 className={styles.groupTitle}>Add Dalexio to a group</h2>
+                      <button type="button" aria-label="Open group creator guide" onClick={() => setGuideOpen("group")}><HugeiconsIcon icon={InformationCircleIcon} size={16} strokeWidth={1.8} /></button>
+                    </div>
+                    <p>Connect a Telegram community, make Dalexio an admin and earn from verified member activity.</p>
+                  </div>
                   <div className={styles.groupStats}><span>Connected <strong>{earn.connectedGroups}</strong></span><span>Active <strong>{earn.activeGroups}</strong></span><span>Earned <strong>{formatNumber(earn.groupXpEarned)} XP</strong></span></div>
                   <Button trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={17} strokeWidth={1.8} />} onClick={addToGroup}>Add bot to a group</Button>
+                </section>
+
+                <section className={styles.groupRoster}>
+                  <header className={styles.sectionHeader}><div><span>CONNECTED COMMUNITIES</span><h2>Group status</h2></div><span>{groupRows.length} groups</span></header>
+                  <div className={styles.rosterList}>
+                    {groupRows.map((group) => (
+                      <article key={group.id}>
+                        <span className={`${styles.avatar} ${styles[`avatar_${group.tone}`]}`}>{initials(group.name)}</span>
+                        <div className={styles.rosterIdentity}><strong>{group.name}</strong><span>{formatNumber(group.members)} members · {group.meta}</span></div>
+                        <div className={styles.rosterStatus}><em className={group.admin ? styles.statusActive : styles.statusPending}>{group.admin ? "Bot admin" : "Admin required"}</em><small>{group.earnedXp ? `${formatNumber(group.earnedXp)} XP earned` : group.status}</small></div>
+                      </article>
+                    ))}
+                  </div>
                 </section>
 
                 <section className={styles.networkHistory}>
@@ -470,6 +538,7 @@ export function EarnPage() {
       </main>
 
       <HistorySheet open={historyOpen} onClose={() => setHistoryOpen(false)} history={earn.history} />
+      <NetworkGuideSheet kind={guideOpen} onClose={() => setGuideOpen(null)} />
       <RewardReveal reward={earn.rewardEvent} onClose={earn.dismissReward} />
       <LevelUpReveal event={earn.rewardEvent ? null : earn.levelUpEvent} onClose={earn.dismissLevelUp} />
     </GameShell>

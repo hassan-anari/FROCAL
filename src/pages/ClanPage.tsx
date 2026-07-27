@@ -12,7 +12,7 @@ export function ClanPage() {
           <section className={`${styles.panel} ${styles.heroLock}`}>
             <div className={styles.lockGlyph}>C</div>
             <span className={styles.eyebrow}>CLAN SYSTEM RESERVED</span>
-            <h2>Your founding signal is waiting.</h2>
+            <h2>Your founding headquarters is waiting.</h2>
             <p>Discovery, creation and membership flows activate when the Clan World phase is completed.</p>
             <button type="button" className={styles.primaryButton} style={{width:"100%"}}>Preview Clan Network</button>
           </section>

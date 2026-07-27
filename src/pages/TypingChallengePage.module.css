@@ -37,9 +37,9 @@
 .challengeHero {
   position: relative;
   display: grid;
-  grid-template-columns: 1fr 118px;
+  grid-template-columns: minmax(0, 1fr) 132px;
   align-items: center;
-  min-height: 150px;
+  min-height: 158px;
   margin: .85rem 0 .65rem;
   padding: .86rem .78rem;
   overflow: hidden;
@@ -60,7 +60,14 @@
 .challengeHero span { color: #7deaff; font-size: .52rem; font-weight: 820; letter-spacing: .16em; }
 .challengeHero h1 { margin: 0; color: #f7f9ff; font-size: 1.55rem; font-weight: 850; letter-spacing: -.055em; line-height: .98; }
 .challengeHero p { max-width: 230px; margin: 0; color: rgba(187, 201, 231, .6); font-size: .61rem; line-height: 1.46; }
-.challengeDexo { position: absolute; right: -.12rem; bottom: -.8rem; width: 145px; }
+.challengeDexo {
+  position: absolute;
+  top: 50%;
+  right: .08rem;
+  width: 150px;
+  translate: 0 -50%;
+}
+.challengeDexo :global(img) { pointer-events: none; }
 
 .liveStats {
   display: grid;
@@ -91,6 +98,9 @@
   line-height: 1.65;
   letter-spacing: .006em;
   white-space: pre-wrap;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 .targetText span { border-radius: 3px; transition: color 120ms ease, background 120ms ease; }
 .correct { color: #eaf8ff; background: rgba(76, 219, 255, .1); }
@@ -112,6 +122,9 @@
   font-size: .76rem;
   line-height: 1.5;
   caret-color: #73e9ff;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 .typingCard textarea:focus { border-color: rgba(103, 220, 255, .36); box-shadow: 0 0 0 3px rgba(63, 207, 255, .06); }
 .typingCard textarea:disabled { opacity: .62; }
@@ -143,7 +156,7 @@
 
 @media (max-height: 680px) {
   .challengeHero { min-height: 124px; margin-block: .6rem; }
-  .challengeDexo { width: 128px; bottom: -1rem; }
+  .challengeDexo { top: 50%; right: .02rem; width: 132px; }
   .targetText { min-height: 74px; font-size: .76rem; }
   .typingCard textarea { min-height: 66px; }
 }

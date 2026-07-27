@@ -29,7 +29,7 @@ const initialNotifications: NotificationItem[] = [
     id: "mission-ready",
     type: "mission",
     title: "Mission updated",
-    message: "Your Daily Signal Sprint is ready.",
+    message: "Your Daily Mission Queue is ready.",
     createdAt: "2m",
     isRead: false,
   },
@@ -180,7 +180,7 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
             >
               <header className={styles.notificationHeader}>
                 <div>
-                  <span>Signal feed</span>
+                  <span>Activity feed</span>
                   <h2>Notifications</h2>
                 </div>
                 <div className={styles.notificationHeaderActions}>

@@ -23,19 +23,19 @@ import styles from "./BasePage.module.css";
 type ReactionKey = "curious" | "happy" | "focused" | "surprised" | "victory";
 
 const reactionLibrary: Record<ReactionKey, { asset: AssetKey; scale: number; dialogues: string[] }> = {
-  curious: { asset: "dexo.personalityCurious", scale: 1.05, dialogues: ["What are we discovering next?", "I found a signal worth following.", "Something new is waiting out there.", "Let’s take a closer look together."] },
+  curious: { asset: "dexo.personalityCurious", scale: 1.05, dialogues: ["What are we discovering next?", "I found a new path worth exploring.", "Something new is waiting out there.", "Let’s take a closer look together."] },
   happy: { asset: "dexo.personalityHappy", scale: 1.02, dialogues: ["I’m glad you’re here.", "Base feels brighter with you around.", "That made my core glow.", "Ready for another good moment?"] },
   focused: { asset: "dexo.personalityFocused", scale: 1.05, dialogues: ["Systems aligned. I’m ready.", "One clear objective at a time.", "Focus locked. Let’s move.", "I’m tracking our next best step."] },
-  surprised: { asset: "dexo.personalitySurprised", scale: 1.03, dialogues: ["Whoa — I didn’t expect that!", "Did you see that energy spike?", "Okay, that definitely got my attention.", "A new signal just appeared!"] },
+  surprised: { asset: "dexo.personalitySurprised", scale: 1.03, dialogues: ["Whoa — I didn’t expect that!", "Did you see that energy spike?", "Okay, that definitely got my attention.", "A new discovery just appeared!"] },
   victory: { asset: "dexo.personalityVictory", scale: 1.02, dialogues: ["That’s the spirit — victory starts here!", "We’re building momentum already.", "Another step toward our legacy.", "I knew we could make that count."] },
 };
 
 const reactionOrder: ReactionKey[] = ["curious", "happy", "focused", "surprised", "victory"];
 
 const activityFeed = [
-  { id: "signals", tone: "cyan", title: "12 verified signals reached your core.", time: "2m ago", status: "Ready" },
+  { id: "missions", tone: "cyan", title: "12 completed missions updated your progress.", time: "2m ago", status: "Ready" },
   { id: "clan-xp", tone: "violet", title: "NovaGuard gained 340 Clan XP.", time: "18m ago", status: "Synced" },
-  { id: "fragment", tone: "gold", title: "A Rare Signal Fragment is now available.", time: "1h ago", status: "New" },
+  { id: "fragment", tone: "gold", title: "A Rare Season Fragment is now available.", time: "1h ago", status: "New" },
 ] as const;
 
 function getLevelAsset(level: number): AssetKey {
@@ -217,7 +217,7 @@ export function BasePage() {
                 <span>Next critical action</span>
                 <small>War in 42m</small>
               </div>
-              <h2>Defend your clan signal</h2>
+              <h2>Defend your clan outpost</h2>
               <p>KRYPT-9 is probing the eastern relay. Join the preparation phase before deployment locks.</p>
               <Button size="lg" className={styles.criticalButton} trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={18} strokeWidth={1.8} />} onClick={() => void navigate({ to: "/arena" })}>
                 Join clan defence
@@ -245,7 +245,7 @@ export function BasePage() {
               <span className={styles.objectiveNode}>02</span>
               <div>
                 <div className={styles.objectiveEyebrow}><span>Starter pathway</span><strong>{starterProgress}%</strong></div>
-                <h3>{claimedMissionCount < 2 ? "Accuracy Protocol" : "Season Signal Access"}</h3>
+                <h3>{claimedMissionCount < 2 ? "Accuracy Protocol" : "Season Access"}</h3>
               </div>
             </article>
             <article className={styles.objectiveItem}>

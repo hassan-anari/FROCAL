@@ -16,11 +16,26 @@ import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import styles from "./TypingChallengePage.module.css";
 
 const phrases = [
-  "Every clear mission brings Dexo closer to the next evolution.",
-  "Focus turns small actions into powerful seasonal momentum.",
-  "Precision and consistency create progress across Dexo Land.",
-  "Explorers grow faster when practice becomes a daily habit.",
-  "A calm mind can move through every challenge with accuracy.",
+  "Every completed mission brings Dexo closer to a new evolution.",
+  "Daily practice turns careful explorers into confident champions.",
+  "A strong clan grows when every member contributes with purpose.",
+  "Seasonal journeys reward patience, curiosity, and consistent effort.",
+  "Dexo learns new abilities as your experience continues to grow.",
+  "The brightest achievements begin with one focused action today.",
+  "Explore every corner of Dexo Land and collect meaningful rewards.",
+  "Accuracy improves when your hands stay relaxed and your mind stays calm.",
+  "Great companions celebrate progress and learn from every challenge.",
+  "A new season creates fresh goals for explorers across the world.",
+  "Small daily victories can unlock powerful upgrades over time.",
+  "Teamwork helps every clan reach milestones that feel impossible alone.",
+  "The Typing Arena rewards speed, control, and steady concentration.",
+  "Complete your objectives and watch your companion become stronger.",
+  "Curious explorers discover opportunities hidden beyond familiar paths.",
+  "Every achievement tells a story about the journey you completed.",
+  "Build your profile with medals, titles, and memorable seasonal moments.",
+  "Invite trusted friends and grow a community that learns together.",
+  "Consistent practice creates the confidence needed for harder missions.",
+  "Your adventure in Dexo Land becomes richer with every new discovery.",
 ];
 
 const CHALLENGE_SECONDS = 30;
@@ -53,7 +68,7 @@ export function TypingChallengePage() {
   const typingAttempts = useEarnStore((state) => state.typingAttempts);
   const attempt = useRef(0);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
-  const [target, setTarget] = useState(phrases[0]);
+  const [target, setTarget] = useState(() => phrases[Math.floor(Math.random() * phrases.length)]);
   const [input, setInput] = useState("");
   const [timeLeft, setTimeLeft] = useState(CHALLENGE_SECONDS);
   const [started, setStarted] = useState(false);
@@ -85,7 +100,7 @@ export function TypingChallengePage() {
   }, [adapter, attemptsRemaining, input, recordTypingResult, result, started, target, timeLeft]);
 
   useEffect(() => {
-    void preloadAssets(["dexo.platform", "dexo.personalityFocused"]);
+    void preloadAssets(["dexo.personalityFocused"]);
   }, []);
 
   useEffect(() => {
@@ -154,7 +169,7 @@ export function TypingChallengePage() {
             <h1>Type with intent.</h1>
             <p>Finish the full phrase with at least {PASS_ACCURACY}% accuracy and {PASS_WPM} WPM.</p>
           </div>
-          <DexoStage character="dexo.personalityFocused" characterScale={1.04} effect="idle" showParticles={false} className={styles.challengeDexo} />
+          <DexoStage character="dexo.personalityFocused" characterScale={1.08} effect="idle" showParticles={false} showPlatform={false} className={styles.challengeDexo} />
         </section>
 
         <section className={styles.liveStats} aria-label="Live typing statistics">
@@ -164,7 +179,13 @@ export function TypingChallengePage() {
         </section>
 
         <section className={styles.typingCard}>
-          <div className={styles.targetText} aria-label="Target phrase">
+          <div
+            className={styles.targetText}
+            aria-label="Target phrase"
+            onCopy={(event) => event.preventDefault()}
+            onContextMenu={(event) => event.preventDefault()}
+            onDragStart={(event) => event.preventDefault()}
+          >
             {target.split("").map((character, index) => {
               const typed = input[index];
               const className = index < input.length
@@ -183,6 +204,14 @@ export function TypingChallengePage() {
             autoCapitalize="off"
             autoCorrect="off"
             spellCheck={false}
+            onCopy={(event) => event.preventDefault()}
+            onCut={(event) => event.preventDefault()}
+            onPaste={(event) => event.preventDefault()}
+            onContextMenu={(event) => event.preventDefault()}
+            onDrop={(event) => event.preventDefault()}
+            onKeyDown={(event) => {
+              if ((event.ctrlKey || event.metaKey) && ["v", "c", "x"].includes(event.key.toLowerCase())) event.preventDefault();
+            }}
             aria-label="Typing challenge input"
           />
 
