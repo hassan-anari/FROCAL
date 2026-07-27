@@ -13,7 +13,7 @@ async function openEarn(page: Page) {
   await page.goto("/earn");
 }
 
-test.describe("Phase 3 Earn loop", () => {
+test.describe("Phase 3.1 Earn Center", () => {
   test("claims the Daily Core and opens the reward reveal", async ({ page }) => {
     await openEarn(page);
     await page.getByRole("button", { name: /Claim daily core/i }).click();
@@ -21,25 +21,30 @@ test.describe("Phase 3 Earn loop", () => {
     await expect(page.getByRole("heading", { name: "+40 XP" })).toBeVisible();
   });
 
-  test("completes the Daily Signal and makes its reward claimable", async ({ page }) => {
+  test("separates active and completed missions", async ({ page }) => {
     await openEarn(page);
-    await page.getByRole("button", { name: /Start mission/i }).click();
-    await page.getByRole("button", { name: /Stabilize signal/i }).click();
-    await expect(page.getByRole("button", { name: /Claim 80 XP/i })).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByRole("heading", { name: /Active Missions/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Completed Missions/i })).toBeVisible();
   });
 
-  test("opens the Typing Protocol as a focused challenge", async ({ page }) => {
+  test("opens Network and Typing tabs", async ({ page }) => {
     await openEarn(page);
-    await page.getByRole("button", { name: /Start challenge/i }).click();
+    await page.getByRole("button", { name: "Network" }).click();
+    await expect(page.getByRole("heading", { name: /Grow with people and groups/i })).toBeVisible();
+    await page.getByRole("button", { name: "Typing" }).click();
+    await expect(page.getByRole("heading", { name: "Typing Arena" })).toBeVisible();
+  });
+
+  test("opens the permanent Typing Arena", async ({ page }) => {
+    await openEarn(page);
+    await page.getByRole("button", { name: "Typing" }).click();
+    await page.getByRole("button", { name: /Enter Typing Arena/i }).click();
     await expect(page.getByRole("heading", { name: /Type with intent/i })).toBeVisible();
     await expect(page.getByRole("textbox", { name: /Typing challenge input/i })).toBeVisible();
   });
 
-  test("opens referral and mission history sheets", async ({ page }) => {
+  test("opens the shared activity history", async ({ page }) => {
     await openEarn(page);
-    await page.getByRole("button", { name: /Invite explorer/i }).click();
-    await expect(page.getByRole("heading", { name: /Invite an Explorer/i })).toBeVisible();
-    await page.keyboard.press("Escape");
     await page.getByRole("button", { name: /History/i }).click();
     await expect(page.getByRole("heading", { name: /Your recent progress/i })).toBeVisible();
   });

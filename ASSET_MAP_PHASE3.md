@@ -1,30 +1,7 @@
-# Phase 3 Asset Map
+# Phase 3.1 Asset Map
 
-Phase 3 introduces no required artwork files. The Earn experience is built with the existing design system, Hugeicons and current Dexo assets.
+Phase 3.1 does not require new artwork.
 
-## Existing Dexo assets used
+The Earn, Network and Typing interfaces use design-system primitives and Hugeicons. Existing Dexo assets remain referenced through the main repository manifest and are not bundled in checkpoint ZIPs.
 
-```text
-/assets/dexo/dexo-place.webp
-/assets/dexo/dexo-personality-focused.webp
-/assets/dexo/dexo-personality-victory.webp
-/assets/dexo/dexo-level-05-explorer.webp
-/assets/dexo/dexo-level-10-connector.webp
-/assets/dexo/dexo-level-15-specialist.webp
-/assets/dexo/dexo-level-20-vanguard.webp
-/assets/dexo/dexo-level-30-legend.webp
-```
-
-## Reserved paths already present in the registry
-
-These paths remain available for a later art pass, but Phase 3 does not require the files to render correctly:
-
-```text
-/assets/missions/mission-daily.webp
-/assets/missions/mission-typing.webp
-/assets/missions/mission-referral.webp
-/assets/rewards/seasonal-reward-capsule.webp
-/assets/rewards/fx-level-up.webp
-```
-
-No logo, background, Dexo, mission or reward artwork is included in the checkpoint ZIP.
+Potential future optional assets may be added only after their UI placement is approved.

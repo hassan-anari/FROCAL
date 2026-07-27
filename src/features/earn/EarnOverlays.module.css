@@ -88,81 +88,6 @@
   line-height: 1.55;
 }
 
-.signalCore {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 142px;
-  height: 142px;
-  margin: .35rem auto 1rem;
-}
-
-.signalCore::before {
-  content: "";
-  position: absolute;
-  inset: 27%;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 28%, #79edff, #7d6cff 55%, #c54cff);
-  box-shadow: 0 0 34px rgba(99, 109, 255, .42), inset 0 1px 0 rgba(255,255,255,.55);
-}
-
-.signalCore i {
-  position: absolute;
-  inset: 8%;
-  border: 1px solid rgba(95, 223, 255, .28);
-  border-radius: 50%;
-  border-left-color: rgba(194, 82, 255, .72);
-}
-
-.signalCore i:nth-child(2) {
-  inset: 0;
-  border-color: rgba(188, 91, 255, .16);
-  border-right-color: rgba(76, 222, 255, .54);
-}
-
-.signalCore strong {
-  position: relative;
-  z-index: 1;
-  color: white;
-  font-size: .78rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.nodeList {
-  display: grid;
-  gap: .5rem;
-  margin-bottom: 1rem;
-}
-
-.nodeList > div {
-  display: grid;
-  grid-template-columns: 34px 1fr auto;
-  align-items: center;
-  gap: .62rem;
-  padding: .65rem .72rem;
-  border: 1px solid rgba(134, 171, 236, .12);
-  border-radius: 15px;
-  background: rgba(5, 11, 27, .55);
-}
-
-.nodeList > div > span {
-  display: grid;
-  place-items: center;
-  width: 31px;
-  height: 31px;
-  border-radius: 11px;
-  color: rgba(190, 206, 238, .58);
-  font-size: .56rem;
-  font-weight: 790;
-  background: rgba(98, 116, 179, .12);
-}
-
-.nodeList strong { color: #eaf0ff; font-size: .7rem; }
-.nodeList em { color: rgba(176, 190, 221, .48); font-size: .56rem; font-style: normal; }
-.nodeReady { border-color: rgba(83, 229, 184, .2) !important; }
-.nodeReady > span { color: #74f0c9 !important; background: rgba(55, 205, 154, .1) !important; }
-.nodeReady em { color: #6ce9c2; }
-
 .referralHero {
   display: grid;
   grid-template-columns: 48px 1fr;
@@ -279,3 +204,4 @@
 @media (prefers-reduced-motion: reduce) {
   .rewardRings i { animation: none; }
 }
+.history_group { background: #7fe7ff !important; }

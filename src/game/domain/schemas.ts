@@ -41,14 +41,23 @@ export type BootstrapPayload = z.infer<typeof bootstrapPayloadSchema>;
 export const missionStatusSchema = z.enum(["available", "in-progress", "completed", "claimed"]);
 
 export const missionSchema = z.object({
-  id: z.enum(["daily-signal", "typing-protocol", "invite-explorer"]),
+  id: z.enum([
+    "visit-dalexio",
+    "view-x-update",
+    "join-telegram",
+    "typing-session",
+    "complete-profile",
+    "read-season-brief",
+  ]),
   title: z.string().min(1),
   description: z.string().min(1),
   rewardXp: z.number().int().positive(),
   status: missionStatusSchema,
   progress: z.number().nonnegative(),
   target: z.number().positive(),
-  category: z.enum(["daily", "skill", "community"]),
+  category: z.enum(["ecosystem", "social", "skill", "profile", "season"]),
+  action: z.enum(["external", "typing", "profile"]),
+  href: z.string().url().optional(),
 });
 
 export const typingResultSchema = z.object({
@@ -60,7 +69,7 @@ export const typingResultSchema = z.object({
 
 export const earnHistoryEntrySchema = z.object({
   id: z.string(),
-  type: z.enum(["daily", "mission", "typing", "referral", "level", "system"]),
+  type: z.enum(["daily", "mission", "typing", "referral", "group", "level", "system"]),
   title: z.string().min(1),
   description: z.string().min(1),
   createdAt: z.string().datetime(),
@@ -76,7 +85,16 @@ export const earnProgressSchema = z.object({
   levelXp: z.number().int().nonnegative(),
   xpToNextLevel: z.number().int().positive(),
   typingBest: typingResultSchema.nullable(),
+  typingAttemptDate: z.string().nullable(),
+  typingAttempts: z.array(typingResultSchema),
   referralSent: z.boolean(),
+  referralShares: z.number().int().nonnegative(),
+  referralCount: z.number().int().nonnegative(),
+  verifiedReferrals: z.number().int().nonnegative(),
+  referralXpEarned: z.number().int().nonnegative(),
+  connectedGroups: z.number().int().nonnegative(),
+  activeGroups: z.number().int().nonnegative(),
+  groupXpEarned: z.number().int().nonnegative(),
   history: z.array(earnHistoryEntrySchema),
 });
 

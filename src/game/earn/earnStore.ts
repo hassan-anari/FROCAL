@@ -9,42 +9,85 @@ import type {
   TypingResult,
 } from "./types";
 
+export const TYPING_DAILY_LIMIT = 5;
 const DAILY_REWARD_XP = 40;
 const INITIAL_LIFETIME_XP = 2_356_254;
 const INITIAL_LEVEL_XP = 120;
 const INITIAL_LEVEL = 1;
 const INITIAL_LEVEL_TARGET = 500;
+const REFERRAL_REWARD_XP = 140;
+const GROUP_REWARD_XP = 200;
 
 const missionTemplate: Record<MissionId, EarnMission> = {
-  "daily-signal": {
-    id: "daily-signal",
-    title: "Daily Signal",
-    description: "Stabilize your core and complete today’s signal check.",
-    rewardXp: 80,
+  "visit-dalexio": {
+    id: "visit-dalexio",
+    title: "Explore Dalexio",
+    description: "Open the official website and discover the wider ecosystem.",
+    rewardXp: 60,
     status: "available",
     progress: 0,
     target: 1,
-    category: "daily",
+    category: "ecosystem",
+    action: "external",
+    href: "https://dalexio.com/",
   },
-  "typing-protocol": {
-    id: "typing-protocol",
-    title: "Typing Protocol",
-    description: "Clear the precision challenge with at least 85% accuracy.",
-    rewardXp: 160,
+  "view-x-update": {
+    id: "view-x-update",
+    title: "View the latest X update",
+    description: "Open the latest community update and return for verification.",
+    rewardXp: 70,
+    status: "available",
+    progress: 0,
+    target: 1,
+    category: "social",
+    action: "external",
+    href: "https://x.com/",
+  },
+  "join-telegram": {
+    id: "join-telegram",
+    title: "Open the Telegram community",
+    description: "Visit the Dalexio community and keep up with new announcements.",
+    rewardXp: 90,
+    status: "available",
+    progress: 0,
+    target: 1,
+    category: "social",
+    action: "external",
+    href: "https://t.me/DalexioBot",
+  },
+  "typing-session": {
+    id: "typing-session",
+    title: "Complete a Typing Arena run",
+    description: "Play one complete round in the permanent Typing Arena.",
+    rewardXp: 120,
     status: "available",
     progress: 0,
     target: 1,
     category: "skill",
+    action: "typing",
   },
-  "invite-explorer": {
-    id: "invite-explorer",
-    title: "Invite an Explorer",
-    description: "Bring one verified explorer into Dexo Land.",
-    rewardXp: 140,
+  "complete-profile": {
+    id: "complete-profile",
+    title: "Review your explorer profile",
+    description: "Open your profile and prepare your public Dexo identity.",
+    rewardXp: 100,
     status: "available",
     progress: 0,
     target: 1,
-    category: "community",
+    category: "profile",
+    action: "profile",
+  },
+  "read-season-brief": {
+    id: "read-season-brief",
+    title: "Read the Season One brief",
+    description: "Review the current season structure and its progression rules.",
+    rewardXp: 80,
+    status: "available",
+    progress: 0,
+    target: 1,
+    category: "season",
+    action: "external",
+    href: "https://dalexio.com/",
   },
 };
 
@@ -52,7 +95,7 @@ function cloneMissions(): Record<MissionId, EarnMission> {
   return structuredClone(missionTemplate);
 }
 
-function localDateKey(date = new Date()): string {
+export function localDateKey(date = new Date()): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
@@ -92,15 +135,26 @@ interface EarnState {
   levelXp: number;
   xpToNextLevel: number;
   typingBest: TypingResult | null;
+  typingAttemptDate: string | null;
+  typingAttempts: TypingResult[];
   referralSent: boolean;
+  referralShares: number;
+  referralCount: number;
+  verifiedReferrals: number;
+  referralXpEarned: number;
+  connectedGroups: number;
+  activeGroups: number;
+  groupXpEarned: number;
   history: EarnHistoryEntry[];
   rewardEvent: RewardEvent | null;
   levelUpEvent: LevelUpEvent | null;
   claimDaily: () => void;
-  completeDailySignal: () => void;
+  startMission: (id: MissionId) => void;
+  completeMission: (id: MissionId) => void;
   recordTypingResult: (result: TypingResult) => boolean;
   markReferralSent: () => void;
   verifyReferral: () => void;
+  verifyGroup: () => void;
   claimMission: (id: MissionId) => void;
   dismissReward: () => void;
   dismissLevelUp: () => void;
@@ -113,8 +167,8 @@ const initialHistory: EarnHistoryEntry[] = [
   {
     id: "journey-ready",
     type: "system",
-    title: "Mission Control is online",
-    description: "Your Starter Protocol is ready to begin.",
+    title: "Earn Center is online",
+    description: "Daily rewards, missions, network growth and the Typing Arena are ready.",
     createdAt: new Date().toISOString(),
   },
 ];
@@ -163,6 +217,10 @@ function applyXp(
   };
 }
 
+function currentTypingAttempts(state: Pick<EarnState, "typingAttemptDate" | "typingAttempts">): TypingResult[] {
+  return state.typingAttemptDate === localDateKey() ? state.typingAttempts : [];
+}
+
 export const useEarnStore = create<EarnState>()(
   persist(
     (set, get) => ({
@@ -174,7 +232,16 @@ export const useEarnStore = create<EarnState>()(
       levelXp: INITIAL_LEVEL_XP,
       xpToNextLevel: INITIAL_LEVEL_TARGET,
       typingBest: null,
+      typingAttemptDate: null,
+      typingAttempts: [],
       referralSent: false,
+      referralShares: 0,
+      referralCount: 3,
+      verifiedReferrals: 2,
+      referralXpEarned: 280,
+      connectedGroups: 1,
+      activeGroups: 1,
+      groupXpEarned: 200,
       history: initialHistory,
       rewardEvent: null,
       levelUpEvent: null,
@@ -203,8 +270,8 @@ export const useEarnStore = create<EarnState>()(
             {
               id: createId("history"),
               type: "daily",
-              title: `Daily core · Day ${nextStreak}`,
-              description: "Your daily connection was stabilized.",
+              title: `Daily Core · Day ${nextStreak}`,
+              description: "Today’s reward was added to your progression.",
               createdAt: now,
               xp: DAILY_REWARD_XP,
             },
@@ -224,21 +291,33 @@ export const useEarnStore = create<EarnState>()(
         });
       },
 
-      completeDailySignal: () => {
+      startMission: (id) => {
         const state = get();
-        const mission = state.missions["daily-signal"];
-        if (mission.status === "claimed" || mission.status === "completed") return;
+        const mission = state.missions[id];
+        if (!mission || mission.status !== "available") return;
         set({
           missions: {
             ...state.missions,
-            "daily-signal": { ...mission, status: "completed", progress: 1 },
+            [id]: { ...mission, status: "in-progress" },
+          },
+        });
+      },
+
+      completeMission: (id) => {
+        const state = get();
+        const mission = state.missions[id];
+        if (!mission || mission.status === "claimed" || mission.status === "completed") return;
+        set({
+          missions: {
+            ...state.missions,
+            [id]: { ...mission, status: "completed", progress: mission.target },
           },
           history: [
             {
               id: createId("history"),
               type: "mission",
-              title: "Daily Signal stabilized",
-              description: "Reward is ready to claim.",
+              title: `${mission.title} verified`,
+              description: "The mission reward is ready to claim.",
               createdAt: new Date().toISOString(),
             },
             ...state.history,
@@ -248,24 +327,30 @@ export const useEarnStore = create<EarnState>()(
 
       recordTypingResult: (result) => {
         const state = get();
+        const today = localDateKey();
+        const attempts = currentTypingAttempts(state);
+        if (attempts.length >= TYPING_DAILY_LIMIT) return false;
+
         const passed = result.accuracy >= 85 && result.wpm >= 10;
-        const currentBest = state.typingBest;
-        const typingBest = !currentBest || result.score > currentBest.score ? result : currentBest;
-        const mission = state.missions["typing-protocol"];
+        const typingBest = !state.typingBest || result.score > state.typingBest.score ? result : state.typingBest;
+        const mission = state.missions["typing-session"];
+        const shouldCompleteMission = mission.status !== "claimed" && mission.status !== "completed";
 
         set({
           typingBest,
-          missions: passed && mission.status !== "claimed"
+          typingAttemptDate: today,
+          typingAttempts: [result, ...attempts],
+          missions: shouldCompleteMission
             ? {
                 ...state.missions,
-                "typing-protocol": { ...mission, status: "completed", progress: 1 },
+                "typing-session": { ...mission, status: "completed", progress: 1 },
               }
             : state.missions,
           history: [
             {
               id: createId("history"),
               type: "typing",
-              title: passed ? "Typing Protocol cleared" : "Typing Protocol attempted",
+              title: passed ? "Typing Arena run cleared" : "Typing Arena run completed",
               description: `${Math.round(result.accuracy)}% accuracy · ${Math.round(result.wpm)} WPM`,
               createdAt: result.completedAt,
             },
@@ -278,34 +363,59 @@ export const useEarnStore = create<EarnState>()(
 
       markReferralSent: () => {
         const state = get();
-        const mission = state.missions["invite-explorer"];
-        if (mission.status === "claimed" || mission.status === "completed") return;
         set({
           referralSent: true,
-          missions: {
-            ...state.missions,
-            "invite-explorer": { ...mission, status: "in-progress", progress: 0 },
-          },
+          referralShares: state.referralShares + 1,
+          history: [
+            {
+              id: createId("history"),
+              type: "referral",
+              title: "Referral link shared",
+              description: "Verification begins when a new explorer joins through your link.",
+              createdAt: new Date().toISOString(),
+            },
+            ...state.history,
+          ],
         });
       },
 
       verifyReferral: () => {
         const state = get();
-        const mission = state.missions["invite-explorer"];
-        if (mission.status === "claimed") return;
+        const now = new Date().toISOString();
         set({
           referralSent: true,
-          missions: {
-            ...state.missions,
-            "invite-explorer": { ...mission, status: "completed", progress: 1 },
-          },
+          referralCount: state.referralCount + 1,
+          verifiedReferrals: state.verifiedReferrals + 1,
+          referralXpEarned: state.referralXpEarned + REFERRAL_REWARD_XP,
           history: [
             {
               id: createId("history"),
               type: "referral",
               title: "Explorer referral verified",
-              description: "A new explorer joined through your invitation.",
-              createdAt: new Date().toISOString(),
+              description: "A new verified explorer joined your network.",
+              createdAt: now,
+              xp: REFERRAL_REWARD_XP,
+            },
+            ...state.history,
+          ],
+        });
+      },
+
+      verifyGroup: () => {
+        const state = get();
+        const now = new Date().toISOString();
+        set({
+          connectedGroups: state.connectedGroups + 1,
+          activeGroups: state.activeGroups + 1,
+          groupXpEarned: state.groupXpEarned + GROUP_REWARD_XP,
+          history: [
+            {
+              id: createId("history"),
+              type: "group",
+              title: "Active group verified",
+              description: "A Telegram group was connected to the Dalexio network.",
+              createdAt: now,
+              xp: GROUP_REWARD_XP,
             },
             ...state.history,
           ],
@@ -315,7 +425,7 @@ export const useEarnStore = create<EarnState>()(
       claimMission: (id) => {
         const state = get();
         const mission = state.missions[id];
-        if (mission.status !== "completed") return;
+        if (!mission || mission.status !== "completed") return;
         const progression = applyXp(state, mission.rewardXp);
         const now = new Date().toISOString();
 
@@ -369,7 +479,16 @@ export const useEarnStore = create<EarnState>()(
         levelXp: INITIAL_LEVEL_XP,
         xpToNextLevel: INITIAL_LEVEL_TARGET,
         typingBest: null,
+        typingAttemptDate: null,
+        typingAttempts: [],
         referralSent: false,
+        referralShares: 0,
+        referralCount: 3,
+        verifiedReferrals: 2,
+        referralXpEarned: 280,
+        connectedGroups: 1,
+        activeGroups: 1,
+        groupXpEarned: 200,
         history: initialHistory,
         rewardEvent: null,
         levelUpEvent: null,
@@ -385,18 +504,16 @@ export const useEarnStore = create<EarnState>()(
 
       completeStarterPathForDiagnostics: () => {
         const state = get();
-        set({
-          referralSent: true,
-          missions: {
-            "daily-signal": { ...state.missions["daily-signal"], status: "completed", progress: 1 },
-            "typing-protocol": { ...state.missions["typing-protocol"], status: "completed", progress: 1 },
-            "invite-explorer": { ...state.missions["invite-explorer"], status: "completed", progress: 1 },
-          },
+        const completed = { ...state.missions };
+        (Object.keys(completed) as MissionId[]).forEach((id) => {
+          const mission = completed[id];
+          completed[id] = { ...mission, status: "completed", progress: mission.target };
         });
+        set({ missions: completed });
       },
     }),
     {
-      name: "dalexio-earn-state-v1",
+      name: "dalexio-earn-state-v2",
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         missions: state.missions,
@@ -407,7 +524,16 @@ export const useEarnStore = create<EarnState>()(
         levelXp: state.levelXp,
         xpToNextLevel: state.xpToNextLevel,
         typingBest: state.typingBest,
+        typingAttemptDate: state.typingAttemptDate,
+        typingAttempts: state.typingAttempts,
         referralSent: state.referralSent,
+        referralShares: state.referralShares,
+        referralCount: state.referralCount,
+        verifiedReferrals: state.verifiedReferrals,
+        referralXpEarned: state.referralXpEarned,
+        connectedGroups: state.connectedGroups,
+        activeGroups: state.activeGroups,
+        groupXpEarned: state.groupXpEarned,
         history: state.history,
       }),
     },
@@ -421,4 +547,18 @@ export function isDailyClaimAvailable(lastClaimDate: string | null): boolean {
 export function getStarterPathProgress(missions: Record<MissionId, EarnMission>): number {
   const claimed = Object.values(missions).filter((mission) => mission.status === "claimed").length;
   return Math.round((claimed / Object.keys(missions).length) * 100);
+}
+
+export function getTypingAttemptsToday(
+  typingAttemptDate: string | null,
+  attempts: TypingResult[],
+): TypingResult[] {
+  return typingAttemptDate === localDateKey() ? attempts : [];
+}
+
+export function getTypingAttemptsRemaining(
+  typingAttemptDate: string | null,
+  attempts: TypingResult[],
+): number {
+  return Math.max(0, TYPING_DAILY_LIMIT - getTypingAttemptsToday(typingAttemptDate, attempts).length);
 }

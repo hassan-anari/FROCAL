@@ -1,31 +1,20 @@
-# Dalexio Mini App — Phase 3
+# Dalexio Mini App — Phase 3.1
 
-Telegram-first Dexo Land mini app with:
+Telegram-first Dexo Land Mini App checkpoint.
 
-- Approved Dexo Land intro
-- Completed onboarding and Dexo acquisition
-- Final Base experience and main app shell
-- Playable Earn / Core Game Loop
+## Included
+- Approved Intro, Onboarding, Base and main shell
+- Earn / Network / Typing tab architecture
+- Daily Core and mission claim loop
+- Referral and Telegram group mock systems
+- Permanent Typing Arena with five daily plays
+- Diagnostics and repeatable mock controls
 
 ## Run
-
 ```bash
 npm install
+npm run check
 npm run dev
 ```
 
-## Production check
-
-```bash
-npm run check
-```
-
-## Phase 3 routes
-
-- `/earn` — Mission Control
-- `/earn/typing` — playable Typing Protocol
-- `/diagnostics` — hidden repeatable test controls
-
-## Asset ownership
-
-Brand, Dexo, Dexo Land, mission and reward artwork are intentionally not bundled. Existing source files remain in the main repository at paths declared in `src/assets/manifest.json`.
+Product artwork is maintained in the main repository and is intentionally excluded from this checkpoint.

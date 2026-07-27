@@ -7,7 +7,7 @@ import { assetRegistry, listAssetsForPhase } from "@/assets/registry";
 import { useOnboardingStore } from "@/game/onboarding/onboardingStore";
 import { useScenarioStore } from "@/game/scenarios/scenarioStore";
 import { useBaseUiStore } from "@/game/ui/baseUiStore";
-import { useEarnStore } from "@/game/earn/earnStore";
+import { getTypingAttemptsRemaining, useEarnStore } from "@/game/earn/earnStore";
 import { loadBootstrap } from "@/integrations/api/bootstrap";
 import { queryKeys } from "@/integrations/api/queryKeys";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
@@ -49,27 +49,29 @@ export function DiagnosticsPage() {
   return (
     <main className={styles.root}>
       <header className={styles.header}>
-        <span>Phase 3 / Earn & Core Loop</span>
+        <span>Phase 3.1 / Earn, Network & Typing</span>
         <h1>System diagnostics</h1>
-        <p>Runtime, Base-state and repeatable Earn-flow controls.</p>
+        <p>Runtime, Base-state and repeatable Earn, Network and Typing controls.</p>
       </header>
 
       <section className={styles.stack} aria-label="Phase 3 diagnostics">
         <article>
           <StatusChip>Earn loop ready</StatusChip>
-          <h2>Mission Control state</h2>
+          <h2>Earn Center state</h2>
           <dl>
             <div><dt>Level</dt><dd>{earn.level}</dd></div>
             <div><dt>Level XP</dt><dd>{earn.levelXp} / {earn.xpToNextLevel}</dd></div>
             <div><dt>Lifetime XP</dt><dd>{earn.lifetimeXp.toLocaleString()}</dd></div>
             <div><dt>Daily streak</dt><dd>{earn.streak}</dd></div>
-            <div><dt>Daily Signal</dt><dd>{earn.missions["daily-signal"].status}</dd></div>
-            <div><dt>Typing Protocol</dt><dd>{earn.missions["typing-protocol"].status}</dd></div>
-            <div><dt>Referral</dt><dd>{earn.missions["invite-explorer"].status}</dd></div>
+            <div><dt>Active missions</dt><dd>{Object.values(earn.missions).filter((mission) => mission.status !== "claimed").length}</dd></div>
+            <div><dt>Typing plays left</dt><dd>{getTypingAttemptsRemaining(earn.typingAttemptDate, earn.typingAttempts)} / 5</dd></div>
+            <div><dt>Verified referrals</dt><dd>{earn.verifiedReferrals}</dd></div>
+            <div><dt>Active groups</dt><dd>{earn.activeGroups}</dd></div>
           </dl>
           <div className={styles.actions}>
             <Button tone="secondary" size="sm" onClick={earn.verifyReferral}>Verify referral</Button>
-            <Button tone="secondary" size="sm" onClick={earn.completeStarterPathForDiagnostics}>Complete starter path</Button>
+            <Button tone="secondary" size="sm" onClick={earn.verifyGroup}>Verify group</Button>
+            <Button tone="secondary" size="sm" onClick={earn.completeStarterPathForDiagnostics}>Complete missions</Button>
             <Button tone="secondary" size="sm" onClick={earn.setNearEvolutionForDiagnostics}>Near evolution</Button>
             <Button tone="secondary" size="sm" onClick={earn.resetEarnProgress}>Reset Earn</Button>
             <Button tone="secondary" size="sm" onClick={() => navigate({ to: "/earn" })}>Open Earn</Button>

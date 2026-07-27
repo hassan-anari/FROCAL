@@ -1,6 +1,14 @@
-export type MissionId = "daily-signal" | "typing-protocol" | "invite-explorer";
+export type MissionId =
+  | "visit-dalexio"
+  | "view-x-update"
+  | "join-telegram"
+  | "typing-session"
+  | "complete-profile"
+  | "read-season-brief";
 
 export type MissionStatus = "available" | "in-progress" | "completed" | "claimed";
+export type MissionCategory = "ecosystem" | "social" | "skill" | "profile" | "season";
+export type MissionAction = "external" | "typing" | "profile";
 
 export interface EarnMission {
   id: MissionId;
@@ -10,7 +18,9 @@ export interface EarnMission {
   status: MissionStatus;
   progress: number;
   target: number;
-  category: "daily" | "skill" | "community";
+  category: MissionCategory;
+  action: MissionAction;
+  href?: string;
 }
 
 export interface TypingResult {
@@ -22,7 +32,7 @@ export interface TypingResult {
 
 export interface EarnHistoryEntry {
   id: string;
-  type: "daily" | "mission" | "typing" | "referral" | "level" | "system";
+  type: "daily" | "mission" | "typing" | "referral" | "group" | "level" | "system";
   title: string;
   description: string;
   createdAt: string;
