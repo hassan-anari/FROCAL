@@ -83,13 +83,25 @@ function referralTier(referrals: number) {
   return "Bronze";
 }
 
-const referralRows = [
+type ReferralRow = {
+  id: string;
+  name: string;
+  level: number;
+  status: "Active" | "Pending";
+  invitedAt: string;
+  tone: "cyan" | "violet" | "gold" | "blue" | "pink";
+  earnedXp?: number;
+  activation?: string;
+  useTelegramPhoto?: boolean;
+};
+
+const referralRows: readonly ReferralRow[] = [
   { id: "ref-1", name: "Aria Moon", level: 8, status: "Active", invitedAt: "Jul 25", earnedXp: 84, useTelegramPhoto: true, tone: "cyan" },
   { id: "ref-2", name: "Nova Reed", level: 6, status: "Active", invitedAt: "Jul 24", earnedXp: 56, tone: "violet" },
   { id: "ref-3", name: "Liam Cross", level: 4, status: "Pending", invitedAt: "Jul 23", activation: "Level 4 / 5", tone: "gold" },
   { id: "ref-4", name: "Mika Vale", level: 2, status: "Pending", invitedAt: "Jul 22", activation: "Level 2 / 5", tone: "blue" },
   { id: "ref-5", name: "Sora Lin", level: 1, status: "Pending", invitedAt: "Jul 21", activation: "Level 1 / 5", tone: "pink" },
-] as const;
+];
 
 const groupRows = [
   { id: "group-1", name: "Dexo Explorers", members: 2840, admin: true, status: "Active", earnedXp: 1240, meta: "Active 12m ago", tone: "violet" },
