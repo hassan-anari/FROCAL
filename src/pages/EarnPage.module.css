@@ -1,0 +1,354 @@
+.page {
+  min-height: 100%;
+  padding:
+    calc(.78rem + var(--safe-top))
+    calc(.82rem + var(--safe-right))
+    1.2rem
+    calc(.82rem + var(--safe-left));
+}
+
+.pageHeader {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: .8rem;
+  margin: 1rem 0 .82rem;
+}
+
+.pageHeader > div { display: grid; gap: .2rem; }
+.pageHeader > div > span,
+.sectionHeader > div > span,
+.dailyCard header span,
+.pathCard header span,
+.allocationCard > div > span {
+  color: #78e9ff;
+  font-size: .54rem;
+  font-weight: 820;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.pageHeader h1 {
+  margin: 0;
+  color: #f7f9ff;
+  font-size: clamp(1.85rem, 8.4vw, 2.45rem);
+  font-weight: 860;
+  letter-spacing: -.06em;
+  line-height: .96;
+}
+
+.pageHeader > button,
+.sectionHeader > span {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+  min-height: 34px;
+  padding: 0 .58rem;
+  border: 1px solid rgba(137, 177, 239, .16);
+  border-radius: 12px;
+  color: rgba(213, 224, 247, .72);
+  background: rgba(6, 13, 31, .54);
+  font-size: .58rem;
+  font-weight: 700;
+}
+
+.progressStrip {
+  display: grid;
+  grid-template-columns: .72fr .95fr 1.6fr;
+  gap: .5rem;
+  margin-bottom: .72rem;
+}
+
+.progressStrip > div {
+  display: grid;
+  gap: .12rem;
+  min-width: 0;
+  padding: .62rem .64rem;
+  border: 1px solid rgba(138, 173, 237, .12);
+  border-radius: 15px;
+  background: rgba(6, 12, 29, .58);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+}
+
+.progressStrip span {
+  color: rgba(160, 177, 211, .48);
+  font-size: .48rem;
+  font-weight: 780;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.progressStrip strong {
+  overflow: hidden;
+  color: #f2f5ff;
+  font-size: .77rem;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.progressStrip .lifetime strong {
+  color: transparent;
+  background: linear-gradient(92deg, #f7faff, #9cecff 54%, #ae8dff);
+  background-clip: text;
+}
+
+.dailyCard,
+.pathCard,
+.missionCard,
+.allocationCard,
+.referralSummary {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(139, 174, 240, .15);
+  background: linear-gradient(145deg, rgba(14, 25, 55, .9), rgba(4, 9, 23, .95));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.045), 0 16px 38px rgba(0,0,0,.2);
+}
+
+.dailyCard {
+  isolation: isolate;
+  padding: .95rem;
+  border-radius: 22px;
+}
+
+.dailyGlow {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    radial-gradient(circle at 86% 14%, rgba(192, 75, 255, .22), transparent 36%),
+    radial-gradient(circle at 12% 88%, rgba(58, 214, 255, .18), transparent 38%);
+}
+
+.dailyCard header {
+  display: flex;
+  justify-content: space-between;
+  gap: .8rem;
+}
+
+.dailyCard header > div { display: grid; gap: .2rem; }
+.dailyCard h2,
+.pathCard h2,
+.sectionHeader h2,
+.allocationCard h2 {
+  margin: 0;
+  color: #f5f7ff;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -.035em;
+}
+
+.dailyCard p,
+.allocationCard p {
+  max-width: 270px;
+  margin: 0;
+  color: rgba(182, 197, 228, .6);
+  font-size: .62rem;
+  line-height: 1.45;
+}
+
+.dailyCard header > strong {
+  align-self: start;
+  color: #7beaff;
+  font-size: .76rem;
+  white-space: nowrap;
+}
+
+.dailyPath {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: .34rem;
+  margin: .9rem 0 .8rem;
+}
+
+.dailyPath span {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border: 1px solid rgba(133, 169, 234, .12);
+  border-radius: 11px;
+  color: rgba(175, 190, 222, .46);
+  font-size: .52rem;
+  font-weight: 780;
+  background: rgba(3, 8, 22, .55);
+}
+
+.dayComplete {
+  color: #71efc2 !important;
+  border-color: rgba(80, 232, 183, .24) !important;
+  background: rgba(49, 191, 144, .09) !important;
+}
+
+.dayActive {
+  color: #f7fbff !important;
+  border-color: rgba(103, 225, 255, .36) !important;
+  background: linear-gradient(145deg, rgba(55, 218, 255, .18), rgba(152, 82, 255, .22)) !important;
+  box-shadow: 0 0 18px rgba(89, 123, 255, .18);
+}
+
+.dailyCard button { width: 100%; }
+
+.pathCard {
+  margin-top: .72rem;
+  padding: .88rem;
+  border-radius: 20px;
+}
+
+.pathCard header,
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+}
+
+.pathCard header > div,
+.sectionHeader > div { display: grid; gap: .16rem; }
+.pathCard header > strong { color: #79eaff; font-size: .68rem; }
+
+.pathMeta,
+.levelMeta {
+  display: flex;
+  justify-content: space-between;
+  gap: .6rem;
+  margin: .72rem 0 .36rem;
+  color: rgba(175, 190, 222, .52);
+  font-size: .56rem;
+}
+.pathMeta strong,
+.levelMeta strong { color: #77e9ff; font-variant-numeric: tabular-nums; }
+.levelMeta { margin-top: .6rem; }
+
+.pathTrack,
+.levelTrack {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(132, 160, 223, .12);
+}
+.pathTrack i,
+.levelTrack i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #45dcff, #8a6cff, #ce55ff); box-shadow: 0 0 13px rgba(83,192,255,.3); }
+.levelTrack i { background: linear-gradient(90deg, #5ce6ff, #a069ff); }
+
+.missionsSection { margin-top: .95rem; }
+.sectionHeader { margin-bottom: .62rem; }
+.sectionHeader > span { border: 0; background: transparent; padding: 0; color: #79eaff; }
+
+.missionList { display: grid; gap: .62rem; }
+.missionCard {
+  padding: .82rem;
+  border-radius: 19px;
+}
+.missionCard::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 100% 0%, var(--mission-glow), transparent 42%);
+}
+.mission_cyan { --mission-glow: rgba(52, 219, 255, .12); }
+.mission_violet { --mission-glow: rgba(151, 84, 255, .16); }
+.mission_gold { --mission-glow: rgba(255, 197, 91, .11); }
+.missionClaimed { opacity: .72; }
+
+.missionHeader {
+  display: grid;
+  grid-template-columns: 38px 1fr auto;
+  align-items: center;
+  gap: .62rem;
+}
+.missionNumber {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(139, 183, 243, .14);
+  border-radius: 13px;
+  color: #d9f8ff;
+  font-size: .66rem;
+  font-weight: 830;
+  background: linear-gradient(145deg, rgba(61, 216, 255, .14), rgba(145, 80, 255, .18));
+}
+.missionHeader > div { display: grid; gap: .12rem; }
+.missionHeader > div > span { color: rgba(159, 178, 213, .45); font-size: .48rem; font-weight: 780; letter-spacing: .12em; text-transform: uppercase; }
+.missionHeader h3 { margin: 0; color: #f2f5ff; font-size: .79rem; font-weight: 760; }
+.missionHeader em { color: #74e9ff; font-size: .53rem; font-style: normal; font-weight: 750; white-space: nowrap; }
+.missionCard > p { margin: .66rem 0; color: rgba(181, 196, 226, .58); font-size: .61rem; line-height: 1.45; }
+.missionReward { display: flex; align-items: center; justify-content: space-between; margin-bottom: .58rem; }
+.missionReward span { color: rgba(159, 177, 211, .46); font-size: .48rem; font-weight: 780; letter-spacing: .13em; }
+.missionReward strong { color: #7aeaff; font-size: .63rem; }
+
+.missionAction {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 42px;
+  padding: 0 .75rem;
+  border: 1px solid rgba(145, 186, 247, .16);
+  border-radius: 14px;
+  color: #eaf1ff;
+  background: rgba(7, 14, 34, .68);
+  font-size: .65rem;
+  font-weight: 740;
+}
+.missionAction:disabled { color: #6fe4bc; opacity: .7; }
+.missionAction i { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 9px; color: #72edc1; font-style: normal; background: rgba(60, 206, 158, .1); }
+
+.allocationCard {
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  align-items: center;
+  gap: .7rem;
+  margin-top: .8rem;
+  padding: .82rem;
+  border-radius: 19px;
+}
+.allocationIcon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  color: #d8f9ff;
+  background: linear-gradient(145deg, rgba(52, 216, 255, .18), rgba(157, 77, 255, .22));
+}
+.allocationCard > div { display: grid; gap: .14rem; }
+.allocationCard h2 { font-size: .82rem; }
+.allocationCard p { font-size: .57rem; }
+.allocationCard > button,
+.referralSummary > button {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(139, 180, 241, .16);
+  border-radius: 12px;
+  color: #d8e8ff;
+  background: rgba(5, 11, 28, .58);
+}
+
+.referralSummary {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: .65rem;
+  margin-top: .62rem;
+  padding: .7rem .78rem;
+  border-radius: 17px;
+}
+.referralSummary > span { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 13px; color: #dff9ff; background: rgba(82, 194, 255, .1); }
+.referralSummary > div { display: grid; gap: .12rem; }
+.referralSummary strong { color: #edf2ff; font-size: .68rem; }
+.referralSummary small { color: rgba(177, 192, 224, .5); font-size: .55rem; }
+
+@media (max-width: 350px) {
+  .progressStrip { grid-template-columns: .65fr .82fr 1.45fr; }
+  .progressStrip > div { padding-inline: .5rem; }
+  .progressStrip strong { font-size: .69rem; }
+  .missionHeader { grid-template-columns: 35px 1fr; }
+  .missionHeader em { grid-column: 2; }
+  .dailyCard h2 { font-size: .92rem; }
+}

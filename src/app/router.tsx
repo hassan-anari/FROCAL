@@ -4,6 +4,7 @@ import { FoundationPage } from "@/pages/FoundationPage";
 import { OnboardingPage } from "@/pages/OnboardingPage";
 import { BasePage } from "@/pages/BasePage";
 import { EarnPage } from "@/pages/EarnPage";
+import { TypingChallengePage } from "@/pages/TypingChallengePage";
 import { ClanPage } from "@/pages/ClanPage";
 import { ArenaPage } from "@/pages/ArenaPage";
 import { ProfilePage } from "@/pages/ProfilePage";
@@ -35,6 +36,12 @@ const earnRoute = createRoute({
   component: EarnPage,
 });
 
+const typingChallengeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/earn/typing",
+  component: TypingChallengePage,
+});
+
 const clanRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/clan",
@@ -64,6 +71,7 @@ const routeTree = rootRoute.addChildren([
   onboardingRoute,
   baseRoute,
   earnRoute,
+  typingChallengeRoute,
   clanRoute,
   arenaRoute,
   profileRoute,

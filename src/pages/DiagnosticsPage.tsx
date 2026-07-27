@@ -7,6 +7,7 @@ import { assetRegistry, listAssetsForPhase } from "@/assets/registry";
 import { useOnboardingStore } from "@/game/onboarding/onboardingStore";
 import { useScenarioStore } from "@/game/scenarios/scenarioStore";
 import { useBaseUiStore } from "@/game/ui/baseUiStore";
+import { useEarnStore } from "@/game/earn/earnStore";
 import { loadBootstrap } from "@/integrations/api/bootstrap";
 import { queryKeys } from "@/integrations/api/queryKeys";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
@@ -14,7 +15,7 @@ import styles from "./DiagnosticsPage.module.css";
 
 const returnPathKey = "dalexio-diagnostics-return-path";
 
-type ReturnPath = "/" | "/onboarding" | "/base" | "/earn" | "/clan" | "/arena" | "/profile";
+type ReturnPath = "/" | "/onboarding" | "/base" | "/earn" | "/earn/typing" | "/clan" | "/arena" | "/profile";
 
 export function DiagnosticsPage() {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ export function DiagnosticsPage() {
   const promoBannerVisible = useBaseUiStore((state) => state.promoBannerVisible);
   const toggleCriticalAction = useBaseUiStore((state) => state.toggleCriticalAction);
   const togglePromoBanner = useBaseUiStore((state) => state.togglePromoBanner);
+  const earn = useEarnStore();
   const { adapter, colorScheme, stableHeight, insets } = useTelegram();
   const bootstrap = useQuery({
     queryKey: queryKeys.bootstrap(scenario),
@@ -47,12 +49,34 @@ export function DiagnosticsPage() {
   return (
     <main className={styles.root}>
       <header className={styles.header}>
-        <span>Phase 2.6 / Base Closeout</span>
+        <span>Phase 3 / Earn & Core Loop</span>
         <h1>System diagnostics</h1>
-        <p>Runtime, navigation and Base-state controls.</p>
+        <p>Runtime, Base-state and repeatable Earn-flow controls.</p>
       </header>
 
-      <section className={styles.stack} aria-label="Phase 2 diagnostics">
+      <section className={styles.stack} aria-label="Phase 3 diagnostics">
+        <article>
+          <StatusChip>Earn loop ready</StatusChip>
+          <h2>Mission Control state</h2>
+          <dl>
+            <div><dt>Level</dt><dd>{earn.level}</dd></div>
+            <div><dt>Level XP</dt><dd>{earn.levelXp} / {earn.xpToNextLevel}</dd></div>
+            <div><dt>Lifetime XP</dt><dd>{earn.lifetimeXp.toLocaleString()}</dd></div>
+            <div><dt>Daily streak</dt><dd>{earn.streak}</dd></div>
+            <div><dt>Daily Signal</dt><dd>{earn.missions["daily-signal"].status}</dd></div>
+            <div><dt>Typing Protocol</dt><dd>{earn.missions["typing-protocol"].status}</dd></div>
+            <div><dt>Referral</dt><dd>{earn.missions["invite-explorer"].status}</dd></div>
+          </dl>
+          <div className={styles.actions}>
+            <Button tone="secondary" size="sm" onClick={earn.verifyReferral}>Verify referral</Button>
+            <Button tone="secondary" size="sm" onClick={earn.completeStarterPathForDiagnostics}>Complete starter path</Button>
+            <Button tone="secondary" size="sm" onClick={earn.setNearEvolutionForDiagnostics}>Near evolution</Button>
+            <Button tone="secondary" size="sm" onClick={earn.resetEarnProgress}>Reset Earn</Button>
+            <Button tone="secondary" size="sm" onClick={() => navigate({ to: "/earn" })}>Open Earn</Button>
+            <Button tone="secondary" size="sm" onClick={() => navigate({ to: "/earn/typing" })}>Open typing</Button>
+          </div>
+        </article>
+
         <article>
           <StatusChip>Base controls ready</StatusChip>
           <h2>Dynamic Base content</h2>
@@ -96,7 +120,7 @@ export function DiagnosticsPage() {
           <h2>Main navigation</h2>
           <dl>
             <div><dt>Base</dt><dd>active</dd></div>
-            <div><dt>Earn</dt><dd>active</dd></div>
+            <div><dt>Earn</dt><dd>playable</dd></div>
             <div><dt>Clan</dt><dd>reserved</dd></div>
             <div><dt>Arena</dt><dd>reserved</dd></div>
             <div><dt>Profile</dt><dd>active</dd></div>
@@ -133,7 +157,7 @@ export function DiagnosticsPage() {
           <dl>
             <div><dt>Manifest version</dt><dd>{assetRegistry.version}</dd></div>
             <div><dt>Total keys</dt><dd>{assetRegistry.assets.length}</dd></div>
-            <div><dt>Phase 2 registry</dt><dd>{listAssetsForPhase(2).length}</dd></div>
+            <div><dt>Phase 3 registry</dt><dd>{listAssetsForPhase(3).length}</dd></div>
             <div><dt>Character pack</dt><dd>external</dd></div>
           </dl>
         </article>

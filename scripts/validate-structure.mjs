@@ -16,10 +16,14 @@ const required = [
   "src/game/domain/schemas.ts",
   "src/game/onboarding/onboardingStore.ts",
   "src/game/ui/baseUiStore.ts",
+  "src/game/earn/types.ts",
+  "src/game/earn/earnStore.ts",
+  "src/features/earn/EarnOverlays.tsx",
   "src/pages/FoundationPage.tsx",
   "src/pages/OnboardingPage.tsx",
   "src/pages/BasePage.tsx",
   "src/pages/EarnPage.tsx",
+  "src/pages/TypingChallengePage.tsx",
   "src/pages/ClanPage.tsx",
   "src/pages/ArenaPage.tsx",
   "src/pages/ProfilePage.tsx",
@@ -38,7 +42,7 @@ for (const file of required) {
 }
 
 if (missing.length) {
-  console.error("Missing Phase 2 architecture files:\n" + missing.join("\n"));
+  console.error("Missing Phase 3 architecture files:\n" + missing.join("\n"));
   process.exit(1);
 }
-console.log(`Structure validation passed: ${required.length} Phase 2 files found.`);
+console.log(`Structure validation passed: ${required.length} Phase 3 files found.`);

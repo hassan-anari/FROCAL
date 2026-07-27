@@ -13,6 +13,7 @@ import { GameShell } from "@/design-system/components/GameShell";
 import { Button } from "@/design-system/primitives/Button";
 import { useOnboardingStore } from "@/game/onboarding/onboardingStore";
 import { useScenarioStore } from "@/game/scenarios/scenarioStore";
+import { useEarnStore } from "@/game/earn/earnStore";
 import { useBaseUiStore } from "@/game/ui/baseUiStore";
 import { loadBootstrap } from "@/integrations/api/bootstrap";
 import { queryKeys } from "@/integrations/api/queryKeys";
@@ -72,6 +73,12 @@ export function BasePage() {
   const onboarding = useOnboardingStore();
   const criticalActionVisible = useBaseUiStore((state) => state.criticalActionVisible);
   const promoBannerVisible = useBaseUiStore((state) => state.promoBannerVisible);
+  const earnLevel = useEarnStore((state) => state.level);
+  const earnLevelXp = useEarnStore((state) => state.levelXp);
+  const earnLevelTarget = useEarnStore((state) => state.xpToNextLevel);
+  const lifetimeXp = useEarnStore((state) => state.lifetimeXp);
+  const streak = useEarnStore((state) => state.streak);
+  const missions = useEarnStore((state) => state.missions);
   const { adapter } = useTelegram();
   const bootstrap = useQuery({ queryKey: queryKeys.bootstrap(scenario), queryFn: () => loadBootstrap(scenario, adapter.platform) });
   const [activeReaction, setActiveReaction] = useState<ReactionKey | null>(null);
@@ -109,11 +116,18 @@ export function BasePage() {
 
   const telegramFirstName = adapter.getUser()?.first_name ?? "Explorer";
   const player = bootstrap.data?.player ?? { id: "pending-player", firstName: telegramFirstName, displayName: telegramFirstName, telegramUsername: null, avatarUrl: null, level: 1, xp: 120, xpToNextLevel: 500, seasonScore: 0, clanId: null };
-  const totalXp = 2_356_254;
-  const xpPercent = useMemo(() => Math.min(100, Math.round((player.xp / player.xpToNextLevel) * 100)), [player.xp, player.xpToNextLevel]);
-  const levelAsset = getLevelAsset(player.level);
+  const currentLevel = Math.max(player.level, earnLevel);
+  const currentLevelXp = currentLevel === earnLevel ? earnLevelXp : player.xp;
+  const currentLevelTarget = currentLevel === earnLevel ? earnLevelTarget : player.xpToNextLevel;
+  const xpPercent = useMemo(() => Math.min(100, Math.round((currentLevelXp / currentLevelTarget) * 100)), [currentLevelTarget, currentLevelXp]);
+  const levelAsset = getLevelAsset(currentLevel);
   const displayedCharacter = activeReaction ? reactionLibrary[activeReaction].asset : levelAsset;
-  const displayedScale = activeReaction ? reactionLibrary[activeReaction].scale : getLevelScale(player.level);
+  const displayedScale = activeReaction ? reactionLibrary[activeReaction].scale : getLevelScale(currentLevel);
+  const missionList = Object.values(missions);
+  const claimedMissionCount = missionList.filter((mission) => mission.status === "claimed").length;
+  const starterProgress = Math.round((claimedMissionCount / missionList.length) * 100);
+  const currentMission = missionList.find((mission) => mission.status !== "claimed");
+  const currentMissionProgress = currentMission?.status === "completed" ? 90 : currentMission?.status === "in-progress" ? 45 : 0;
 
   const scheduleReturn = () => {
     if (resetTimer.current !== null) window.clearTimeout(resetTimer.current);
@@ -169,12 +183,12 @@ export function BasePage() {
           <div className={styles.dexoMeta}>
             <div>
               <span>YOUR DEXO</span>
-              <strong>{getDexoTitle(player.level)}</strong>
+              <strong>{getDexoTitle(currentLevel)}</strong>
             </div>
-            <div className={styles.totalXpDisplay} aria-label={`${totalXp.toLocaleString()} total XP`}>
+            <div className={styles.totalXpDisplay} aria-label={`${lifetimeXp.toLocaleString()} total XP`}>
               <span>Lifetime XP</span>
               <div>
-                <strong>{totalXp.toLocaleString()}</strong>
+                <strong>{lifetimeXp.toLocaleString()}</strong>
               </div>
             </div>
           </div>
@@ -191,7 +205,7 @@ export function BasePage() {
           <DexoStage character={displayedCharacter} characterScale={displayedScale} effect="base" showParticles={false} interactive onPress={triggerReaction} ariaLabel="Interact with Dexo" className={styles.dexoStage} />
 
           <div className={styles.progressFooter}>
-            <div className={styles.xpLabels}><span>Growth progress</span><strong>{player.xp} / {player.xpToNextLevel} XP</strong></div>
+            <div className={styles.xpLabels}><span>Growth progress</span><strong>{currentLevelXp} / {currentLevelTarget} XP</strong></div>
             <div className={styles.xpTrack}><motion.i initial={{ width: 0 }} animate={{ width: `${xpPercent}%` }} transition={{ duration: .85 }} /></div>
           </div>
         </section>
@@ -222,16 +236,16 @@ export function BasePage() {
             <article className={`${styles.objectiveItem} ${styles.objectiveActive}`}>
               <span className={styles.objectiveNode}>01</span>
               <div>
-                <div className={styles.objectiveEyebrow}><span>Current objective</span><strong>68%</strong></div>
-                <h3>Complete today’s Signal Sprint</h3>
-                <div className={styles.objectiveTrack}><i /></div>
+                <div className={styles.objectiveEyebrow}><span>Current objective</span><strong>{currentMission ? `${currentMissionProgress}%` : "100%"}</strong></div>
+                <h3>{currentMission ? (currentMission.status === "completed" ? `Claim ${currentMission.title}` : currentMission.title) : "Starter Protocol complete"}</h3>
+                <div className={styles.objectiveTrack}><i style={{ width: `${currentMission ? currentMissionProgress : 100}%` }} /></div>
               </div>
             </article>
             <article className={styles.objectiveItem}>
               <span className={styles.objectiveNode}>02</span>
               <div>
-                <div className={styles.objectiveEyebrow}><span>Next unlock</span><strong>→</strong></div>
-                <h3>Accuracy Protocol</h3>
+                <div className={styles.objectiveEyebrow}><span>Starter pathway</span><strong>{starterProgress}%</strong></div>
+                <h3>{claimedMissionCount < 2 ? "Accuracy Protocol" : "Season Signal Access"}</h3>
               </div>
             </article>
             <article className={styles.objectiveItem}>
@@ -258,7 +272,7 @@ export function BasePage() {
         </section>
 
         <section className={styles.quickStats} aria-label="Base status">
-          <div><span>Daily streak</span><strong>1 day</strong></div>
+          <div><span>Daily streak</span><strong>{streak || 0} day{streak === 1 ? "" : "s"}</strong></div>
           <div><span>Season score</span><strong>{player.seasonScore}</strong></div>
           <div><span>Clan status</span><strong>Open</strong></div>
         </section>

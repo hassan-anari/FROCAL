@@ -30,7 +30,7 @@ const basePayload: BootstrapPayload = {
   },
   featureFlags: {
     onboarding: true,
-    missions: false,
+    missions: true,
     clan: false,
     arena: false,
     season: false,

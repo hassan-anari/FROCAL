@@ -17,6 +17,7 @@ type GameRoute = "/base" | "/earn" | "/clan" | "/arena" | "/profile";
 interface GameShellProps {
   children: ReactNode;
   className?: string;
+  hideNavigation?: boolean;
 }
 
 const navigation = [
@@ -29,7 +30,7 @@ const navigation = [
 
 const directionKey = "dalexio-nav-direction";
 
-export function GameShell({ children, className = "" }: GameShellProps) {
+export function GameShell({ children, className = "", hideNavigation = false }: GameShellProps) {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const { adapter } = useTelegram();
@@ -49,33 +50,35 @@ export function GameShell({ children, className = "" }: GameShellProps) {
       <div className={styles.ambient} aria-hidden="true" />
       <motion.div
         key={pathname}
-        className={styles.content}
+        className={`${styles.content} ${hideNavigation ? styles.contentFull : ""}`}
         initial={{ opacity: 0, x: direction * 18, filter: "blur(4px)" }}
         animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
         transition={{ duration: .34, ease: [0.22, 1, 0.36, 1] }}
       >
         {children}
       </motion.div>
-      <nav className={styles.nav} aria-label="Primary game navigation">
-        {navigation.map((item) => {
-          const active = pathname === item.to;
-          return (
-            <button
-              key={item.to}
-              type="button"
-              className={`${styles.navItem} ${active ? styles.active : ""}`}
-              onClick={() => openRoute(item.to)}
-              aria-label={item.label}
-              title={item.label}
-              aria-current={active ? "page" : undefined}
-            >
-              <span className={styles.iconWrap}>
-                <HugeiconsIcon icon={item.icon} size={22} strokeWidth={active ? 1.9 : 1.55} />
-              </span>
-            </button>
-          );
-        })}
-      </nav>
+      {hideNavigation ? null : (
+        <nav className={styles.nav} aria-label="Primary game navigation">
+          {navigation.map((item) => {
+            const active = pathname === item.to;
+            return (
+              <button
+                key={item.to}
+                type="button"
+                className={`${styles.navItem} ${active ? styles.active : ""}`}
+                onClick={() => openRoute(item.to)}
+                aria-label={item.label}
+                title={item.label}
+                aria-current={active ? "page" : undefined}
+              >
+                <span className={styles.iconWrap}>
+                  <HugeiconsIcon icon={item.icon} size={22} strokeWidth={active ? 1.9 : 1.55} />
+                </span>
+              </button>
+            );
+          })}
+        </nav>
+      )}
     </div>
   );
 }

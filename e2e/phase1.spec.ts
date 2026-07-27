@@ -1,5 +1,15 @@
 import { expect, test } from "@playwright/test";
 
+async function setCompletedOnboarding(page: import("@playwright/test").Page) {
+  await page.goto("/");
+  await page.evaluate(() => {
+    localStorage.setItem("dalexio-onboarding-v1", JSON.stringify({
+      state: { status: "completed", step: "ready", guideIndex: 3, completedAt: new Date().toISOString() },
+      version: 1,
+    }));
+  });
+}
+
 test.beforeEach(async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
@@ -26,37 +36,24 @@ test("runs the new-player journey into Base", async ({ page }) => {
 
   await expect(page.getByText(/Your world is ready/i)).toBeVisible();
   await page.getByRole("button", { name: /Enter Base/i }).click();
-  await expect(page.getByText(/Personal Base/i)).toBeVisible();
-  await expect(page.getByRole("button", { name: /Say hello to Dexo/i })).toBeVisible();
+  await expect(page.getByText(/Your Dexo/i)).toBeVisible();
+  await expect(page.getByRole("button", { name: /Interact with Dexo/i })).toBeVisible();
 });
 
 test("keeps completed onboarding after refresh", async ({ page }) => {
+  await setCompletedOnboarding(page);
   await page.goto("/base");
-  await page.evaluate(() => {
-    localStorage.setItem("dalexio-onboarding-v1", JSON.stringify({
-      state: { status: "completed", step: "ready", guideIndex: 3, completedAt: new Date().toISOString() },
-      version: 1,
-    }));
-  });
   await page.reload();
-  await expect(page.getByText(/Personal Base/i)).toBeVisible();
+  await expect(page.getByText(/Your Dexo/i)).toBeVisible();
 });
 
-test("keeps Dexo visible through Base interactions", async ({ page }) => {
-  await page.evaluate(() => {
-    localStorage.setItem("dalexio-onboarding-v1", JSON.stringify({
-      state: { status: "completed", step: "ready", guideIndex: 3, completedAt: new Date().toISOString() },
-      version: 1,
-    }));
-  });
+test("keeps Dexo visible through Base reactions", async ({ page }) => {
+  await setCompletedOnboarding(page);
   await page.goto("/base");
 
   const dexoButton = page.getByRole("button", { name: /Interact with Dexo/i });
   await expect(dexoButton).toBeVisible();
   await dexoButton.click();
-  await expect(dexoButton).toBeVisible();
-
-  await page.getByRole("button", { name: /Say hello to Dexo/i }).click();
-  await expect(page.getByRole("button", { name: /Say hello again/i })).toBeVisible();
+  await expect(page.getByText("DEXO", { exact: true })).toBeVisible();
   await expect(dexoButton).toBeVisible();
 });

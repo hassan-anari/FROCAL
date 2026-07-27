@@ -5,6 +5,7 @@ import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useScenarioStore } from "@/game/scenarios/scenarioStore";
+import { useEarnStore } from "@/game/earn/earnStore";
 import { loadBootstrap } from "@/integrations/api/bootstrap";
 import { queryKeys } from "@/integrations/api/queryKeys";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
@@ -77,7 +78,8 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
 
   const firstName = adapter.getUser()?.first_name ?? bootstrap.data?.player.firstName ?? "Explorer";
   const avatar = adapter.getUser()?.photo_url;
-  const level = bootstrap.data?.player.level ?? 1;
+  const earnedLevel = useEarnStore((state) => state.level);
+  const level = Math.max(earnedLevel, bootstrap.data?.player.level ?? 1);
   const initials = firstName.trim().slice(0, 1).toUpperCase();
   const unreadCount = useMemo(() => notifications.filter((item) => !item.isRead).length, [notifications]);
 

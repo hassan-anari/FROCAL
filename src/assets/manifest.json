@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "assets": [
     {
       "key": "brand.logo",
@@ -11,7 +11,7 @@
     {
       "key": "brand.logoTagline",
       "path": "/assets/brand/dalexio-logo-tagline.svg",
-      "alt": "Dalexio — Play Grow Unite Compete",
+      "alt": "Dalexio \u2014 Play Grow Unite Compete",
       "category": "brand",
       "requiredInPhase": 0
     },

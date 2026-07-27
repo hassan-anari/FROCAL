@@ -37,3 +37,49 @@ export const bootstrapPayloadSchema = z.object({
 export type UserProfile = z.infer<typeof userProfileSchema>;
 export type DexoProgression = z.infer<typeof dexoProgressionSchema>;
 export type BootstrapPayload = z.infer<typeof bootstrapPayloadSchema>;
+
+export const missionStatusSchema = z.enum(["available", "in-progress", "completed", "claimed"]);
+
+export const missionSchema = z.object({
+  id: z.enum(["daily-signal", "typing-protocol", "invite-explorer"]),
+  title: z.string().min(1),
+  description: z.string().min(1),
+  rewardXp: z.number().int().positive(),
+  status: missionStatusSchema,
+  progress: z.number().nonnegative(),
+  target: z.number().positive(),
+  category: z.enum(["daily", "skill", "community"]),
+});
+
+export const typingResultSchema = z.object({
+  accuracy: z.number().min(0).max(100),
+  wpm: z.number().nonnegative(),
+  score: z.number().int().nonnegative(),
+  completedAt: z.string().datetime(),
+});
+
+export const earnHistoryEntrySchema = z.object({
+  id: z.string(),
+  type: z.enum(["daily", "mission", "typing", "referral", "level", "system"]),
+  title: z.string().min(1),
+  description: z.string().min(1),
+  createdAt: z.string().datetime(),
+  xp: z.number().int().positive().optional(),
+});
+
+export const earnProgressSchema = z.object({
+  missions: z.record(z.string(), missionSchema),
+  lastClaimDate: z.string().nullable(),
+  streak: z.number().int().nonnegative(),
+  lifetimeXp: z.number().int().nonnegative(),
+  level: z.number().int().positive(),
+  levelXp: z.number().int().nonnegative(),
+  xpToNextLevel: z.number().int().positive(),
+  typingBest: typingResultSchema.nullable(),
+  referralSent: z.boolean(),
+  history: z.array(earnHistoryEntrySchema),
+});
+
+export type Mission = z.infer<typeof missionSchema>;
+export type TypingResultContract = z.infer<typeof typingResultSchema>;
+export type EarnProgress = z.infer<typeof earnProgressSchema>;

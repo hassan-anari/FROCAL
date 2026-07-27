@@ -32,6 +32,10 @@
 
 .content::-webkit-scrollbar { display: none; }
 
+.contentFull {
+  padding-bottom: 0;
+}
+
 .nav {
   position: absolute;
   z-index: 90;
