@@ -11,12 +11,18 @@
   display: flex;
   align-items: end;
   justify-content: space-between;
-  gap: .8rem;
+  gap: .52rem;
   margin: .9rem 0 .72rem;
 }
 
-.pageHeader > div { display: grid; gap: .12rem; min-width: 0; }
-.pageHeader > div > p { max-width: 280px; margin: .12rem 0 0; color: rgba(181, 196, 227, .56); font-size: .58rem; line-height: 1.45; }
+.pageHeader > div { display: grid; flex: 1; gap: .12rem; min-width: 0; }
+.pageHeader > div > p {
+  max-width: 330px;
+  margin: .18rem 0 0;
+  color: rgba(189, 201, 231, .68);
+  font-size: .76rem;
+  line-height: 1.55;
+}
 .pageHeader span,
 .sectionHeader > div > span,
 .dailyCard header span,
@@ -36,12 +42,16 @@
 }
 
 .pageHeader h1 {
+  max-width: 100%;
   margin: 0;
+  overflow: hidden;
   color: #f7f9ff;
-  font-size: clamp(1.9rem, 8.6vw, 2.55rem);
+  font-size: clamp(1.48rem, 7vw, 2.55rem);
   font-weight: 860;
-  letter-spacing: -.065em;
+  letter-spacing: -.068em;
   line-height: .95;
+  text-overflow: clip;
+  white-space: nowrap;
 }
 
 .pageHeader > button {
@@ -258,6 +268,30 @@
     radial-gradient(circle at 92% 14%, rgba(171, 79, 255, .16), transparent 33%),
     linear-gradient(145deg, rgba(13, 25, 55, .9), rgba(4, 9, 23, .96));
 }
+
+.networkHero {
+  grid-template-columns: 43px minmax(0, 1fr);
+  align-items: center;
+  gap: .58rem;
+  padding: .62rem .72rem;
+}
+
+.networkHero > div {
+  align-content: start;
+  gap: .04rem;
+}
+
+.networkHero h2 {
+  margin: .03rem 0 0;
+  font-size: 1rem;
+  line-height: 1.04;
+}
+
+.networkHero p {
+  margin-top: .18rem;
+  line-height: 1.35;
+}
+
 .networkIcon,
 .typingIcon { display: grid; place-items: center; width: 43px; height: 43px; border: 1px solid rgba(116, 205, 255, .18); border-radius: 14px; color: #79e8ff; background: linear-gradient(145deg, rgba(57, 150, 204, .2), rgba(126, 72, 209, .25)); }
 .networkHero > div,
@@ -301,8 +335,13 @@
 .tierList em { color: rgba(133, 157, 200, .56); font-size: .49rem; font-style: normal; font-weight: 720; }
 .tierList i { grid-column: 1 / -1; height: 4px; overflow: hidden; border-radius: 999px; background: rgba(129, 155, 214, .11); }
 .tierList i b { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #50ddff, #9a6fff, #e0b05d); }
-.tierList .tierUnlocked { border-color: rgba(255, 211, 105, .18); }
-.tierUnlocked em { color: #ffd36e; }
+.tierList .tierUnlocked {
+  border-color: rgba(130, 165, 225, .1);
+}
+
+.tierUnlocked em {
+  color: #76e9ff;
+}
 
 .groupCard { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .62rem; }
 .groupCard > button,
@@ -343,7 +382,7 @@
 
 @media (max-width: 360px) {
   .page { padding-inline: calc(.6rem + var(--safe-right)); }
-  .pageHeader h1 { font-size: 1.8rem; }
+  .pageHeader h1 { font-size: clamp(1.35rem, 6.7vw, 1.58rem); }
   .tabBar button { gap: .28rem; font-size: .52rem; }
   .missionHeader { grid-template-columns: 28px minmax(0,1fr); }
   .missionHeader em { grid-column: 2; justify-self: start; }
@@ -365,14 +404,35 @@
 .titleWithHelp > button { display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 1px solid rgba(112, 207, 255, .18); border-radius: 10px; color: #82eaff; background: rgba(7, 17, 39, .72); }
 .referralCard header em { display: grid; justify-items: end; gap: .08rem; }
 .referralCard header em small { color: rgba(155, 178, 216, .5); font-size: .4rem; font-style: normal; letter-spacing: .1em; }
-.tierList .tierActive { border-color: rgba(255, 211, 105, .32); background: linear-gradient(145deg, rgba(255, 196, 74, .08), rgba(4, 10, 24, .54)); box-shadow: inset 0 0 0 1px rgba(255, 215, 120, .04); }
+.tierList .tierActive {
+  border-color: rgba(130, 165, 225, .1);
+  background: rgba(4, 10, 24, .5);
+  box-shadow: none;
+}
 .referralRoster,
 .groupRoster { padding: .78rem; border: 1px solid rgba(137, 176, 240, .15); border-radius: 21px; background: linear-gradient(145deg, rgba(14, 25, 55, .9), rgba(4, 9, 23, .96)); box-shadow: inset 0 1px 0 rgba(255,255,255,.035); }
 .rosterList { display: grid; margin-top: .62rem; }
 .rosterList article { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; align-items: center; gap: .55rem; padding: .62rem .02rem; border-bottom: 1px solid rgba(137, 174, 235, .08); }
 .rosterList article:last-child { border-bottom: 0; }
-.avatar { display: grid; place-items: center; width: 38px; height: 38px; overflow: hidden; border: 1px solid rgba(255,255,255,.1); border-radius: 13px; color: white; font-size: .62rem; font-weight: 820; box-shadow: inset 0 1px 0 rgba(255,255,255,.12); }
-.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 13px;
+  color: white;
+  font-size: .62rem;
+  font-weight: 820;
+  box-shadow: none;
+}
+.avatar img {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  object-fit: cover;
+}
 .avatar_cyan { background: linear-gradient(145deg, #1685a7, #37d3d7); }
 .avatar_violet { background: linear-gradient(145deg, #5a3db5, #a55bd8); }
 .avatar_gold { background: linear-gradient(145deg, #8e5e20, #dcac4d); }
