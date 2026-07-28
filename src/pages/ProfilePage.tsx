@@ -12,6 +12,7 @@ import { AssetImage } from "@/design-system/components/AssetImage";
 import { GameHeader } from "@/design-system/components/GameHeader";
 import { GameShell } from "@/design-system/components/GameShell";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
+import { Button } from "@/design-system/primitives/Button";
 import { usePauseBackgroundMotion } from "@/design-system/motion/usePauseBackgroundMotion";
 import {
   CustomizeProfileSheet,
@@ -124,7 +125,6 @@ export function ProfilePage() {
     void preloadAssets([
       activeFrame.asset,
       "profile.cosmetic.titlePlate",
-      "profile.cosmetic.shareFrame",
       "profile.cosmetic.achievementSlot",
       "profile.cosmetic.medalSlot",
     ]);
@@ -302,14 +302,26 @@ export function ProfilePage() {
                   </div>
 
                   <div className={styles.identityActions}>
-                    <button type="button" className={styles.secondaryAction} onClick={() => setCustomizeOpen(true)}>
-                      <UserCircleIconView />
-                      <span>Customize</span>
-                    </button>
-                    <button type="button" className={styles.primaryAction} onClick={() => setShareOpen(true)}>
-                      <span>Share profile</span>
-                      <HugeiconsIcon icon={ArrowRight01Icon} size={16} strokeWidth={1.8} />
-                    </button>
+                    <Button
+                      type="button"
+                      tone="secondary"
+                      size="md"
+                      className={styles.secondaryAction}
+                      leadingIcon={<UserCircleIconView />}
+                      onClick={() => setCustomizeOpen(true)}
+                    >
+                      Customize
+                    </Button>
+                    <Button
+                      type="button"
+                      tone="primary"
+                      size="md"
+                      className={styles.primaryAction}
+                      trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={16} strokeWidth={1.8} />}
+                      onClick={() => setShareOpen(true)}
+                    >
+                      Share profile
+                    </Button>
                   </div>
                 </section>
 

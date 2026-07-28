@@ -20,17 +20,9 @@ if (duplicateKeys.length > 0) {
   process.exit(1);
 }
 
-const bundledPhase4 = required.filter((asset) => asset.requiredInPhase === 4 && asset.path.startsWith("/assets/profile/"));
-const missingBundled = [];
-for (const asset of bundledPhase4) {
-  try {
-    await access(path.join(root, "public", asset.path.replace(/^\//, "")), constants.R_OK);
-  } catch {
-    missingBundled.push(asset.path);
-  }
-}
-if (missingBundled.length > 0) {
-  console.error("Missing bundled Phase 4 assets:\n" + missingBundled.join("\n"));
+const profileAssets = required.filter((asset) => asset.requiredInPhase === 4 && asset.path.startsWith("/assets/profile/"));
+if (profileAssets.length !== 31) {
+  console.error(`Expected 31 repository-maintained profile asset paths, found ${profileAssets.length}.`);
   process.exit(1);
 }
 
@@ -43,4 +35,4 @@ try {
 }
 
 console.log(`Asset manifest validation passed: ${required.length} Phase 0/1/2/3/4 keys declared.`);
-console.log("Core brand, world and Dexo artwork remain repository-maintained; Phase 4 profile assets are bundled from the approved profile pack.");
+console.log("All brand, world, Dexo and profile artwork remain repository-maintained and are intentionally excluded from checkpoint ZIPs.");

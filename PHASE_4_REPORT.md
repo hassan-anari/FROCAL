@@ -47,4 +47,7 @@ All Phase 4 motion follows the Phase 3.3 mobile profile:
 Wallet and Dalexio account connections are frontend mock flows with `disconnected / connecting / connected / error` contracts. Real SDK and API integration remain backend/integration work.
 
 ## Asset policy
-The 31 approved Profile assets are bundled. Existing brand, world and Dexo artwork remain repository-maintained and are not duplicated.
+The 31 approved Profile assets are repository-maintained and are not bundled in checkpoint ZIPs. Their exact `/assets/profile/*.webp` paths remain registered in the manifest. Existing brand, world and Dexo artwork follows the same repository-maintained policy.
+
+## Phase 4.1 polish
+The Profile overlay system now renders at `document.body`, locks the game scroll container, covers the complete mobile viewport, respects safe areas, keeps modal actions visible and gives every detail state a close action. The title plate and symbolic Share Profile preview were also recomposed for a cleaner mobile identity layout.

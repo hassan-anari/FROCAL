@@ -1,10 +1,12 @@
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { motion } from "motion/react";
-import { useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { AssetKey } from "@/assets/registry";
 import { AssetImage } from "@/design-system/components/AssetImage";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
+import { Button } from "@/design-system/primitives/Button";
 import {
   achievementById,
   frameById,
@@ -40,8 +42,97 @@ interface OverlayFrameProps {
   footer?: React.ReactNode;
 }
 
+const focusableSelector = [
+  "button:not([disabled])",
+  "a[href]",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  '[tabindex]:not([tabindex="-1"])',
+].join(",");
+
 function OverlayFrame({ eyebrow, title, onClose, children, footer }: OverlayFrameProps) {
-  return (
+  const titleId = useId();
+  const sheetRef = useRef<HTMLElement | null>(null);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+
+  useEffect(() => {
+    const scrollRoot = document.querySelector<HTMLElement>("[data-game-scroll]");
+    const appRoot = document.getElementById("root");
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const scrollTop = scrollRoot?.scrollTop ?? 0;
+    const previousOverflow = scrollRoot?.style.overflow ?? "";
+    const previousTouchAction = scrollRoot?.style.touchAction ?? "";
+    const previousOverscroll = scrollRoot?.style.overscrollBehavior ?? "";
+    const rootWasInert = appRoot?.hasAttribute("inert") ?? false;
+    const rootAriaHidden = appRoot ? appRoot.getAttribute("aria-hidden") : null;
+
+    document.documentElement.classList.add("profile-modal-open");
+    if (scrollRoot) {
+      scrollRoot.style.overflow = "hidden";
+      scrollRoot.style.touchAction = "none";
+      scrollRoot.style.overscrollBehavior = "none";
+    }
+    if (appRoot) {
+      appRoot.setAttribute("inert", "");
+      appRoot.setAttribute("aria-hidden", "true");
+    }
+
+    const focusTimer = window.setTimeout(() => {
+      const preferred = sheetRef.current?.querySelector<HTMLElement>("[data-modal-primary], [data-modal-close]");
+      preferred?.focus({ preventScroll: true });
+    }, 20);
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeRef.current();
+        return;
+      }
+      if (event.key !== "Tab" || !sheetRef.current) return;
+
+      const focusable = Array.from(sheetRef.current.querySelectorAll<HTMLElement>(focusableSelector))
+        .filter((element) => !element.hasAttribute("disabled") && element.getAttribute("aria-hidden") !== "true");
+      if (focusable.length === 0) {
+        event.preventDefault();
+        sheetRef.current.focus({ preventScroll: true });
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus({ preventScroll: true });
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus({ preventScroll: true });
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.removeEventListener("keydown", handleKeyDown);
+      document.documentElement.classList.remove("profile-modal-open");
+      if (scrollRoot) {
+        scrollRoot.style.overflow = previousOverflow;
+        scrollRoot.style.touchAction = previousTouchAction;
+        scrollRoot.style.overscrollBehavior = previousOverscroll;
+        scrollRoot.scrollTop = scrollTop;
+      }
+      if (appRoot) {
+        if (!rootWasInert) appRoot.removeAttribute("inert");
+        if (rootAriaHidden === null) appRoot.removeAttribute("aria-hidden");
+        else appRoot.setAttribute("aria-hidden", rootAriaHidden);
+      }
+      previousFocus?.focus({ preventScroll: true });
+    };
+  }, []);
+
+  const modal = (
     <motion.div
       className={styles.backdrop}
       initial={{ opacity: 0 }}
@@ -49,25 +140,39 @@ function OverlayFrame({ eyebrow, title, onClose, children, footer }: OverlayFram
       exit={{ opacity: 0 }}
       transition={mobileMotion.micro}
       onPointerDown={(event) => {
-        if (event.target === event.currentTarget) onClose();
+        if (event.target === event.currentTarget) closeRef.current();
       }}
     >
       <motion.section
+        ref={sheetRef}
         className={styles.sheet}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 12 }}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
+        initial={{ opacity: 0, y: 18, scale: 0.995 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 10, scale: 0.998 }}
         transition={mobileMotion.overlay}
+        onPointerDown={(event) => event.stopPropagation()}
       >
         <header className={styles.sheetHeader}>
-          <div><span>{eyebrow}</span><h2>{title}</h2></div>
-          <button type="button" onClick={onClose} aria-label="Close">×</button>
+          <div><span>{eyebrow}</span><h2 id={titleId}>{title}</h2></div>
+          <button type="button" data-modal-close onClick={() => closeRef.current()} aria-label="Close">×</button>
         </header>
         <div className={styles.sheetBody}>{children}</div>
-        {footer ? <footer className={styles.sheetFooter}>{footer}</footer> : null}
+        <footer className={styles.sheetFooter}>
+          {footer ?? (
+            <Button type="button" tone="primary" size="md" className={styles.primaryButton} data-modal-primary onClick={() => closeRef.current()}>
+              Got it
+            </Button>
+          )}
+        </footer>
       </motion.section>
     </motion.div>
   );
+
+  return createPortal(modal, document.body);
 }
 
 interface DetailSheetProps {
@@ -78,16 +183,25 @@ interface DetailSheetProps {
 export function ProfileDetailSheet({ item, onClose }: DetailSheetProps) {
   const progress = item.progress;
   const ratio = progress ? Math.min(1, progress.current / Math.max(1, progress.target)) : 0;
+  const action = item.primaryLabel && item.onPrimary ? (
+    <Button
+      type="button"
+      tone="primary"
+      size="md"
+      className={styles.primaryButton}
+      data-modal-primary
+      trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={17} strokeWidth={1.8} />}
+      onClick={() => {
+        item.onPrimary?.();
+        onClose();
+      }}
+    >
+      {item.primaryLabel}
+    </Button>
+  ) : undefined;
 
   return (
-    <OverlayFrame eyebrow={item.kind} title={item.name} onClose={onClose} footer={
-      item.primaryLabel && item.onPrimary ? (
-        <button type="button" className={styles.primaryButton} onClick={() => { item.onPrimary?.(); onClose(); }}>
-          <span>{item.primaryLabel}</span>
-          <HugeiconsIcon icon={ArrowRight01Icon} size={17} strokeWidth={1.8} />
-        </button>
-      ) : null
-    }>
+    <OverlayFrame eyebrow={item.kind} title={item.name} onClose={onClose} footer={action}>
       <div className={`${styles.detailArt} ${item.unlocked ? "" : styles.detailLocked}`}>
         <AssetImage assetKey={item.asset} loading="eager" draggable={false} />
         {item.unlocked ? null : <span>LOCKED</span>}
@@ -156,13 +270,20 @@ export function CustomizeProfileSheet({
 
   return (
     <OverlayFrame eyebrow="Profile cosmetic" title="Customize profile" onClose={onClose} footer={
-      <button type="button" className={styles.primaryButton} onClick={() => {
-        onSave({ frameId: draftFrame, titleId: draftTitle, medalId: draftMedal, achievementId: draftAchievement });
-        onClose();
-      }}>
-        <span>Save profile</span>
-        <HugeiconsIcon icon={ArrowRight01Icon} size={17} strokeWidth={1.8} />
-      </button>
+      <Button
+        type="button"
+        tone="primary"
+        size="md"
+        className={styles.primaryButton}
+        data-modal-primary
+        trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={17} strokeWidth={1.8} />}
+        onClick={() => {
+          onSave({ frameId: draftFrame, titleId: draftTitle, medalId: draftMedal, achievementId: draftAchievement });
+          onClose();
+        }}
+      >
+        Save profile
+      </Button>
     }>
       <section className={styles.livePreview}>
         <ProfileAvatar firstName={firstName} photoUrl={photoUrl} frameId={draftFrame} size="lg" />
@@ -290,31 +411,41 @@ export function ShareProfileSheet({
   return (
     <OverlayFrame eyebrow="Telegram share" title="Share profile" onClose={onClose} footer={
       <div className={styles.shareActions}>
-        <button type="button" className={styles.secondaryButton} onClick={() => void copy()}>{copied ? "Copied" : "Copy link"}</button>
-        <button type="button" className={styles.primaryButton} onClick={onShare}>Share in Telegram</button>
+        <Button type="button" tone="secondary" size="md" className={styles.secondaryButton} onClick={() => void copy()}>
+          {copied ? "Copied" : "Copy link"}
+        </Button>
+        <Button type="button" tone="primary" size="md" className={styles.primaryButton} data-modal-primary onClick={onShare}>
+          Share in Telegram
+        </Button>
       </div>
     }>
       <div className={styles.shareCard}>
-        <AssetImage assetKey="profile.cosmetic.shareFrame" className={styles.shareFrame} loading="eager" draggable={false} />
-        <ProfileAvatar firstName={firstName} photoUrl={photoUrl} frameId={frameId} size="lg" className={styles.shareAvatar} />
-        <div className={styles.shareIdentity}>
-          <span>DEXO LAND EXPLORER</span>
-          <strong>{firstName}</strong>
-          <small>{username ? `@${username}` : titleById[titleId].name}</small>
+        <div className={styles.shareHero}>
+          <ProfileAvatar firstName={firstName} photoUrl={photoUrl} frameId={frameId} size="lg" className={styles.shareAvatar} />
+          <div className={styles.shareIdentity}>
+            <span>DEXO LAND PROFILE</span>
+            <strong>{firstName}</strong>
+            <small>{username ? `@${username}` : "Telegram explorer"}</small>
+            <div className={styles.shareTitle}>{titleById[titleId].name}</div>
+          </div>
         </div>
-        <div className={styles.shareTitle}>{titleById[titleId].name}</div>
         <div className={styles.shareStats}>
           <div><strong>{level}</strong><span>Level</span></div>
           <div><strong>{lifetimeXp.toLocaleString()}</strong><span>Lifetime XP</span></div>
+          <div><strong>S1</strong><span>Season</span></div>
         </div>
-        <div className={styles.shareSlots}>
-          <div>{medal ? <AssetImage assetKey={medal.asset} loading="eager" draggable={false} /> : <span>—</span>}</div>
-          <div>{achievement ? <AssetImage assetKey={achievement.asset} loading="eager" draggable={false} /> : <span>—</span>}</div>
-          <div><span>S1</span></div>
-          <div><span>DX</span></div>
+        <div className={styles.shareHonors}>
+          <div>
+            {medal ? <AssetImage assetKey={medal.asset} loading="eager" draggable={false} /> : <span>—</span>}
+            <p>{medal?.name ?? "No featured medal"}</p>
+          </div>
+          <div>
+            {achievement ? <AssetImage assetKey={achievement.asset} loading="eager" draggable={false} /> : <span>—</span>}
+            <p>{achievement?.name ?? "No featured achievement"}</p>
+          </div>
         </div>
       </div>
-      <p className={styles.shareHint}>Your selected frame, title and featured honors are included in the preview.</p>
+      <p className={styles.shareHint}>This preview represents the profile details included with your Telegram share link.</p>
     </OverlayFrame>
   );
 }

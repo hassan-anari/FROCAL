@@ -1,6 +1,6 @@
 # Phase 4 Asset Map — Profile & Identity
 
-The approved `profile.zip` pack is bundled under `public/assets/profile/` because these assets are exclusive to the Profile experience.
+The approved Profile pack is repository-maintained. Checkpoint ZIPs keep the exact manifest paths but do not bundle the 31 WebP files.
 
 ## Avatar frames
 - `profile.frame.standard`
@@ -16,13 +16,13 @@ The approved `profile.zip` pack is bundled under `public/assets/profile/` becaus
 - `profile.cosmetic.medalSlot`
 - `profile.cosmetic.shareFrame`
 
-These cosmetic assets are used only inside Profile, Customize Profile and Share Profile. The main application header remains unchanged.
+These cosmetics are used only inside Profile, Customize Profile and Share Profile. The main application header remains unchanged.
 
 ## Achievements
-Ten achievement assets are registered, including current Journey/Community achievements and future Clan/War achievements.
+Ten achievement paths are registered, including current Journey/Community achievements and future Clan/War achievements.
 
 ## Medals
-Six seasonal medals and five career-medal files are registered. The duplicate generic Season Champion artwork is retained in the registry but intentionally excluded from the visible collection; the seasonal champion medal is the canonical season reward.
+Six seasonal medal paths and five career-medal paths are registered. The duplicate generic Season Champion remains in the registry but is intentionally excluded from the visible collection; the seasonal champion medal is the canonical season reward.
 
-## Core asset policy
-Brand logos, main world background, Dexo character assets and Dexo platform files are not bundled in this checkpoint.
+## Delivery policy
+Only `public/assets/system/missing-asset.svg` is bundled. The main repository must continue serving every `/assets/profile/*.webp` path declared in `src/assets/manifest.json`.

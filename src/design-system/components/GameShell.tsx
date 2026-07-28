@@ -51,6 +51,7 @@ export function GameShell({ children, className = "", hideNavigation = false }: 
       <div className={styles.ambient} aria-hidden="true" />
       <motion.div
         key={pathname}
+        data-game-scroll
         className={`${styles.content} ${hideNavigation ? styles.contentFull : ""}`}
         initial={{ opacity: 0, x: direction * 10, scale: 0.998 }}
         animate={{ opacity: 1, x: 0, scale: 1 }}

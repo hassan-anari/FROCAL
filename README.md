@@ -1,6 +1,6 @@
-# Dalexio Mini App — Phase 4
+# Dalexio Mini App — Phase 4.1
 
-Mobile-first Telegram Mini App checkpoint for Profile & Identity.
+Mobile-first Telegram Mini App checkpoint for Profile identity, modal behavior and share polish.
 
 ## Run
 
@@ -15,4 +15,4 @@ npm run dev
 npm run check
 ```
 
-Profile assets from the approved pack are located at `public/assets/profile/`. Brand, world and Dexo artwork continue to use repository-maintained manifest paths.
+All Profile, brand, world and Dexo artwork remains repository-maintained. This checkpoint keeps manifest paths only and bundles the system fallback asset.
