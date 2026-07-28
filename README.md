@@ -1,20 +1,18 @@
-# Dalexio Mini App — Phase 3.1
+# Dalexio Mini App — Phase 4
 
-Telegram-first Dexo Land Mini App checkpoint.
-
-## Included
-- Approved Intro, Onboarding, Base and main shell
-- Earn / Network / Typing tab architecture
-- Daily Core and mission claim loop
-- Referral and Telegram group mock systems
-- Permanent Typing Arena with five daily plays
-- Diagnostics and repeatable mock controls
+Mobile-first Telegram Mini App checkpoint for Profile & Identity.
 
 ## Run
+
 ```bash
 npm install
-npm run check
 npm run dev
 ```
 
-Product artwork is maintained in the main repository and is intentionally excluded from this checkpoint.
+## Validation
+
+```bash
+npm run check
+```
+
+Profile assets from the approved pack are located at `public/assets/profile/`. Brand, world and Dexo artwork continue to use repository-maintained manifest paths.

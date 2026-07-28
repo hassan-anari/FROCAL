@@ -18,6 +18,11 @@ const required = [
   "src/game/ui/baseUiStore.ts",
   "src/game/earn/types.ts",
   "src/game/earn/earnStore.ts",
+  "src/game/profile/types.ts",
+  "src/game/profile/profileCatalog.ts",
+  "src/game/profile/profileStore.ts",
+  "src/features/profile/ProfileAvatar.tsx",
+  "src/features/profile/ProfileOverlays.tsx",
   "src/features/earn/EarnOverlays.tsx",
   "src/pages/FoundationPage.tsx",
   "src/pages/OnboardingPage.tsx",
@@ -42,7 +47,7 @@ for (const file of required) {
 }
 
 if (missing.length) {
-  console.error("Missing Phase 3 architecture files:\n" + missing.join("\n"));
+  console.error("Missing Phase 4 architecture files:\n" + missing.join("\n"));
   process.exit(1);
 }
-console.log(`Structure validation passed: ${required.length} Phase 3 files found.`);
+console.log(`Structure validation passed: ${required.length} Phase 4 files found.`);

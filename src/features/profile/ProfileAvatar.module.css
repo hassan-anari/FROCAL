@@ -1,0 +1,54 @@
+.avatar {
+  position: relative;
+  flex: 0 0 auto;
+  isolation: isolate;
+  aspect-ratio: 1;
+}
+
+.sm { width: 52px; }
+.md { width: 86px; }
+.lg { width: 116px; }
+
+.photoWell {
+  position: absolute;
+  z-index: 1;
+  inset: 17.5%;
+  display: grid;
+  overflow: hidden;
+  place-items: center;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 22%, rgba(94, 226, 255, .2), transparent 35%),
+    linear-gradient(145deg, #172546, #18102e);
+}
+
+.photo,
+.fallback {
+  width: 100%;
+  height: 100%;
+}
+
+.photo {
+  display: block;
+  object-fit: cover;
+}
+
+.fallback {
+  display: grid;
+  place-items: center;
+  color: #effcff;
+  font-size: clamp(1rem, 8vw, 2rem);
+  font-weight: 850;
+  letter-spacing: -.05em;
+}
+
+.frame {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  object-fit: contain;
+  transform: translateZ(0);
+}

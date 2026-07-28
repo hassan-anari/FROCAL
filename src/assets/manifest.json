@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "assets": [
     {
       "key": "brand.logo",
@@ -434,6 +434,223 @@
       "alt": "Dalexio Base promotional banner",
       "category": "banner",
       "requiredInPhase": 2
+    },
+    {
+      "key": "profile.frame.standard",
+      "path": "/assets/profile/profile-cosmetic-standard-avatar-frame.webp",
+      "alt": "Standard avatar frame",
+      "category": "profile-frame",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "profile.frame.premium",
+      "path": "/assets/profile/profile-cosmetic-premium-avatar-frame.webp",
+      "alt": "Premium avatar frame",
+      "category": "profile-frame",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "profile.frame.seasonal",
+      "path": "/assets/profile/profile-cosmetic-seasonal-avatar-frame.webp",
+      "alt": "Seasonal avatar frame",
+      "category": "profile-frame",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "profile.frame.founder",
+      "path": "/assets/profile/profile-cosmetic-founder-avatar-frame.webp",
+      "alt": "Founder avatar frame",
+      "category": "profile-frame",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "profile.frame.clan",
+      "path": "/assets/profile/profile-cosmetic-clan-avatar-frame.webp",
+      "alt": "Clan avatar frame",
+      "category": "profile-frame",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "profile.frame.captain",
+      "path": "/assets/profile/profile-cosmetic-captain-avatar-frame.webp",
+      "alt": "Captain avatar frame",
+      "category": "profile-frame",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "profile.cosmetic.titlePlate",
+      "path": "/assets/profile/profile-cosmetic-title-plate.webp",
+      "alt": "Profile title plate",
+      "category": "profile-cosmetic",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "profile.cosmetic.achievementSlot",
+      "path": "/assets/profile/profile-cosmetic-achievement-showcase-slot.webp",
+      "alt": "Achievement showcase slot",
+      "category": "profile-cosmetic",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "profile.cosmetic.medalSlot",
+      "path": "/assets/profile/profile-cosmetic-medal-display-slot.webp",
+      "alt": "Medal display slot",
+      "category": "profile-cosmetic",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "profile.cosmetic.shareFrame",
+      "path": "/assets/profile/profile-cosmetic-profile-share-frame.webp",
+      "alt": "Profile share frame",
+      "category": "profile-cosmetic",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "achievement.firstMission",
+      "path": "/assets/profile/achievement-first-mission.webp",
+      "alt": "First Mission achievement",
+      "category": "achievement",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "achievement.firstReferral",
+      "path": "/assets/profile/achievement-first-referral.webp",
+      "alt": "First Referral achievement",
+      "category": "achievement",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "achievement.sevenDayStreak",
+      "path": "/assets/profile/achievement-seven-day-streak.webp",
+      "alt": "Seven Day Streak achievement",
+      "category": "achievement",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "achievement.thirtyDayStreak",
+      "path": "/assets/profile/achievement-thirty-day-streak.webp",
+      "alt": "Thirty Day Streak achievement",
+      "category": "achievement",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "achievement.firstVerifiedActivity",
+      "path": "/assets/profile/achievement-first-verified-activity.webp",
+      "alt": "First Verified Activity achievement",
+      "category": "achievement",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "achievement.clanReady",
+      "path": "/assets/profile/achievement-clan-ready.webp",
+      "alt": "Clan Ready achievement",
+      "category": "achievement",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "achievement.firstClan",
+      "path": "/assets/profile/achievement-first-clan.webp",
+      "alt": "First Clan achievement",
+      "category": "achievement",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "achievement.firstContribution",
+      "path": "/assets/profile/achievement-first-contribution.webp",
+      "alt": "First Contribution achievement",
+      "category": "achievement",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "achievement.firstWar",
+      "path": "/assets/profile/achievement-first-war.webp",
+      "alt": "First War achievement",
+      "category": "achievement",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "achievement.firstVictory",
+      "path": "/assets/profile/achievement-first-victory.webp",
+      "alt": "First Victory achievement",
+      "category": "achievement",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "medal.season.founding",
+      "path": "/assets/profile/seasonal-medal-founding-season.webp",
+      "alt": "Founding Season medal",
+      "category": "seasonal-medal",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "medal.season.participant",
+      "path": "/assets/profile/seasonal-medal-season-participant.webp",
+      "alt": "Season Participant medal",
+      "category": "seasonal-medal",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "medal.season.veteran",
+      "path": "/assets/profile/seasonal-medal-season-veteran.webp",
+      "alt": "Season Veteran medal",
+      "category": "seasonal-medal",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "medal.season.top10",
+      "path": "/assets/profile/seasonal-medal-top-10-percent.webp",
+      "alt": "Top 10 Percent medal",
+      "category": "seasonal-medal",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "medal.season.top1",
+      "path": "/assets/profile/seasonal-medal-top-1-percent.webp",
+      "alt": "Top 1 Percent medal",
+      "category": "seasonal-medal",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "medal.season.champion",
+      "path": "/assets/profile/seasonal-medal-season-champion.webp",
+      "alt": "Season Champion medal",
+      "category": "seasonal-medal",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "medal.career.activityVeteran",
+      "path": "/assets/profile/medal-activity-veteran.webp",
+      "alt": "Activity Veteran medal",
+      "category": "career-medal",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "medal.career.clanLoyalty",
+      "path": "/assets/profile/medal-clan-loyalty.webp",
+      "alt": "Clan Loyalty medal",
+      "category": "career-medal",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "medal.career.leadership",
+      "path": "/assets/profile/medal-leadership.webp",
+      "alt": "Leadership medal",
+      "category": "career-medal",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "medal.career.missionMaster",
+      "path": "/assets/profile/medal-mission-master.webp",
+      "alt": "Mission Master medal",
+      "category": "career-medal",
+      "requiredInPhase": 4
+    },
+    {
+      "key": "medal.career.seasonChampionLegacy",
+      "path": "/assets/profile/medal-season-champion.webp",
+      "alt": "Legacy Season Champion medal",
+      "category": "career-medal",
+      "requiredInPhase": 4
     }
   ]
 }

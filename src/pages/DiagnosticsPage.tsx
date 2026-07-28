@@ -8,6 +8,7 @@ import { useOnboardingStore } from "@/game/onboarding/onboardingStore";
 import { useScenarioStore } from "@/game/scenarios/scenarioStore";
 import { useBaseUiStore } from "@/game/ui/baseUiStore";
 import { getTypingAttemptsRemaining, useEarnStore } from "@/game/earn/earnStore";
+import { useProfileStore } from "@/game/profile/profileStore";
 import { loadBootstrap } from "@/integrations/api/bootstrap";
 import { queryKeys } from "@/integrations/api/queryKeys";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
@@ -26,6 +27,7 @@ export function DiagnosticsPage() {
   const toggleCriticalAction = useBaseUiStore((state) => state.toggleCriticalAction);
   const togglePromoBanner = useBaseUiStore((state) => state.togglePromoBanner);
   const earn = useEarnStore();
+  const profile = useProfileStore();
   const { adapter, colorScheme, stableHeight, insets } = useTelegram();
   const bootstrap = useQuery({
     queryKey: queryKeys.bootstrap(scenario),
@@ -49,12 +51,12 @@ export function DiagnosticsPage() {
   return (
     <main className={styles.root}>
       <header className={styles.header}>
-        <span>Phase 3.1 / Earn, Network & Typing</span>
+        <span>Phase 4 / Profile & Identity</span>
         <h1>System diagnostics</h1>
-        <p>Runtime, Base-state and repeatable Earn, Network and Typing controls.</p>
+        <p>Runtime, game-loop and repeatable Profile, Achievement and Collection controls.</p>
       </header>
 
-      <section className={styles.stack} aria-label="Phase 3 diagnostics">
+      <section className={styles.stack} aria-label="Phase 4 diagnostics">
         <article>
           <StatusChip>Earn loop ready</StatusChip>
           <h2>Earn Center state</h2>
@@ -76,6 +78,27 @@ export function DiagnosticsPage() {
             <Button tone="secondary" size="sm" onClick={earn.resetEarnProgress}>Reset Earn</Button>
             <Button tone="secondary" size="sm" onClick={() => navigate({ to: "/earn" })}>Open Earn</Button>
             <Button tone="secondary" size="sm" onClick={() => navigate({ to: "/earn/typing" })}>Open typing</Button>
+          </div>
+        </article>
+
+        <article>
+          <StatusChip>Profile ready</StatusChip>
+          <h2>Profile & Identity state</h2>
+          <dl>
+            <div><dt>Frame</dt><dd>{profile.activeFrameId}</dd></div>
+            <div><dt>Title</dt><dd>{profile.activeTitleId}</dd></div>
+            <div><dt>Achievements</dt><dd>{profile.unlockedAchievementIds.length} / 10</dd></div>
+            <div><dt>Medals</dt><dd>{profile.unlockedMedalIds.length} / 10</dd></div>
+            <div><dt>Wallet</dt><dd>{profile.walletStatus}</dd></div>
+            <div><dt>Dalexio account</dt><dd>{profile.dalexioStatus}</dd></div>
+          </dl>
+          <div className={styles.actions}>
+            <Button tone="secondary" size="sm" onClick={profile.unlockCommunityActivity}>Verified activity</Button>
+            <Button tone="secondary" size="sm" onClick={profile.unlockWarJourney}>War journey</Button>
+            <Button tone="secondary" size="sm" onClick={profile.setChampionProfile}>Champion profile</Button>
+            <Button tone="secondary" size="sm" onClick={profile.unlockAllProfileItems}>Unlock all</Button>
+            <Button tone="secondary" size="sm" onClick={profile.resetProfile}>Reset Profile</Button>
+            <Button tone="secondary" size="sm" onClick={() => navigate({ to: "/profile" })}>Open Profile</Button>
           </div>
         </article>
 
@@ -159,8 +182,8 @@ export function DiagnosticsPage() {
           <dl>
             <div><dt>Manifest version</dt><dd>{assetRegistry.version}</dd></div>
             <div><dt>Total keys</dt><dd>{assetRegistry.assets.length}</dd></div>
-            <div><dt>Phase 3 registry</dt><dd>{listAssetsForPhase(3).length}</dd></div>
-            <div><dt>Character pack</dt><dd>external</dd></div>
+            <div><dt>Phase 4 registry</dt><dd>{listAssetsForPhase(4).length}</dd></div>
+            <div><dt>Profile pack</dt><dd>31 assets</dd></div>
           </dl>
         </article>
 
