@@ -1,7 +1,7 @@
 # Dalexio / Dexo Land — Product & Business Logic
 
 > **Snapshot:** 2026-08-08  
-> **Current frontend checkpoint:** Phase 4.1 (`4.1.0`)  
+> **Current frontend checkpoint:** Phase 4.1.1 (`4.1.1`)  
 > **Primary runtime:** Telegram Mini App on mobile  
 > **Purpose of this file:** product/business source-of-truth for continuing development in a new chat without reconstructing prior decisions.
 
@@ -374,7 +374,7 @@ Dexo appears without the platform in the Typing Arena hero and uses a lightweigh
 
 ## 10. Profile & Identity business logic
 
-Phase 4 is currently implemented but **not yet officially closed** by the user. The latest checkpoint is v4.2 and is still under visual/behavior QA.
+Phase 4 is currently implemented but **not yet officially closed** by the user. The latest checkpoint is v4.1.1 and is still under visual/behavior QA.
 
 Profile has three internal tabs:
 
@@ -400,7 +400,7 @@ Overview is intended to contain only meaningful identity/progression/connectivit
 - Telegram profile photo or initials fallback
 - first name / username
 - profile-only frame
-- profile-only title plate/title
+- profile-only active title; the decorative Title Plate is not used in the main Profile header because it interfered with the compact identity composition
 - Level and XP progress
 - concise core stats such as missions/streak/referrals/lifetime XP
 - Wallet connect surface
@@ -410,19 +410,30 @@ Overview is intended to contain only meaningful identity/progression/connectivit
 
 The main global app header remains plain and unchanged. Profile title plates/frames are not used there.
 
-Current Profile identity composition places the active Title Plate between the player name and Telegram username so it reads as a profile cosmetic without colliding with the ID.
-
 ### 10.2 Wallet connection
 
-The Wallet card remains part of Profile Overview because wallet connectivity is planned for the product, but the current user-facing state is intentionally **`Coming soon`**.
+The Overview keeps a Wallet surface because Wallet support is part of the intended product, but the current frontend shows it as **Coming soon**.
 
-Do not show temporary `Connect`, `Connecting`, `Connected`, `Done` or error controls in the current Profile UI. Real wallet SDK/network choice and the final connection flow are future integration work. Existing internal mock/store fields may remain as implementation scaffolding but are not current product UX.
+Current UI rule:
+
+- no fake `Connect` action
+- no `Connecting` state
+- no fake `Done` state
+- no simulated wallet address
+
+The existing store fields may remain for future integration. Real wallet SDK/network/provider selection is not yet integrated.
 
 ### 10.3 Dalexio account connection
 
-The Dalexio Account card also remains visible in Overview but is intentionally **`Coming soon`**.
+The Overview keeps a Dalexio Account surface, but the current frontend shows it as **Coming soon**.
 
-Do not expose temporary mock linking controls in the current Profile UI. Real Dalexio account linking starts only when the ecosystem account API/flow is defined. Existing internal mock/store fields may remain as implementation scaffolding but are not current product UX.
+Current UI rule:
+
+- no fake `Connect` action
+- no fake linked-account handle
+- no `Done` state
+
+Real account linking will be connected when the backend/API contract exists.
 
 ### 10.4 Profile frames
 

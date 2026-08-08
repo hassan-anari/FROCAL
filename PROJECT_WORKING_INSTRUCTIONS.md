@@ -61,8 +61,6 @@ Permanent standard from Phase 3.3:
 - pause animation when WebView is hidden
 - persistent motion only on small isolated elements
 - target stable 60 FPS in Telegram mobile WebView
-- avoid persistent `translateZ(0)`, broad `will-change`, or forced GPU compositing on large text-bearing surfaces; these can soften text in mobile WebViews
-- do not scale an entire route or large modal just for transition polish; prefer short translate + opacity so text remains crisp
 
 Preferred timing:
 
@@ -136,8 +134,7 @@ Also:
 
 - no Dexo Showcase in Profile
 - keep Overview focused and not crowded
-- include Wallet and Dalexio Account connection surfaces because the user explicitly requested them
-- current Wallet and Dalexio Account cards must display `Coming soon`; do not expose fake/mock `Connect`, `Done`, connected or error UI until the real integration flow is intentionally opened
+- include Wallet and Dalexio Account surfaces because the user explicitly requested them, but keep them `Coming soon` until real integrations exist; do not simulate Connect/Done states in the current Profile UI
 - use Profile cosmetics only inside Profile-related flows
 
 Current Profile structure:
@@ -166,7 +163,7 @@ For mobile modals/sheets:
 - actionable states can use Equip/Feature/etc.
 - sticky/fixed action button must remain inside safe area
 - buttons should use approved sheen and clean rounded gradient treatment
-- Profile modal action buttons should not stretch edge-to-edge by default; keep single primary actions centered and reasonably constrained, with readable mobile-sized labels
+- Profile modal footer CTAs should stay compact in height with clearly readable text; avoid large trailing icon blocks that artificially increase button height
 - do not use heavy live backdrop blur to create the effect
 
 If a user opens a modal after scrolling far down the page, the modal must appear correctly **where they currently are**, not at document top.
@@ -409,4 +406,4 @@ Do not let an older mock implementation override a newer product decision.
 
 At this snapshot, do **not** jump to Inventory/Clan/Arena simply because they are next on the roadmap.
 
-Phase 4.2 Profile is the current checkpoint and should be tested/fixed until the user explicitly says Phase 4 is finished. The immediate QA target is the v4.2 Title Plate placement, modal button sizing, Coming Soon connection cards and crispness/compositing polish; the v4.1 root-modal fixes remain part of the baseline. Also remember that the 31 supplied Profile assets are now repository-maintained and must not be bundled again in future source ZIPs.
+Phase 4.1.1 Profile is the current checkpoint and should be tested/fixed until the user explicitly says Phase 4 is finished. It is based on v4.1 and contains only the targeted title/modal-button/Coming-Soon connection fixes requested by the user. The discarded v4.2 blur/rasterization experiment must not be treated as part of the baseline. Also remember that the 31 supplied Profile assets are now repository-maintained and must not be bundled again in future source ZIPs.

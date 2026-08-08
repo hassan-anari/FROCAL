@@ -1,18 +1,23 @@
-# Phase 4.2 Mobile Test Checklist
+# Phase 4.1 Mobile Test Checklist
 
-1. Open Profile and confirm the active Title Plate sits cleanly between the player name and Telegram username; it must not collide with or hide under the ID.
-2. Check the Profile identity card at 320–460 px widths and confirm the plate crop, username and avatar stay readable without overlap.
-3. Open an Achievement, Medal, Frame or Customize modal and confirm single action buttons are centered, noticeably narrower than the full modal width, and labels are easy to read.
-4. Open Share Profile and confirm the two-button action group is width-constrained, keeps clean rounded corners and retains the recurring primary-button sheen.
-5. Open Profile after scrolling any app page, then open a medal or achievement.
-6. Confirm the modal appears inside the current viewport instead of at the document top.
-7. Confirm the dark backdrop covers the complete screen and bottom navigation.
-8. Confirm the page behind the modal cannot scroll or receive taps.
-9. Scroll the modal body and confirm its header and action button remain visible.
-10. Close the modal and confirm the page returns to the exact prior scroll position.
-11. Open locked, unlocked, equipped and featured items; every detail modal must show either its main action or `Got it`.
-12. Check top, side and bottom safe-area spacing on Telegram Android and iOS.
-13. Confirm both Wallet and Dalexio Account cards show `Coming soon` and do not expose temporary `Connect`, `Done`, connected or error controls.
-14. Compare Profile, Earn, Base and modal text on the real phone: static text should look crisp, with no persistent whole-page blur/soft rasterization after transitions settle.
-15. Confirm route transitions still feel smooth after removing page-wide scale/compositing hints.
-16. Confirm the repository already contains all files referenced by `/assets/profile/*.webp`, because checkpoint ZIPs no longer bundle them.
+1. Open Profile after scrolling any app page, then open a medal or achievement.
+2. Confirm the modal appears inside the current viewport instead of at the document top.
+3. Confirm the dark backdrop covers the complete screen and bottom navigation.
+4. Confirm the page behind the modal cannot scroll or receive taps.
+5. Scroll the modal body and confirm its header and action button remain visible.
+6. Close the modal and confirm the page returns to the exact prior scroll position.
+7. Open locked, unlocked, equipped and featured items; every detail modal must show either its main action or `Got it`.
+8. Check top, side and bottom safe-area spacing on Telegram Android and iOS.
+9. Check Profile `Share profile`, `Save profile` and detail action buttons for clean corners and recurring sheen.
+10. Confirm the title plate reads as part of the identity block rather than a detached image.
+11. Open Share Profile and confirm the simplified preview fits without clipping at 320–460 px widths.
+12. Confirm the repository already contains all files referenced by `/assets/profile/*.webp`, because checkpoint ZIPs no longer bundle them.
+
+## Phase 4.1.1 targeted checks
+
+- Main Profile identity header shows the active title cleanly without the decorative Title Plate overlapping/cropping the Telegram username.
+- Profile modal footer buttons are visibly shorter than v4.1 while their labels are larger/easier to read.
+- `Feature achievement`, `Save profile`, `Got it`, `Copy link`, and `Share in Telegram` retain their approved treatments without oversized trailing-arrow blocks.
+- Wallet row shows `Coming soon` and has no Connect/Done button.
+- Dalexio account row shows `Coming soon` and has no Connect/Done button.
+- Verify no unrelated global blur/rasterization changes from discarded v4.2 are present.

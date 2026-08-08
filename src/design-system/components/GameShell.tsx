@@ -53,8 +53,8 @@ export function GameShell({ children, className = "", hideNavigation = false }: 
         key={pathname}
         data-game-scroll
         className={`${styles.content} ${hideNavigation ? styles.contentFull : ""}`}
-        initial={{ opacity: 0, x: direction * 10 }}
-        animate={{ opacity: 1, x: 0 }}
+        initial={{ opacity: 0, x: direction * 10, scale: 0.998 }}
+        animate={{ opacity: 1, x: 0, scale: 1 }}
         transition={mobileMotion.page}
       >
         {children}

@@ -74,7 +74,6 @@ function clampRatio(current: number, target: number): number {
   return Math.max(0, Math.min(1, current / Math.max(1, target)));
 }
 
-
 export function ProfilePage() {
   const scenario = useScenarioStore((state) => state.activeScenario);
   const { adapter } = useTelegram();
@@ -118,7 +117,6 @@ export function ProfilePage() {
   useEffect(() => {
     void preloadAssets([
       activeFrame.asset,
-      "profile.cosmetic.titlePlate",
       "profile.cosmetic.achievementSlot",
       "profile.cosmetic.medalSlot",
     ]);
@@ -140,7 +138,6 @@ export function ProfilePage() {
     setActiveTab(tab);
     sessionStorage.setItem(profileTabKey, tab);
   };
-
 
   const shareProfile = () => {
     const text = `${firstName} is exploring Dexo Land as ${activeTitle.name}. Level ${level} · ${lifetimeXp.toLocaleString()} lifetime XP.`;
@@ -263,11 +260,8 @@ export function ProfilePage() {
                     <div className={styles.identityCopy}>
                       <span>SEASON ONE EXPLORER</span>
                       <h2>{firstName}</h2>
-                      <div className={styles.titlePlate}>
-                        <AssetImage assetKey="profile.cosmetic.titlePlate" draggable={false} />
-                        <strong>{activeTitle.name}</strong>
-                      </div>
                       {username ? <small>@{username}</small> : null}
+                      <strong className={styles.activeTitle}>{activeTitle.name}</strong>
                     </div>
                   </div>
 
@@ -321,7 +315,7 @@ export function ProfilePage() {
                       <div className={styles.connectionIcon}><HugeiconsIcon icon={Wallet01Icon} size={21} strokeWidth={1.65} /></div>
                       <div className={styles.connectionCopy}>
                         <div><strong>Wallet</strong><span className={styles.comingSoon}>Coming soon</span></div>
-                        <p>Wallet connection will open with the on-chain reward layer.</p>
+                        <p>Wallet connection will be available in a future update.</p>
                       </div>
                     </article>
 
@@ -329,7 +323,7 @@ export function ProfilePage() {
                       <div className={styles.connectionIcon}><HugeiconsIcon icon={UserCircleIcon} size={21} strokeWidth={1.65} /></div>
                       <div className={styles.connectionCopy}>
                         <div><strong>Dalexio account</strong><span className={styles.comingSoon}>Coming soon</span></div>
-                        <p>Dalexio account linking will open when ecosystem accounts go live.</p>
+                        <p>Dalexio account linking will be available in a future update.</p>
                       </div>
                     </article>
                   </div>

@@ -5,6 +5,8 @@ test("profile overview, achievements and collection are available", async ({ pag
   await expect(page.getByRole("heading", { name: "Shape your legacy." })).toBeVisible();
   await expect(page.getByRole("button", { name: "Overview" })).toBeVisible();
   await expect(page.getByText("Wallet", { exact: true })).toBeVisible();
+  await expect(page.getByText("Coming soon", { exact: true })).toHaveCount(2);
+  await expect(page.getByRole("button", { name: "Connect" })).toHaveCount(0);
 
   await page.getByRole("button", { name: "Achievements" }).click();
   await expect(page.getByText("Milestones that matter.")).toBeVisible();

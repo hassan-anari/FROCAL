@@ -1,9 +1,9 @@
 # Dalexio / Dexo Land — Project Status, Handoff & Roadmap
 
 > **Snapshot date:** 2026-08-08  
-> **Latest code checkpoint:** `dalexio-miniapp-phase4-v4.2-profile-polish` / package version `4.2.0`  
+> **Latest code checkpoint:** `dalexio-miniapp-phase4-v4.1.1-targeted-profile-fixes` / package version `4.1.1`  
 > **Current major phase:** Phase 4 — Profile & Identity  
-> **Immediate continuation point:** deploy/test **Phase 4.2 Profile Composition, Modal Actions & Crispness Polish** on the real Telegram mobile WebView and apply only user-requested fixes.  
+> **Immediate continuation point:** deploy/test **Phase 4.1.1 Targeted Profile Fixes** on the real Telegram mobile WebView and apply only user-requested fixes.  
 > **Important:** Phase 3 is officially closed. Phase 4 is implemented but has **not yet been officially declared finished** by the user. Do **not** start Inventory/Clan/Arena before the user explicitly closes Phase 4.
 
 ---
@@ -12,30 +12,29 @@
 
 This is the exact continuation state a new chat must inherit:
 
-- **Code baseline:** `Phase 4.2 — Profile Composition, Modal Actions & Crispness Polish`
-- **Package version:** `4.2.0`
-- **Previous stable code checkpoint:** `dalexio-miniapp-phase4-v4.1-profile-modal-polish.zip`
-- **Previous v4.1 SHA-256:** `d1a0ac219939b226153a365dce706cc7bb636937e3066d6fe7e788f503436ad7`
-- **Documentation handoff before this patch:** `dalexio-miniapp-phase4-v4.1-handoff-v2.zip`
-- **Current distribution:** use the newest Phase 4.2 ZIP delivered with this documentation and its companion `.sha256` file as checksum source of truth.
-- **Code status:** Phase 4.2 fixes are implemented, but **the user has not yet confirmed the deployed/mobile result**.
-- **Correct next action:** resume Phase 4 QA from v4.2. Do not redesign closed phases and do not advance the roadmap until Phase 4 is explicitly approved.
+- **Code baseline:** `Phase 4.1.1 — Targeted Profile Fixes`
+- **Package version:** `4.1.1`
+- **Original v4.1 ZIP:** `dalexio-miniapp-phase4-v4.1-profile-modal-polish.zip`
+- **Original v4.1 ZIP SHA-256:** `d1a0ac219939b226153a365dce706cc7bb636937e3066d6fe7e788f503436ad7`
+- **Previous documentation handoff ZIP:** `dalexio-miniapp-phase4-v4.1-with-handoff-docs.zip`
+- **Previous documentation handoff SHA-256:** `c7c0810c60c20b5642084917b9e662e3849fffc68c9972fa655303dbc428c072`
+- **Code status:** v4.1.1 applies only the user's latest targeted fixes on the v4.1 baseline; **the user has not yet confirmed the deployed/mobile result**.
+- **Correct next action:** resume Phase 4 QA from v4.1.1. Do not redesign closed phases and do not advance the roadmap until Phase 4 is explicitly approved.
 
-The current documentation-enhanced archive may receive a distribution filename/hash after packaging. When present, the companion `.sha256` file beside the delivered ZIP is the checksum source of truth for that distribution.
+The current documentation-enhanced archive may have a newer distribution filename/hash than the two historical checkpoints above. When present, the companion `.sha256` file beside the delivered ZIP is the checksum source of truth for that distribution.
 
 ## 0.1 Current Phase 4 QA focus
 
-The most recent implementation specifically fixed:
+The current v4.1.1 checkpoint intentionally applies only these latest user-requested changes on the v4.1 baseline:
 
-- Profile Title Plate order/spacing: the active plate now sits above the Telegram username instead of visually falling underneath the ID.
-- Profile modal actions: single primary actions are narrower/centered and labels are larger; two-button Share actions are also width-constrained.
-- Connections: Wallet and Dalexio Account are visible but marked `Coming soon`; temporary mock `Connect` / `Done` controls are not shown.
-- Crispness audit: no active product-wide blur was found; persistent GPU-compositing hints were removed from large text-bearing surfaces to avoid softened text in Telegram mobile WebViews.
-- Route motion keeps the approved fade + short slide but no longer applies a page-wide micro-scale.
-- Profile modal motion keeps opacity + vertical movement without scaling the whole text-bearing modal.
-- The v4.1 root modal fixes remain active: body portal, viewport-fixed backdrop, safe areas, background scroll lock, internal modal scrolling and persistent action footer.
+- The decorative Title Plate is removed from the main Profile identity header; the active title remains as clean text below the Telegram username.
+- All Profile modal footer CTAs are shorter and use larger label text; oversized trailing arrow blocks were removed from `Feature achievement` and `Save profile`.
+- Wallet and Dalexio Account rows are static `Coming soon` surfaces with no mock `Connect`, `Done`, simulated address or simulated linked-account flow.
+- The v4.1 root-modal architecture remains unchanged: body portal, viewport-fixed backdrop, safe areas, background scroll lock, internal modal scrolling, persistent action footer and `Got it` close actions.
 
-These are the first things to verify when the project is opened in a new chat.
+Important: the later v4.2 blur/rasterization experiment was explicitly discarded by the user and is **not** part of this baseline.
+
+These are the first things to verify on the real Telegram mobile WebView.
 
 ## 0.2 Approved / do not reopen without an explicit request
 
@@ -68,11 +67,11 @@ When continuing this project in a fresh conversation:
 
 Latest generated checkpoint before this documentation update:
 
-`Phase 4.2 — Profile Composition, Modal Actions & Crispness Polish`
+`Phase 4.1.1 — Targeted Profile Fixes`
 
 Package version:
 
-`4.2.0`
+`4.1.1`
 
 Main current routes:
 
@@ -267,7 +266,7 @@ Implemented:
 - profile-only title plate
 - Level/XP progress
 - key progression summary
-- mock Wallet connection
+- Wallet connection surface: static `Coming soon` until real integration exists
 - mock Dalexio Account connection
 - Customize Profile
 - featured medal
@@ -369,7 +368,7 @@ The user has **not yet given final approval of Phase 4.1** after deployment/test
 
 Therefore, the correct next product action after this documentation handoff is:
 
-**Resume Phase 4 QA from v4.1 and apply only the user's requested fixes. Do not move to the next major phase until the user declares Phase 4 complete.**
+**Resume Phase 4 QA from v4.1.1 and apply only the user's requested fixes. Do not move to the next major phase until the user declares Phase 4 complete.**
 
 Key things to verify on an actual phone:
 
@@ -584,4 +583,4 @@ A future assistant should ask/plan around these when they become relevant, not f
 
 If a new chat needs one concise state statement, use this:
 
-> **Dalexio Dexo Land is a Telegram-mobile-first gamified airdrop/community Mini App. Phases 0–3 are approved and closed, including the optimized Earn/Network/Typing loop and the mobile motion standard. Phase 4 Profile & Identity is implemented through v4.1 but is still under user QA; the immediate next step is to test/fix v4.1 Profile, especially title composition, Share UI and the new viewport-safe modal system. Do not start Inventory/Clan/Arena until the user explicitly closes Phase 4.**
+> **Dalexio Dexo Land is a Telegram-mobile-first gamified airdrop/community Mini App. Phases 0–3 are approved and closed, including the optimized Earn/Network/Typing loop and the mobile motion standard. Phase 4 Profile & Identity is implemented through v4.1.1 but is still under user QA; the immediate next step is to test the targeted Profile title/modal-button/Coming-Soon connection fixes while preserving the v4.1 viewport-safe modal system. Do not start Inventory/Clan/Arena until the user explicitly closes Phase 4.**

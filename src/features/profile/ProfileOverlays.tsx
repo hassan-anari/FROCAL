@@ -150,9 +150,9 @@ function OverlayFrame({ eyebrow, title, onClose, children, footer }: OverlayFram
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 18, scale: 0.995 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 10, scale: 0.998 }}
         transition={mobileMotion.overlay}
         onPointerDown={(event) => event.stopPropagation()}
       >
@@ -163,7 +163,7 @@ function OverlayFrame({ eyebrow, title, onClose, children, footer }: OverlayFram
         <div className={styles.sheetBody}>{children}</div>
         <footer className={styles.sheetFooter}>
           {footer ?? (
-            <Button type="button" tone="primary" size="md" className={styles.primaryButton} data-modal-primary onClick={() => closeRef.current()}>
+            <Button type="button" tone="primary" size="sm" className={styles.primaryButton} data-modal-primary onClick={() => closeRef.current()}>
               Got it
             </Button>
           )}
@@ -190,7 +190,6 @@ export function ProfileDetailSheet({ item, onClose }: DetailSheetProps) {
       size="md"
       className={styles.primaryButton}
       data-modal-primary
-      trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={17} strokeWidth={1.8} />}
       onClick={() => {
         item.onPrimary?.();
         onClose();
@@ -276,7 +275,6 @@ export function CustomizeProfileSheet({
         size="md"
         className={styles.primaryButton}
         data-modal-primary
-        trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={17} strokeWidth={1.8} />}
         onClick={() => {
           onSave({ frameId: draftFrame, titleId: draftTitle, medalId: draftMedal, achievementId: draftAchievement });
           onClose();
@@ -411,10 +409,10 @@ export function ShareProfileSheet({
   return (
     <OverlayFrame eyebrow="Telegram share" title="Share profile" onClose={onClose} footer={
       <div className={styles.shareActions}>
-        <Button type="button" tone="secondary" size="md" className={styles.secondaryButton} onClick={() => void copy()}>
+        <Button type="button" tone="secondary" size="sm" className={styles.secondaryButton} onClick={() => void copy()}>
           {copied ? "Copied" : "Copy link"}
         </Button>
-        <Button type="button" tone="primary" size="md" className={styles.primaryButton} data-modal-primary onClick={onShare}>
+        <Button type="button" tone="primary" size="sm" className={styles.primaryButton} data-modal-primary onClick={onShare}>
           Share in Telegram
         </Button>
       </div>

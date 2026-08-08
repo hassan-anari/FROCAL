@@ -27,6 +27,9 @@
   overscroll-behavior: contain;
   scrollbar-width: none;
   padding-bottom: calc(70px + var(--safe-bottom));
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: opacity, transform;
 }
 
 .content::-webkit-scrollbar { display: none; }
