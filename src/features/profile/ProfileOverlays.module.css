@@ -30,7 +30,6 @@
     radial-gradient(circle at 88% 0%, rgba(115, 76, 255, .11), transparent 15rem),
     linear-gradient(160deg, #0b142d, #030712 74%);
   box-shadow: 0 24px 70px rgba(0, 0, 0, .56), inset 0 1px 0 rgba(255, 255, 255, .045);
-  transform: translateZ(0);
   touch-action: auto;
 }
 
@@ -111,7 +110,9 @@
 .sheetFooter {
   position: relative;
   z-index: 2;
+  display: flex;
   flex: 0 0 auto;
+  justify-content: center;
   padding: .72rem .94rem .82rem;
   border-top: 1px solid rgba(139, 171, 239, .09);
   background: #030712;
@@ -119,10 +120,10 @@
 
 .primaryButton,
 .secondaryButton {
-  width: 100%;
-  min-height: 48px;
-  border-radius: 15px;
-  font-size: .74rem;
+  width: min(100%, 286px);
+  min-height: 50px;
+  border-radius: 16px;
+  font-size: .84rem;
 }
 
 .primaryButton::after {
@@ -131,8 +132,16 @@
 
 .shareActions {
   display: grid;
-  grid-template-columns: .78fr 1.22fr;
+  grid-template-columns: .82fr 1.18fr;
   gap: .5rem;
+  width: min(100%, 344px);
+  margin-inline: auto;
+}
+
+.shareActions .primaryButton,
+.shareActions .secondaryButton {
+  width: 100%;
+  font-size: .8rem;
 }
 
 .detailArt {

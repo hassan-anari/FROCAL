@@ -87,18 +87,19 @@
 
 .identityCard { padding: .88rem; }
 .identityTop { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: .74rem; }
-.identityCopy { display: grid; min-width: 0; align-content: center; gap: .055rem; }
+.identityCopy { display: grid; min-width: 0; align-content: center; gap: .035rem; }
 .identityCopy > span { color: #77e8ff; font-size: .48rem; font-weight: 820; letter-spacing: .14em; }
 .identityCopy h2 { margin: 0; overflow: hidden; color: #f7f9ff; font-size: 1.32rem; font-weight: 850; letter-spacing: -.05em; text-overflow: ellipsis; white-space: nowrap; }
-.identityCopy > small { color: rgba(177,191,223,.56); font-size: .58rem; }
+.identityCopy > small { margin-top: .02rem; color: rgba(177,191,223,.56); font-size: .58rem; }
 
 .titlePlate {
   position: relative;
   display: inline-grid;
   place-items: center;
-  width: clamp(128px, 40vw, 154px);
-  height: 32px;
-  margin: .08rem 0 0 -.18rem;
+  align-self: start;
+  width: clamp(132px, 42vw, 160px);
+  height: 34px;
+  margin: .1rem 0 .03rem -.14rem;
   overflow: hidden;
   isolation: isolate;
 }
@@ -148,16 +149,14 @@
 .statGrid span { color: rgba(171,186,219,.5); font-size: .5rem; font-weight: 720; letter-spacing: .06em; text-transform: uppercase; }
 
 .connectionList { display: grid; gap: .52rem; }
-.connectionCard { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: .58rem; padding: .66rem; border: 1px solid rgba(139,171,239,.1); border-radius: 16px; background: rgba(5,11,27,.55); }
+.connectionCard { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: .58rem; padding: .66rem; border: 1px solid rgba(139,171,239,.1); border-radius: 16px; background: rgba(5,11,27,.55); }
 .connectionIcon { display: grid; place-items: center; width: 39px; height: 39px; border-radius: 13px; color: #8feeff; background: linear-gradient(145deg, rgba(52,196,231,.14), rgba(123,73,215,.2)); }
 .connectionCopy { display: grid; min-width: 0; gap: .23rem; }
 .connectionCopy > div { display: flex; align-items: center; justify-content: space-between; gap: .45rem; }
 .connectionCopy strong { overflow: hidden; color: #f0f4ff; font-size: .69rem; font-weight: 760; text-overflow: ellipsis; white-space: nowrap; }
 .connectionCopy span { flex: 0 0 auto; color: rgba(172,187,220,.48); font-size: .47rem; font-weight: 760; text-transform: uppercase; }
-.connectionCopy .connected { color: #72e9bd; }
+.connectionCopy .comingSoon { color: #79e8ff; letter-spacing: .06em; }
 .connectionCopy p { margin: 0; overflow: hidden; color: rgba(174,189,221,.52); font-size: .56rem; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }
-.connectionCard > button { min-width: 56px; min-height: 32px; border: 1px solid rgba(100,211,255,.19); border-radius: 11px; color: #bff7ff; background: rgba(31,128,161,.1); font-size: .54rem; font-weight: 780; cursor: pointer; }
-.connectionCard > button:disabled { cursor: default; opacity: .65; }
 
 .showcaseGrid { display: grid; grid-template-columns: 1fr 1fr; gap: .52rem; }
 .showcaseGrid > button { display: grid; min-width: 0; justify-items: center; gap: .18rem; padding: .52rem .42rem .6rem; border: 1px solid rgba(139,171,239,.1); border-radius: 16px; color: inherit; background: rgba(5,11,27,.52); cursor: pointer; }
@@ -228,7 +227,6 @@
   .pageHeader h1 { font-size: clamp(1.34rem, 6.8vw, 1.55rem); }
   .identityTop { grid-template-columns: 104px minmax(0, 1fr); gap: .58rem; }
   .connectionCard { grid-template-columns: auto minmax(0, 1fr); }
-  .connectionCard > button { grid-column: 2; justify-self: end; min-width: 70px; }
   .achievementCard { grid-template-columns: 58px minmax(0, 1fr) auto; }
   .achievementArt { width: 58px; height: 58px; }
 }

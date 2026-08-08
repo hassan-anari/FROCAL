@@ -74,12 +74,6 @@ function clampRatio(current: number, target: number): number {
   return Math.max(0, Math.min(1, current / Math.max(1, target)));
 }
 
-function connectionLabel(status: "disconnected" | "connecting" | "connected" | "error"): string {
-  if (status === "connected") return "Connected";
-  if (status === "connecting") return "Connecting";
-  if (status === "error") return "Try again";
-  return "Not connected";
-}
 
 export function ProfilePage() {
   const scenario = useScenarioStore((state) => state.activeScenario);
@@ -147,25 +141,6 @@ export function ProfilePage() {
     sessionStorage.setItem(profileTabKey, tab);
   };
 
-  const connectWallet = () => {
-    if (profile.walletStatus === "connecting" || profile.walletStatus === "connected") return;
-    adapter.hapticImpact("light");
-    profile.beginWalletConnection();
-    window.setTimeout(() => {
-      profile.finishWalletConnection("0x7A4C...9F21");
-      adapter.hapticNotice("success");
-    }, 760);
-  };
-
-  const connectDalexio = () => {
-    if (profile.dalexioStatus === "connecting" || profile.dalexioStatus === "connected") return;
-    adapter.hapticImpact("light");
-    profile.beginDalexioConnection();
-    window.setTimeout(() => {
-      profile.finishDalexioConnection(`Explorer #${telegramUser?.id ?? "704768645"}`);
-      adapter.hapticNotice("success");
-    }, 760);
-  };
 
   const shareProfile = () => {
     const text = `${firstName} is exploring Dexo Land as ${activeTitle.name}. Level ${level} · ${lifetimeXp.toLocaleString()} lifetime XP.`;
@@ -288,11 +263,11 @@ export function ProfilePage() {
                     <div className={styles.identityCopy}>
                       <span>SEASON ONE EXPLORER</span>
                       <h2>{firstName}</h2>
-                      {username ? <small>@{username}</small> : null}
                       <div className={styles.titlePlate}>
                         <AssetImage assetKey="profile.cosmetic.titlePlate" draggable={false} />
                         <strong>{activeTitle.name}</strong>
                       </div>
+                      {username ? <small>@{username}</small> : null}
                     </div>
                   </div>
 
@@ -345,23 +320,17 @@ export function ProfilePage() {
                     <article className={styles.connectionCard}>
                       <div className={styles.connectionIcon}><HugeiconsIcon icon={Wallet01Icon} size={21} strokeWidth={1.65} /></div>
                       <div className={styles.connectionCopy}>
-                        <div><strong>Wallet</strong><span className={profile.walletStatus === "connected" ? styles.connected : ""}>{connectionLabel(profile.walletStatus)}</span></div>
-                        <p>{profile.walletAddress ?? "Connect a wallet to prepare for future on-chain rewards."}</p>
+                        <div><strong>Wallet</strong><span className={styles.comingSoon}>Coming soon</span></div>
+                        <p>Wallet connection will open with the on-chain reward layer.</p>
                       </div>
-                      <button type="button" disabled={profile.walletStatus === "connecting" || profile.walletStatus === "connected"} onClick={connectWallet}>
-                        {profile.walletStatus === "connected" ? "Done" : profile.walletStatus === "connecting" ? "..." : "Connect"}
-                      </button>
                     </article>
 
                     <article className={styles.connectionCard}>
                       <div className={styles.connectionIcon}><HugeiconsIcon icon={UserCircleIcon} size={21} strokeWidth={1.65} /></div>
                       <div className={styles.connectionCopy}>
-                        <div><strong>Dalexio account</strong><span className={profile.dalexioStatus === "connected" ? styles.connected : ""}>{connectionLabel(profile.dalexioStatus)}</span></div>
-                        <p>{profile.dalexioHandle ?? "Link your Dalexio account to keep your ecosystem identity together."}</p>
+                        <div><strong>Dalexio account</strong><span className={styles.comingSoon}>Coming soon</span></div>
+                        <p>Dalexio account linking will open when ecosystem accounts go live.</p>
                       </div>
-                      <button type="button" disabled={profile.dalexioStatus === "connecting" || profile.dalexioStatus === "connected"} onClick={connectDalexio}>
-                        {profile.dalexioStatus === "connected" ? "Done" : profile.dalexioStatus === "connecting" ? "..." : "Connect"}
-                      </button>
                     </article>
                   </div>
                 </section>
