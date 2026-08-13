@@ -1,0 +1,356 @@
+import {
+  ArrowRight01Icon,
+  InformationCircleIcon,
+  UserCircleIcon,
+  UserGroupIcon,
+  Wallet01Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { motion } from "motion/react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
+import { createPortal } from "react-dom";
+import { mobileMotion } from "@/design-system/motion/mobileMotion";
+import { usePauseBackgroundMotion } from "@/design-system/motion/usePauseBackgroundMotion";
+import { Button } from "@/design-system/primitives/Button";
+import type { ClanInventoryItem, ClanJoinApplicant, ClanRole, ClanSummary } from "@/game/clan/types";
+import styles from "./ClanOverlays.module.css";
+
+interface ClanModalProps {
+  eyebrow: string;
+  title: string;
+  onClose: () => void;
+  children: ReactNode;
+  footer?: ReactNode;
+}
+
+const focusableSelector = [
+  "button:not([disabled])",
+  "a[href]",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  '[tabindex]:not([tabindex="-1"])',
+].join(",");
+
+export function ClanModal({ eyebrow, title, onClose, children, footer }: ClanModalProps) {
+  const titleId = useId();
+  const sheetRef = useRef<HTMLElement | null>(null);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+  usePauseBackgroundMotion(true);
+
+  useEffect(() => {
+    const scrollRoot = document.querySelector<HTMLElement>("[data-game-scroll]");
+    const appRoot = document.getElementById("root");
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const scrollTop = scrollRoot?.scrollTop ?? 0;
+    const previousOverflow = scrollRoot?.style.overflow ?? "";
+    const previousTouchAction = scrollRoot?.style.touchAction ?? "";
+    const previousOverscroll = scrollRoot?.style.overscrollBehavior ?? "";
+    const rootWasInert = appRoot?.hasAttribute("inert") ?? false;
+    const rootAriaHidden = appRoot?.getAttribute("aria-hidden") ?? null;
+
+    if (scrollRoot) {
+      scrollRoot.style.overflow = "hidden";
+      scrollRoot.style.touchAction = "none";
+      scrollRoot.style.overscrollBehavior = "none";
+    }
+    if (appRoot) {
+      appRoot.setAttribute("inert", "");
+      appRoot.setAttribute("aria-hidden", "true");
+    }
+
+    const timer = window.setTimeout(() => {
+      sheetRef.current?.querySelector<HTMLElement>("[data-clan-primary], [data-clan-close]")?.focus({ preventScroll: true });
+    }, 20);
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeRef.current();
+        return;
+      }
+      if (event.key !== "Tab" || !sheetRef.current) return;
+
+      const focusable = Array.from(sheetRef.current.querySelectorAll<HTMLElement>(focusableSelector))
+        .filter((element) => !element.hasAttribute("disabled"));
+      if (focusable.length === 0) {
+        event.preventDefault();
+        sheetRef.current.focus({ preventScroll: true });
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus({ preventScroll: true });
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus({ preventScroll: true });
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      window.clearTimeout(timer);
+      document.removeEventListener("keydown", onKeyDown);
+      if (scrollRoot) {
+        scrollRoot.style.overflow = previousOverflow;
+        scrollRoot.style.touchAction = previousTouchAction;
+        scrollRoot.style.overscrollBehavior = previousOverscroll;
+        scrollRoot.scrollTop = scrollTop;
+      }
+      if (appRoot) {
+        if (!rootWasInert) appRoot.removeAttribute("inert");
+        if (rootAriaHidden === null) appRoot.removeAttribute("aria-hidden");
+        else appRoot.setAttribute("aria-hidden", rootAriaHidden);
+      }
+      previousFocus?.focus({ preventScroll: true });
+    };
+  }, []);
+
+  return createPortal(
+    <motion.div
+      className={styles.backdrop}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={mobileMotion.micro}
+      onPointerDown={(event) => {
+        if (event.target === event.currentTarget) closeRef.current();
+      }}
+    >
+      <motion.section
+        ref={sheetRef}
+        className={styles.sheet}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 10 }}
+        transition={mobileMotion.overlay}
+        onPointerDown={(event) => event.stopPropagation()}
+      >
+        <header className={styles.header}>
+          <div><span>{eyebrow}</span><h2 id={titleId}>{title}</h2></div>
+          <button type="button" data-clan-close aria-label="Close" onClick={() => closeRef.current()}>×</button>
+        </header>
+        <div className={styles.body}>{children}</div>
+        <footer className={styles.footer}>
+          {footer ?? (
+            <Button type="button" tone="primary" size="sm" className={styles.primary} data-clan-primary onClick={() => closeRef.current()}>
+              Got it
+            </Button>
+          )}
+        </footer>
+      </motion.section>
+    </motion.div>,
+    document.body,
+  );
+}
+
+export function RoleConfirmSheet({
+  role,
+  onClose,
+  onConfirm,
+}: {
+  role: ClanRole;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  const captain = role === "captain";
+  return (
+    <ClanModal
+      eyebrow="Permanent path"
+      title={captain ? "Become a Captain" : "Become a Soldier"}
+      onClose={onClose}
+      footer={
+        <div className={styles.doubleActions}>
+          <Button type="button" tone="secondary" size="sm" onClick={onClose}>Go back</Button>
+          <Button type="button" tone="primary" size="sm" className={styles.primary} data-clan-primary onClick={onConfirm}>
+            Confirm path
+          </Button>
+        </div>
+      }
+    >
+      <div className={`${styles.roleMark} ${captain ? styles.captain : styles.soldier}`}>
+        <HugeiconsIcon icon={captain ? UserGroupIcon : UserCircleIcon} size={36} strokeWidth={1.5} />
+      </div>
+      <div className={styles.centerCopy}>
+        <strong>This choice is made once.</strong>
+        <p>
+          {captain
+            ? "You will lead the clan, approve members and decide how Treasury is used. The clan's direction and success will depend heavily on your decisions."
+            : "You will shape clan progress through your own actions. Missions, contribution and consistency can change what your clan is able to achieve."}
+        </p>
+      </div>
+      <div className={styles.note}>
+        <HugeiconsIcon icon={InformationCircleIcon} size={18} strokeWidth={1.55} />
+        <span>No role-switch control will be available after confirmation.</span>
+      </div>
+    </ClanModal>
+  );
+}
+
+export function ClanPreviewSheet({
+  clan,
+  pendingClanId,
+  onClose,
+  onJoin,
+}: {
+  clan: ClanSummary;
+  pendingClanId: string | null;
+  onClose: () => void;
+  onJoin: () => void;
+}) {
+  const full = clan.members >= clan.capacity || clan.status === "Full";
+  const hasPending = pendingClanId !== null;
+  const isThisPending = pendingClanId === clan.id;
+
+  let label = "Request to join";
+  if (full) label = "Clan full";
+  else if (isThisPending) label = "Request pending";
+  else if (hasPending) label = "One request already active";
+
+  return (
+    <ClanModal
+      eyebrow="Clan preview"
+      title={clan.name}
+      onClose={onClose}
+      footer={
+        <Button
+          type="button"
+          tone={full || hasPending ? "secondary" : "primary"}
+          size="sm"
+          className={!full && !hasPending ? styles.primary : ""}
+          data-clan-primary
+          disabled={full || hasPending}
+          onClick={onJoin}
+        >
+          {label}
+        </Button>
+      }
+    >
+      <div className={`${styles.clanHero} ${styles[clan.accent]}`}>
+        <div className={styles.clanMark}><span>{clan.tag}</span></div>
+        <div>
+          <span>#{clan.rank} GLOBAL</span>
+          <h3>{clan.name}</h3>
+          <p>{clan.summary}</p>
+        </div>
+      </div>
+      <div className={styles.stats}>
+        <div><span>Level</span><strong>{clan.level}</strong></div>
+        <div><span>Members</span><strong>{clan.members}/{clan.capacity}</strong></div>
+        <div><span>Score</span><strong>{clan.score.toLocaleString()}</strong></div>
+      </div>
+      <div className={styles.detailList}>
+        <div><span>Status</span><strong>{clan.status}</strong></div>
+        <div><span>Match</span><strong>{clan.match ?? 80}%</strong></div>
+        <div><span>Request rule</span><strong>One active request</strong></div>
+      </div>
+    </ClanModal>
+  );
+}
+
+export function ClanItemSheet({
+  item,
+  owned,
+  captain,
+  treasury,
+  onClose,
+  onPurchase,
+}: {
+  item: ClanInventoryItem;
+  owned: boolean;
+  captain: boolean;
+  treasury: number;
+  onClose: () => void;
+  onPurchase: () => void;
+}) {
+  const canBuy = captain && !owned && treasury >= item.price;
+  let label = "Got it";
+  if (captain && owned) label = "Owned";
+  else if (captain && treasury < item.price) label = "Not enough Treasury";
+  else if (captain) label = `Buy for ${item.price.toLocaleString()}`;
+
+  return (
+    <ClanModal
+      eyebrow="Clan inventory"
+      title={item.name}
+      onClose={onClose}
+      footer={
+        captain ? (
+          <Button
+            type="button"
+            tone={canBuy ? "primary" : "secondary"}
+            size="sm"
+            className={canBuy ? styles.primary : ""}
+            data-clan-primary
+            disabled={!canBuy}
+            onClick={onPurchase}
+          >
+            {label}
+          </Button>
+        ) : undefined
+      }
+    >
+      <div className={styles.itemArt}><span>{item.glyph}</span></div>
+      <div className={styles.centerCopy}>
+        <strong>{item.rarity} clan item</strong>
+        <p>{item.description}</p>
+      </div>
+      <div className={styles.effectCard}>
+        <span>WHAT IT DOES</span>
+        <p>{item.effect}</p>
+      </div>
+      <div className={styles.detailList}>
+        <div><span>Price</span><strong>{item.price.toLocaleString()} Treasury</strong></div>
+        <div><span>Status</span><strong>{owned ? "Owned" : "Available"}</strong></div>
+      </div>
+    </ClanModal>
+  );
+}
+
+export function JoinRequestsSheet({
+  applicants,
+  onClose,
+  onAccept,
+  onReject,
+}: {
+  applicants: ClanJoinApplicant[];
+  onClose: () => void;
+  onAccept: (id: string) => void;
+  onReject: (id: string) => void;
+}) {
+  const pending = applicants.filter((applicant) => applicant.status === "pending");
+
+  return (
+    <ClanModal eyebrow="Captain tools" title="Join requests" onClose={onClose}>
+      <div className={styles.requestIntro}>
+        <HugeiconsIcon icon={UserGroupIcon} size={22} strokeWidth={1.55} />
+        <div><strong>{pending.length} pending explorers</strong><span>Review each request before opening a place in your roster.</span></div>
+      </div>
+      <div className={styles.requestList}>
+        {applicants.map((applicant) => (
+          <article key={applicant.id} className={styles.request}>
+            <div className={styles.avatar}>{applicant.initial}</div>
+            <div className={styles.requestCopy}>
+              <strong>{applicant.name}</strong>
+              <span>Level {applicant.level} · {applicant.contributionPreview.toLocaleString()} activity score</span>
+            </div>
+            {applicant.status === "pending" ? (
+              <div className={styles.requestActions}>
+                <button type="button" onClick={() => onReject(applicant.id)}>Reject</button>
+                <button type="button" className={styles.accept} onClick={() => onAccept(applicant.id)}>Accept</button>
+              </div>
+            ) : <em className={styles[applicant.status]}>{applicant.status}</em>}
+          </article>
+        ))}
+      </div>
+    </ClanModal>
+  );
+}

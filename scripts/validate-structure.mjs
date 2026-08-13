@@ -21,8 +21,12 @@ const required = [
   "src/game/profile/types.ts",
   "src/game/profile/profileCatalog.ts",
   "src/game/profile/profileStore.ts",
+  "src/game/clan/types.ts",
+  "src/game/clan/clanCatalog.ts",
+  "src/game/clan/clanStore.ts",
   "src/features/profile/ProfileAvatar.tsx",
   "src/features/profile/ProfileOverlays.tsx",
+  "src/features/clan/ClanOverlays.tsx",
   "src/features/earn/EarnOverlays.tsx",
   "src/pages/FoundationPage.tsx",
   "src/pages/OnboardingPage.tsx",
@@ -30,10 +34,15 @@ const required = [
   "src/pages/EarnPage.tsx",
   "src/pages/TypingChallengePage.tsx",
   "src/pages/ClanPage.tsx",
+  "src/pages/ClanPage.module.css",
   "src/pages/ArenaPage.tsx",
   "src/pages/ProfilePage.tsx",
   "src/pages/DiagnosticsPage.tsx",
   "src/mocks/handlers/bootstrap.handlers.ts",
+  "PHASE_5_CLAN_REPORT.md",
+  "PHASE_5_ROUTE_MAP.md",
+  "PHASE_5_TEST_CHECKLIST.md",
+  "CLAN_FRONTEND_SCOPE.md",
   "vercel.json",
 ];
 
@@ -47,7 +56,7 @@ for (const file of required) {
 }
 
 if (missing.length) {
-  console.error("Missing Phase 4 architecture files:\n" + missing.join("\n"));
+  console.error("Missing Phase 5 architecture files:\n" + missing.join("\n"));
   process.exit(1);
 }
-console.log(`Structure validation passed: ${required.length} Phase 4 files found.`);
+console.log(`Structure validation passed: ${required.length} Phase 5 files found.`);

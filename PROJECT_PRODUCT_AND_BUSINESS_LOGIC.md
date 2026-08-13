@@ -1,7 +1,7 @@
 # Dalexio / Dexo Land — Product & Business Logic
 
-> **Snapshot:** 2026-08-08  
-> **Current frontend checkpoint:** Phase 4.1.3 (`4.1.3`)  
+> **Snapshot:** 2026-08-13  
+> **Current frontend checkpoint:** Phase 5 Clan Frontend v5.0 (`5.0.0`)  
 > **Primary runtime:** Telegram Mini App on mobile  
 > **Purpose of this file:** product/business source-of-truth for continuing development in a new chat without reconstructing prior decisions.
 
@@ -374,7 +374,7 @@ Dexo appears without the platform in the Typing Arena hero and uses a lightweigh
 
 ## 10. Profile & Identity business logic
 
-Phase 4 is currently implemented but **not yet officially closed** by the user. The latest checkpoint is v4.1.3 and is still under visual/behavior QA.
+Phase 4 Profile & Identity is officially approved and closed by the user. The accepted final checkpoint is v4.1.3.
 
 Profile has three internal tabs:
 
@@ -726,3 +726,117 @@ The known planned major systems after Profile are:
 6. Launch polish and final integration
 
 Exact implementation details of these future systems should be defined with the user before coding. Do not invent complex mechanics simply to fill the page.
+
+
+## Phase 4 closure
+
+Phase 4 Profile & Identity is officially complete. The next major product area is Inventory. Inventory business rules must be defined with the user before implementation; do not invent an economy or item system without approval.
+
+
+## Next major module — Clan frontend definition
+
+The next major frontend module is **Clan**. Do not build a standalone Inventory phase before Clan.
+
+Important implementation boundary:
+- The current work is frontend-first.
+- Do not over-design backend/economy/business rules that have not been defined.
+- Build the UI/state flows with mock data so the backend can be connected later.
+
+### Clan unlock and permanent path choice
+
+- Clan is locked before Level 5.
+- At Level 5, the user gets a one-time path choice:
+  - `Captain`
+  - `Soldier`
+- The role choice is permanent in the current frontend flow.
+- Do not add role switching, role reset, or change-role settings.
+
+The role-selection UI must explain the meaning of each path before confirmation:
+- Captain: leadership carries major responsibility; the clan's direction and success depend on the Captain's decisions and management.
+- Soldier: the player contributes through their own actions and can materially change the clan's progress and outcomes.
+
+### Soldier discovery/join flow
+
+Before joining a clan, Soldier UI includes:
+- Clan Leaderboard
+- Clan Search
+- Suggested Clans, especially suitable/newly-active clans
+- Clan preview/details
+- Join request
+
+Join-request rule for the current frontend:
+- only one active join request at a time
+- no multi-request UI
+- states should cover at least `not requested`, `pending`, `accepted`, `rejected`
+- after acceptance, the Soldier becomes a clan member and Discovery/Search is replaced by Clan Headquarters
+
+### Captain flow
+
+Captain UI includes:
+- Clan creation flow
+- Clan identity setup
+- Captain-facing Headquarters
+- Join-request inbox
+- Accept/Reject member requests
+- Treasury-spending Clan Shop/Inventory controls
+
+### Clan Headquarters
+
+Once a user belongs to a clan, the main Clan surface becomes the Headquarters/Home rather than Discovery.
+
+Shared member/Captain information includes:
+- clan identity
+- clan level
+- clan progress
+- clan status
+- clan rank/leaderboard position
+- treasury
+- member list
+- member level
+- member contribution / points earned for the clan
+- active tasks
+- completed tasks
+- clan achievements
+- clan inventory
+- relevant clan activity/history
+
+### Clan tasks
+
+Clan tasks must be visually separated into two explicit categories:
+- `Group Tasks`
+- `Individual Tasks`
+
+Do not merge these into one undifferentiated task list.
+
+Business/reward calculation is backend work later; frontend should represent progress, states and completion clearly without inventing final economics.
+
+### Clan inventory/shop
+
+Inventory is part of Clan, not a separate standalone phase at this point.
+
+For regular members:
+- Clan Inventory is read-only
+- members can see items already purchased by the Captain
+- each item can show artwork, name, description/effect and current status where relevant
+
+For Captain:
+- Inventory also exposes a Shop-like purchase experience
+- Treasury is the spending source
+- item cards/detail modals show price, description and what the item does
+- purchase behavior can remain mocked until backend/business rules are implemented
+
+The presentation can reuse the successful Profile Achievement/Medal detail-modal pattern, adapted for item price/effect/action.
+
+
+## Clan frontend v5.0 implementation note
+
+The approved Clan UX/state definition has now been implemented in frontend v5.0.
+
+Important:
+- this is still frontend/mock state
+- final reward/economy/Treasury calculations are not defined here
+- one role choice is permanent in UI
+- one Soldier join request can be active at a time
+- Group Tasks and Individual Tasks are separate
+- Clan Inventory belongs inside Headquarters
+- Captain Shop is a Treasury-spending mock surface

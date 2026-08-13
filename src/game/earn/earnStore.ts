@@ -160,6 +160,7 @@ interface EarnState {
   dismissLevelUp: () => void;
   resetEarnProgress: () => void;
   setNearEvolutionForDiagnostics: () => void;
+  setLevelForDiagnostics: (level: number) => void;
   completeStarterPathForDiagnostics: () => void;
 }
 
@@ -501,6 +502,17 @@ export const useEarnStore = create<EarnState>()(
         levelUpEvent: null,
         rewardEvent: null,
       }),
+
+      setLevelForDiagnostics: (level) => {
+        const normalized = Math.max(1, Math.floor(level));
+        set({
+          level: normalized,
+          levelXp: normalized === 1 ? 120 : 90,
+          xpToNextLevel: levelTarget(normalized),
+          levelUpEvent: null,
+          rewardEvent: null,
+        });
+      },
 
       completeStarterPathForDiagnostics: () => {
         const state = get();

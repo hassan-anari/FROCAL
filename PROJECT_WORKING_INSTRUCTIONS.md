@@ -386,7 +386,7 @@ Without an explicit user request, do not broadly redesign or refactor:
 - Phase 3 Earn/Network/Typing
 - Phase 3.3 mobile motion standard
 
-Phase 0–3 are closed. Phase 4 remains active until the user closes it. Narrow bug fixes may touch shared code only when necessary, while preserving approved visuals/behavior elsewhere.
+Phases 0–4 are closed. Phase 5 Clan is the active QA phase until the user closes it. Narrow bug fixes may touch shared code only when necessary, while preserving approved visuals/behavior elsewhere.
 
 ## 18. Source-of-truth precedence
 
@@ -404,10 +404,42 @@ Do not let an older mock implementation override a newer product decision.
 
 ## 19. Current continuation rule
 
-At this snapshot, do **not** jump to Inventory/Clan/Arena simply because they are next on the roadmap.
+At this snapshot, do **not** jump beyond Clan or reopen earlier closed phases simply because later systems exist on the roadmap.
 
-Phase 4.1.3 Profile is the current checkpoint and should be tested/fixed until the user explicitly says Phase 4 is finished. It is based on v4.1.2 and additionally makes the two Profile header actions compact, removes the decorative Title Plate from Customize preview too, and fixes immediate Avatar Frame visual updates. Neither main Profile nor Customize live preview should render the Title Plate. The discarded v4.2 blur/rasterization experiment must not be treated as part of the baseline. Also remember that the 31 supplied Profile assets are now repository-maintained and must not be bundled again in future source ZIPs.
+Phase 4.1.3 Profile is the accepted final Phase 4 checkpoint. Phase 4 is officially closed. It is based on v4.1.2 and additionally makes the two Profile header actions compact, removes the decorative Title Plate from Customize preview too, and fixes immediate Avatar Frame visual updates. Neither main Profile nor Customize live preview should render the Title Plate. The discarded v4.2 blur/rasterization experiment must not be treated as part of the baseline. Also remember that the 31 supplied Profile assets are now repository-maintained and must not be bundled again in future source ZIPs.
 
 - Profile identity actions under the level bar should be compact-height mobile CTAs. A trailing icon container must never force the entire button taller than intended.
 
 - Dynamic asset selectors (especially Avatar Frames) must visually update immediately when the asset key changes; never cache an initial asset path in a way that requires page/tab remounting.
+
+- Phase 4 is closed. Do not redesign or reopen Profile unless the user explicitly requests a change.
+
+
+## Clan implementation instructions
+
+- The next frontend module is Clan, not standalone Inventory.
+- Treat backend/business/economy logic as future integration work; use mock data/state for the frontend.
+- Clan stays locked until Level 5.
+- At Level 5 show a one-time permanent path choice: Captain or Soldier.
+- Never add a role-switch/change-role control.
+- Before confirmation, explain Captain responsibility and Soldier impact clearly.
+- Soldier can have only one active join request; do not build multi-request UI.
+- Before membership, Soldier UI includes Clan Leaderboard, Search and Suggested Clans.
+- After acceptance into a clan, hide Discovery/Search and make Clan Headquarters the primary Clan experience.
+- Separate `Group Tasks` and `Individual Tasks` visually and structurally.
+- Regular members can view Clan Inventory but cannot spend Treasury.
+- Captain can spend Treasury through a Shop-like Inventory UI.
+- Reuse established mobile modal patterns for Clan item/achievement details.
+- Keep all Clan design mobile-first and preserve the Phase 3.3 performance/motion rules.
+
+
+## Phase 5 Clan QA instruction
+
+Clan v5.0 is implemented. Until the user closes the phase:
+- test/fix the current Clan implementation rather than redesigning closed Phase 0–4 screens
+- keep all new Clan fixes mobile-first
+- preserve one-time role choice
+- preserve one-active-request Soldier rule
+- preserve Group/Individual task separation
+- preserve member read-only Inventory vs Captain Shop distinction
+- do not add backend/economy complexity unless explicitly requested

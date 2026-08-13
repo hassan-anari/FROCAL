@@ -9,6 +9,7 @@ import { useScenarioStore } from "@/game/scenarios/scenarioStore";
 import { useBaseUiStore } from "@/game/ui/baseUiStore";
 import { getTypingAttemptsRemaining, useEarnStore } from "@/game/earn/earnStore";
 import { useProfileStore } from "@/game/profile/profileStore";
+import { useClanStore } from "@/game/clan/clanStore";
 import { loadBootstrap } from "@/integrations/api/bootstrap";
 import { queryKeys } from "@/integrations/api/queryKeys";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
@@ -28,6 +29,7 @@ export function DiagnosticsPage() {
   const togglePromoBanner = useBaseUiStore((state) => state.togglePromoBanner);
   const earn = useEarnStore();
   const profile = useProfileStore();
+  const clan = useClanStore();
   const { adapter, colorScheme, stableHeight, insets } = useTelegram();
   const bootstrap = useQuery({
     queryKey: queryKeys.bootstrap(scenario),
@@ -51,9 +53,9 @@ export function DiagnosticsPage() {
   return (
     <main className={styles.root}>
       <header className={styles.header}>
-        <span>Phase 4 / Profile & Identity</span>
+        <span>Phase 5 / Clan Frontend</span>
         <h1>System diagnostics</h1>
-        <p>Runtime, game-loop and repeatable Profile, Achievement and Collection controls.</p>
+        <p>Runtime, game-loop and repeatable Clan, Profile and Earn scenario controls.</p>
       </header>
 
       <section className={styles.stack} aria-label="Phase 4 diagnostics">
@@ -103,6 +105,30 @@ export function DiagnosticsPage() {
         </article>
 
         <article>
+          <StatusChip>Clan frontend ready</StatusChip>
+          <h2>Clan scenario controls</h2>
+          <dl>
+            <div><dt>Player level</dt><dd>{earn.level}</dd></div>
+            <div><dt>Role</dt><dd>{clan.role ?? "not chosen"}</dd></div>
+            <div><dt>Membership</dt><dd>{clan.membership}</dd></div>
+            <div><dt>Join request</dt><dd>{clan.joinRequestState}</dd></div>
+            <div><dt>Active clan</dt><dd>{clan.activeClanId ?? "—"}</dd></div>
+            <div><dt>Treasury</dt><dd>{clan.treasury.toLocaleString()}</dd></div>
+          </dl>
+          <div className={styles.actions}>
+            <Button tone="secondary" size="sm" onClick={() => { earn.setLevelForDiagnostics(4); clan.resetClan(); }}>Locked · L4</Button>
+            <Button tone="secondary" size="sm" onClick={() => { earn.setLevelForDiagnostics(5); clan.resetClan(); }}>Role choice · L5</Button>
+            <Button tone="secondary" size="sm" onClick={() => { earn.setLevelForDiagnostics(5); clan.setSoldierDiscoveryForDiagnostics(); }}>Soldier discovery</Button>
+            <Button tone="secondary" size="sm" onClick={() => { earn.setLevelForDiagnostics(5); clan.setSoldierPendingForDiagnostics(); }}>Soldier pending</Button>
+            <Button tone="secondary" size="sm" onClick={() => { earn.setLevelForDiagnostics(5); clan.setSoldierMemberForDiagnostics(); }}>Soldier HQ</Button>
+            <Button tone="secondary" size="sm" onClick={() => { earn.setLevelForDiagnostics(5); clan.setCaptainHeadquartersForDiagnostics(); }}>Captain HQ</Button>
+            <Button tone="secondary" size="sm" onClick={clan.rejectCurrentJoinForDiagnostics}>Reject current request</Button>
+            <Button tone="secondary" size="sm" onClick={clan.acceptCurrentJoinForDiagnostics}>Accept current request</Button>
+            <Button tone="secondary" size="sm" onClick={() => navigate({ to: "/clan" })}>Open Clan</Button>
+          </div>
+        </article>
+
+        <article>
           <StatusChip>Base controls ready</StatusChip>
           <h2>Dynamic Base content</h2>
           <dl>
@@ -146,7 +172,7 @@ export function DiagnosticsPage() {
           <dl>
             <div><dt>Base</dt><dd>active</dd></div>
             <div><dt>Earn</dt><dd>playable</dd></div>
-            <div><dt>Clan</dt><dd>reserved</dd></div>
+            <div><dt>Clan</dt><dd>active frontend</dd></div>
             <div><dt>Arena</dt><dd>reserved</dd></div>
             <div><dt>Profile</dt><dd>active</dd></div>
           </dl>
