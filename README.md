@@ -1,6 +1,6 @@
-# Dalexio Mini App — Phase 5 Clan v5.0
+# Dalexio Mini App — Phase 4.1.3
 
-Mobile-first Telegram Mini App checkpoint for the Phase 5 Clan frontend.
+Mobile-first Telegram Mini App checkpoint for targeted Profile title, modal-button and Connections polish.
 
 ## Run
 
@@ -25,7 +25,7 @@ For a fresh ChatGPT conversation, read these files in order before changing code
 2. `PROJECT_STATUS_AND_ROADMAP.md` — exact completed/current/remaining development state.
 3. `PROJECT_WORKING_INSTRUCTIONS.md` — permanent design, mobile, asset, QA and collaboration rules.
 
-Current status: **Phases 0–4 are officially closed. Phase 5 Clan v5.0 is implemented and awaiting Telegram-mobile QA.**
+Current status: **Phases 0–4 are officially closed.** The accepted Phase 4 checkpoint is v4.1.3. **Immediate next action is to define Inventory business rules with the user, then implement Inventory.**
 
 Exact v4.1 code baseline: `dalexio-miniapp-phase4-v4.1-profile-modal-polish.zip` — SHA-256 `d1a0ac219939b226153a365dce706cc7bb636937e3066d6fe7e788f503436ad7`.
 
@@ -39,8 +39,8 @@ Current targeted checkpoint: `Phase 4.1.2` fixes the height of the `Customize` a
 
 Current targeted checkpoint: `Phase 4.1.3` compacts the two Profile header actions, removes Title Plate artwork from Customize live preview, and fixes immediate Avatar Frame updates via the shared AssetImage component.
 
-Phase 4 closure: Profile & Identity is approved. Phase 5 Clan is now the active QA phase.
+Phase 4 closure: Profile & Identity is approved. Next major module: Inventory.
 
 Next module clarification: **Clan** is next. Inventory is embedded inside Clan Headquarters. Level 5 unlocks a permanent Captain/Soldier choice; Soldier uses Leaderboard/Search/Suggestions + one join request, Captain creates/manages the clan, and accepted members move into Headquarters. Group Tasks and Individual Tasks are separate UI categories. Backend/economy logic remains mocked for frontend development.
 
-Phase 5 Clan frontend is implemented and awaiting Telegram-mobile QA. Use hidden Diagnostics Clan controls to preview all states without backend integration.
+Build correction: Phase 5.0.1 fixes the Clan applicant readonly/mutable TypeScript assignment reported by Vercel. No UI changes.

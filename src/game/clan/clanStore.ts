@@ -34,6 +34,9 @@ interface ClanState {
   resetClan: () => void;
 }
 
+const cloneJoinApplicants = (): ClanJoinApplicant[] =>
+  clanJoinApplicants.map((applicant): ClanJoinApplicant => ({ ...applicant }));
+
 const initialState = {
   role: null as ClanRole | null,
   membership: "none" as ClanMembershipStatus,
@@ -43,7 +46,7 @@ const initialState = {
   createdClan: null as CreatedClan | null,
   treasury: 12_840,
   ownedItemIds: [...initialOwnedClanItemIds] as string[],
-  applicants: structuredClone(clanJoinApplicants) as ClanJoinApplicant[],
+  applicants: cloneJoinApplicants(),
 };
 
 const diagnosticCaptainClan: CreatedClan = {
@@ -162,7 +165,7 @@ export const useClanStore = create<ClanState>()(
       resetClan: () => set({
         ...initialState,
         ownedItemIds: [...initialOwnedClanItemIds],
-        applicants: structuredClone(clanJoinApplicants),
+        applicants: cloneJoinApplicants(),
       }),
     }),
     {

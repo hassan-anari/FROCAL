@@ -1,7 +1,7 @@
 # Dalexio / Dexo Land — Product & Business Logic
 
-> **Snapshot:** 2026-08-13  
-> **Current frontend checkpoint:** Phase 5 Clan Frontend v5.0 (`5.0.0`)  
+> **Snapshot:** 2026-08-08  
+> **Current frontend checkpoint:** Phase 4.1.3 (`4.1.3`)  
 > **Primary runtime:** Telegram Mini App on mobile  
 > **Purpose of this file:** product/business source-of-truth for continuing development in a new chat without reconstructing prior decisions.
 
@@ -826,17 +826,3 @@ For Captain:
 - purchase behavior can remain mocked until backend/business rules are implemented
 
 The presentation can reuse the successful Profile Achievement/Medal detail-modal pattern, adapted for item price/effect/action.
-
-
-## Clan frontend v5.0 implementation note
-
-The approved Clan UX/state definition has now been implemented in frontend v5.0.
-
-Important:
-- this is still frontend/mock state
-- final reward/economy/Treasury calculations are not defined here
-- one role choice is permanent in UI
-- one Soldier join request can be active at a time
-- Group Tasks and Individual Tasks are separate
-- Clan Inventory belongs inside Headquarters
-- Captain Shop is a Treasury-spending mock surface

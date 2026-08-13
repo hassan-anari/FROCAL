@@ -629,3 +629,9 @@ Implemented:
 
 Current next action:
 **Test Clan v5.0 on Telegram mobile and fix only what the user requests. Backend/economy logic remains out of scope.**
+
+## Phase 5.0.1 build correction
+
+Vercel full TypeScript checking found TS4104 in `src/game/clan/clanStore.ts`: readonly catalog applicants were being assigned to mutable Zustand state during reset. v5.0.1 replaces that with an explicitly typed mutable clone helper. No Clan UX or visual behavior changed.
+
+Validation rule reinforced: syntax parsing/transpilation is not equivalent to `tsc -b`. Full semantic typecheck/build must be preferred before delivery whenever dependencies are available.
