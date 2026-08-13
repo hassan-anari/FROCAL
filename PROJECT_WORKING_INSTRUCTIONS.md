@@ -406,4 +406,8 @@ Do not let an older mock implementation override a newer product decision.
 
 At this snapshot, do **not** jump to Inventory/Clan/Arena simply because they are next on the roadmap.
 
-Phase 4.1.1 Profile is the current checkpoint and should be tested/fixed until the user explicitly says Phase 4 is finished. It is based on v4.1 and contains only the targeted title/modal-button/Coming-Soon connection fixes requested by the user. The discarded v4.2 blur/rasterization experiment must not be treated as part of the baseline. Also remember that the 31 supplied Profile assets are now repository-maintained and must not be bundled again in future source ZIPs.
+Phase 4.1.3 Profile is the current checkpoint and should be tested/fixed until the user explicitly says Phase 4 is finished. It is based on v4.1.2 and additionally makes the two Profile header actions compact, removes the decorative Title Plate from Customize preview too, and fixes immediate Avatar Frame visual updates. Neither main Profile nor Customize live preview should render the Title Plate. The discarded v4.2 blur/rasterization experiment must not be treated as part of the baseline. Also remember that the 31 supplied Profile assets are now repository-maintained and must not be bundled again in future source ZIPs.
+
+- Profile identity actions under the level bar should be compact-height mobile CTAs. A trailing icon container must never force the entire button taller than intended.
+
+- Dynamic asset selectors (especially Avatar Frames) must visually update immediately when the asset key changes; never cache an initial asset path in a way that requires page/tab remounting.

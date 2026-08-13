@@ -274,7 +274,7 @@ export function ProfilePage() {
                     <Button
                       type="button"
                       tone="secondary"
-                      size="md"
+                      size="sm"
                       className={styles.secondaryAction}
                       leadingIcon={<UserCircleIconView />}
                       onClick={() => setCustomizeOpen(true)}
@@ -284,7 +284,7 @@ export function ProfilePage() {
                     <Button
                       type="button"
                       tone="primary"
-                      size="md"
+                      size="sm"
                       className={styles.primaryAction}
                       trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={16} strokeWidth={1.8} />}
                       onClick={() => setShareOpen(true)}

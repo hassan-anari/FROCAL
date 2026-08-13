@@ -7,7 +7,8 @@ interface AssetImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, "src
 
 export function AssetImage({ assetKey, onError, ...props }: AssetImageProps) {
   const asset = getAsset(assetKey);
-  const [src, setSrc] = useState(asset.path);
+  const [failedAssetKey, setFailedAssetKey] = useState<AssetKey | null>(null);
+  const src = failedAssetKey === assetKey ? "/assets/system/missing-asset.svg" : asset.path;
 
   return (
     <img
@@ -15,7 +16,7 @@ export function AssetImage({ assetKey, onError, ...props }: AssetImageProps) {
       src={src}
       alt={asset.alt}
       onError={(event) => {
-        setSrc("/assets/system/missing-asset.svg");
+        setFailedAssetKey(assetKey);
         onError?.(event);
       }}
     />

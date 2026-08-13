@@ -21,3 +21,20 @@
 - Wallet row shows `Coming soon` and has no Connect/Done button.
 - Dalexio account row shows `Coming soon` and has no Connect/Done button.
 - Verify no unrelated global blur/rasterization changes from discarded v4.2 are present.
+
+## Phase 4.1.2 targeted checks
+
+- `Customize` and `Share profile` directly under the Profile level bar are compact and visibly shorter than v4.1.1.
+- Their labels are readable and not undersized.
+- The `Share profile` arrow block is 30×30 and does not increase CTA height.
+- Main Profile header has no decorative Title Plate.
+- Customize live preview still shows the decorative Title Plate.
+
+## Phase 4.1.3 targeted checks
+
+- `Customize` and `Share profile` directly under the level bar render at a compact 36px height.
+- Share arrow block is 24×24 and does not expand button height.
+- Main Profile header has no decorative Title Plate.
+- Customize live preview also has no decorative Title Plate and uses clean title text.
+- Selecting Standard/Premium/Founder frame changes the live-preview frame immediately without closing/reopening the modal.
+- Saving the selected frame changes the main Profile avatar immediately without changing tab or route.

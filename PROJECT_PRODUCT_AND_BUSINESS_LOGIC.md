@@ -1,7 +1,7 @@
 # Dalexio / Dexo Land — Product & Business Logic
 
 > **Snapshot:** 2026-08-08  
-> **Current frontend checkpoint:** Phase 4.1.1 (`4.1.1`)  
+> **Current frontend checkpoint:** Phase 4.1.3 (`4.1.3`)  
 > **Primary runtime:** Telegram Mini App on mobile  
 > **Purpose of this file:** product/business source-of-truth for continuing development in a new chat without reconstructing prior decisions.
 
@@ -374,7 +374,7 @@ Dexo appears without the platform in the Typing Arena hero and uses a lightweigh
 
 ## 10. Profile & Identity business logic
 
-Phase 4 is currently implemented but **not yet officially closed** by the user. The latest checkpoint is v4.1.1 and is still under visual/behavior QA.
+Phase 4 is currently implemented but **not yet officially closed** by the user. The latest checkpoint is v4.1.3 and is still under visual/behavior QA.
 
 Profile has three internal tabs:
 
@@ -400,7 +400,7 @@ Overview is intended to contain only meaningful identity/progression/connectivit
 - Telegram profile photo or initials fallback
 - first name / username
 - profile-only frame
-- profile-only active title; the decorative Title Plate is not used in the main Profile header because it interfered with the compact identity composition
+- profile-only active title rendered as clean text; the decorative Title Plate is not used in either the main Profile header or Customize live preview because it interfered with the compact identity composition
 - Level and XP progress
 - concise core stats such as missions/streak/referrals/lifetime XP
 - Wallet connect surface

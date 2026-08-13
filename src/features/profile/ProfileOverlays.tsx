@@ -288,10 +288,7 @@ export function CustomizeProfileSheet({
         <div>
           <span>LIVE PREVIEW</span>
           <h3>{firstName}</h3>
-          <div className={styles.titlePlate}>
-            <AssetImage assetKey="profile.cosmetic.titlePlate" draggable={false} />
-            <strong>{titleById[draftTitle].name}</strong>
-          </div>
+          <strong className={styles.previewTitle}>{titleById[draftTitle].name}</strong>
         </div>
       </section>
 

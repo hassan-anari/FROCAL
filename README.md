@@ -1,4 +1,4 @@
-# Dalexio Mini App — Phase 4.1.1
+# Dalexio Mini App — Phase 4.1.3
 
 Mobile-first Telegram Mini App checkpoint for targeted Profile title, modal-button and Connections polish.
 
@@ -25,7 +25,7 @@ For a fresh ChatGPT conversation, read these files in order before changing code
 2. `PROJECT_STATUS_AND_ROADMAP.md` — exact completed/current/remaining development state.
 3. `PROJECT_WORKING_INSTRUCTIONS.md` — permanent design, mobile, asset, QA and collaboration rules.
 
-Current status: Phases 0–3 are closed; Phase 4 Profile is implemented through v4.1.1 and remains under user QA. **Immediate next action is v4.1.1 mobile QA/fixes — do not start Inventory/Clan/Arena yet.**
+Current status: Phases 0–3 are closed; Phase 4 Profile is implemented through v4.1.3 and remains under user QA. **Immediate next action is v4.1.3 mobile QA/fixes — do not start Inventory/Clan/Arena yet.**
 
 Exact v4.1 code baseline: `dalexio-miniapp-phase4-v4.1-profile-modal-polish.zip` — SHA-256 `d1a0ac219939b226153a365dce706cc7bb636937e3066d6fe7e788f503436ad7`.
 
@@ -34,3 +34,7 @@ Real QA loop: `ZIP → GitHub → Vercel build → Telegram test bot on a real p
 Important asset rule: the 31 Profile images, logos, main background, Dexo images and Dexo platform are repository-maintained and are not bundled in future checkpoints; exact paths remain in `src/assets/manifest.json`.
 
 Current targeted checkpoint: `Phase 4.1.1` removes the decorative Title Plate from the main Profile header, compacts Profile modal CTAs, and marks Wallet/Dalexio Account as static `Coming soon`. The discarded v4.2 experiment is not part of this baseline.
+
+Current targeted checkpoint: `Phase 4.1.2` fixes the height of the `Customize` and `Share profile` buttons directly under the Profile level bar. The Title Plate remains only in Customize live preview, not in the main Profile header.
+
+Current targeted checkpoint: `Phase 4.1.3` compacts the two Profile header actions, removes Title Plate artwork from Customize live preview, and fixes immediate Avatar Frame updates via the shared AssetImage component.
