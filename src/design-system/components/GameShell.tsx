@@ -1,10 +1,10 @@
-import { Home01Icon } from "@hugeicons/core-free-icons";
 import {
   AdventureIcon,
   ChampionIcon,
+  Home01Icon,
   MoneyReceiveSquareIcon,
   SquareUserRoundIcon,
-} from "@hugeicons-pro/core-stroke-rounded";
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { motion } from "motion/react";
