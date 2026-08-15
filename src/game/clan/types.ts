@@ -1,3 +1,4 @@
+import type { AssetKey } from "@/assets/registry";
 export type ClanRole = "captain" | "soldier";
 export type ClanMembershipStatus = "none" | "pending" | "member";
 export type JoinRequestState = "none" | "pending" | "rejected";
@@ -63,6 +64,8 @@ export interface ClanInventoryItem {
   price: number;
   glyph: string;
   rarity: "Core" | "Rare" | "Epic";
+  kind: "Booster" | "Defence" | "Utility";
+  artKey: AssetKey;
 }
 
 export interface ClanJoinApplicant {

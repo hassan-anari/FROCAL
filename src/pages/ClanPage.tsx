@@ -2,13 +2,13 @@ import {
   ArrowRight01Icon,
   InformationCircleIcon,
   Sword01Icon,
-  UserCircleIcon,
   UserGroupIcon,
   Wallet01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion } from "motion/react";
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { AssetImage } from "@/design-system/components/AssetImage";
 import { GameHeader } from "@/design-system/components/GameHeader";
 import { GameShell } from "@/design-system/components/GameShell";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
@@ -40,6 +40,7 @@ import type {
   SoldierClanTab,
   TaskFilter,
 } from "@/game/clan/types";
+import { clanRoleArt, getClanEmblemAssetKey, getClanHqAssetKey } from "@/game/clan/clanVisuals";
 import { useEarnStore } from "@/game/earn/earnStore";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import styles from "./ClanPage.module.css";
@@ -51,8 +52,30 @@ type OverlayState =
   | { type: "requests" }
   | null;
 
-function ClanEmblem({ clan, size = "md" }: { clan: Pick<ClanSummary, "tag" | "accent">; size?: "sm" | "md" | "lg" }) {
-  return <div className={`${styles.emblem} ${styles[clan.accent]} ${styles[`emblem${size}`]}`}><span>{clan.tag}</span></div>;
+function ClanEmblem({
+  clan,
+  size = "md",
+  shape = "crest",
+}: {
+  clan: Pick<ClanSummary, "tag" | "accent">;
+  size?: "sm" | "md" | "lg";
+  shape?: "circle" | "crest";
+}) {
+  return (
+    <div className={`${styles.emblem} ${styles[clan.accent]} ${styles[`emblem${size}`]}`}>
+      <AssetImage assetKey={getClanEmblemAssetKey(shape)} className={styles.emblemFrame} />
+      <span>{clan.tag}</span>
+    </div>
+  );
+}
+
+function MemberAvatar({ initial, captain = false }: { initial: string; captain?: boolean }) {
+  return (
+    <div className={styles.memberAvatar}>
+      <span>{initial}</span>
+      <AssetImage assetKey={captain ? "profile.frame.captain" : "profile.frame.clan"} className={styles.memberFrame} />
+    </div>
+  );
 }
 
 function buildCreatedClanSummary(created: CreatedClan): ClanSummary {
@@ -86,24 +109,24 @@ function LockedClan({ level }: { level: number }) {
   const ratio = Math.min(1, level / 5);
   return (
     <div className={styles.stack}>
-      <section className={`${styles.panel} ${styles.lockedHero}`}>
-        <div className={styles.lockCore}><HugeiconsIcon icon={UserGroupIcon} size={42} strokeWidth={1.45} /></div>
-        <span className={styles.eyebrow}>LEVEL 5 REQUIRED</span>
-        <h2>Your clan path is still locked.</h2>
-        <p>Reach Level 5 to choose your permanent role and enter the clan network.</p>
+      <section className={styles.lockedScene}>
+        <div className={styles.sceneGlow} />
+        <AssetImage assetKey="clan.hq.stateLocked" className={styles.lockedArt} />
+        <div className={styles.lockedCopy}>
+          <span className={styles.eyebrow}>CLAN SYSTEM · LEVEL 5</span>
+          <h2>Headquarters access locked</h2>
+          <p>Grow your Dexo to Level 5, then choose one seasonal path: lead a clan or fight for one.</p>
+        </div>
         <div className={styles.unlockProgress}>
-          <div><span>Current level</span><strong>{level} / 5</strong></div>
+          <div><span>Access progress</span><strong>LVL {level} / 5</strong></div>
           <div className={styles.progressTrack}><i style={{ transform: `scaleX(${ratio})` }} /></div>
         </div>
       </section>
 
-      <section className={styles.panel}>
-        <SectionTitle eyebrow="UNLOCKS AT LEVEL 5" title="What opens next" />
-        <div className={styles.featureList}>
-          <article><span><HugeiconsIcon icon={UserGroupIcon} size={19} strokeWidth={1.55} /></span><div><strong>Choose your path</strong><p>Commit once as Captain or Soldier.</p></div></article>
-          <article><span><HugeiconsIcon icon={UserCircleIcon} size={19} strokeWidth={1.55} /></span><div><strong>Clan network</strong><p>Discover clans, request entry and build your place in the roster.</p></div></article>
-          <article><span><HugeiconsIcon icon={Sword01Icon} size={19} strokeWidth={1.55} /></span><div><strong>Shared progression</strong><p>Group and individual tasks feed one Headquarters.</p></div></article>
-        </div>
+      <section className={styles.unlockStrip}>
+        <article><HugeiconsIcon icon={UserGroupIcon} size={19} strokeWidth={1.55} /><div><strong>Choose a role</strong><span>Captain or Soldier</span></div></article>
+        <article><HugeiconsIcon icon={Sword01Icon} size={19} strokeWidth={1.55} /><div><strong>Shared missions</strong><span>Build progress together</span></div></article>
+        <article><HugeiconsIcon icon={Wallet01Icon} size={19} strokeWidth={1.55} /><div><strong>Clan resources</strong><span>Unlock inventory & Treasury</span></div></article>
       </section>
     </div>
   );
@@ -112,37 +135,43 @@ function LockedClan({ level }: { level: number }) {
 function RoleChoice({ onChoose }: { onChoose: (role: ClanRole) => void }) {
   return (
     <div className={styles.stack}>
-      <section className={`${styles.panel} ${styles.pathIntro}`}>
-        <span className={styles.eyebrow}>ONE CHOICE · ONE PATH</span>
-        <h2>Choose how you shape the clan world.</h2>
-        <p>At Level 5 your clan role becomes permanent. Read both paths before you commit.</p>
+      <section className={styles.roleIntro}>
+        <span className={styles.eyebrow}>SEASONAL CLAN PATH</span>
+        <h2>Choose where you stand.</h2>
+        <p>One role for the season. Captain builds the home. Soldier earns a place inside one.</p>
       </section>
 
       <section className={styles.roleGrid}>
         <button type="button" className={`${styles.roleCard} ${styles.captainCard}`} onClick={() => onChoose("captain")}>
-          <span className={styles.roleIcon}><HugeiconsIcon icon={UserGroupIcon} size={28} strokeWidth={1.55} /></span>
-          <div>
+          <div className={styles.roleArtStage}>
+            <span className={styles.roleHalo} />
+            <AssetImage assetKey={clanRoleArt.captain} className={styles.roleArt} />
+          </div>
+          <div className={styles.roleCopy}>
             <span>LEADERSHIP PATH</span>
             <h3>Captain</h3>
-            <p>Lead the clan, approve members and decide how Treasury is used. The clan's success will carry your decisions.</p>
+            <p>Found the headquarters, review recruits and control shared clan resources.</p>
           </div>
-          <em>Choose Captain <HugeiconsIcon icon={ArrowRight01Icon} size={15} strokeWidth={1.7} /></em>
+          <em>Lead a clan <HugeiconsIcon icon={ArrowRight01Icon} size={16} strokeWidth={1.7} /></em>
         </button>
 
         <button type="button" className={`${styles.roleCard} ${styles.soldierCard}`} onClick={() => onChoose("soldier")}>
-          <span className={styles.roleIcon}><HugeiconsIcon icon={UserCircleIcon} size={28} strokeWidth={1.55} /></span>
-          <div>
+          <div className={styles.roleArtStage}>
+            <span className={styles.roleHalo} />
+            <AssetImage assetKey={clanRoleArt.soldier} className={styles.roleArt} />
+          </div>
+          <div className={styles.roleCopy}>
             <span>CONTRIBUTION PATH</span>
             <h3>Soldier</h3>
-            <p>Your actions can change the game. Missions, consistency and contribution move the whole clan forward.</p>
+            <p>Join one clan, complete missions and turn your activity into team progress.</p>
           </div>
-          <em>Choose Soldier <HugeiconsIcon icon={ArrowRight01Icon} size={15} strokeWidth={1.7} /></em>
+          <em>Find a clan <HugeiconsIcon icon={ArrowRight01Icon} size={16} strokeWidth={1.7} /></em>
         </button>
       </section>
 
       <div className={styles.choiceNote}>
         <HugeiconsIcon icon={InformationCircleIcon} size={18} strokeWidth={1.55} />
-        <span>This frontend intentionally has no role-switch setting after confirmation.</span>
+        <span>Your confirmed path stays locked for the current season.</span>
       </div>
     </div>
   );
@@ -160,42 +189,53 @@ function ClanCard({
   const pending = pendingClanId === clan.id;
   return (
     <button type="button" className={styles.clanCard} onClick={onOpen}>
-      <ClanEmblem clan={clan} size="sm" />
+      <ClanEmblem clan={clan} size="sm" shape="circle" />
       <div className={styles.clanCardCopy}>
         <div className={styles.clanNameRow}>
           <strong>{clan.name}</strong>
-          {clan.fresh ? <em>NEW ACTIVE</em> : null}
+          {clan.fresh ? <em>ACTIVE</em> : null}
         </div>
-        <span>#{clan.rank} · LVL {clan.level} · {clan.members}/{clan.capacity} members</span>
+        <span>LVL {clan.level} · {clan.members}/{clan.capacity} members · Rank #{clan.rank}</span>
         <div className={styles.miniMeta}>
           <span>{clan.status}</span>
           <span>{pending ? "Request pending" : `${clan.match ?? 80}% match`}</span>
         </div>
       </div>
-      <HugeiconsIcon icon={ArrowRight01Icon} size={16} strokeWidth={1.6} />
+      <HugeiconsIcon icon={ArrowRight01Icon} size={17} strokeWidth={1.6} />
     </button>
   );
 }
 
-function PendingJoinCard({
-  clan,
-  rejected,
-}: {
-  clan: ClanSummary | null;
-  rejected: boolean;
-}) {
+function FeaturedClan({ clan, onOpen }: { clan: ClanSummary; onOpen: () => void }) {
+  return (
+    <button type="button" className={`${styles.featuredClan} ${styles[clan.accent]}`} onClick={onOpen}>
+      <AssetImage assetKey={getClanHqAssetKey(clan.level)} className={styles.featuredHq} />
+      <div className={styles.featuredShade} />
+      <div className={styles.featuredTop}>
+        <ClanEmblem clan={clan} size="md" />
+        <span>#{clan.rank} SEASON</span>
+      </div>
+      <div className={styles.featuredCopy}>
+        <span>RECOMMENDED · {clan.match ?? 90}% MATCH</span>
+        <strong>{clan.name}</strong>
+        <p>{clan.summary}</p>
+        <em>{clan.members}/{clan.capacity} members · Level {clan.level} <HugeiconsIcon icon={ArrowRight01Icon} size={15} strokeWidth={1.7} /></em>
+      </div>
+    </button>
+  );
+}
+
+function PendingJoinCard({ clan, rejected }: { clan: ClanSummary | null; rejected: boolean }) {
   if (!clan) return null;
   return (
     <section className={`${styles.requestState} ${rejected ? styles.requestRejected : ""}`}>
-      <span>{rejected ? "REQUEST CLOSED" : "JOIN REQUEST SENT"}</span>
+      <ClanEmblem clan={clan} size="sm" />
       <div>
-        <ClanEmblem clan={clan} size="sm" />
-        <div>
-          <strong>{clan.name}</strong>
-          <p>{rejected ? "This request was not accepted. You can choose another clan." : "Waiting for the Captain to review your request. You cannot send another request while this one is active."}</p>
-        </div>
+        <span>{rejected ? "REQUEST CLOSED" : "REQUEST IN REVIEW"}</span>
+        <strong>{clan.name}</strong>
+        <p>{rejected ? "The slot stayed closed. You can search for another clan." : "Your only active request is waiting for Captain review."}</p>
       </div>
-      <em>{rejected ? "Ready to search again" : "Pending Captain approval"}</em>
+      <em>{rejected ? "Search unlocked" : "Pending"}</em>
     </section>
   );
 }
@@ -221,12 +261,12 @@ function SoldierNetwork({
     const normalized = query.trim().toLowerCase();
     if (!normalized) return clanCatalog;
     return clanCatalog.filter((clan) =>
-      clan.name.toLowerCase().includes(normalized) ||
-      clan.tag.toLowerCase().includes(normalized),
+      clan.name.toLowerCase().includes(normalized) || clan.tag.toLowerCase().includes(normalized),
     );
   }, [query]);
 
   const ranking = [...clanCatalog].sort((a, b) => a.rank - b.rank);
+  const featured = suggested[0];
 
   return (
     <div className={styles.stack}>
@@ -252,26 +292,19 @@ function SoldierNetwork({
         >
           {tab === "discover" ? (
             <>
+              {featured ? <FeaturedClan clan={featured} onOpen={() => onOpenClan(featured.id)} /> : null}
               <section className={styles.panel}>
-                <SectionTitle eyebrow="MATCHED FOR YOU" title="Suggested clans" action={<span className={styles.sectionHint}>Fresh & active</span>} />
+                <SectionTitle eyebrow="OPEN RECRUITMENT" title="More clans for you" action={<span className={styles.sectionHint}>One request at a time</span>} />
                 <div className={styles.clanList}>
-                  {suggested.map((clan) => (
+                  {suggested.slice(1).map((clan) => (
                     <ClanCard key={clan.id} clan={clan} pendingClanId={pendingClanId} onOpen={() => onOpenClan(clan.id)} />
                   ))}
                 </div>
               </section>
 
-              <section className={styles.panel}>
-                <SectionTitle eyebrow="NETWORK SNAPSHOT" title="Rising this week" />
-                <div className={styles.risingGrid}>
-                  {clanCatalog.slice(3, 6).map((clan) => (
-                    <button type="button" key={clan.id} onClick={() => onOpenClan(clan.id)}>
-                      <ClanEmblem clan={clan} size="sm" />
-                      <strong>{clan.name}</strong>
-                      <span>#{clan.rank} · {clan.score.toLocaleString()}</span>
-                    </button>
-                  ))}
-                </div>
+              <section className={styles.networkPulse}>
+                <div><span>CLAN NETWORK</span><strong>{clanCatalog.length} active HQs</strong></div>
+                <p>Choose for fit, not size. Capacity grows with clan progression.</p>
               </section>
             </>
           ) : null}
@@ -280,8 +313,8 @@ function SoldierNetwork({
             <section className={styles.panel}>
               <SectionTitle eyebrow="FIND A CLAN" title="Search the network" />
               <label className={styles.searchBox}>
-                <span>Search by clan name or tag</span>
-                <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="e.g. Nova or NVG" />
+                <span>Clan name or tag</span>
+                <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Nova, NVG..." />
               </label>
               <div className={styles.searchCount}>{filtered.length} clans found</div>
               <div className={styles.clanList}>
@@ -294,7 +327,7 @@ function SoldierNetwork({
 
           {tab === "ranking" ? (
             <section className={styles.panel}>
-              <SectionTitle eyebrow="SEASON CLAN RANKING" title="Leaderboard" />
+              <SectionTitle eyebrow="SEASON CLAN RANKING" title="Clan standings" />
               <div className={styles.podium}>
                 {ranking.slice(0, 3).map((clan, index) => (
                   <button type="button" key={clan.id} onClick={() => onOpenClan(clan.id)}>
@@ -309,7 +342,7 @@ function SoldierNetwork({
                 {ranking.slice(3).map((clan) => (
                   <button type="button" key={clan.id} onClick={() => onOpenClan(clan.id)}>
                     <span>#{clan.rank}</span>
-                    <ClanEmblem clan={clan} size="sm" />
+                    <ClanEmblem clan={clan} size="sm" shape="circle" />
                     <div><strong>{clan.name}</strong><em>Level {clan.level} · {clan.members}/{clan.capacity}</em></div>
                     <b>{clan.score.toLocaleString()}</b>
                   </button>
@@ -346,19 +379,17 @@ function CaptainFounding({ onCreate }: { onCreate: (input: { name: string; tag: 
 
   return (
     <div className={styles.stack}>
-      <section className={`${styles.panel} ${styles.foundingHero}`}>
-        <span className={styles.eyebrow}>CAPTAIN PATH</span>
-        <h2>Found your headquarters.</h2>
-        <p>Create the identity your members will rally around. Backend rules come later; this flow is frontend-only.</p>
+      <section className={`${styles.foundingScene} ${styles[accent]}`}>
+        <div className={styles.sceneGlow} />
+        <AssetImage assetKey="clan.hq.level1" className={styles.foundingHq} />
+        <div className={styles.foundingIdentity}>
+          <ClanEmblem clan={preview} size="md" />
+          <div><span>STARTER HEADQUARTERS</span><strong>{preview.name}</strong><p>{preview.summary}</p></div>
+        </div>
       </section>
 
       <section className={styles.panel}>
-        <SectionTitle eyebrow="LIVE CLAN IDENTITY" title="Founding setup" />
-        <div className={styles.foundingPreview}>
-          <ClanEmblem clan={preview} size="lg" />
-          <div><span>FOUNDING CLAN</span><strong>{preview.name}</strong><p>{preview.summary}</p></div>
-        </div>
-
+        <SectionTitle eyebrow="CLAN IDENTITY" title="Founding setup" />
         <div className={styles.formGrid}>
           <label><span>Clan name</span><input value={name} maxLength={28} onChange={(event) => setName(event.target.value)} /></label>
           <label><span>Tag</span><input value={tag} maxLength={4} onChange={(event) => setTag(event.target.value.toUpperCase())} /></label>
@@ -383,7 +414,7 @@ function CaptainFounding({ onCreate }: { onCreate: (input: { name: string; tag: 
           disabled={!valid}
           onClick={() => onCreate({ name: name.trim(), tag: tag.trim().slice(0, 4).toUpperCase(), motto: motto.trim(), accent })}
         >
-          Found clan
+          Establish headquarters
         </Button>
       </section>
     </div>
@@ -394,18 +425,37 @@ function TaskCard({ task }: { task: (typeof clanTasks)[number] }) {
   const ratio = Math.min(1, task.current / Math.max(1, task.target));
   return (
     <article className={`${styles.taskCard} ${task.status === "completed" ? styles.taskComplete : ""}`}>
-      <div className={styles.taskTop}>
-        <span>{task.type === "group" ? "GROUP" : "INDIVIDUAL"}</span>
-        <em>{task.timeLabel}</em>
+      <div className={styles.taskSignal}><span>{Math.round(ratio * 100)}</span><small>%</small></div>
+      <div className={styles.taskBody}>
+        <div className={styles.taskTop}>
+          <span>{task.type === "group" ? "GROUP OP" : "PERSONAL OP"}</span>
+          <em>{task.timeLabel}</em>
+        </div>
+        <strong>{task.title}</strong>
+        <p>{task.description}</p>
+        <div className={styles.taskProgress}>
+          <div><span>{task.current} / {task.target} {task.unit}</span><strong>{task.rewardLabel}</strong></div>
+          <div className={styles.progressTrack}><i style={{ transform: `scaleX(${ratio})` }} /></div>
+        </div>
       </div>
-      <strong>{task.title}</strong>
-      <p>{task.description}</p>
-      <div className={styles.taskProgress}>
-        <div><span>{task.current} / {task.target} {task.unit}</span><strong>{Math.round(ratio * 100)}%</strong></div>
-        <div className={styles.progressTrack}><i style={{ transform: `scaleX(${ratio})` }} /></div>
-      </div>
-      <footer><span>{task.rewardLabel}</span><em>{task.status === "completed" ? "Completed" : "Active"}</em></footer>
     </article>
+  );
+}
+
+function ItemCard({ item, owned, onOpen }: { item: ClanInventoryItem; owned: boolean; onOpen: () => void }) {
+  return (
+    <button type="button" className={styles.itemCard} onClick={onOpen}>
+      <div className={styles.itemVisual}>
+        <AssetImage assetKey={item.artKey} className={styles.itemImage} />
+        {owned ? <span className={styles.ownedBadge}>OWNED</span> : null}
+      </div>
+      <div className={styles.itemCopy}>
+        <span>{item.kind} · {item.rarity}</span>
+        <strong>{item.name}</strong>
+        <p>{item.effect}</p>
+        <em>{owned ? "Open item" : `${item.price.toLocaleString()} Treasury`}</em>
+      </div>
+    </button>
   );
 }
 
@@ -434,38 +484,49 @@ function Headquarters({
   const ownedItems = clanShopItems.filter((item) => ownedItemIds.includes(item.id));
   const shopItems = clanShopItems.filter((item) => !ownedItemIds.includes(item.id));
   const levelProgress = clan.id === "captain-created" ? .42 : .68;
+  const nextLevel = clan.level + 1;
 
   return (
     <div className={styles.stack}>
-      <section className={`${styles.panel} ${styles.hqHero}`}>
-        <div className={styles.hqTop}>
-          <ClanEmblem clan={clan} size="lg" />
+      <section className={`${styles.hqScene} ${styles[clan.accent]}`}>
+        <div className={styles.sceneGlow} />
+        <div className={styles.hqSceneTop}>
+          <ClanEmblem clan={clan} size="md" />
           <div className={styles.hqIdentity}>
-            <span>CLAN HEADQUARTERS</span>
+            <span>{captain ? "CAPTAIN HEADQUARTERS" : "YOUR CLAN HEADQUARTERS"}</span>
             <h2>{clan.name}</h2>
             <p>{clan.summary}</p>
           </div>
           <span className={styles.hqRank}>#{clan.rank}</span>
         </div>
-        <div className={styles.hqBadgeRow}>
-          <span>{clan.status}</span>
-          <span>{clan.score.toLocaleString()} clan score</span>
+
+        <div className={styles.hqArtStage}>
+          <motion.div
+            className={styles.hqArtFloat}
+            animate={{ y: [0, -4, 0] }}
+            transition={{ duration: 4.6, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <AssetImage assetKey={getClanHqAssetKey(clan.level)} className={styles.hqArt} />
+          </motion.div>
+          <div className={styles.hqLevelPill}>HQ LVL {clan.level}</div>
         </div>
-        <div className={styles.hqProgress}>
-          <div><span>Clan Level {clan.level}</span><strong>{Math.round(levelProgress * 100)}%</strong></div>
-          <div className={styles.progressTrack}><i style={{ transform: `scaleX(${levelProgress})` }} /></div>
-        </div>
-        <div className={styles.hqStats}>
-          <div><span>Members</span><strong>{clan.members}/{clan.capacity}</strong></div>
+
+        <div className={styles.hqHud}>
+          <div><span>Members</span><strong>{clan.members}<small>/{clan.capacity}</small></strong></div>
           <div><span>Treasury</span><strong>{treasury.toLocaleString()}</strong></div>
-          <div><span>Rank</span><strong>#{clan.rank}</strong></div>
+          <div><span>Season score</span><strong>{clan.score.toLocaleString()}</strong></div>
+        </div>
+
+        <div className={styles.hqProgress}>
+          <div><span>Progress to HQ Level {nextLevel}</span><strong>{Math.round(levelProgress * 100)}%</strong></div>
+          <div className={styles.progressTrack}><i style={{ transform: `scaleX(${levelProgress})` }} /></div>
         </div>
       </section>
 
       <nav className={styles.hqNav} aria-label="Clan headquarters sections">
         {(["home", "tasks", "members", "inventory"] as const).map((item) => (
           <button key={item} type="button" className={tab === item ? styles.hqNavActive : ""} onClick={() => setTab(item)}>
-            {item === "home" ? "Home" : item === "tasks" ? "Tasks" : item === "members" ? "Members" : "Inventory"}
+            {item === "home" ? "HQ" : item === "tasks" ? "Missions" : item === "members" ? "Roster" : "Inventory"}
           </button>
         ))}
       </nav>
@@ -481,51 +542,44 @@ function Headquarters({
         >
           {tab === "home" ? (
             <>
-              {captain ? (
-                <section className={styles.captainCallout}>
-                  <div><span>CAPTAIN INBOX</span><strong>{pendingRequests} join requests waiting</strong><p>Review explorers before opening the roster.</p></div>
-                  <button type="button" onClick={onOpenRequests}>Manage <HugeiconsIcon icon={ArrowRight01Icon} size={15} strokeWidth={1.7} /></button>
-                </section>
+              {captain && pendingRequests > 0 ? (
+                <button type="button" className={styles.captainInbox} onClick={onOpenRequests}>
+                  <div className={styles.inboxIcon}><HugeiconsIcon icon={UserGroupIcon} size={24} strokeWidth={1.55} /></div>
+                  <div><span>CAPTAIN INBOX</span><strong>{pendingRequests} recruits waiting</strong><p>Review them before the roster fills.</p></div>
+                  <HugeiconsIcon icon={ArrowRight01Icon} size={17} strokeWidth={1.7} />
+                </button>
               ) : null}
 
-              <section className={styles.panel}>
-                <SectionTitle eyebrow="CURRENT OBJECTIVE" title="Clan momentum" />
+              <section className={styles.operationPanel}>
+                <SectionTitle eyebrow="ACTIVE CLAN OPERATION" title="Build the Relay" action={<span className={styles.sectionHint}>2d 08h</span>} />
                 <TaskCard task={clanTasks[0]} />
               </section>
 
-              <section className={styles.panel}>
-                <SectionTitle eyebrow="SEASON STANDING" title="Clan Leaderboard" action={<span className={styles.sectionHint}>Current rank #{clan.rank}</span>} />
-                <div className={styles.hqLeaderboard}>
-                  {[...clanCatalog].sort((a, b) => a.rank - b.rank).slice(0, 3).map((ranked) => (
-                    <div key={ranked.id}>
-                      <span>#{ranked.rank}</span>
-                      <ClanEmblem clan={ranked} size="sm" />
-                      <strong>{ranked.name}</strong>
-                      <b>{ranked.score.toLocaleString()}</b>
-                    </div>
-                  ))}
-                  {clan.rank > 3 ? (
-                    <div className={styles.currentClanRank}>
-                      <span>#{clan.rank}</span>
-                      <ClanEmblem clan={clan} size="sm" />
-                      <strong>{clan.name}</strong>
-                      <b>{clan.score.toLocaleString()}</b>
-                    </div>
-                  ) : null}
+              <section className={styles.commandRow}>
+                <button type="button" onClick={() => setTab("inventory")}>
+                  <span className={styles.commandArt}><AssetImage assetKey="clan.utilityHqUpgrade" /></span>
+                  <div><span>PROGRESSION</span><strong>Next HQ upgrade</strong><p>{Math.round(levelProgress * 100)}% ready</p></div>
+                  <HugeiconsIcon icon={ArrowRight01Icon} size={16} strokeWidth={1.7} />
+                </button>
+                <div className={styles.rankPanel}>
+                  <span>SEASON STANDING</span>
+                  <strong>#{clan.rank}</strong>
+                  <p>{clan.score.toLocaleString()} clan score</p>
                 </div>
               </section>
 
               <section className={styles.panel}>
-                <SectionTitle eyebrow="CLAN HONORS" title="Achievements" />
-                <div className={styles.achievementGrid}>
+                <SectionTitle eyebrow="CLAN HONORS" title="Progress worth keeping" />
+                <div className={styles.honorRail}>
                   {clanAchievements.map((achievement) => {
                     const ratio = Math.min(1, achievement.current / Math.max(1, achievement.target));
                     return (
-                      <article key={achievement.id} className={achievement.unlocked ? styles.achievementUnlocked : ""}>
-                        <span>{achievement.unlocked ? "UNLOCKED" : `${Math.round(ratio * 100)}%`}</span>
+                      <article key={achievement.id} className={achievement.unlocked ? styles.honorUnlocked : ""}>
+                        <span className={styles.honorRing} style={{ "--honor-progress": `${ratio * 360}deg` } as CSSProperties}>
+                          <i>{achievement.unlocked ? "✓" : Math.round(ratio * 100)}</i>
+                        </span>
                         <strong>{achievement.name}</strong>
-                        <p>{achievement.description}</p>
-                        <div className={styles.progressTrack}><i style={{ transform: `scaleX(${ratio})` }} /></div>
+                        <small>{achievement.unlocked ? "Unlocked" : `${Math.round(ratio * 100)}%`}</small>
                       </article>
                     );
                   })}
@@ -533,11 +587,11 @@ function Headquarters({
               </section>
 
               <section className={styles.panel}>
-                <SectionTitle eyebrow="RECENT CLAN ACTIVITY" title="Headquarters log" />
+                <SectionTitle eyebrow="HEADQUARTERS LOG" title="Recent activity" />
                 <div className={styles.activityList}>
-                  <article><span>12m</span><div><strong>Mira Vale added 180 contribution</strong><p>Individual task progress moved forward.</p></div></article>
-                  <article><span>1h</span><div><strong>Supply Cache added to Inventory</strong><p>Captain purchase recorded in the shared clan log.</p></div></article>
-                  <article><span>3h</span><div><strong>Group Task reached 64%</strong><p>Build the Relay continues to advance.</p></div></article>
+                  <article><span>12m</span><div><strong>Mira Vale +180 contribution</strong><p>Personal mission progress reached the clan.</p></div></article>
+                  <article><span>1h</span><div><strong>Emergency Repair Kit stored</strong><p>A shared defence item entered the clan inventory.</p></div></article>
+                  <article><span>3h</span><div><strong>Build the Relay reached 64%</strong><p>The next clan milestone moved closer.</p></div></article>
                 </div>
               </section>
             </>
@@ -551,14 +605,14 @@ function Headquarters({
               </nav>
 
               <section className={styles.panel}>
-                <SectionTitle eyebrow="SHARED OBJECTIVES" title="Group Tasks" />
+                <SectionTitle eyebrow="SHARED OPERATIONS" title="Clan missions" />
                 <div className={styles.taskList}>
                   {clanTasks.filter((task) => task.type === "group" && task.status === taskFilter).map((task) => <TaskCard key={task.id} task={task} />)}
                 </div>
               </section>
 
               <section className={styles.panel}>
-                <SectionTitle eyebrow="YOUR CONTRIBUTION" title="Individual Tasks" />
+                <SectionTitle eyebrow="YOUR CONTRIBUTION" title="Personal missions" />
                 <div className={styles.taskList}>
                   {clanTasks.filter((task) => task.type === "individual" && task.status === taskFilter).map((task) => <TaskCard key={task.id} task={task} />)}
                 </div>
@@ -568,12 +622,16 @@ function Headquarters({
 
           {tab === "members" ? (
             <section className={styles.panel}>
-              <SectionTitle eyebrow="CLAN ROSTER" title={`${clan.members} members`} action={<span className={styles.sectionHint}>Contribution ranked</span>} />
+              <SectionTitle eyebrow="ACTIVE ROSTER" title={`${clan.members} / ${clan.capacity} positions`} action={<span className={styles.sectionHint}>Contribution order</span>} />
+              <div className={styles.rosterLead}>
+                <div><span>CLAN CAPACITY</span><strong>{clan.capacity - clan.members} slots open</strong></div>
+                <div className={styles.progressTrack}><i style={{ transform: `scaleX(${Math.min(1, clan.members / clan.capacity)})` }} /></div>
+              </div>
               <div className={styles.memberList}>
                 {clanMembers.map((member, index) => (
                   <article key={member.id}>
                     <span className={styles.memberRank}>#{index + 1}</span>
-                    <div className={styles.memberAvatar}>{member.initial}</div>
+                    <MemberAvatar initial={member.initial} captain={member.role === "Captain"} />
                     <div><strong>{member.name}</strong><span>Level {member.level} · {member.role}</span></div>
                     <b>{member.contribution.toLocaleString()}</b>
                   </article>
@@ -593,31 +651,17 @@ function Headquarters({
 
               {inventoryMode === "owned" || !captain ? (
                 <section className={styles.panel}>
-                  <SectionTitle eyebrow="SHARED ITEMS" title="Clan Inventory" action={<span className={styles.sectionHint}>{ownedItems.length} owned</span>} />
+                  <SectionTitle eyebrow="SHARED LOADOUT" title="Clan Inventory" action={<span className={styles.sectionHint}>{ownedItems.length} owned</span>} />
                   <div className={styles.itemGrid}>
-                    {ownedItems.map((item) => (
-                      <button type="button" key={item.id} onClick={() => onOpenItem(item.id)}>
-                        <span className={styles.itemGlyph}>{item.glyph}</span>
-                        <strong>{item.name}</strong>
-                        <em>{item.rarity}</em>
-                        <p>{item.effect}</p>
-                      </button>
-                    ))}
+                    {ownedItems.map((item) => <ItemCard key={item.id} item={item} owned onOpen={() => onOpenItem(item.id)} />)}
                   </div>
                 </section>
               ) : (
                 <section className={styles.panel}>
-                  <SectionTitle eyebrow="CAPTAIN SHOP" title="Spend Treasury" action={<span className={styles.treasuryChip}><HugeiconsIcon icon={Wallet01Icon} size={14} strokeWidth={1.65} /> {treasury.toLocaleString()}</span>} />
-                  <div className={styles.shopIntro}>Purchases are mocked for frontend review. Final Treasury rules will be connected with the backend later.</div>
+                  <SectionTitle eyebrow="CAPTAIN ARMORY" title="Spend Treasury" action={<span className={styles.treasuryChip}><HugeiconsIcon icon={Wallet01Icon} size={15} strokeWidth={1.65} /> {treasury.toLocaleString()}</span>} />
+                  <p className={styles.shopIntro}>Choose a shared item for the clan. Effects remain mock-only until the backend rules are connected.</p>
                   <div className={styles.itemGrid}>
-                    {shopItems.map((item) => (
-                      <button type="button" key={item.id} onClick={() => onOpenItem(item.id)}>
-                        <span className={styles.itemGlyph}>{item.glyph}</span>
-                        <strong>{item.name}</strong>
-                        <em>{item.price.toLocaleString()} Treasury</em>
-                        <p>{item.effect}</p>
-                      </button>
-                    ))}
+                    {shopItems.map((item) => <ItemCard key={item.id} item={item} owned={false} onOpen={() => onOpenItem(item.id)} />)}
                   </div>
                 </section>
               )}
@@ -641,14 +685,14 @@ export function ClanPage() {
   }, [clan.activeClanId, clan.createdClan]);
 
   const pageCopy = earnLevel < 5
-    ? { eyebrow: "CLAN NETWORK", title: "Build together.", subtitle: "Reach Level 5 to unlock your permanent clan path." }
+    ? { eyebrow: "CLAN NETWORK", title: "Your clan path waits ahead.", subtitle: "Reach Level 5 to unlock the social game layer." }
     : clan.role === null
-      ? { eyebrow: "CLAN NETWORK", title: "Choose your path.", subtitle: "Captain or Soldier — one permanent decision shapes what comes next." }
+      ? { eyebrow: "CLAN NETWORK", title: "Choose your place in the season.", subtitle: "Lead one headquarters or earn your place inside one." }
       : clan.membership === "member" && activeClan
-        ? { eyebrow: clan.role === "captain" ? "CAPTAIN COMMAND" : "CLAN NETWORK", title: "Your headquarters.", subtitle: "Progress, members, tasks, Treasury and shared clan resources in one place." }
+        ? { eyebrow: clan.role === "captain" ? "CAPTAIN COMMAND" : "CLAN NETWORK", title: activeClan.name, subtitle: clan.role === "captain" ? "Your headquarters is online." : "Your seasonal home is online." }
         : clan.role === "captain"
-          ? { eyebrow: "CAPTAIN PATH", title: "Found your clan.", subtitle: "Create the headquarters you will lead." }
-          : { eyebrow: "SOLDIER PATH", title: "Find your clan.", subtitle: "Search, compare and send one active request at a time." };
+          ? { eyebrow: "CAPTAIN PATH", title: "Build your headquarters.", subtitle: "Create the clan identity your first members will join." }
+          : { eyebrow: "SOLDIER PATH", title: "Find your seasonal home.", subtitle: "Compare active clans and keep one request in play." };
 
   const openClan = (clanId: string) => {
     adapter.selectionChanged();
@@ -683,7 +727,7 @@ export function ClanPage() {
       <main className={styles.page}>
         <GameHeader />
 
-        <header className={styles.pageHeader}>
+        <header className={`${styles.pageHeader} ${clan.membership === "member" ? styles.pageHeaderCompact : ""}`}>
           <span>{pageCopy.eyebrow}</span>
           <h1>{pageCopy.title}</h1>
           <p>{pageCopy.subtitle}</p>
@@ -693,11 +737,7 @@ export function ClanPage() {
         {earnLevel >= 5 && clan.role === null ? <RoleChoice onChoose={chooseRole} /> : null}
 
         {earnLevel >= 5 && clan.role === "soldier" && clan.membership !== "member" ? (
-          <SoldierNetwork
-            pendingClanId={clan.joinRequestClanId}
-            requestState={clan.joinRequestState}
-            onOpenClan={openClan}
-          />
+          <SoldierNetwork pendingClanId={clan.joinRequestClanId} requestState={clan.joinRequestState} onOpenClan={openClan} />
         ) : null}
 
         {earnLevel >= 5 && clan.role === "captain" && clan.membership !== "member" ? (

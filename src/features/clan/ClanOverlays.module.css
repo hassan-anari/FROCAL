@@ -7,12 +7,8 @@
   width: 100dvw;
   height: 100dvh;
   overflow: hidden;
-  padding:
-    calc(.58rem + var(--safe-top))
-    calc(.58rem + var(--safe-right))
-    calc(.58rem + var(--safe-bottom))
-    calc(.58rem + var(--safe-left));
-  background: rgba(1, 3, 10, .91);
+  padding: calc(.58rem + var(--safe-top)) calc(.58rem + var(--safe-right)) calc(.58rem + var(--safe-bottom)) calc(.58rem + var(--safe-left));
+  background: rgba(1, 3, 10, .92);
   overscroll-behavior: none;
   touch-action: none;
 }
@@ -24,12 +20,10 @@
   max-height: 100%;
   min-height: 0;
   overflow: hidden;
-  border: 1px solid rgba(139, 171, 239, .18);
-  border-radius: 24px;
-  background:
-    radial-gradient(circle at 90% 0%, rgba(102, 79, 255, .1), transparent 15rem),
-    linear-gradient(160deg, #0b142d, #030712 74%);
-  box-shadow: 0 24px 70px rgba(0, 0, 0, .56), inset 0 1px 0 rgba(255, 255, 255, .045);
+  border: 1px solid rgba(129, 181, 247, .17);
+  border-radius: 25px;
+  background: radial-gradient(circle at 90% 0%, rgba(92, 73, 219, .11), transparent 14rem), linear-gradient(160deg, #0b1530, #030712 74%);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .58), inset 0 1px 0 rgba(255, 255, 255, .045);
   touch-action: auto;
 }
 
@@ -40,13 +34,12 @@
   gap: 1rem;
   padding: .88rem .92rem .74rem;
   border-bottom: 1px solid rgba(139, 171, 239, .09);
-  background: #091126;
+  background: rgba(7, 15, 34, .92);
 }
-
 .header > div { display: grid; min-width: 0; gap: .12rem; }
-.header span { color: #7fe9ff; font-size: .54rem; font-weight: 820; letter-spacing: .15em; text-transform: uppercase; }
-.header h2 { margin: 0; overflow: hidden; color: #f6f8ff; font-size: 1.08rem; font-weight: 820; letter-spacing: -.035em; text-overflow: ellipsis; white-space: nowrap; }
-.header button { display: grid; place-items: center; width: 35px; height: 35px; border: 1px solid rgba(139,171,239,.14); border-radius: 12px; color: rgba(231,237,255,.76); background: #050b1c; font-size: 1.15rem; cursor: pointer; }
+.header span { color: #78e9ff; font-size: .65rem; font-weight: 850; letter-spacing: .14em; text-transform: uppercase; }
+.header h2 { margin: 0; overflow: hidden; color: #f6f8ff; font-size: 1.08rem; font-weight: 840; letter-spacing: -.035em; text-overflow: ellipsis; white-space: nowrap; }
+.header button { display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid rgba(139,171,239,.14); border-radius: 12px; color: rgba(231,237,255,.78); background: #050b1c; font-size: 1.15rem; cursor: pointer; }
 .header button:active { transform: scale(.95); }
 
 .body {
@@ -63,122 +56,95 @@
   -webkit-overflow-scrolling: touch;
 }
 .body::-webkit-scrollbar { display: none; }
-
-.footer {
-  padding: .68rem .92rem .8rem;
-  border-top: 1px solid rgba(139,171,239,.09);
-  background: #030712;
-}
-
+.footer { padding: .68rem .92rem .8rem; border-top: 1px solid rgba(139,171,239,.09); background: #030712; }
 .primary { width: 100%; font-size: .82rem; }
 .primary::after { animation-play-state: running !important; }
 .doubleActions { display: grid; grid-template-columns: .82fr 1.18fr; gap: .5rem; }
 .doubleActions > * { width: 100%; }
 
-.roleMark {
+.roleArtStage {
+  position: relative;
   display: grid;
   place-items: center;
-  width: 92px;
-  height: 92px;
-  margin: .2rem auto 0;
-  border: 1px solid rgba(128, 205, 255, .18);
-  border-radius: 28px;
-  color: #dffaff;
+  min-height: 220px;
+  overflow: hidden;
+  border: 1px solid rgba(121, 201, 255, .13);
+  border-radius: 22px;
+  background: radial-gradient(circle at 50% 50%, rgba(72, 204, 242, .16), rgba(96, 63, 208, .05) 52%, transparent 70%);
 }
-.captain { background: linear-gradient(145deg, rgba(53, 183, 224, .15), rgba(113, 66, 202, .2)); }
-.soldier { background: linear-gradient(145deg, rgba(86, 100, 218, .16), rgba(167, 75, 222, .16)); }
-
+.roleArtStage.captain { background: radial-gradient(circle at 50% 50%, rgba(66, 205, 245, .18), rgba(91, 59, 196, .06) 55%, transparent 72%); }
+.roleArtStage.soldier { background: radial-gradient(circle at 50% 50%, rgba(126, 99, 255, .18), rgba(70, 142, 232, .06) 55%, transparent 72%); }
+.roleArt { width: min(70vw, 245px); filter: drop-shadow(0 18px 20px rgba(0,0,0,.34)); }
 .centerCopy { display: grid; justify-items: center; gap: .4rem; text-align: center; }
 .centerCopy strong { color: #f3f6ff; font-size: .82rem; }
-.centerCopy p { max-width: 330px; margin: 0; color: rgba(188,201,231,.7); font-size: .72rem; line-height: 1.55; }
-
+.centerCopy p { max-width: 330px; margin: 0; color: rgba(194,207,234,.68); font-size: .73rem; line-height: 1.55; }
 .note,
-.requestIntro {
-  display: flex;
-  align-items: center;
-  gap: .6rem;
-  padding: .68rem;
-  border: 1px solid rgba(120, 206, 255, .12);
-  border-radius: 15px;
-  color: #7ce8ff;
-  background: rgba(8, 20, 42, .72);
-}
-.note span { color: rgba(198,211,240,.72); font-size: .64rem; line-height: 1.4; }
+.requestIntro { display: flex; align-items: center; gap: .6rem; padding: .68rem; border: 1px solid rgba(120, 206, 255, .12); border-radius: 15px; color: #7ce8ff; background: rgba(8, 20, 42, .72); }
+.note span { color: rgba(198,211,240,.72); font-size: .66rem; line-height: 1.4; }
 
 .clanHero {
-  display: grid;
-  grid-template-columns: auto minmax(0,1fr);
-  align-items: center;
-  gap: .72rem;
-  padding: .78rem;
-  border: 1px solid rgba(139,171,239,.13);
-  border-radius: 18px;
-  background: rgba(5,11,27,.62);
+  --clan-accent: #68e5ff;
+  --clan-accent-rgb: 104, 229, 255;
+  position: relative;
+  min-height: 268px;
+  overflow: hidden;
+  border: 1px solid rgba(var(--clan-accent-rgb), .16);
+  border-radius: 21px;
+  background: linear-gradient(180deg, #09152e, #050914);
 }
-.clanMark {
-  display: grid;
-  place-items: center;
-  width: 72px;
-  height: 72px;
-  border: 1px solid rgba(130, 205, 255, .2);
-  border-radius: 23px 23px 29px 29px;
-  background:
-    radial-gradient(circle at 32% 24%, rgba(100,230,255,.22), transparent 32%),
-    linear-gradient(145deg, rgba(28,58,112,.88), rgba(47,18,86,.92));
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.1);
-}
-.clanMark span { color: #e6fbff; font-size: .72rem; font-weight: 900; letter-spacing: .08em; }
-.clanHero > div:last-child { display: grid; gap: .16rem; min-width: 0; }
-.clanHero > div:last-child > span { color: #79e8ff; font-size: .5rem; font-weight: 800; letter-spacing: .12em; }
-.clanHero h3 { margin: 0; color: #f5f7ff; font-size: 1rem; font-weight: 830; letter-spacing: -.035em; }
-.clanHero p { margin: .08rem 0 0; color: rgba(185,199,229,.65); font-size: .64rem; line-height: 1.45; }
-
-.violet .clanMark { background: linear-gradient(145deg, rgba(83,53,167,.88), rgba(33,19,83,.94)); }
-.gold .clanMark { background: linear-gradient(145deg, rgba(130,92,35,.82), rgba(55,29,59,.94)); }
-.blue .clanMark { background: linear-gradient(145deg, rgba(34,74,145,.88), rgba(22,35,80,.94)); }
+.cyan { --clan-accent: #68e5ff; --clan-accent-rgb: 104, 229, 255; }
+.violet { --clan-accent: #ae95ff; --clan-accent-rgb: 174, 149, 255; }
+.gold { --clan-accent: #efc66d; --clan-accent-rgb: 239, 198, 109; }
+.blue { --clan-accent: #7aaeff; --clan-accent-rgb: 122, 174, 255; }
+.clanHeroHq { position: absolute; top: -24px; right: -25px; width: 250px; filter: drop-shadow(0 20px 22px rgba(0,0,0,.42)); }
+.clanHeroShade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(4,10,23,.96), rgba(4,10,23,.55) 56%, rgba(4,10,23,.05)), linear-gradient(0deg, rgba(4,8,18,.9), transparent 58%); }
+.clanHeroIdentity { position: absolute; z-index: 2; right: .72rem; bottom: .72rem; left: .72rem; display: grid; grid-template-columns: auto minmax(0,1fr); align-items: center; gap: .65rem; }
+.clanMark { position: relative; display: grid; place-items: center; width: 72px; height: 72px; filter: drop-shadow(0 8px 12px rgba(0,0,0,.3)); }
+.clanMark img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.clanMark span { position: relative; z-index: 1; color: #e8fbff; font-size: .7rem; font-weight: 900; letter-spacing: .04em; text-shadow: 0 2px 7px rgba(0,0,0,.7); }
+.clanHeroIdentity > div:last-child { display: grid; gap: .12rem; min-width: 0; }
+.clanHeroIdentity > div:last-child > span { color: var(--clan-accent); font-size: .64rem; font-weight: 850; letter-spacing: .1em; }
+.clanHero h3 { margin: 0; color: #f5f8ff; font-size: 1.04rem; font-weight: 850; letter-spacing: -.035em; }
+.clanHero p { margin: 0; color: rgba(195,209,236,.66); font-size: .67rem; line-height: 1.42; }
 
 .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: .48rem; }
 .stats div { display: grid; gap: .13rem; padding: .62rem .4rem; border: 1px solid rgba(139,171,239,.1); border-radius: 14px; background: rgba(5,11,27,.6); text-align: center; }
-.stats span { color: rgba(173,188,220,.52); font-size: .51rem; text-transform: uppercase; }
-.stats strong { color: #f2f6ff; font-size: .75rem; }
-
+.stats span { color: rgba(184,199,228,.54); font-size: .64rem; text-transform: uppercase; }
+.stats strong { color: #f2f6ff; font-size: .76rem; }
 .detailList { display: grid; gap: .42rem; }
 .detailList div { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-bottom: .42rem; border-bottom: 1px solid rgba(255,255,255,.045); }
 .detailList div:last-child { border-bottom: 0; }
-.detailList span { color: rgba(175,190,221,.55); font-size: .61rem; }
-.detailList strong { color: rgba(231,237,255,.82); font-size: .62rem; text-align: right; }
+.detailList span { color: rgba(184,199,228,.57); font-size: .65rem; }
+.detailList strong { color: rgba(231,237,255,.84); font-size: .66rem; text-align: right; }
 
 .itemArt {
   display: grid;
   place-items: center;
-  width: 142px;
-  aspect-ratio: 1;
-  margin: .1rem auto;
-  border: 1px solid rgba(125,204,255,.18);
-  border-radius: 34px;
-  background:
-    radial-gradient(circle at 34% 27%, rgba(83,224,255,.22), transparent 30%),
-    linear-gradient(145deg, rgba(26,55,108,.86), rgba(52,21,96,.9));
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.1);
+  min-height: 210px;
+  overflow: hidden;
+  border: 1px solid rgba(125,204,255,.14);
+  border-radius: 24px;
+  background: radial-gradient(circle at 50% 52%, rgba(83,224,255,.18), rgba(102,65,215,.06) 48%, transparent 70%);
 }
-.itemArt span { color: #e5fbff; font-size: 1.15rem; font-weight: 900; letter-spacing: .08em; }
-
+.itemArtImage { width: min(65vw, 235px); filter: drop-shadow(0 18px 20px rgba(0,0,0,.38)); }
 .effectCard { display: grid; gap: .28rem; padding: .72rem; border: 1px solid rgba(139,171,239,.11); border-radius: 16px; background: rgba(5,11,27,.66); }
-.effectCard span { color: #7fe9ff; font-size: .52rem; font-weight: 820; letter-spacing: .13em; }
-.effectCard p { margin: 0; color: rgba(195,207,235,.7); font-size: .68rem; line-height: 1.5; }
+.effectCard span { color: #7fe9ff; font-size: .64rem; font-weight: 850; letter-spacing: .12em; }
+.effectCard p { margin: 0; color: rgba(195,207,235,.7); font-size: .69rem; line-height: 1.5; }
 
 .requestIntro div { display: grid; gap: .12rem; }
-.requestIntro strong { color: #eef7ff; font-size: .72rem; }
-.requestIntro span { color: rgba(184,199,229,.62); font-size: .61rem; line-height: 1.4; }
+.requestIntro strong { color: #eef7ff; font-size: .74rem; }
+.requestIntro span { color: rgba(184,199,229,.62); font-size: .64rem; line-height: 1.4; }
 .requestList { display: grid; gap: .55rem; }
 .request { display: grid; grid-template-columns: auto minmax(0,1fr); gap: .58rem; align-items: center; padding: .68rem; border: 1px solid rgba(139,171,239,.1); border-radius: 16px; background: rgba(5,11,27,.64); }
-.avatar { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 13px; color: #e8fbff; font-size: .72rem; font-weight: 850; background: linear-gradient(145deg, rgba(58,187,222,.22), rgba(120,70,209,.22)); }
+.avatar { position: relative; display: grid; place-items: center; width: 44px; height: 44px; }
+.avatar > span { position: relative; z-index: 1; display: grid; place-items: center; width: 27px; height: 27px; border-radius: 50%; color: #e8fbff; background: linear-gradient(145deg, rgba(58,187,222,.22), rgba(120,70,209,.22)); font-size: .68rem; font-weight: 850; }
+.avatarFrame { position: absolute; z-index: 2; inset: -2px; width: 48px; height: 48px; object-fit: contain; }
 .requestCopy { display: grid; gap: .12rem; min-width: 0; }
 .requestCopy strong { color: #f2f5ff; font-size: .72rem; }
-.requestCopy span { color: rgba(179,194,224,.58); font-size: .58rem; }
+.requestCopy span { color: rgba(179,194,224,.58); font-size: .64rem; }
 .requestActions { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: .42rem; }
-.requestActions button { min-height: 34px; border: 1px solid rgba(139,171,239,.13); border-radius: 11px; color: rgba(221,230,249,.72); background: #071027; font-size: .62rem; font-weight: 760; }
+.requestActions button { min-height: 38px; border: 1px solid rgba(139,171,239,.13); border-radius: 11px; color: rgba(221,230,249,.72); background: #071027; font-size: .65rem; font-weight: 760; }
 .requestActions .accept { border-color: rgba(89,228,180,.18); color: #7ce9c2; background: rgba(34,126,99,.12); }
-.request em { justify-self: end; color: rgba(197,209,235,.6); font-size: .58rem; font-style: normal; text-transform: capitalize; }
+.request em { justify-self: end; color: rgba(197,209,235,.6); font-size: .64rem; font-style: normal; text-transform: capitalize; }
 .request em.accepted { color: #76e8bf; }
 .request em.rejected { color: #ff9caa; }

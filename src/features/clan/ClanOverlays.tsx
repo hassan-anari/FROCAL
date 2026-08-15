@@ -1,18 +1,17 @@
 import {
-  ArrowRight01Icon,
   InformationCircleIcon,
-  UserCircleIcon,
   UserGroupIcon,
-  Wallet01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { motion } from "motion/react";
+import { AssetImage } from "@/design-system/components/AssetImage";
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
 import { usePauseBackgroundMotion } from "@/design-system/motion/usePauseBackgroundMotion";
 import { Button } from "@/design-system/primitives/Button";
 import type { ClanInventoryItem, ClanJoinApplicant, ClanRole, ClanSummary } from "@/game/clan/types";
+import { clanRoleArt, getClanEmblemAssetKey, getClanHqAssetKey } from "@/game/clan/clanVisuals";
 import styles from "./ClanOverlays.module.css";
 
 interface ClanModalProps {
@@ -176,8 +175,8 @@ export function RoleConfirmSheet({
         </div>
       }
     >
-      <div className={`${styles.roleMark} ${captain ? styles.captain : styles.soldier}`}>
-        <HugeiconsIcon icon={captain ? UserGroupIcon : UserCircleIcon} size={36} strokeWidth={1.5} />
+      <div className={`${styles.roleArtStage} ${captain ? styles.captain : styles.soldier}`}>
+        <AssetImage assetKey={clanRoleArt[role]} className={styles.roleArt} />
       </div>
       <div className={styles.centerCopy}>
         <strong>This choice is made once.</strong>
@@ -235,11 +234,18 @@ export function ClanPreviewSheet({
       }
     >
       <div className={`${styles.clanHero} ${styles[clan.accent]}`}>
-        <div className={styles.clanMark}><span>{clan.tag}</span></div>
-        <div>
-          <span>#{clan.rank} GLOBAL</span>
-          <h3>{clan.name}</h3>
-          <p>{clan.summary}</p>
+        <AssetImage assetKey={getClanHqAssetKey(clan.level)} className={styles.clanHeroHq} />
+        <div className={styles.clanHeroShade} />
+        <div className={styles.clanHeroIdentity}>
+          <div className={styles.clanMark}>
+            <AssetImage assetKey={getClanEmblemAssetKey("crest")} />
+            <span>{clan.tag}</span>
+          </div>
+          <div>
+            <span>#{clan.rank} SEASON</span>
+            <h3>{clan.name}</h3>
+            <p>{clan.summary}</p>
+          </div>
         </div>
       </div>
       <div className={styles.stats}>
@@ -298,9 +304,9 @@ export function ClanItemSheet({
         ) : undefined
       }
     >
-      <div className={styles.itemArt}><span>{item.glyph}</span></div>
+      <div className={styles.itemArt}><AssetImage assetKey={item.artKey} className={styles.itemArtImage} /></div>
       <div className={styles.centerCopy}>
-        <strong>{item.rarity} clan item</strong>
+        <strong>{item.kind} · {item.rarity}</strong>
         <p>{item.description}</p>
       </div>
       <div className={styles.effectCard}>
@@ -337,7 +343,7 @@ export function JoinRequestsSheet({
       <div className={styles.requestList}>
         {applicants.map((applicant) => (
           <article key={applicant.id} className={styles.request}>
-            <div className={styles.avatar}>{applicant.initial}</div>
+            <div className={styles.avatar}><span>{applicant.initial}</span><AssetImage assetKey="profile.frame.clan" className={styles.avatarFrame} /></div>
             <div className={styles.requestCopy}>
               <strong>{applicant.name}</strong>
               <span>Level {applicant.level} · {applicant.contributionPreview.toLocaleString()} activity score</span>

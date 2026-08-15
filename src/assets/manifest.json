@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "assets": [
     {
       "key": "brand.logo",
@@ -651,6 +651,160 @@
       "alt": "Legacy Season Champion medal",
       "category": "career-medal",
       "requiredInPhase": 4
+    },
+    {
+      "key": "clan.emblemCircle",
+      "path": "/assets/clan/clan-emblem-base-circle.webp",
+      "alt": "Clan circular emblem frame",
+      "category": "clan-emblem",
+      "requiredInPhase": 5
+    },
+    {
+      "key": "clan.emblemCrest",
+      "path": "/assets/clan/clan-emblem-base-crest.webp",
+      "alt": "Clan crest emblem frame",
+      "category": "clan-emblem",
+      "requiredInPhase": 5
+    },
+    {
+      "key": "clan.hq.level1",
+      "path": "/assets/clan/clan-hq-level-1-starter-hub.webp",
+      "alt": "Clan starter headquarters",
+      "category": "clan-hq",
+      "requiredInPhase": 5
+    },
+    {
+      "key": "clan.hq.level2",
+      "path": "/assets/clan/clan-hq-level-2-growing-hub.webp",
+      "alt": "Clan growing headquarters",
+      "category": "clan-hq",
+      "requiredInPhase": 5
+    },
+    {
+      "key": "clan.hq.level3",
+      "path": "/assets/clan/clan-hq-level-3-operations-center.webp",
+      "alt": "Clan operations center",
+      "category": "clan-hq",
+      "requiredInPhase": 5
+    },
+    {
+      "key": "clan.hq.level4",
+      "path": "/assets/clan/clan-hq-level-4-advanced-headquarters.webp",
+      "alt": "Advanced clan headquarters",
+      "category": "clan-hq",
+      "requiredInPhase": 5
+    },
+    {
+      "key": "clan.hq.level5",
+      "path": "/assets/clan/clan-hq-level-5-elite-headquarters.webp",
+      "alt": "Elite clan headquarters",
+      "category": "clan-hq",
+      "requiredInPhase": 5
+    },
+    {
+      "key": "clan.hq.stateLocked",
+      "path": "/assets/clan/clan-hq-state-locked.webp",
+      "alt": "Locked clan headquarters",
+      "category": "clan-hq-state",
+      "requiredInPhase": 5
+    },
+    {
+      "key": "clan.hq.stateMax",
+      "path": "/assets/clan/clan-hq-state-max-level.webp",
+      "alt": "Max level clan headquarters",
+      "category": "clan-hq-state",
+      "requiredInPhase": 5
+    },
+    {
+      "key": "clan.hq.stateRecovery",
+      "path": "/assets/clan/clan-hq-state-recovery-mode.webp",
+      "alt": "Clan headquarters recovery mode",
+      "category": "clan-hq-state",
+      "requiredInPhase": 5
+    },
+    {
+      "key": "clan.hq.stateUpgrade",
+      "path": "/assets/clan/clan-hq-state-upgrade-available.webp",
+      "alt": "Clan headquarters upgrade available",
+      "category": "clan-hq-state",
+      "requiredInPhase": 5
+    },
+    {
+      "key": "clan.boosterXp",
+      "path": "/assets/clan/clan-booster-clan-xp-booster.webp",
+      "alt": "Clan XP booster",
+      "category": "clan-item",
+      "requiredInPhase": 5
+    },
+    {
+      "key": "clan.boosterContribution",
+      "path": "/assets/clan/clan-booster-contribution-booster.webp",
+      "alt": "Clan contribution booster",
+      "category": "clan-item",
+      "requiredInPhase": 5
+    },
+    {
+      "key": "clan.boosterMission",
+      "path": "/assets/clan/clan-booster-mission-progress-booster.webp",
+      "alt": "Clan mission progress booster",
+      "category": "clan-item",
+      "requiredInPhase": 5
+    },
+    {
+      "key": "clan.defenceEarlyWarning",
+      "path": "/assets/clan/defence-item-early-warning-beacon.webp",
+      "alt": "Early warning defence beacon",
+      "category": "clan-item",
+      "requiredInPhase": 5
+    },
+    {
+      "key": "clan.defenceEmergencyRepair",
+      "path": "/assets/clan/defence-item-emergency-repair-kit.webp",
+      "alt": "Emergency repair defence kit",
+      "category": "clan-item",
+      "requiredInPhase": 5
+    },
+    {
+      "key": "clan.defenceFirewall",
+      "path": "/assets/clan/defence-item-firewall-shield.webp",
+      "alt": "Firewall shield defence item",
+      "category": "clan-item",
+      "requiredInPhase": 5
+    },
+    {
+      "key": "clan.defenceProtectionDome",
+      "path": "/assets/clan/defence-item-protection-dome.webp",
+      "alt": "Protection dome defence item",
+      "category": "clan-item",
+      "requiredInPhase": 5
+    },
+    {
+      "key": "clan.utilityAlliancePermit",
+      "path": "/assets/clan/utility-item-alliance-permit.webp",
+      "alt": "Alliance permit utility item",
+      "category": "clan-item",
+      "requiredInPhase": 5
+    },
+    {
+      "key": "clan.utilityCapacity",
+      "path": "/assets/clan/utility-item-capacity-expansion-module.webp",
+      "alt": "Capacity expansion utility module",
+      "category": "clan-item",
+      "requiredInPhase": 5
+    },
+    {
+      "key": "clan.utilityEventPass",
+      "path": "/assets/clan/utility-item-event-entry-pass.webp",
+      "alt": "Event entry utility pass",
+      "category": "clan-item",
+      "requiredInPhase": 5
+    },
+    {
+      "key": "clan.utilityHqUpgrade",
+      "path": "/assets/clan/utility-item-hq-upgrade-kit.webp",
+      "alt": "Headquarters upgrade utility kit",
+      "category": "clan-item",
+      "requiredInPhase": 5
     }
   ]
 }
