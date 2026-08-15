@@ -3,7 +3,7 @@ import {
   ChampionIcon,
   Home01Icon,
   MoneyReceiveSquareIcon,
-  SquareUserRoundIcon,
+  UserSquareIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
@@ -26,7 +26,7 @@ const navigation = [
   { to: "/earn", label: "Earn", icon: MoneyReceiveSquareIcon },
   { to: "/clan", label: "Clan", icon: ChampionIcon },
   { to: "/arena", label: "Arena", icon: AdventureIcon },
-  { to: "/profile", label: "Profile", icon: SquareUserRoundIcon },
+  { to: "/profile", label: "Profile", icon: UserSquareIcon },
 ] as const;
 
 const directionKey = "dalexio-nav-direction";
