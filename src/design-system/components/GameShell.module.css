@@ -26,7 +26,7 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: none;
-  padding-bottom: calc(96px + var(--safe-bottom));
+  padding-bottom: calc(92px + var(--safe-bottom));
   backface-visibility: hidden;
   transform: translateZ(0);
   will-change: opacity, transform;
@@ -36,9 +36,9 @@
 .contentFull { padding-bottom: 0; }
 
 /*
- * A single navigation rail instead of five app-style tab buttons.
- * Every destination has equal visual weight. The rail/node metaphor makes the
- * control read like movement between game locations rather than dashboard tabs.
+ * Compact game HUD rail. Every destination has equal visual weight.
+ * The secondary numbered/top rail from the previous iteration was removed;
+ * only the shared signal route remains between the five destinations.
  */
 .nav {
   position: absolute;
@@ -46,16 +46,15 @@
   left: 50%;
   bottom: calc(.48rem + var(--safe-bottom));
   width: min(calc(100% - 1rem), 448px);
-  min-height: 72px;
+  min-height: 68px;
   translate: -50% 0;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   align-items: stretch;
-  padding: .42rem .3rem .34rem;
+  padding: .34rem .3rem .3rem;
   border: 1px solid rgba(116, 159, 232, .16);
   border-radius: 20px;
-  background:
-    linear-gradient(180deg, rgba(11, 18, 39, .965), rgba(4, 8, 20, .99));
+  background: linear-gradient(180deg, rgba(11, 18, 39, .965), rgba(4, 8, 20, .99));
   box-shadow:
     0 15px 38px rgba(0, 0, 0, .48),
     0 0 0 1px rgba(2, 6, 18, .76),
@@ -63,27 +62,15 @@
   contain: layout paint;
 }
 
-.nav::before,
-.nav::after {
+.nav::before {
   content: "";
   position: absolute;
-  pointer-events: none;
-}
-
-.nav::before {
   inset: 0;
   border-radius: inherit;
+  pointer-events: none;
   background:
     linear-gradient(90deg, transparent 4%, rgba(72, 219, 255, .08) 18%, transparent 36%, transparent 64%, rgba(137, 91, 255, .08) 82%, transparent 96%);
-  opacity: .75;
-}
-
-.nav::after {
-  left: 12px;
-  right: 12px;
-  top: 5px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(103, 218, 255, .18), rgba(143, 105, 255, .2), transparent);
+  opacity: .68;
 }
 
 .routeRail {
@@ -91,7 +78,7 @@
   z-index: 0;
   left: 9.5%;
   right: 9.5%;
-  top: 39px;
+  top: 36px;
   height: 1px;
   pointer-events: none;
   background: linear-gradient(90deg, rgba(68, 118, 175, .05), rgba(87, 174, 221, .22) 18%, rgba(109, 109, 205, .18) 50%, rgba(87, 174, 221, .22) 82%, rgba(68, 118, 175, .05));
@@ -102,13 +89,13 @@
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-rows: 30px 12px 14px;
+  grid-template-rows: 29px 10px 14px;
   justify-items: center;
   align-items: center;
   gap: 0;
   min-width: 0;
-  min-height: 61px;
-  padding: .05rem .05rem 0;
+  min-height: 58px;
+  padding: 0 .05rem;
   border: 0;
   color: rgba(145, 162, 196, .57);
   background: transparent;
@@ -123,22 +110,10 @@
   position: relative;
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 30px;
+  width: 36px;
+  height: 29px;
   color: currentColor;
   transition: color 170ms ease, transform 190ms ease, filter 190ms ease;
-}
-
-.stationCode {
-  position: absolute;
-  top: -1px;
-  right: -7px;
-  color: rgba(128, 153, 192, .31);
-  font-size: .42rem;
-  font-weight: 760;
-  letter-spacing: .055em;
-  line-height: 1;
-  transition: color 170ms ease, opacity 170ms ease;
 }
 
 .stationNode {
@@ -176,10 +151,6 @@
   filter: drop-shadow(0 0 7px rgba(87, 211, 255, .35));
 }
 
-.active .stationCode {
-  color: rgba(145, 224, 255, .68);
-}
-
 .active .stationNode {
   width: 19px;
   border-color: rgba(116, 224, 255, .55);
@@ -212,14 +183,12 @@
   }
 
   .navLabel { font-size: .56rem; }
-  .stationCode { right: -5px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .content { transform: none !important; }
   .navItem,
   .navGlyph,
-  .stationCode,
   .stationNode,
   .navLabel { transition: none !important; }
 }

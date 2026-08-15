@@ -1,10 +1,10 @@
+import { Home01Icon } from "@hugeicons/core-free-icons";
 import {
-  Home01Icon,
-  Sword01Icon,
-  UserCircleIcon,
-  UserGroupIcon,
-  Wallet01Icon,
-} from "@hugeicons/core-free-icons";
+  AdventureIcon,
+  ChampionIcon,
+  MoneyReceiveSquareIcon,
+  SquareUserRoundIcon,
+} from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { motion } from "motion/react";
@@ -22,11 +22,11 @@ interface GameShellProps {
 }
 
 const navigation = [
-  { to: "/base", label: "Base", icon: Home01Icon, station: "01" },
-  { to: "/earn", label: "Earn", icon: Wallet01Icon, station: "02" },
-  { to: "/clan", label: "Clan", icon: UserGroupIcon, station: "03" },
-  { to: "/arena", label: "Arena", icon: Sword01Icon, station: "04" },
-  { to: "/profile", label: "Profile", icon: UserCircleIcon, station: "05" },
+  { to: "/base", label: "Base", icon: Home01Icon },
+  { to: "/earn", label: "Earn", icon: MoneyReceiveSquareIcon },
+  { to: "/clan", label: "Clan", icon: ChampionIcon },
+  { to: "/arena", label: "Arena", icon: AdventureIcon },
+  { to: "/profile", label: "Profile", icon: SquareUserRoundIcon },
 ] as const;
 
 const directionKey = "dalexio-nav-direction";
@@ -75,8 +75,12 @@ export function GameShell({ children, className = "", hideNavigation = false }: 
                 aria-current={active ? "page" : undefined}
               >
                 <span className={styles.navGlyph}>
-                  <span className={styles.stationCode} aria-hidden="true">{item.station}</span>
-                  <HugeiconsIcon icon={item.icon} size={22} strokeWidth={active ? 1.95 : 1.55} />
+                  <HugeiconsIcon
+                    icon={item.icon}
+                    size={24}
+                    color="currentColor"
+                    strokeWidth={1.5}
+                  />
                 </span>
                 <span className={styles.stationNode} aria-hidden="true" />
                 <span className={styles.navLabel}>{item.label}</span>
