@@ -24,7 +24,7 @@ interface GameShellProps {
 const navigation = [
   { to: "/base", label: "Base", icon: Home01Icon },
   { to: "/earn", label: "Earn", icon: Wallet01Icon },
-  { to: "/clan", label: "Clan", icon: UserGroupIcon },
+  { to: "/clan", label: "Clan", icon: UserGroupIcon, featured: true },
   { to: "/arena", label: "Arena", icon: Sword01Icon },
   { to: "/profile", label: "Profile", icon: UserCircleIcon },
 ] as const;
@@ -67,15 +67,21 @@ export function GameShell({ children, className = "", hideNavigation = false }: 
               <button
                 key={item.to}
                 type="button"
-                className={`${styles.navItem} ${active ? styles.active : ""}`}
+                className={`${styles.navItem} ${"featured" in item && item.featured ? styles.featured : ""} ${active ? styles.active : ""}`}
                 onClick={() => openRoute(item.to)}
                 aria-label={item.label}
                 title={item.label}
                 aria-current={active ? "page" : undefined}
               >
                 <span className={styles.iconWrap}>
-                  <HugeiconsIcon icon={item.icon} size={22} strokeWidth={active ? 1.9 : 1.55} />
+                  <HugeiconsIcon
+                    icon={item.icon}
+                    size={"featured" in item && item.featured ? 24 : 21}
+                    strokeWidth={active ? 1.9 : 1.55}
+                  />
                 </span>
+                <span className={styles.navLabel}>{item.label}</span>
+                <span className={styles.activeSignal} aria-hidden="true" />
               </button>
             );
           })}
