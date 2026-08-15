@@ -148,3 +148,80 @@
 .request em { justify-self: end; color: rgba(197,209,235,.6); font-size: .64rem; font-style: normal; text-transform: capitalize; }
 .request em.accepted { color: #76e8bf; }
 .request em.rejected { color: #ff9caa; }
+
+/* Clan refinement V2 */
+.clanHeroHq {
+  top: -6px;
+  right: auto;
+  left: 50%;
+  width: 222px;
+  transform: translateX(-12%);
+}
+.clanHeroShade {
+  background:
+    linear-gradient(90deg, rgba(4,10,23,.96), rgba(4,10,23,.64) 55%, rgba(4,10,23,.08)),
+    linear-gradient(0deg, rgba(4,8,18,.92), transparent 60%);
+}
+.clanMark { --identity-hue: 195; }
+.clanMarkIdentity {
+  position: absolute;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 55%;
+  height: 55%;
+  overflow: hidden;
+  clip-path: polygon(50% 0%, 88% 14%, 83% 70%, 50% 100%, 17% 70%, 12% 14%);
+  color: #f2fbff;
+  background:
+    radial-gradient(circle at 35% 28%, hsla(var(--identity-hue), 92%, 72%, .35), transparent 42%),
+    linear-gradient(145deg, hsl(var(--identity-hue) 62% 34%), hsl(calc(var(--identity-hue) + 46) 62% 20%));
+}
+.clanMarkIdentity img { width: 100%; height: 100%; object-fit: cover; }
+.clanMarkIdentity b { font-size: .68rem; font-weight: 900; letter-spacing: .03em; text-shadow: 0 2px 7px rgba(0,0,0,.65); }
+.clanMarkFrame { z-index: 2; }
+
+.request {
+  grid-template-columns: 52px minmax(0,1fr);
+  align-items: start;
+  padding: .72rem;
+}
+.avatar { width: 50px; height: 50px; }
+.avatar > span {
+  width: 32px;
+  height: 32px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 35% 28%, hsla(var(--identity-hue), 95%, 74%, .34), transparent 45%),
+    linear-gradient(145deg, hsl(var(--identity-hue) 58% 34%), hsl(calc(var(--identity-hue) + 44) 55% 20%));
+}
+.avatar > span img { width: 100%; height: 100%; object-fit: cover; }
+.avatarFrame { inset: -2px; width: 54px; height: 54px; }
+.requestCopy { gap: .35rem; }
+.requestNameRow { display: flex; align-items: baseline; gap: .35rem; min-width: 0; }
+.requestNameRow strong { overflow: hidden; color: #f4f7ff; font-size: .78rem; text-overflow: ellipsis; white-space: nowrap; }
+.requestNameRow span { overflow: hidden; color: rgba(168,190,228,.55); font-size: .62rem; text-overflow: ellipsis; white-space: nowrap; }
+.requestStats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: .28rem; }
+.requestStats span {
+  display: grid;
+  gap: .08rem;
+  min-width: 0;
+  padding: .34rem .2rem;
+  border: 1px solid rgba(132,177,238,.08);
+  border-radius: 9px;
+  color: #e6f2ff;
+  background: rgba(4,10,25,.56);
+  font-size: .6rem;
+  font-weight: 780;
+  text-align: center;
+}
+.requestStats b { color: #6fe5ff; font-size: .48rem; font-weight: 900; letter-spacing: .06em; }
+.requestMeta { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem; }
+.requestMeta > span { color: rgba(187,203,231,.58); font-size: .61rem; }
+.requestMeta em { padding: .15rem .28rem; border: 1px solid rgba(111,214,255,.1); border-radius: 999px; color: #94eaff; background: rgba(25,80,103,.12); font-size: .56rem; font-style: normal; font-weight: 760; }
+.requestActions { margin-top: .12rem; }
+
+@media (max-width: 350px) {
+  .requestStats { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .clanHeroHq { left: 45%; width: 210px; }
+}

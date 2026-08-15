@@ -6,6 +6,34 @@ export const clanRoleArt: Record<ClanRole, AssetKey> = {
   soldier: "dexo.roleOfficer",
 };
 
+export const clanPreloadAssets = [
+  "dexo.roleCaptain",
+  "dexo.roleOfficer",
+  "profile.frame.clan",
+  "profile.frame.captain",
+  "clan.emblemCrest",
+  "clan.hq.level1",
+  "clan.hq.level2",
+  "clan.hq.level3",
+  "clan.hq.level4",
+  "clan.hq.level5",
+  "clan.hq.stateLocked",
+  "clan.hq.stateMax",
+  "clan.hq.stateRecovery",
+  "clan.hq.stateUpgrade",
+  "clan.boosterXp",
+  "clan.boosterContribution",
+  "clan.boosterMission",
+  "clan.defenceEarlyWarning",
+  "clan.defenceEmergencyRepair",
+  "clan.defenceFirewall",
+  "clan.defenceProtectionDome",
+  "clan.utilityAlliancePermit",
+  "clan.utilityCapacity",
+  "clan.utilityEventPass",
+  "clan.utilityHqUpgrade",
+] as const satisfies readonly AssetKey[];
+
 export function getClanHqAssetKey(level: number): AssetKey {
   if (level <= 2) return "clan.hq.level1";
   if (level <= 4) return "clan.hq.level2";
@@ -14,6 +42,20 @@ export function getClanHqAssetKey(level: number): AssetKey {
   return "clan.hq.level5";
 }
 
-export function getClanEmblemAssetKey(shape: "circle" | "crest" = "crest"): AssetKey {
-  return shape === "circle" ? "clan.emblemCircle" : "clan.emblemCrest";
+export function getClanEmblemAssetKey(): AssetKey {
+  return "clan.emblemCrest";
+}
+
+export function getIdentityInitials(name: string): string {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  if (words.length >= 2) return `${words[0][0] ?? ""}${words[1][0] ?? ""}`.toUpperCase();
+  return (words[0]?.slice(0, 2) || "DX").toUpperCase();
+}
+
+export function getIdentityHue(seed: string): number {
+  let hash = 0;
+  for (let index = 0; index < seed.length; index += 1) {
+    hash = (hash * 31 + seed.charCodeAt(index)) | 0;
+  }
+  return Math.abs(hash) % 360;
 }

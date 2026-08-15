@@ -5,13 +5,13 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { motion } from "motion/react";
 import { AssetImage } from "@/design-system/components/AssetImage";
-import { useEffect, useId, useRef, type ReactNode } from "react";
+import { useEffect, useId, useRef, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
 import { usePauseBackgroundMotion } from "@/design-system/motion/usePauseBackgroundMotion";
 import { Button } from "@/design-system/primitives/Button";
 import type { ClanInventoryItem, ClanJoinApplicant, ClanRole, ClanSummary } from "@/game/clan/types";
-import { clanRoleArt, getClanEmblemAssetKey, getClanHqAssetKey } from "@/game/clan/clanVisuals";
+import { clanRoleArt, getClanEmblemAssetKey, getClanHqAssetKey, getIdentityHue, getIdentityInitials } from "@/game/clan/clanVisuals";
 import styles from "./ClanOverlays.module.css";
 
 interface ClanModalProps {
@@ -224,7 +224,7 @@ export function ClanPreviewSheet({
           type="button"
           tone={full || hasPending ? "secondary" : "primary"}
           size="sm"
-          className={!full && !hasPending ? styles.primary : ""}
+          className={styles.primary}
           data-clan-primary
           disabled={full || hasPending}
           onClick={onJoin}
@@ -237,9 +237,11 @@ export function ClanPreviewSheet({
         <AssetImage assetKey={getClanHqAssetKey(clan.level)} className={styles.clanHeroHq} />
         <div className={styles.clanHeroShade} />
         <div className={styles.clanHeroIdentity}>
-          <div className={styles.clanMark}>
-            <AssetImage assetKey={getClanEmblemAssetKey("crest")} />
-            <span>{clan.tag}</span>
+          <div className={styles.clanMark} style={{ "--identity-hue": getIdentityHue(clan.name) } as CSSProperties}>
+            <span className={styles.clanMarkIdentity}>
+              {clan.imageUrl ? <img src={clan.imageUrl} alt="" /> : <b>{getIdentityInitials(clan.name)}</b>}
+            </span>
+            <AssetImage assetKey={getClanEmblemAssetKey()} className={styles.clanMarkFrame} />
           </div>
           <div>
             <span>#{clan.rank} SEASON</span>
@@ -264,24 +266,23 @@ export function ClanPreviewSheet({
 
 export function ClanItemSheet({
   item,
-  owned,
+  quantity,
   captain,
   treasury,
   onClose,
   onPurchase,
 }: {
   item: ClanInventoryItem;
-  owned: boolean;
+  quantity: number;
   captain: boolean;
   treasury: number;
   onClose: () => void;
   onPurchase: () => void;
 }) {
-  const canBuy = captain && !owned && treasury >= item.price;
+  const canBuy = captain && treasury >= item.price;
   let label = "Got it";
-  if (captain && owned) label = "Owned";
-  else if (captain && treasury < item.price) label = "Not enough Treasury";
-  else if (captain) label = `Buy for ${item.price.toLocaleString()}`;
+  if (captain && treasury < item.price) label = "Not enough Treasury";
+  else if (captain) label = `Buy +1 · ${item.price.toLocaleString()}`;
 
   return (
     <ClanModal
@@ -294,7 +295,7 @@ export function ClanItemSheet({
             type="button"
             tone={canBuy ? "primary" : "secondary"}
             size="sm"
-            className={canBuy ? styles.primary : ""}
+            className={styles.primary}
             data-clan-primary
             disabled={!canBuy}
             onClick={onPurchase}
@@ -315,7 +316,7 @@ export function ClanItemSheet({
       </div>
       <div className={styles.detailList}>
         <div><span>Price</span><strong>{item.price.toLocaleString()} Treasury</strong></div>
-        <div><span>Status</span><strong>{owned ? "Owned" : "Available"}</strong></div>
+        <div><span>Inventory</span><strong>{quantity > 0 ? `×${quantity} stored` : "None stored"}</strong></div>
       </div>
     </ClanModal>
   );
@@ -343,10 +344,22 @@ export function JoinRequestsSheet({
       <div className={styles.requestList}>
         {applicants.map((applicant) => (
           <article key={applicant.id} className={styles.request}>
-            <div className={styles.avatar}><span>{applicant.initial}</span><AssetImage assetKey="profile.frame.clan" className={styles.avatarFrame} /></div>
+            <div className={styles.avatar} style={{ "--identity-hue": getIdentityHue(applicant.name) } as CSSProperties}>
+              <span>{applicant.avatarUrl ? <img src={applicant.avatarUrl} alt="" /> : getIdentityInitials(applicant.name)}</span>
+              <AssetImage assetKey="profile.frame.clan" className={styles.avatarFrame} />
+            </div>
             <div className={styles.requestCopy}>
-              <strong>{applicant.name}</strong>
-              <span>Level {applicant.level} · {applicant.contributionPreview.toLocaleString()} activity score</span>
+              <div className={styles.requestNameRow}><strong>{applicant.name}</strong>{applicant.username ? <span>@{applicant.username}</span> : null}</div>
+              <div className={styles.requestStats}>
+                <span><b>LVL</b>{applicant.level}</span>
+                <span><b>SCORE</b>{applicant.seasonScore.toLocaleString()}</span>
+                <span><b>RANK</b>#{applicant.globalRank.toLocaleString()}</span>
+                <span><b>ACTIVE</b>{applicant.activeDays}d</span>
+              </div>
+              <div className={styles.requestMeta}>
+                <span>Contribution {applicant.contributionPreview.toLocaleString()}</span>
+                {applicant.medals.slice(0, 2).map((medal) => <em key={medal}>{medal}</em>)}
+              </div>
             </div>
             {applicant.status === "pending" ? (
               <div className={styles.requestActions}>

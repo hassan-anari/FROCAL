@@ -35,4 +35,14 @@ describe("clan store", () => {
     expect(useClanStore.getState().treasury).toBe(before - 2400);
     expect(useClanStore.getState().ownedItemIds).toContain("rally-beacon");
   });
+  it("lets captains stack multiple copies of the same item", () => {
+    useClanStore.getState().setCaptainHeadquartersForDiagnostics();
+    const before = useClanStore.getState().treasury;
+    expect(useClanStore.getState().purchaseItem("supply-cache", 1800)).toBe(true);
+    expect(useClanStore.getState().purchaseItem("supply-cache", 1800)).toBe(true);
+    const copies = useClanStore.getState().ownedItemIds.filter((id) => id === "supply-cache").length;
+    expect(copies).toBe(3);
+    expect(useClanStore.getState().treasury).toBe(before - 3600);
+  });
+
 });

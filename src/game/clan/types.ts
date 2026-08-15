@@ -1,4 +1,5 @@
 import type { AssetKey } from "@/assets/registry";
+
 export type ClanRole = "captain" | "soldier";
 export type ClanMembershipStatus = "none" | "pending" | "member";
 export type JoinRequestState = "none" | "pending" | "rejected";
@@ -21,6 +22,7 @@ export interface ClanSummary {
   status: "Recruiting" | "Focused" | "Full";
   summary: string;
   accent: "cyan" | "violet" | "gold" | "blue";
+  imageUrl?: string | null;
   fresh?: boolean;
   match?: number;
 }
@@ -32,6 +34,7 @@ export interface ClanMember {
   contribution: number;
   role: "Captain" | "Soldier";
   initial: string;
+  avatarUrl?: string | null;
 }
 
 export interface ClanTask {
@@ -71,10 +74,27 @@ export interface ClanInventoryItem {
 export interface ClanJoinApplicant {
   id: string;
   name: string;
+  username: string | null;
   level: number;
+  seasonScore: number;
+  globalRank: number;
+  activeDays: number;
   contributionPreview: number;
+  medals: string[];
   initial: string;
+  avatarUrl?: string | null;
   status: "pending" | "accepted" | "rejected";
+}
+
+export interface ClanEligibleGroup {
+  id: string;
+  title: string;
+  username: string | null;
+  memberCount: number;
+  botIsAdmin: boolean;
+  userIsAdmin: boolean;
+  userIsOwner: boolean;
+  photoUrl?: string | null;
 }
 
 export interface CreatedClan {
@@ -82,4 +102,8 @@ export interface CreatedClan {
   tag: string;
   motto: string;
   accent: ClanSummary["accent"];
+  telegramGroupId: string;
+  telegramGroupTitle: string;
+  telegramGroupUsername: string | null;
+  telegramGroupPhotoUrl?: string | null;
 }

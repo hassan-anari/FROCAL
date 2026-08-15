@@ -54,6 +54,9 @@ const diagnosticCaptainClan: CreatedClan = {
   tag: "AGS",
   motto: "Move together. Hold the line.",
   accent: "cyan",
+  telegramGroupId: "-1002284100138",
+  telegramGroupTitle: "Aegis Community",
+  telegramGroupUsername: "aegiscommunity",
 };
 
 export const useClanStore = create<ClanState>()(
@@ -118,7 +121,7 @@ export const useClanStore = create<ClanState>()(
       purchaseItem: (itemId, price) => {
         const state = get();
         if (state.role !== "captain" || state.membership !== "member") return false;
-        if (state.ownedItemIds.includes(itemId) || state.treasury < price) return false;
+        if (state.treasury < price) return false;
         set({
           treasury: state.treasury - price,
           ownedItemIds: [...state.ownedItemIds, itemId],

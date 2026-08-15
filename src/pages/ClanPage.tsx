@@ -22,6 +22,7 @@ import {
 import {
   clanAchievements,
   clanCatalog,
+  eligibleClanGroups,
   clanMembers,
   clanShopItems,
   clanTasks,
@@ -31,6 +32,7 @@ import {
 } from "@/game/clan/clanCatalog";
 import { useClanStore } from "@/game/clan/clanStore";
 import type {
+  ClanEligibleGroup,
   ClanInventoryItem,
   ClanJoinApplicant,
   ClanRole,
@@ -40,7 +42,7 @@ import type {
   SoldierClanTab,
   TaskFilter,
 } from "@/game/clan/types";
-import { clanRoleArt, getClanEmblemAssetKey, getClanHqAssetKey } from "@/game/clan/clanVisuals";
+import { clanRoleArt, getClanEmblemAssetKey, getClanHqAssetKey, getIdentityHue, getIdentityInitials } from "@/game/clan/clanVisuals";
 import { useEarnStore } from "@/game/earn/earnStore";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import styles from "./ClanPage.module.css";
@@ -55,24 +57,31 @@ type OverlayState =
 function ClanEmblem({
   clan,
   size = "md",
-  shape = "crest",
 }: {
-  clan: Pick<ClanSummary, "tag" | "accent">;
+  clan: Pick<ClanSummary, "name" | "tag" | "accent" | "imageUrl">;
   size?: "sm" | "md" | "lg";
-  shape?: "circle" | "crest";
 }) {
+  const initials = getIdentityInitials(clan.name);
+  const hue = getIdentityHue(clan.name);
   return (
-    <div className={`${styles.emblem} ${styles[clan.accent]} ${styles[`emblem${size}`]}`}>
-      <AssetImage assetKey={getClanEmblemAssetKey(shape)} className={styles.emblemFrame} />
-      <span>{clan.tag}</span>
+    <div
+      className={`${styles.emblem} ${styles[clan.accent]} ${styles[`emblem${size}`]}`}
+      style={{ "--identity-hue": hue } as CSSProperties}
+      aria-label={`${clan.name} clan emblem`}
+    >
+      <span className={styles.emblemFallback}>
+        {clan.imageUrl ? <img src={clan.imageUrl} alt="" /> : <b>{initials}</b>}
+      </span>
+      <AssetImage assetKey={getClanEmblemAssetKey()} className={styles.emblemFrame} />
     </div>
   );
 }
 
-function MemberAvatar({ initial, captain = false }: { initial: string; captain?: boolean }) {
+function MemberAvatar({ name, avatarUrl, captain = false }: { name: string; avatarUrl?: string | null; captain?: boolean }) {
+  const hue = getIdentityHue(name);
   return (
-    <div className={styles.memberAvatar}>
-      <span>{initial}</span>
+    <div className={styles.memberAvatar} style={{ "--identity-hue": hue } as CSSProperties}>
+      <span>{avatarUrl ? <img src={avatarUrl} alt="" /> : getIdentityInitials(name)}</span>
       <AssetImage assetKey={captain ? "profile.frame.captain" : "profile.frame.clan"} className={styles.memberFrame} />
     </div>
   );
@@ -92,6 +101,7 @@ function buildCreatedClanSummary(created: CreatedClan): ClanSummary {
     summary: created.motto,
     accent: created.accent,
     fresh: true,
+    imageUrl: created.telegramGroupPhotoUrl ?? null,
     match: 100,
   };
 }
@@ -145,7 +155,7 @@ function RoleChoice({ onChoose }: { onChoose: (role: ClanRole) => void }) {
         <button type="button" className={`${styles.roleCard} ${styles.captainCard}`} onClick={() => onChoose("captain")}>
           <div className={styles.roleArtStage}>
             <span className={styles.roleHalo} />
-            <AssetImage assetKey={clanRoleArt.captain} className={styles.roleArt} />
+            <motion.div className={styles.roleFloat} animate={{ y: [0, -5, 0], rotate: [0, .6, 0] }} transition={{ duration: 4.4, repeat: Infinity, ease: "easeInOut" }}><AssetImage assetKey={clanRoleArt.captain} className={styles.roleArt} /></motion.div>
           </div>
           <div className={styles.roleCopy}>
             <span>LEADERSHIP PATH</span>
@@ -158,7 +168,7 @@ function RoleChoice({ onChoose }: { onChoose: (role: ClanRole) => void }) {
         <button type="button" className={`${styles.roleCard} ${styles.soldierCard}`} onClick={() => onChoose("soldier")}>
           <div className={styles.roleArtStage}>
             <span className={styles.roleHalo} />
-            <AssetImage assetKey={clanRoleArt.soldier} className={styles.roleArt} />
+            <motion.div className={styles.roleFloat} animate={{ y: [0, -5, 0], rotate: [0, -.6, 0] }} transition={{ duration: 4.8, repeat: Infinity, ease: "easeInOut", delay: .25 }}><AssetImage assetKey={clanRoleArt.soldier} className={styles.roleArt} /></motion.div>
           </div>
           <div className={styles.roleCopy}>
             <span>CONTRIBUTION PATH</span>
@@ -189,7 +199,7 @@ function ClanCard({
   const pending = pendingClanId === clan.id;
   return (
     <button type="button" className={styles.clanCard} onClick={onOpen}>
-      <ClanEmblem clan={clan} size="sm" shape="circle" />
+      <ClanEmblem clan={clan} size="sm" />
       <div className={styles.clanCardCopy}>
         <div className={styles.clanNameRow}>
           <strong>{clan.name}</strong>
@@ -342,7 +352,7 @@ function SoldierNetwork({
                 {ranking.slice(3).map((clan) => (
                   <button type="button" key={clan.id} onClick={() => onOpenClan(clan.id)}>
                     <span>#{clan.rank}</span>
-                    <ClanEmblem clan={clan} size="sm" shape="circle" />
+                    <ClanEmblem clan={clan} size="sm" />
                     <div><strong>{clan.name}</strong><em>Level {clan.level} · {clan.members}/{clan.capacity}</em></div>
                     <b>{clan.score.toLocaleString()}</b>
                   </button>
@@ -356,17 +366,31 @@ function SoldierNetwork({
   );
 }
 
-function CaptainFounding({ onCreate }: { onCreate: (input: { name: string; tag: string; motto: string; accent: ClanSummary["accent"] }) => void }) {
-  const [name, setName] = useState("Aegis Prime");
-  const [tag, setTag] = useState("AGS");
+function CaptainFounding({
+  onCreate,
+  onAddGroup,
+}: {
+  onCreate: (input: CreatedClan) => void;
+  onAddGroup: () => void;
+}) {
+  const [selectedGroup, setSelectedGroup] = useState<ClanEligibleGroup | null>(null);
+  const [name, setName] = useState("");
+  const [tag, setTag] = useState("");
   const [motto, setMotto] = useState("Move together. Hold the line.");
   const [accent, setAccent] = useState<ClanSummary["accent"]>("cyan");
-  const valid = name.trim().length >= 3 && tag.trim().length >= 2;
 
+  const selectGroup = (group: ClanEligibleGroup) => {
+    setSelectedGroup(group);
+    setName(group.title);
+    setTag(getIdentityInitials(group.title).slice(0, 4));
+  };
+
+  const verifiedGroups = eligibleClanGroups.filter((group) => group.botIsAdmin && group.userIsAdmin);
+  const valid = selectedGroup !== null && name.trim().length >= 3 && tag.trim().length >= 2;
   const preview: ClanSummary = {
     id: "preview",
-    name: name.trim() || "Your Clan",
-    tag: (tag.trim() || "TAG").slice(0, 4).toUpperCase(),
+    name: name.trim() || selectedGroup?.title || "Your Clan",
+    tag: (tag.trim() || getIdentityInitials(selectedGroup?.title ?? "Your Clan")).slice(0, 4).toUpperCase(),
     level: 1,
     members: 1,
     capacity: 20,
@@ -375,7 +399,58 @@ function CaptainFounding({ onCreate }: { onCreate: (input: { name: string; tag: 
     status: "Recruiting",
     summary: motto.trim() || "Your clan motto will appear here.",
     accent,
+    imageUrl: selectedGroup?.photoUrl ?? null,
   };
+
+  if (!selectedGroup) {
+    return (
+      <div className={styles.stack}>
+        <section className={styles.captainGuide}>
+          <div className={styles.captainGuideArt}>
+            <motion.div animate={{ y: [0, -4, 0] }} transition={{ duration: 4.6, repeat: Infinity, ease: "easeInOut" }}>
+              <AssetImage assetKey={clanRoleArt.captain} />
+            </motion.div>
+          </div>
+          <div>
+            <span className={styles.eyebrow}>CAPTAIN REGISTRATION</span>
+            <h2>Promote a verified group into your Clan HQ.</h2>
+            <p>
+              Captain is a seasonal leadership path. Choose a Telegram group already known to Dalexio where the bot is an admin and you have admin authority. We verify the group from backend data; you never need to enter a Chat ID manually.
+            </p>
+          </div>
+        </section>
+
+        <section className={styles.panel}>
+          <SectionTitle eyebrow="VERIFIED TELEGRAM GROUPS" title="Choose your headquarters group" action={<span className={styles.sectionHint}>{verifiedGroups.length} eligible</span>} />
+          <div className={styles.groupList}>
+            {verifiedGroups.map((group) => {
+              const hue = getIdentityHue(group.title);
+              return (
+                <button type="button" key={group.id} className={styles.groupCard} onClick={() => selectGroup(group)}>
+                  <span className={styles.groupAvatar} style={{ "--identity-hue": hue } as CSSProperties}>
+                    {group.photoUrl ? <img src={group.photoUrl} alt="" /> : getIdentityInitials(group.title)}
+                  </span>
+                  <div>
+                    <strong>{group.title}</strong>
+                    <span>{group.memberCount.toLocaleString()} members{group.username ? ` · @${group.username}` : ""}</span>
+                    <em>Bot admin ✓ · {group.userIsOwner ? "Owner verified" : "Admin verified"} ✓</em>
+                  </div>
+                  <HugeiconsIcon icon={ArrowRight01Icon} size={17} strokeWidth={1.65} />
+                </button>
+              );
+            })}
+          </div>
+
+          <div className={styles.groupHelp}>
+            <div><strong>Don't see your group?</strong><span>Add the Dalexio bot as an admin first, then return and refresh the eligible group list.</span></div>
+            <Button type="button" tone="secondary" size="sm" className={styles.fullButton} onClick={onAddGroup}>
+              Add Dalexio Bot to a group
+            </Button>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.stack}>
@@ -388,8 +463,18 @@ function CaptainFounding({ onCreate }: { onCreate: (input: { name: string; tag: 
         </div>
       </section>
 
+      <section className={styles.selectedGroup}>
+        <div className={styles.selectedGroupCopy}>
+          <span>VERIFIED TELEGRAM HOME</span>
+          <strong>{selectedGroup.title}</strong>
+          <p>Bot admin verified · You are {selectedGroup.userIsOwner ? "the group owner" : "a verified group admin"}</p>
+        </div>
+        <button type="button" onClick={() => setSelectedGroup(null)}>Change</button>
+      </section>
+
       <section className={styles.panel}>
-        <SectionTitle eyebrow="CLAN IDENTITY" title="Founding setup" />
+        <SectionTitle eyebrow="CLAN IDENTITY" title="Finish the registration" />
+        <p className={styles.foundingIntro}>The Telegram group remains the real home. These fields create the seasonal Clan identity shown inside Dexo Land.</p>
         <div className={styles.formGrid}>
           <label><span>Clan name</span><input value={name} maxLength={28} onChange={(event) => setName(event.target.value)} /></label>
           <label><span>Tag</span><input value={tag} maxLength={4} onChange={(event) => setTag(event.target.value.toUpperCase())} /></label>
@@ -412,9 +497,18 @@ function CaptainFounding({ onCreate }: { onCreate: (input: { name: string; tag: 
           className={styles.fullButton}
           trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={17} strokeWidth={1.7} />}
           disabled={!valid}
-          onClick={() => onCreate({ name: name.trim(), tag: tag.trim().slice(0, 4).toUpperCase(), motto: motto.trim(), accent })}
+          onClick={() => onCreate({
+            name: name.trim(),
+            tag: tag.trim().slice(0, 4).toUpperCase(),
+            motto: motto.trim(),
+            accent,
+            telegramGroupId: selectedGroup.id,
+            telegramGroupTitle: selectedGroup.title,
+            telegramGroupUsername: selectedGroup.username,
+            telegramGroupPhotoUrl: selectedGroup.photoUrl ?? null,
+          })}
         >
-          Establish headquarters
+          Register clan headquarters
         </Button>
       </section>
     </div>
@@ -425,7 +519,12 @@ function TaskCard({ task }: { task: (typeof clanTasks)[number] }) {
   const ratio = Math.min(1, task.current / Math.max(1, task.target));
   return (
     <article className={`${styles.taskCard} ${task.status === "completed" ? styles.taskComplete : ""}`}>
-      <div className={styles.taskSignal}><span>{Math.round(ratio * 100)}</span><small>%</small></div>
+      <div className={styles.taskSignal} style={{ "--task-progress": `${ratio * 360}deg` } as CSSProperties}>
+        <span className={styles.taskSignalCore}>
+          <b>{Math.round(ratio * 100)}%</b>
+          <small>{task.status === "completed" ? "DONE" : task.type === "group" ? "SYNC" : "YOU"}</small>
+        </span>
+      </div>
       <div className={styles.taskBody}>
         <div className={styles.taskTop}>
           <span>{task.type === "group" ? "GROUP OP" : "PERSONAL OP"}</span>
@@ -442,18 +541,28 @@ function TaskCard({ task }: { task: (typeof clanTasks)[number] }) {
   );
 }
 
-function ItemCard({ item, owned, onOpen }: { item: ClanInventoryItem; owned: boolean; onOpen: () => void }) {
+function ItemCard({
+  item,
+  quantity,
+  shop = false,
+  onOpen,
+}: {
+  item: ClanInventoryItem;
+  quantity: number;
+  shop?: boolean;
+  onOpen: () => void;
+}) {
   return (
     <button type="button" className={styles.itemCard} onClick={onOpen}>
       <div className={styles.itemVisual}>
         <AssetImage assetKey={item.artKey} className={styles.itemImage} />
-        {owned ? <span className={styles.ownedBadge}>OWNED</span> : null}
+        {quantity > 0 ? <span className={styles.quantityBadge}>×{quantity}</span> : null}
       </div>
       <div className={styles.itemCopy}>
         <span>{item.kind} · {item.rarity}</span>
         <strong>{item.name}</strong>
         <p>{item.effect}</p>
-        <em>{owned ? "Open item" : `${item.price.toLocaleString()} Treasury`}</em>
+        <em>{shop ? `${item.price.toLocaleString()} Treasury${quantity > 0 ? ` · Have ×${quantity}` : ""}` : `Inventory ×${quantity}`}</em>
       </div>
     </button>
   );
@@ -481,8 +590,13 @@ function Headquarters({
   const [inventoryMode, setInventoryMode] = useState<"owned" | "shop">("owned");
 
   const pendingRequests = applicants.filter((applicant) => applicant.status === "pending").length;
-  const ownedItems = clanShopItems.filter((item) => ownedItemIds.includes(item.id));
-  const shopItems = clanShopItems.filter((item) => !ownedItemIds.includes(item.id));
+  const itemQuantity = (itemId: string) => ownedItemIds.filter((ownedId) => ownedId === itemId).length;
+  const ownedItems = clanShopItems.filter((item) => itemQuantity(item.id) > 0);
+  const shopGroups = (["Booster", "Defence", "Utility"] as const).map((kind) => ({
+    kind,
+    items: clanShopItems.filter((item) => item.kind === kind),
+  }));
+  const totalOwnedItems = ownedItemIds.length;
   const levelProgress = clan.id === "captain-created" ? .42 : .68;
   const nextLevel = clan.level + 1;
 
@@ -631,7 +745,7 @@ function Headquarters({
                 {clanMembers.map((member, index) => (
                   <article key={member.id}>
                     <span className={styles.memberRank}>#{index + 1}</span>
-                    <MemberAvatar initial={member.initial} captain={member.role === "Captain"} />
+                    <MemberAvatar name={member.name} avatarUrl={member.avatarUrl} captain={member.role === "Captain"} />
                     <div><strong>{member.name}</strong><span>Level {member.level} · {member.role}</span></div>
                     <b>{member.contribution.toLocaleString()}</b>
                   </article>
@@ -651,17 +765,24 @@ function Headquarters({
 
               {inventoryMode === "owned" || !captain ? (
                 <section className={styles.panel}>
-                  <SectionTitle eyebrow="SHARED LOADOUT" title="Clan Inventory" action={<span className={styles.sectionHint}>{ownedItems.length} owned</span>} />
+                  <SectionTitle eyebrow="SHARED LOADOUT" title="Clan Inventory" action={<span className={styles.sectionHint}>{totalOwnedItems} items · {ownedItems.length} types</span>} />
                   <div className={styles.itemGrid}>
-                    {ownedItems.map((item) => <ItemCard key={item.id} item={item} owned onOpen={() => onOpenItem(item.id)} />)}
+                    {ownedItems.map((item) => <ItemCard key={item.id} item={item} quantity={itemQuantity(item.id)} onOpen={() => onOpenItem(item.id)} />)}
                   </div>
                 </section>
               ) : (
                 <section className={styles.panel}>
                   <SectionTitle eyebrow="CAPTAIN ARMORY" title="Spend Treasury" action={<span className={styles.treasuryChip}><HugeiconsIcon icon={Wallet01Icon} size={15} strokeWidth={1.65} /> {treasury.toLocaleString()}</span>} />
-                  <p className={styles.shopIntro}>Choose a shared item for the clan. Effects remain mock-only until the backend rules are connected.</p>
-                  <div className={styles.itemGrid}>
-                    {shopItems.map((item) => <ItemCard key={item.id} item={item} owned={false} onOpen={() => onOpenItem(item.id)} />)}
+                  <p className={styles.shopIntro}>Items can be purchased repeatedly. Every purchase adds one unit to the shared Clan Inventory.</p>
+                  <div className={styles.shopSections}>
+                    {shopGroups.map((group) => (
+                      <section key={group.kind} className={styles.shopGroup}>
+                        <div className={styles.shopGroupTitle}><span>{group.kind.toUpperCase()}</span><strong>{group.items.length} ITEMS</strong></div>
+                        <div className={styles.itemGrid}>
+                          {group.items.map((item) => <ItemCard key={item.id} item={item} quantity={itemQuantity(item.id)} shop onOpen={() => onOpenItem(item.id)} />)}
+                        </div>
+                      </section>
+                    ))}
                   </div>
                 </section>
               )}
@@ -691,7 +812,7 @@ export function ClanPage() {
       : clan.membership === "member" && activeClan
         ? { eyebrow: clan.role === "captain" ? "CAPTAIN COMMAND" : "CLAN NETWORK", title: activeClan.name, subtitle: clan.role === "captain" ? "Your headquarters is online." : "Your seasonal home is online." }
         : clan.role === "captain"
-          ? { eyebrow: "CAPTAIN PATH", title: "Build your headquarters.", subtitle: "Create the clan identity your first members will join." }
+          ? { eyebrow: "CAPTAIN PATH", title: "Register your headquarters.", subtitle: "Promote a verified Telegram group into your seasonal clan home." }
           : { eyebrow: "SOLDIER PATH", title: "Find your seasonal home.", subtitle: "Compare active clans and keep one request in play." };
 
   const openClan = (clanId: string) => {
@@ -746,6 +867,7 @@ export function ClanPage() {
               clan.createClan(input);
               adapter.hapticNotice("success");
             }}
+            onAddGroup={() => adapter.openTelegramLink("https://t.me/DalexioBot?startgroup=dexoairdrop")}
           />
         ) : null}
 
@@ -785,7 +907,7 @@ export function ClanPage() {
             return (
               <ClanItemSheet
                 item={item}
-                owned={clan.ownedItemIds.includes(item.id)}
+                quantity={clan.ownedItemIds.filter((ownedId) => ownedId === item.id).length}
                 captain={clan.role === "captain"}
                 treasury={clan.treasury}
                 onClose={() => setOverlay(null)}
