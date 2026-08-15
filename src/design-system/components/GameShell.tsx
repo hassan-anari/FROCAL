@@ -22,11 +22,11 @@ interface GameShellProps {
 }
 
 const navigation = [
-  { to: "/base", label: "Base", icon: Home01Icon },
-  { to: "/earn", label: "Earn", icon: Wallet01Icon },
-  { to: "/clan", label: "Clan", icon: UserGroupIcon, featured: true },
-  { to: "/arena", label: "Arena", icon: Sword01Icon },
-  { to: "/profile", label: "Profile", icon: UserCircleIcon },
+  { to: "/base", label: "Base", icon: Home01Icon, station: "01" },
+  { to: "/earn", label: "Earn", icon: Wallet01Icon, station: "02" },
+  { to: "/clan", label: "Clan", icon: UserGroupIcon, station: "03" },
+  { to: "/arena", label: "Arena", icon: Sword01Icon, station: "04" },
+  { to: "/profile", label: "Profile", icon: UserCircleIcon, station: "05" },
 ] as const;
 
 const directionKey = "dalexio-nav-direction";
@@ -61,27 +61,25 @@ export function GameShell({ children, className = "", hideNavigation = false }: 
       </motion.div>
       {hideNavigation ? null : (
         <nav className={styles.nav} aria-label="Primary game navigation">
+          <span className={styles.routeRail} aria-hidden="true" />
           {navigation.map((item) => {
             const active = pathname === item.to;
             return (
               <button
                 key={item.to}
                 type="button"
-                className={`${styles.navItem} ${"featured" in item && item.featured ? styles.featured : ""} ${active ? styles.active : ""}`}
+                className={`${styles.navItem} ${active ? styles.active : ""}`}
                 onClick={() => openRoute(item.to)}
                 aria-label={item.label}
                 title={item.label}
                 aria-current={active ? "page" : undefined}
               >
-                <span className={styles.iconWrap}>
-                  <HugeiconsIcon
-                    icon={item.icon}
-                    size={"featured" in item && item.featured ? 24 : 21}
-                    strokeWidth={active ? 1.9 : 1.55}
-                  />
+                <span className={styles.navGlyph}>
+                  <span className={styles.stationCode} aria-hidden="true">{item.station}</span>
+                  <HugeiconsIcon icon={item.icon} size={22} strokeWidth={active ? 1.95 : 1.55} />
                 </span>
+                <span className={styles.stationNode} aria-hidden="true" />
                 <span className={styles.navLabel}>{item.label}</span>
-                <span className={styles.activeSignal} aria-hidden="true" />
               </button>
             );
           })}
