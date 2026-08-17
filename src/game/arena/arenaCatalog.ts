@@ -9,10 +9,10 @@ import type {
 } from "./types";
 
 export const arenaSeason: ArenaSeasonSummary = {
-  number: 2,
-  name: "Warfront Season",
-  daysLeft: 48,
-  progress: 0.18,
+  number: 1,
+  name: "Founding Season",
+  daysLeft: 21,
+  progress: 0.42,
   playerScore: 8_420,
   playerRank: 247,
 };
@@ -96,7 +96,7 @@ export const arenaHistoryPreloadAssets = ["war.victory", "war.defeat", "war.draw
 export const arenaRankingPreloadAssets = ["arena.rewardCapsule"] as const;
 
 /* Backwards-compatible aliases. */
-export const arenaWarfrontPreloadAssets = arenaOverviewPreloadAssets;
+export const arenaWarfrontPreloadAssets = ["war.active", "war.opponentPreview", "war.preparation", "war.defenceSetup"] as const;
 export const arenaWarDebugPreloadAssets = [
   "war.matchmaking", "war.opponent", "war.opponentPreview", "war.confirmation", "war.preparation", "war.itemSelection",
   "war.countdown", "war.active", "war.finalMoments", "war.defenceSetup", "war.victory", "war.defeat", "war.draw",

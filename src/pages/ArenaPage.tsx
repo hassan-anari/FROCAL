@@ -14,6 +14,7 @@ import { AssetImage } from "@/design-system/components/AssetImage";
 import { GameHeader } from "@/design-system/components/GameHeader";
 import { GameShell } from "@/design-system/components/GameShell";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
+import { Button } from "@/design-system/primitives/Button";
 import {
   arenaHistoryPreloadAssets,
   arenaOverviewPreloadAssets,
@@ -22,6 +23,7 @@ import {
   arenaSeason,
   arenaWarHistory,
   arenaWarPreloadAssets,
+  arenaWarfrontPreloadAssets,
   attackClanTasks,
   attackPersonalTasks,
   defenceClanTasks,
@@ -44,6 +46,8 @@ import { getIdentityHue, getIdentityInitials } from "@/game/clan/clanVisuals";
 import { useEarnStore } from "@/game/earn/earnStore";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import styles from "./ArenaPage.module.css";
+
+type SeasonOneSection = "warfront" | "rankings";
 
 function buildCreatedClanSummary(created: CreatedClan): ClanSummary {
   return {
@@ -156,9 +160,14 @@ function ArenaOverview({
           <span>{active ? (defending ? "HEADQUARTERS UNDER ATTACK" : "ATTACK IN PROGRESS") : captain ? "WAR COMMAND ONLINE" : "WARFRONT STATUS"}</span>
           <h2>{active ? `${ownClan?.name ?? "Your Clan"} vs ${rival.name}` : captain ? "Choose when your clan goes to war." : "Your orders begin when the clan enters war."}</h2>
           <p>{active ? "Complete war operations before the rival does. Total completion wins; speed breaks a tie." : captain ? "Search the Arena, inspect a rival and launch a task-based clan operation when your team is ready." : "The Captain controls challenges and defence. When a war starts, this page becomes your live mission board."}</p>
-          <button type="button" className={styles.heroAction} onClick={active ? onOpenWar : captain ? onFindTarget : onOpenWar}>
-            {active ? "Open live war" : captain ? "Find a rival" : "Open war status"} <HugeiconsIcon icon={ArrowRight01Icon} size={16} strokeWidth={1.7} />
-          </button>
+          <Button
+            size="sm"
+            className={styles.heroAction}
+            trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={16} strokeWidth={1.7} />}
+            onClick={active ? onOpenWar : captain ? onFindTarget : onOpenWar}
+          >
+            {active ? "Open live war" : captain ? "Find a rival" : "Open war status"}
+          </Button>
         </div>
         {active ? <div className={styles.overviewScore}><span>{ownProgress}%</span><i /><span>{enemyProgress}%</span></div> : null}
       </section>
@@ -268,7 +277,10 @@ function OpponentPreview({ ownClan, rival, onBack, onPrepare }: { ownClan: ClanS
         <div className={styles.formRow}><span>RECENT WAR FORM</span><div><i>W</i><i>W</i><i className={styles.formLoss}>L</i><i>W</i><i className={styles.formDraw}>D</i></div></div>
       </section>
       <section className={styles.rulesCard}><HugeiconsIcon icon={InformationCircleIcon} size={19} strokeWidth={1.55} /><div><strong>War is won by task execution, not raw score.</strong><p>Both clans receive balanced operations. More completed operations wins. If both finish equally, the faster clan takes the result.</p></div></section>
-      <div className={styles.actionBar}><button type="button" className={styles.secondaryAction} onClick={onBack}>Back to targets</button><button type="button" className={styles.primaryAction} onClick={onPrepare}>Prepare attack <HugeiconsIcon icon={ArrowRight01Icon} size={16} strokeWidth={1.7} /></button></div>
+      <div className={styles.actionBar}>
+        <Button tone="secondary" size="sm" onClick={onBack}>Back to targets</Button>
+        <Button size="sm" className={styles.primaryAction} trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={16} strokeWidth={1.7} />} onClick={onPrepare}>Prepare attack</Button>
+      </div>
     </div>
   );
 }
@@ -301,7 +313,10 @@ function Preparation({ rival, ownedItemIds, selectedItemIds, onToggle, onBack, o
         <SectionTitle eyebrow="SHARED LOADOUT" title="Choose up to two items" action={<span className={styles.hint}>{selectedItemIds.length}/2 selected</span>} />
         {eligible.length ? <div className={styles.loadoutGrid}>{eligible.map((item) => <LoadoutCard key={item.id} item={item} quantity={itemQty(item.id)} selected={selectedItemIds.includes(item.id)} onToggle={() => onToggle(item.id)} />)}</div> : <div className={styles.emptyLoadout}><strong>No eligible items stored</strong><p>You can still deploy the attack without a shared item.</p></div>}
       </section>
-      <div className={styles.actionBar}><button type="button" className={styles.secondaryAction} onClick={onBack}>Back</button><button type="button" className={styles.primaryAction} onClick={onDeploy}>Deploy attack <HugeiconsIcon icon={Sword01Icon} size={16} strokeWidth={1.7} /></button></div>
+      <div className={styles.actionBar}>
+        <Button tone="secondary" size="sm" onClick={onBack}>Back</Button>
+        <Button size="sm" className={styles.primaryAction} trailingIcon={<HugeiconsIcon icon={Sword01Icon} size={16} strokeWidth={1.7} />} onClick={onDeploy}>Deploy attack</Button>
+      </div>
     </div>
   );
 }
@@ -366,7 +381,7 @@ function ResultView({ ownClan, rival, resultId, ownProgress, enemyProgress, onCo
       <section className={styles.resultHero}><AssetImage assetKey={meta.asset} /><div><span>WAR RESULT</span><h2>{meta.title}</h2><p>{meta.subtitle}</p></div></section>
       <BattleIdentity ownClan={ownClan} rival={rival} direction="attack" ownProgress={ownProgress} enemyProgress={enemyProgress} />
       <section className={styles.resultStats}><article><ChampionIconView /><div><span>SEASON SCORE</span><strong>{meta.scoreDelta >= 0 ? "+" : ""}{meta.scoreDelta}</strong></div></article><article><HugeiconsIcon icon={Wallet01Icon} size={20} strokeWidth={1.55} /><div><span>CLAN REWARD</span><strong>+{meta.reward.toLocaleString()}</strong></div></article><article><HugeiconsIcon icon={UserGroupIcon} size={20} strokeWidth={1.55} /><div><span>OPERATIONS</span><strong>4 / 4</strong></div></article></section>
-      <button type="button" className={styles.primaryWide} onClick={onContinue}>Continue to headquarters status <HugeiconsIcon icon={ArrowRight01Icon} size={16} strokeWidth={1.7} /></button>
+      <Button className={styles.primaryWide} trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={16} strokeWidth={1.7} />} onClick={onContinue}>Continue to headquarters status</Button>
     </div>
   );
 }
@@ -392,7 +407,7 @@ function WarHistory({ onOpenRankings }: { onOpenRankings: () => void }) {
       <section className={styles.historyHero}><div><span>WAR ARCHIVE</span><h2>Your clan remembers every operation.</h2><p>Attack, defence, completion rate, MVP and reward stay visible after the timer ends.</p></div><AssetImage assetKey="war.victory" /></section>
       <section className={styles.historySummary}><article><span>RECORD</span><strong>2W · 1L · 1D</strong></article><article><span>ATTACKS</span><strong>2</strong></article><article><span>DEFENCES</span><strong>2</strong></article></section>
       <section className={styles.panel}>
-        <SectionTitle eyebrow="RECENT WARS" title="Battle history" action={<button type="button" className={styles.textAction} onClick={onOpenRankings}>Rankings</button>} />
+        <SectionTitle eyebrow="RECENT WARS" title="Battle history" action={<Button tone="ghost" size="sm" className={styles.textAction} onClick={onOpenRankings}>Rankings</Button>} />
         <div className={styles.historyList}>
           {arenaWarHistory.map((entry) => {
             const rival = getClanById(entry.opponentId) ?? clanCatalog[0];
@@ -415,6 +430,67 @@ function WarHistory({ onOpenRankings }: { onOpenRankings: () => void }) {
   );
 }
 
+
+function SeasonOneWarfront() {
+  return (
+    <div className={styles.stack}>
+      <section className={styles.seasonPreviewHero}>
+        <AssetImage assetKey="war.active" className={styles.seasonPreviewArt} />
+        <div className={styles.seasonPreviewShade} />
+        <div className={styles.seasonPreviewCopy}>
+          <span>SEASON 2 · WARFRONT</span>
+          <h2>Rankings become clan warfare.</h2>
+          <p>
+            In Season 2, Captains can search the Arena for rival clans, inspect a target and launch a coordinated war.
+            Soldiers enter the same Warfront to follow live orders and push the clan through verified activity.
+          </p>
+        </div>
+      </section>
+
+      <section className={styles.panel}>
+        <SectionTitle eyebrow="HOW WARFRONT PLAYS" title="A clear clan competition loop" />
+        <div className={styles.seasonPreviewFlow}>
+          <article>
+            <AssetImage assetKey="war.opponentPreview" />
+            <div><span>01 · FIND</span><strong>Choose a rival</strong><p>Captains browse recommended clans or search by name and tag, then inspect the target before committing.</p></div>
+          </article>
+          <article>
+            <AssetImage assetKey="war.preparation" />
+            <div><span>02 · PREPARE</span><strong>Set the operation</strong><p>The Captain reviews war rules, chooses eligible shared items and deploys the clan when the team is ready.</p></div>
+          </article>
+          <article>
+            <AssetImage assetKey="war.active" />
+            <div><span>03 · EXECUTE</span><strong>Complete war tasks</strong><p>Both clans receive operations. Better completion wins; if both finish equally, the faster clan takes the result.</p></div>
+          </article>
+        </div>
+      </section>
+
+      <section className={styles.seasonPreviewRoles}>
+        <div className={styles.seasonPreviewDefenceArt}><AssetImage assetKey="war.defenceSetup" /></div>
+        <div>
+          <span>CAPTAIN COMMAND · SOLDIER ORDERS</span>
+          <strong>Different roles. One shared result.</strong>
+          <p>Captains control attacks and defence. Soldiers see the active battle, their personal orders and the clan task board without extra management screens.</p>
+          <div className={styles.seasonPreviewFeatureRow}>
+            <span><HugeiconsIcon icon={Sword01Icon} size={15} strokeWidth={1.55} /> Search & attack</span>
+            <span><HugeiconsIcon icon={ChampionIcon} size={15} strokeWidth={1.55} /> Task-based wars</span>
+            <span><HugeiconsIcon icon={UserGroupIcon} size={15} strokeWidth={1.55} /> Defence & history</span>
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.seasonPreviewLock}>
+        <div>
+          <span>SEASON 1 STATUS</span>
+          <strong>Warfront arrives with Season 2.</strong>
+          <p>For now, Arena stays simple: compete in Player and Clan Rankings and prepare for the next season.</p>
+        </div>
+        <Button tone="secondary" size="sm" disabled>Unlocks in Season 2</Button>
+      </section>
+    </div>
+  );
+}
+
 function PlayerPodium({ players }: { players: ArenaPlayerRank[] }) {
   return <div className={styles.podium}>{players.slice(0, 3).map((player, index) => <article key={player.id} className={styles.podiumCard}><span className={styles.podiumRank}>#{index + 1}</span><PlayerAvatar player={player} large /><strong>{player.name}</strong><p>{player.clan ?? "Independent"}</p><b>{player.score.toLocaleString()}</b></article>)}</div>;
 }
@@ -423,10 +499,10 @@ function ClanPodium({ clans }: { clans: ClanSummary[] }) {
   return <div className={styles.podium}>{clans.slice(0, 3).map((clan, index) => <article key={clan.id} className={styles.podiumCard}><span className={styles.podiumRank}>#{index + 1}</span><ClanMark clan={clan} large /><strong>{clan.name}</strong><p>LVL {clan.level} · {clan.members}/{clan.capacity}</p><b>{clan.score.toLocaleString()}</b></article>)}</div>;
 }
 
-function Rankings({ mode, onMode, rankedClans, ownClan, level, currentName, currentPhotoUrl }: { mode: ArenaRankingMode; onMode: (mode: ArenaRankingMode) => void; rankedClans: ClanSummary[]; ownClan: ClanSummary | null; level: number; currentName: string; currentPhotoUrl?: string | null }) {
+function Rankings({ mode, onMode, rankedClans, ownClan, level, currentName, currentPhotoUrl, showSeasonHero = false }: { mode: ArenaRankingMode; onMode: (mode: ArenaRankingMode) => void; rankedClans: ClanSummary[]; ownClan: ClanSummary | null; level: number; currentName: string; currentPhotoUrl?: string | null; showSeasonHero?: boolean }) {
   return (
     <div className={styles.stack}>
-      <section className={styles.seasonHero}><div><span>CURRENT SEASON</span><h2>{arenaSeason.name}</h2><p>Rankings remain global while Warfront adds clan-versus-clan competition.</p><div><strong>{arenaSeason.daysLeft} days left</strong><span>{Math.round(arenaSeason.progress * 100)}% complete</span></div><ProgressBar value={arenaSeason.progress * 100} /></div><AssetImage assetKey="arena.rewardCapsule" /></section>
+      {showSeasonHero ? <section className={styles.seasonHero}><div><span>FOUNDING SEASON</span><h2>Season {String(arenaSeason.number).padStart(2, "0")}</h2><p>Every verified action moves your seasonal score. Finish as high as you can before the reset.</p><div><strong>{arenaSeason.daysLeft} days left</strong><span>{Math.round(arenaSeason.progress * 100)}% complete</span></div><ProgressBar value={arenaSeason.progress * 100} /></div><AssetImage assetKey="arena.rewardCapsule" /></section> : null}
       <section className={styles.panel}>
         <SectionTitle eyebrow="GLOBAL STANDINGS" title="Season Leaderboard" />
         <nav className={styles.rankingSwitch}><button type="button" className={mode === "players" ? styles.rankingSwitchActive : ""} onClick={() => onMode("players")}>Players</button><button type="button" className={mode === "clans" ? styles.rankingSwitchActive : ""} onClick={() => onMode("clans")}>Clans</button></nav>
@@ -442,6 +518,7 @@ export function ArenaPage() {
   const level = useEarnStore((state) => state.level);
   const { adapter } = useTelegram();
   const [rankingMode, setRankingMode] = useState<ArenaRankingMode>("players");
+  const [seasonOneSection, setSeasonOneSection] = useState<SeasonOneSection>("warfront");
   const telegramUser = adapter.getUser();
   const currentName = telegramUser?.first_name ?? "Explorer";
   const currentPhotoUrl = telegramUser?.photo_url ?? null;
@@ -458,14 +535,24 @@ export function ArenaPage() {
   const rankedClans = useMemo(() => [...clanCatalog].sort((a, b) => a.rank - b.rank), []);
 
   useEffect(() => {
+    if (arena.experienceMode === "season1") {
+      void preloadAssets(seasonOneSection === "warfront" ? arenaWarfrontPreloadAssets : arenaRankingPreloadAssets);
+      return;
+    }
     const assets = arena.hubSection === "overview" ? arenaOverviewPreloadAssets : arena.hubSection === "war" ? arenaWarPreloadAssets : arena.hubSection === "history" ? arenaHistoryPreloadAssets : arenaRankingPreloadAssets;
     void preloadAssets(assets);
-  }, [arena.hubSection]);
+  }, [arena.experienceMode, arena.hubSection, seasonOneSection]);
 
   const selectSection = (section: ArenaHubSection) => {
     if (section === arena.hubSection) return;
     adapter.selectionChanged();
     arena.setHubSection(section);
+  };
+
+  const selectSeasonOneSection = (section: SeasonOneSection) => {
+    if (section === seasonOneSection) return;
+    adapter.selectionChanged();
+    setSeasonOneSection(section);
   };
 
   const openTargeting = () => {
@@ -489,21 +576,54 @@ export function ArenaPage() {
     <GameShell>
       <main className={styles.page}>
         <GameHeader />
-        <header className={styles.pageHeader}><span>ARENA · WAR COMMAND</span><h1>{captain ? "Command the Warfront." : soldier ? "Enter the Warfront." : "Arena competition."}</h1><p>{captain ? "Choose rivals, prepare attacks, protect the headquarters and lead the clan through live operations." : soldier ? "See the active war, follow your orders and move the clan score with verified activity." : "Join a clan to enter Warfront. Rankings remain open to every player."}</p></header>
 
-        <nav className={styles.arenaTabs} aria-label="Arena sections">
-          {(["overview", "war", "history", "rankings"] as ArenaHubSection[]).map((section) => <button key={section} type="button" className={arena.hubSection === section ? styles.arenaTabActive : ""} onClick={() => selectSection(section)}>{section === "overview" ? "Overview" : section === "war" ? "War" : section === "history" ? "History" : "Rankings"}</button>)}
-        </nav>
+        {arena.experienceMode === "season1" ? (
+          <>
+            <header className={styles.pageHeader}>
+              <span>ARENA · COMPETITION HUB</span>
+              <h1>Compete. Rise. Prepare.</h1>
+              <p>Season 1 ranks players and clans. Season 2 turns the Arena into a live clan Warfront.</p>
+            </header>
 
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div key={arena.hubSection} className={styles.sectionContent} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={mobileMotion.tab}>
-            {arena.hubSection === "overview" ? <ArenaOverview captain={captain} ownClan={ownClan} rival={rival} scenario={arena.scenario} ownProgress={arena.battleProgress} enemyProgress={arena.enemyProgress} onOpenWar={() => arena.setHubSection("war")} onFindTarget={openTargeting} onOpenHistory={() => arena.setHubSection("history")} /> : null}
-            {arena.hubSection === "war" ? warContent() : null}
-            {arena.hubSection === "history" ? <WarHistory onOpenRankings={() => arena.setHubSection("rankings")} /> : null}
-            {arena.hubSection === "rankings" ? <Rankings mode={rankingMode} onMode={(mode) => { adapter.selectionChanged(); setRankingMode(mode); }} rankedClans={rankedClans} ownClan={ownClan} level={level} currentName={currentName} currentPhotoUrl={currentPhotoUrl} /> : null}
-          </motion.div>
-        </AnimatePresence>
+            <nav className={`${styles.arenaTabs} ${styles.arenaTabsTwo}`} aria-label="Arena Season 1 sections">
+              <button type="button" className={seasonOneSection === "warfront" ? styles.arenaTabActive : ""} onClick={() => selectSeasonOneSection("warfront")}>
+                <span>Warfront</span><em>S2</em>
+              </button>
+              <button type="button" className={seasonOneSection === "rankings" ? styles.arenaTabActive : ""} onClick={() => selectSeasonOneSection("rankings")}>
+                <span>Rankings</span>
+              </button>
+            </nav>
+
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div key={seasonOneSection} className={styles.sectionContent} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={mobileMotion.tab}>
+                {seasonOneSection === "warfront" ? <SeasonOneWarfront /> : <Rankings mode={rankingMode} onMode={(mode) => { adapter.selectionChanged(); setRankingMode(mode); }} rankedClans={rankedClans} ownClan={ownClan} level={level} currentName={currentName} currentPhotoUrl={currentPhotoUrl} showSeasonHero />}
+              </motion.div>
+            </AnimatePresence>
+          </>
+        ) : (
+          <>
+            <header className={styles.pageHeader}>
+              <span>ARENA · WAR COMMAND</span>
+              <h1>{captain ? "Command the Warfront." : soldier ? "Enter the Warfront." : "Arena competition."}</h1>
+              <p>{captain ? "Choose rivals, prepare attacks, protect the headquarters and lead the clan through live operations." : soldier ? "See the active war, follow your orders and move the clan score with verified activity." : "Join a clan to enter Warfront. Rankings remain open to every player."}</p>
+            </header>
+
+            <nav className={`${styles.arenaTabs} ${styles.arenaTabsFour}`} aria-label="Arena Season 2 sections">
+              {(["overview", "war", "history", "rankings"] as ArenaHubSection[]).map((section) => <button key={section} type="button" className={arena.hubSection === section ? styles.arenaTabActive : ""} onClick={() => selectSection(section)}>{section === "overview" ? "Overview" : section === "war" ? "War" : section === "history" ? "History" : "Rankings"}</button>)}
+            </nav>
+
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div key={arena.hubSection} className={styles.sectionContent} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={mobileMotion.tab}>
+                {arena.hubSection === "overview" ? <ArenaOverview captain={captain} ownClan={ownClan} rival={rival} scenario={arena.scenario} ownProgress={arena.battleProgress} enemyProgress={arena.enemyProgress} onOpenWar={() => arena.setHubSection("war")} onFindTarget={openTargeting} onOpenHistory={() => arena.setHubSection("history")} /> : null}
+                {arena.hubSection === "war" ? warContent() : null}
+                {arena.hubSection === "history" ? <WarHistory onOpenRankings={() => arena.setHubSection("rankings")} /> : null}
+                {arena.hubSection === "rankings" ? <Rankings mode={rankingMode} onMode={(mode) => { adapter.selectionChanged(); setRankingMode(mode); }} rankedClans={rankedClans} ownClan={ownClan} level={level} currentName={currentName} currentPhotoUrl={currentPhotoUrl} /> : null}
+              </motion.div>
+            </AnimatePresence>
+          </>
+        )}
       </main>
     </GameShell>
   );
+
 }

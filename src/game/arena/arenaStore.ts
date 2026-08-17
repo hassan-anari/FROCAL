@@ -13,6 +13,7 @@ const warStageOrder: ArenaWarStage[] = [
 ];
 
 interface ArenaWarState {
+  experienceMode: "season1" | "season2";
   hubSection: ArenaHubSection;
   scenario: ArenaWarScenario;
   selectedOpponentId: string;
@@ -23,6 +24,9 @@ interface ArenaWarState {
   result: ArenaWarResult;
   status: ArenaWarStatus;
 
+  setExperienceMode: (mode: "season1" | "season2") => void;
+  openSeason1Public: () => void;
+  openSeason2Diagnostics: () => void;
   setHubSection: (section: ArenaHubSection) => void;
   setScenario: (scenario: ArenaWarScenario) => void;
   openTargeting: () => void;
@@ -51,6 +55,7 @@ interface ArenaWarState {
 }
 
 const baseState = {
+  experienceMode: "season1" as const,
   hubSection: "overview" as ArenaHubSection,
   scenario: "idle" as ArenaWarScenario,
   selectedOpponentId: "void-runners",
@@ -67,6 +72,9 @@ const baseState = {
 export const useArenaWarStore = create<ArenaWarState>((set, get) => ({
   ...baseState,
 
+  setExperienceMode: (experienceMode) => set({ experienceMode }),
+  openSeason1Public: () => set({ ...baseState, experienceMode: "season1", selectedItemIds: [] }),
+  openSeason2Diagnostics: () => set({ ...baseState, experienceMode: "season2", selectedItemIds: [] }),
   setHubSection: (hubSection) => set({ hubSection }),
   setScenario: (scenario) => set({ scenario, hubSection: scenario === "idle" ? "overview" : "war" }),
   openTargeting: () => set({ scenario: "targeting", hubSection: "war", direction: "attack" }),

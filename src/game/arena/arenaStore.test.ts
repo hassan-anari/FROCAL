@@ -8,6 +8,14 @@ function reset() {
 describe("arena war store", () => {
   beforeEach(reset);
 
+  it("keeps Season 1 as the public default and opens Season 2 only explicitly", () => {
+    expect(useArenaWarStore.getState().experienceMode).toBe("season1");
+    useArenaWarStore.getState().openSeason2Diagnostics();
+    expect(useArenaWarStore.getState().experienceMode).toBe("season2");
+    useArenaWarStore.getState().openSeason1Public();
+    expect(useArenaWarStore.getState().experienceMode).toBe("season1");
+  });
+
   it("opens the captain target browser", () => {
     useArenaWarStore.getState().openTargeting();
     expect(useArenaWarStore.getState().scenario).toBe("targeting");

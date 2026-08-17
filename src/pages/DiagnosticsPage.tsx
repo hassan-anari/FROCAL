@@ -60,66 +60,68 @@ export function DiagnosticsPage() {
     void navigate({ to: "/arena" });
   };
 
-  const openCaptainOverview = () => {
+  const openSeasonOneArena = () => {
+    arena.openSeason1Public();
+    openArena("overview");
+  };
+
+  const prepareSeasonTwoCaptain = () => {
     clan.setCaptainHeadquartersForDiagnostics();
-    arena.resetArena();
+    arena.openSeason2Diagnostics();
+  };
+
+  const openCaptainOverview = () => {
+    prepareSeasonTwoCaptain();
     openArena("overview");
   };
 
   const openCaptainTargeting = () => {
-    clan.setCaptainHeadquartersForDiagnostics();
-    arena.resetArena();
+    prepareSeasonTwoCaptain();
     arena.openTargeting();
     openArena("war");
   };
 
   const openCaptainPreview = () => {
-    clan.setCaptainHeadquartersForDiagnostics();
-    arena.resetArena();
+    prepareSeasonTwoCaptain();
     arena.selectOpponent("void-runners");
     openArena("war");
   };
 
   const openCaptainPreparation = () => {
-    clan.setCaptainHeadquartersForDiagnostics();
-    arena.resetArena();
+    prepareSeasonTwoCaptain();
     arena.selectOpponent("void-runners");
     arena.beginPreparation();
     openArena("war");
   };
 
   const openCaptainAttack = () => {
-    clan.setCaptainHeadquartersForDiagnostics();
-    arena.resetArena();
+    prepareSeasonTwoCaptain();
     arena.showAttackForDiagnostics();
     openArena("war");
   };
 
   const openCaptainDefence = () => {
-    clan.setCaptainHeadquartersForDiagnostics();
-    arena.resetArena();
+    prepareSeasonTwoCaptain();
     arena.showDefenceForDiagnostics();
     openArena("war");
   };
 
   const openSoldierWar = (direction: "attack" | "defence") => {
     clan.setSoldierMemberForDiagnostics();
-    arena.resetArena();
+    arena.openSeason2Diagnostics();
     if (direction === "attack") arena.showAttackForDiagnostics();
     else arena.showDefenceForDiagnostics();
     openArena("war");
   };
 
   const openArenaResult = (result: ArenaWarResult) => {
-    clan.setCaptainHeadquartersForDiagnostics();
-    arena.resetArena();
+    prepareSeasonTwoCaptain();
     arena.showResultForDiagnostics(result);
     openArena("war");
   };
 
   const openArenaStatus = (status: ArenaWarStatus) => {
-    clan.setCaptainHeadquartersForDiagnostics();
-    arena.resetArena();
+    prepareSeasonTwoCaptain();
     arena.showStatusForDiagnostics(status);
     openArena("war");
   };
@@ -206,6 +208,7 @@ export function DiagnosticsPage() {
           <StatusChip>Arena Phase 6 ready</StatusChip>
           <h2>Arena / Warfront scenarios</h2>
           <dl>
+            <div><dt>Experience</dt><dd>{arena.experienceMode === "season1" ? "Season 1 public" : "Season 2 diagnostics"}</dd></div>
             <div><dt>Role</dt><dd>{clan.role ?? "none"}</dd></div>
             <div><dt>Arena section</dt><dd>{arena.hubSection}</dd></div>
             <div><dt>War scenario</dt><dd>{arena.scenario}</dd></div>
@@ -214,7 +217,12 @@ export function DiagnosticsPage() {
             <div><dt>Rival progress</dt><dd>{arena.enemyProgress}%</dd></div>
           </dl>
 
-          <h2>Captain scenarios</h2>
+          <h2>Public Season 1</h2>
+          <div className={styles.actions}>
+            <Button tone="secondary" size="sm" onClick={openSeasonOneArena}>Open Season 1 Arena</Button>
+          </div>
+
+          <h2>Season 2 · Captain scenarios</h2>
           <div className={styles.actions}>
             <Button tone="secondary" size="sm" onClick={openCaptainOverview}>Captain overview</Button>
             <Button tone="secondary" size="sm" onClick={openCaptainTargeting}>Target browser</Button>
@@ -224,17 +232,17 @@ export function DiagnosticsPage() {
             <Button tone="secondary" size="sm" onClick={openCaptainDefence}>Under attack · Captain</Button>
           </div>
 
-          <h2>Soldier scenarios</h2>
+          <h2>Season 2 · Soldier scenarios</h2>
           <div className={styles.actions}>
-            <Button tone="secondary" size="sm" onClick={() => { clan.setSoldierMemberForDiagnostics(); arena.resetArena(); openArena("overview"); }}>Soldier overview</Button>
+            <Button tone="secondary" size="sm" onClick={() => { clan.setSoldierMemberForDiagnostics(); arena.openSeason2Diagnostics(); openArena("overview"); }}>Soldier overview</Button>
             <Button tone="secondary" size="sm" onClick={() => openSoldierWar("attack")}>Soldier · attacking</Button>
             <Button tone="secondary" size="sm" onClick={() => openSoldierWar("defence")}>Soldier · defending</Button>
           </div>
 
-          <h2>Arena persistent views</h2>
+          <h2>Season 2 · Persistent views</h2>
           <div className={styles.actions}>
-            <Button tone="secondary" size="sm" onClick={() => { clan.setCaptainHeadquartersForDiagnostics(); arena.resetArena(); openArena("history"); }}>War history</Button>
-            <Button tone="secondary" size="sm" onClick={() => { arena.resetArena(); openArena("rankings"); }}>Rankings</Button>
+            <Button tone="secondary" size="sm" onClick={() => { prepareSeasonTwoCaptain(); openArena("history"); }}>War history</Button>
+            <Button tone="secondary" size="sm" onClick={() => { arena.openSeason2Diagnostics(); openArena("rankings"); }}>Rankings</Button>
           </div>
 
           <h2>War result states</h2>
@@ -252,7 +260,7 @@ export function DiagnosticsPage() {
             <Button tone="secondary" size="sm" onClick={() => openArenaStatus("recovery")}>Recovery mode</Button>
             <Button tone="secondary" size="sm" onClick={() => openArenaStatus("reward")}>Reward ready</Button>
             <Button tone="secondary" size="sm" onClick={() => openArenaStatus("debuff")}>Temporary debuff</Button>
-            <Button tone="secondary" size="sm" onClick={() => openArena("overview")}>Open Arena</Button>
+            <Button tone="secondary" size="sm" onClick={openSeasonOneArena}>Open public Arena</Button>
           </div>
         </article>
 
