@@ -9,7 +9,6 @@ import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { preloadAssets } from "@/assets/preload";
 import { AssetImage } from "@/design-system/components/AssetImage";
 import { GameHeader } from "@/design-system/components/GameHeader";
-import { ArenaDebugPanel, isArenaDebugVisible } from "@/features/arena/ArenaDebugPanel";
 import { ArenaWarExperience } from "@/features/arena/ArenaWarExperience";
 import { GameShell } from "@/design-system/components/GameShell";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
@@ -294,7 +293,6 @@ export function ArenaPage() {
   const [section, setSection] = useState<ArenaSection>("warfront");
   const [rankingMode, setRankingMode] = useState<ArenaRankingMode>("players");
   const warDebugUnlocked = useArenaWarStore((state) => state.debugUnlocked);
-  const arenaDebugVisible = isArenaDebugVisible();
   const level = useEarnStore((state) => state.level);
   const clan = useClanStore();
   const { adapter } = useTelegram();
@@ -370,7 +368,7 @@ export function ArenaPage() {
             transition={mobileMotion.tab}
           >
             {section === "warfront" ? (
-              arenaDebugVisible && warDebugUnlocked ? <ArenaWarExperience ownClan={ownClan} /> : <WarfrontTab />
+              warDebugUnlocked ? <ArenaWarExperience ownClan={ownClan} /> : <WarfrontTab />
             ) : (
               <RankingsTab
                 rankingMode={rankingMode}
@@ -384,7 +382,6 @@ export function ArenaPage() {
             )}
           </motion.div>
         </AnimatePresence>
-        <ArenaDebugPanel />
       </main>
     </GameShell>
   );

@@ -10,6 +10,8 @@ import { useBaseUiStore } from "@/game/ui/baseUiStore";
 import { getTypingAttemptsRemaining, useEarnStore } from "@/game/earn/earnStore";
 import { useProfileStore } from "@/game/profile/profileStore";
 import { useClanStore } from "@/game/clan/clanStore";
+import { useArenaWarStore, warStageOrder } from "@/game/arena/arenaStore";
+import type { ArenaWarResult, ArenaWarStage, ArenaWarStatus } from "@/game/arena/types";
 import { loadBootstrap } from "@/integrations/api/bootstrap";
 import { queryKeys } from "@/integrations/api/queryKeys";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
@@ -30,6 +32,7 @@ export function DiagnosticsPage() {
   const earn = useEarnStore();
   const profile = useProfileStore();
   const clan = useClanStore();
+  const arena = useArenaWarStore();
   const { adapter, colorScheme, stableHeight, insets } = useTelegram();
   const bootstrap = useQuery({
     queryKey: queryKeys.bootstrap(scenario),
@@ -50,15 +53,49 @@ export function DiagnosticsPage() {
     void navigate({ to: "/onboarding" });
   };
 
+  const openArenaStage = (stage: ArenaWarStage) => {
+    arena.setDebugUnlocked(true);
+    arena.setStage(stage);
+    adapter.selectionChanged();
+    sessionStorage.setItem(returnPathKey, "/arena");
+    void navigate({ to: "/arena" });
+  };
+
+  const openArenaResult = (result: ArenaWarResult) => {
+    arena.setDebugUnlocked(true);
+    arena.setResult(result);
+    arena.setStage("result");
+    adapter.selectionChanged();
+    sessionStorage.setItem(returnPathKey, "/arena");
+    void navigate({ to: "/arena" });
+  };
+
+  const openArenaStatus = (status: ArenaWarStatus) => {
+    arena.setDebugUnlocked(true);
+    arena.setStatus(status);
+    arena.setStage("status");
+    adapter.selectionChanged();
+    sessionStorage.setItem(returnPathKey, "/arena");
+    void navigate({ to: "/arena" });
+  };
+
+  const openSeasonOneArena = () => {
+    arena.resetWar();
+    arena.setDebugUnlocked(false);
+    adapter.selectionChanged();
+    sessionStorage.setItem(returnPathKey, "/arena");
+    void navigate({ to: "/arena" });
+  };
+
   return (
     <main className={styles.root}>
       <header className={styles.header}>
-        <span>Phase 5 / Clan Frontend</span>
+        <span>Phase 6 / Arena Frontend</span>
         <h1>System diagnostics</h1>
-        <p>Runtime, game-loop and repeatable Clan, Profile and Earn scenario controls.</p>
+        <p>Runtime, game-loop and repeatable Arena, Clan, Profile and Earn scenario controls.</p>
       </header>
 
-      <section className={styles.stack} aria-label="Phase 4 diagnostics">
+      <section className={styles.stack} aria-label="Phase 6 diagnostics">
         <article>
           <StatusChip>Earn loop ready</StatusChip>
           <h2>Earn Center state</h2>
@@ -129,6 +166,47 @@ export function DiagnosticsPage() {
         </article>
 
         <article>
+          <StatusChip>Arena Phase 6 ready</StatusChip>
+          <h2>Arena & Warfront scenarios</h2>
+          <dl>
+            <div><dt>Public season mode</dt><dd>{arena.debugUnlocked ? "Season 2 simulation" : "Season 1"}</dd></div>
+            <div><dt>War stage</dt><dd>{arena.stage}</dd></div>
+            <div><dt>Result</dt><dd>{arena.result}</dd></div>
+            <div><dt>Post-war status</dt><dd>{arena.status}</dd></div>
+            <div><dt>Your battle progress</dt><dd>{arena.battleProgress}%</dd></div>
+            <div><dt>Enemy progress</dt><dd>{arena.enemyProgress}%</dd></div>
+          </dl>
+
+          <div className={styles.actions}>
+            <Button tone="secondary" size="sm" onClick={openSeasonOneArena}>Season 1 · Public Arena</Button>
+            <Button tone="secondary" size="sm" onClick={() => openArenaStage("matchmaking")}>Start Warfront</Button>
+            {warStageOrder.filter((stage) => stage !== "matchmaking" && stage !== "result" && stage !== "status").map((stage) => (
+              <Button key={stage} tone="secondary" size="sm" onClick={() => openArenaStage(stage)}>
+                {stage === "opponent" ? "Opponent found" : stage === "preview" ? "Opponent preview" : stage === "confirm" ? "Match confirm" : stage === "prepare" ? "Preparation" : stage === "items" ? "Item selection" : stage === "countdown" ? "Countdown" : stage === "battle" ? "Active battle" : stage === "final" ? "Final moments" : stage === "defence" ? "Defence setup" : "Matchmaking"}
+              </Button>
+            ))}
+          </div>
+
+          <h2>War result states</h2>
+          <div className={styles.actions}>
+            <Button tone="secondary" size="sm" onClick={() => openArenaResult("victory")}>Victory</Button>
+            <Button tone="secondary" size="sm" onClick={() => openArenaResult("defeat")}>Defeat</Button>
+            <Button tone="secondary" size="sm" onClick={() => openArenaResult("draw")}>Draw</Button>
+            <Button tone="secondary" size="sm" onClick={() => openArenaResult("successfulAttack")}>Successful attack</Button>
+            <Button tone="secondary" size="sm" onClick={() => openArenaResult("successfulDefence")}>Successful defence</Button>
+          </div>
+
+          <h2>Post-war status states</h2>
+          <div className={styles.actions}>
+            <Button tone="secondary" size="sm" onClick={() => openArenaStatus("protection")}>Protection active</Button>
+            <Button tone="secondary" size="sm" onClick={() => openArenaStatus("recovery")}>Recovery mode</Button>
+            <Button tone="secondary" size="sm" onClick={() => openArenaStatus("reward")}>Reward ready</Button>
+            <Button tone="secondary" size="sm" onClick={() => openArenaStatus("debuff")}>Temporary debuff</Button>
+            <Button tone="secondary" size="sm" onClick={() => navigate({ to: "/arena" })}>Open Arena</Button>
+          </div>
+        </article>
+
+        <article>
           <StatusChip>Base controls ready</StatusChip>
           <h2>Dynamic Base content</h2>
           <dl>
@@ -173,7 +251,7 @@ export function DiagnosticsPage() {
             <div><dt>Base</dt><dd>active</dd></div>
             <div><dt>Earn</dt><dd>playable</dd></div>
             <div><dt>Clan</dt><dd>active frontend</dd></div>
-            <div><dt>Arena</dt><dd>reserved</dd></div>
+            <div><dt>Arena</dt><dd>Phase 6 active</dd></div>
             <div><dt>Profile</dt><dd>active</dd></div>
           </dl>
         </article>
@@ -209,6 +287,7 @@ export function DiagnosticsPage() {
             <div><dt>Manifest version</dt><dd>{assetRegistry.version}</dd></div>
             <div><dt>Total keys</dt><dd>{assetRegistry.assets.length}</dd></div>
             <div><dt>Phase 4 registry</dt><dd>{listAssetsForPhase(4).length}</dd></div>
+            <div><dt>Phase 6 registry</dt><dd>{listAssetsForPhase(6).length}</dd></div>
             <div><dt>Profile pack</dt><dd>31 assets</dd></div>
           </dl>
         </article>
