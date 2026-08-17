@@ -3,34 +3,73 @@ export interface MobilePerfSample {
   label: string;
   startedAt: number;
   inputToFrameMs: number;
-  settleMs: number;
-  frameGapMs: number;
-  longTaskMs: number;
+  windowMs: number;
+  estimatedFrameBudgetMs: number;
+  maxFrameGapMs: number;
+  droppedFrames: number;
+  slowFrames16: number;
+  slowFrames33: number;
+  longTaskCount: number;
+  longTaskTotalMs: number;
+  worstLongTaskMs: number;
+  stableByMs: number;
 }
 
 export interface MobilePerfSnapshot {
   enabled: boolean;
   samples: MobilePerfSample[];
-  longTaskCount: number;
+  estimatedFrameBudgetMs: number;
+  totalLongTaskCount: number;
   worstLongTaskMs: number;
-  worstFrameGapMs: number;
+  worstInteractionFrameGapMs: number;
+  totalDroppedFrames: number;
+}
+
+interface LongTaskRecord {
+  startTime: number;
+  duration: number;
+}
+
+interface ActiveInteraction {
+  id: number;
+  label: string;
+  startedAt: number;
+  deadlineAt: number;
+  frameBudgetMs: number;
+  firstFrameAt: number | null;
+  previousFrameAt: number | null;
+  maxFrameGapMs: number;
+  droppedFrames: number;
+  slowFrames16: number;
+  slowFrames33: number;
+  lastUnstableAt: number;
+  healthyFramesAfterUnstable: number;
+  stableByMs: number;
+  rafId: number;
 }
 
 const storageKey = "dalexio-mobile-perf-enabled";
 const sampleEvent = "dalexio:mobile-perf-sample";
 const maxSamples = 24;
+const interactionWindowMs = 450;
+const longTaskRetentionMs = 8_000;
+const defaultFrameBudgetMs = 16.7;
 
 let initialized = false;
 let enabled = false;
 let nextId = 1;
 let samples: MobilePerfSample[] = [];
-let longTaskCount = 0;
-let worstLongTaskMs = 0;
-let worstFrameGapMs = 0;
-let lastLongTaskMs = 0;
+let longTasks: LongTaskRecord[] = [];
 let observer: PerformanceObserver | null = null;
-let frameRaf = 0;
-let previousFrameAt = 0;
+let monitorRaf = 0;
+let previousMonitorFrameAt = 0;
+let recentFrameGaps: number[] = [];
+let estimatedFrameBudgetMs = defaultFrameBudgetMs;
+let totalLongTaskCount = 0;
+let worstLongTaskMs = 0;
+let worstInteractionFrameGapMs = 0;
+let totalDroppedFrames = 0;
+const activeInteractions = new Map<number, ActiveInteraction>();
 
 function canUseDom(): boolean {
   return typeof window !== "undefined" && typeof document !== "undefined";
@@ -59,35 +98,151 @@ function labelForTarget(target: EventTarget | null): string {
   return (explicit || text || control.tagName.toLowerCase()).slice(0, 56);
 }
 
-function recordInteraction(label: string, startedAt: number): void {
-  if (!enabled || !canUseDom()) return;
-  const longTaskAtStart = lastLongTaskMs;
+function pruneLongTasks(now: number): void {
+  const cutoff = now - longTaskRetentionMs;
+  if (longTasks.length > 0 && longTasks[0].startTime < cutoff) {
+    longTasks = longTasks.filter((task) => task.startTime + task.duration >= cutoff);
+  }
+}
 
-  window.requestAnimationFrame((firstFrameAt) => {
-    if (!enabled) return;
-    window.requestAnimationFrame((secondFrameAt) => {
-      if (!enabled) return;
-      const frameGap = Math.max(0, secondFrameAt - firstFrameAt);
-      worstFrameGapMs = Math.max(worstFrameGapMs, frameGap);
-      samples = [
-        {
-          id: nextId++,
-          label,
-          startedAt,
-          inputToFrameMs: Math.max(0, firstFrameAt - startedAt),
-          settleMs: Math.max(0, secondFrameAt - startedAt),
-          frameGapMs: frameGap,
-          longTaskMs: Math.max(0, lastLongTaskMs - longTaskAtStart),
-        },
-        ...samples,
-      ].slice(0, maxSamples);
-      emit();
-    });
+function percentile(values: number[], fraction: number): number {
+  if (values.length === 0) return defaultFrameBudgetMs;
+  const sorted = [...values].sort((a, b) => a - b);
+  const index = Math.min(sorted.length - 1, Math.max(0, Math.floor((sorted.length - 1) * fraction)));
+  return sorted[index] ?? defaultFrameBudgetMs;
+}
+
+function updateFrameBudget(gap: number): void {
+  if (gap < 4 || gap > 24) return;
+  recentFrameGaps.push(gap);
+  if (recentFrameGaps.length > 90) recentFrameGaps.shift();
+  if (recentFrameGaps.length < 8) return;
+
+  // The lower quartile tracks the device's native cadence without letting an
+  // occasional missed frame make a 120 Hz phone look like a 60 Hz phone.
+  const candidate = percentile(recentFrameGaps, 0.25);
+  estimatedFrameBudgetMs = Math.min(20, Math.max(7, candidate));
+}
+
+function countDroppedFrames(gap: number, budget: number): number {
+  if (gap <= budget * 1.45) return 0;
+  return Math.max(1, Math.round(gap / budget) - 1);
+}
+
+function interactionLongTasks(interaction: ActiveInteraction): LongTaskRecord[] {
+  const start = interaction.startedAt;
+  const end = interaction.deadlineAt;
+  return longTasks.filter((task) => {
+    const taskEnd = task.startTime + task.duration;
+    return task.startTime <= end && taskEnd >= start;
   });
 }
 
-function handlePointerUp(event: PointerEvent): void {
+function finalizeInteraction(interaction: ActiveInteraction): void {
   if (!enabled) return;
+  activeInteractions.delete(interaction.id);
+  pruneLongTasks(performance.now());
+
+  const matchingLongTasks = interactionLongTasks(interaction);
+  const longTaskTotalMs = matchingLongTasks.reduce((sum, task) => sum + task.duration, 0);
+  const interactionWorstLongTaskMs = matchingLongTasks.reduce((worst, task) => Math.max(worst, task.duration), 0);
+  const firstFrameAt = interaction.firstFrameAt ?? interaction.startedAt;
+
+  worstInteractionFrameGapMs = Math.max(worstInteractionFrameGapMs, interaction.maxFrameGapMs);
+  totalDroppedFrames += interaction.droppedFrames;
+
+  samples = [
+    {
+      id: interaction.id,
+      label: interaction.label,
+      startedAt: interaction.startedAt,
+      inputToFrameMs: Math.max(0, firstFrameAt - interaction.startedAt),
+      windowMs: interactionWindowMs,
+      estimatedFrameBudgetMs: interaction.frameBudgetMs,
+      maxFrameGapMs: interaction.maxFrameGapMs,
+      droppedFrames: interaction.droppedFrames,
+      slowFrames16: interaction.slowFrames16,
+      slowFrames33: interaction.slowFrames33,
+      longTaskCount: matchingLongTasks.length,
+      longTaskTotalMs,
+      worstLongTaskMs: interactionWorstLongTaskMs,
+      stableByMs: interaction.stableByMs,
+    },
+    ...samples,
+  ].slice(0, maxSamples);
+  emit();
+}
+
+function interactionFrame(interactionId: number, now: number): void {
+  const interaction = activeInteractions.get(interactionId);
+  if (!interaction || !enabled) return;
+
+  if (document.visibilityState !== "visible") {
+    interaction.previousFrameAt = null;
+    interaction.rafId = window.requestAnimationFrame((timestamp) => interactionFrame(interactionId, timestamp));
+    return;
+  }
+
+  if (interaction.firstFrameAt === null) {
+    interaction.firstFrameAt = now;
+  }
+
+  if (interaction.previousFrameAt !== null) {
+    const gap = Math.max(0, now - interaction.previousFrameAt);
+    interaction.maxFrameGapMs = Math.max(interaction.maxFrameGapMs, gap);
+    interaction.droppedFrames += countDroppedFrames(gap, interaction.frameBudgetMs);
+    if (gap > 16.7) interaction.slowFrames16 += 1;
+    if (gap > 33.4) interaction.slowFrames33 += 1;
+
+    const unstable = gap > interaction.frameBudgetMs * 1.55;
+    if (unstable) {
+      interaction.lastUnstableAt = now;
+      interaction.healthyFramesAfterUnstable = 0;
+    } else if (interaction.lastUnstableAt > 0) {
+      interaction.healthyFramesAfterUnstable += 1;
+      if (interaction.healthyFramesAfterUnstable >= 3) {
+        interaction.stableByMs = Math.max(0, now - interaction.startedAt);
+        interaction.lastUnstableAt = 0;
+      }
+    }
+  }
+
+  interaction.previousFrameAt = now;
+
+  if (now >= interaction.deadlineAt) {
+    finalizeInteraction(interaction);
+    return;
+  }
+
+  interaction.rafId = window.requestAnimationFrame((timestamp) => interactionFrame(interactionId, timestamp));
+}
+
+function recordInteraction(label: string, startedAt: number): void {
+  if (!enabled || !canUseDom()) return;
+  const id = nextId++;
+  const interaction: ActiveInteraction = {
+    id,
+    label,
+    startedAt,
+    deadlineAt: startedAt + interactionWindowMs,
+    frameBudgetMs: estimatedFrameBudgetMs,
+    firstFrameAt: null,
+    previousFrameAt: null,
+    maxFrameGapMs: 0,
+    droppedFrames: 0,
+    slowFrames16: 0,
+    slowFrames33: 0,
+    lastUnstableAt: 0,
+    healthyFramesAfterUnstable: 0,
+    stableByMs: 0,
+    rafId: 0,
+  };
+  activeInteractions.set(id, interaction);
+  interaction.rafId = window.requestAnimationFrame((timestamp) => interactionFrame(id, timestamp));
+}
+
+function handlePointerDown(event: PointerEvent): void {
+  if (!enabled || event.button > 0) return;
   const control = event.target instanceof Element
     ? event.target.closest("button, a, [role='tab'], [role='button']")
     : null;
@@ -101,11 +256,13 @@ function startLongTaskObserver(): void {
     const supported = PerformanceObserver.supportedEntryTypes ?? [];
     if (!supported.includes("longtask")) return;
     observer = new PerformanceObserver((list) => {
+      const now = performance.now();
       for (const entry of list.getEntries()) {
-        longTaskCount += 1;
-        lastLongTaskMs += entry.duration;
+        longTasks.push({ startTime: entry.startTime, duration: entry.duration });
+        totalLongTaskCount += 1;
         worstLongTaskMs = Math.max(worstLongTaskMs, entry.duration);
       }
+      pruneLongTasks(now);
       emit();
     });
     observer.observe({ entryTypes: ["longtask"] });
@@ -119,42 +276,48 @@ function stopLongTaskObserver(): void {
   observer = null;
 }
 
-function frameLoop(now: number): void {
+function monitorFrame(now: number): void {
   if (!enabled) return;
-  if (previousFrameAt > 0) {
-    const gap = now - previousFrameAt;
-    if (gap > worstFrameGapMs) {
-      worstFrameGapMs = gap;
-      if (gap > 34) emit();
-    }
+  if (document.visibilityState !== "visible") {
+    previousMonitorFrameAt = 0;
+  } else if (previousMonitorFrameAt > 0) {
+    updateFrameBudget(now - previousMonitorFrameAt);
   }
-  previousFrameAt = now;
-  frameRaf = window.requestAnimationFrame(frameLoop);
+  previousMonitorFrameAt = now;
+  monitorRaf = window.requestAnimationFrame(monitorFrame);
 }
 
 function startFrameMonitor(): void {
-  if (!canUseDom() || frameRaf) return;
-  previousFrameAt = 0;
-  frameRaf = window.requestAnimationFrame(frameLoop);
+  if (!canUseDom() || monitorRaf) return;
+  previousMonitorFrameAt = 0;
+  monitorRaf = window.requestAnimationFrame(monitorFrame);
 }
 
 function stopFrameMonitor(): void {
-  if (!canUseDom() || !frameRaf) return;
-  window.cancelAnimationFrame(frameRaf);
-  frameRaf = 0;
-  previousFrameAt = 0;
+  if (!canUseDom() || !monitorRaf) return;
+  window.cancelAnimationFrame(monitorRaf);
+  monitorRaf = 0;
+  previousMonitorFrameAt = 0;
+}
+
+function cancelActiveInteractions(): void {
+  for (const interaction of activeInteractions.values()) {
+    if (interaction.rafId) window.cancelAnimationFrame(interaction.rafId);
+  }
+  activeInteractions.clear();
 }
 
 function syncEnabledState(): void {
   if (!canUseDom()) return;
   if (enabled) {
-    document.addEventListener("pointerup", handlePointerUp, true);
+    document.addEventListener("pointerdown", handlePointerDown, true);
     startLongTaskObserver();
     startFrameMonitor();
   } else {
-    document.removeEventListener("pointerup", handlePointerUp, true);
+    document.removeEventListener("pointerdown", handlePointerDown, true);
     stopLongTaskObserver();
     stopFrameMonitor();
+    cancelActiveInteractions();
   }
 }
 
@@ -180,11 +343,15 @@ export function setMobilePerformanceMonitorEnabled(value: boolean): void {
 }
 
 export function resetMobilePerformanceMetrics(): void {
+  cancelActiveInteractions();
   samples = [];
-  longTaskCount = 0;
+  longTasks = [];
+  recentFrameGaps = [];
+  estimatedFrameBudgetMs = defaultFrameBudgetMs;
+  totalLongTaskCount = 0;
   worstLongTaskMs = 0;
-  worstFrameGapMs = 0;
-  lastLongTaskMs = 0;
+  worstInteractionFrameGapMs = 0;
+  totalDroppedFrames = 0;
   emit();
 }
 
@@ -192,9 +359,11 @@ export function getMobilePerformanceSnapshot(): MobilePerfSnapshot {
   return {
     enabled,
     samples: [...samples],
-    longTaskCount,
+    estimatedFrameBudgetMs,
+    totalLongTaskCount,
     worstLongTaskMs,
-    worstFrameGapMs,
+    worstInteractionFrameGapMs,
+    totalDroppedFrames,
   };
 }
 

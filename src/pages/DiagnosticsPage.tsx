@@ -64,6 +64,8 @@ export function DiagnosticsPage() {
   const averageInputToFrame = recentPerfSamples.length > 0
     ? recentPerfSamples.reduce((sum, sample) => sum + sample.inputToFrameMs, 0) / recentPerfSamples.length
     : 0;
+  const recentDroppedFrames = recentPerfSamples.reduce((sum, sample) => sum + sample.droppedFrames, 0);
+  const recentLongTasks = recentPerfSamples.reduce((sum, sample) => sum + sample.longTaskCount, 0);
 
   const resetJourney = () => {
     onboarding.reset();
@@ -288,20 +290,24 @@ export function DiagnosticsPage() {
           <h2>Mobile interaction performance</h2>
           <dl>
             <div><dt>Recorder</dt><dd>{perfSnapshot.enabled ? "ON" : "OFF"}</dd></div>
+            <div><dt>Interaction window</dt><dd>450ms</dd></div>
+            <div><dt>Frame budget</dt><dd>~{perfSnapshot.estimatedFrameBudgetMs.toFixed(1)}ms</dd></div>
             <div><dt>Recent samples</dt><dd>{perfSnapshot.samples.length}</dd></div>
             <div><dt>Avg tap → frame</dt><dd>{averageInputToFrame ? `${averageInputToFrame.toFixed(1)}ms` : "—"}</dd></div>
-            <div><dt>Worst frame gap</dt><dd>{perfSnapshot.worstFrameGapMs ? `${perfSnapshot.worstFrameGapMs.toFixed(1)}ms` : "—"}</dd></div>
-            <div><dt>Long tasks</dt><dd>{perfSnapshot.longTaskCount}</dd></div>
+            <div><dt>Worst interaction gap</dt><dd>{perfSnapshot.worstInteractionFrameGapMs ? `${perfSnapshot.worstInteractionFrameGapMs.toFixed(1)}ms` : "—"}</dd></div>
+            <div><dt>Dropped · latest 5</dt><dd>{recentDroppedFrames}</dd></div>
+            <div><dt>Long tasks · latest 5</dt><dd>{recentLongTasks}</dd></div>
+            <div><dt>Long tasks · total</dt><dd>{perfSnapshot.totalLongTaskCount}</dd></div>
             <div><dt>Worst long task</dt><dd>{perfSnapshot.worstLongTaskMs ? `${perfSnapshot.worstLongTaskMs.toFixed(1)}ms` : "unsupported / none"}</dd></div>
           </dl>
           {recentPerfSamples.length > 0 ? (
             <>
-              <h2>Latest interactions</h2>
+              <h2>Latest interactions · full 450ms</h2>
               <dl>
                 {recentPerfSamples.map((sample) => (
                   <div key={sample.id}>
                     <dt>{sample.label}</dt>
-                    <dd>{sample.inputToFrameMs.toFixed(1)} / {sample.frameGapMs.toFixed(1)}ms</dd>
+                    <dd>tap {sample.inputToFrameMs.toFixed(1)} · max {sample.maxFrameGapMs.toFixed(1)} · drop {sample.droppedFrames} · LT {sample.longTaskCount ? `${sample.worstLongTaskMs.toFixed(0)}ms` : "0"}</dd>
                   </div>
                 ))}
               </dl>
@@ -317,7 +323,7 @@ export function DiagnosticsPage() {
             </Button>
             <Button tone="secondary" size="sm" onClick={resetMobilePerformanceMetrics}>Reset metrics</Button>
           </div>
-          <p>Values show tap→next-frame / following frame gap. Test Bottom Nav, tabs and overlays on the real Telegram phone client, then return here.</p>
+          <p>Each sample follows the full 450ms after pointer-down. “max” is the worst frame gap inside that interaction, “drop” estimates missed refresh frames using the detected phone cadence, and “LT” is the worst attributed long task.</p>
         </article>
 
         <article>
