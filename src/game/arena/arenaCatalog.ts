@@ -33,7 +33,13 @@ export const warFlow: ArenaWarStep[] = [
   { id: "defence", title: "Defence setup", description: "Prepare protection for incoming attacks.", asset: "war.defenceSetup" },
 ];
 
-export const arenaPreloadAssets = [
-  "arena.rewardCapsule",
+export const arenaWarfrontPreloadAssets = [
+  "war.active",
   "war.matchmaking",
+  "war.preparation",
+  "war.defenceSetup",
+] as const;
+
+export const arenaRankingPreloadAssets = [
+  "arena.rewardCapsule",
 ] as const;

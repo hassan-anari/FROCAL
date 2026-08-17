@@ -1,5 +1,4 @@
 import {
-  AdventureIcon,
   ChampionIcon,
   Sword01Icon,
   UserGroupIcon,
@@ -12,7 +11,12 @@ import { AssetImage } from "@/design-system/components/AssetImage";
 import { GameHeader } from "@/design-system/components/GameHeader";
 import { GameShell } from "@/design-system/components/GameShell";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
-import { arenaPlayerRanking, arenaPreloadAssets, arenaSeason } from "@/game/arena/arenaCatalog";
+import {
+  arenaPlayerRanking,
+  arenaRankingPreloadAssets,
+  arenaSeason,
+  arenaWarfrontPreloadAssets,
+} from "@/game/arena/arenaCatalog";
 import type { ArenaPlayerRank, ArenaRankingMode } from "@/game/arena/types";
 import { clanCatalog, getClanById } from "@/game/clan/clanCatalog";
 import { useClanStore } from "@/game/clan/clanStore";
@@ -22,11 +26,22 @@ import { useEarnStore } from "@/game/earn/earnStore";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import styles from "./ArenaPage.module.css";
 
+type ArenaSection = "warfront" | "rankings";
+
 function PlayerAvatar({ player, large = false }: { player: ArenaPlayerRank; large?: boolean }) {
   return (
     <div className={`${styles.playerAvatar} ${large ? styles.playerAvatarLarge : ""}`} style={{ "--identity-hue": player.accentHue } as CSSProperties}>
       <span>{player.initials}</span>
       <AssetImage assetKey="profile.frame.standard" className={styles.playerFrame} />
+    </div>
+  );
+}
+
+function CurrentPlayerAvatar({ name, photoUrl }: { name: string; photoUrl?: string | null }) {
+  const initial = name.trim().slice(0, 1).toUpperCase() || "D";
+  return (
+    <div className={styles.currentPlayerAvatar}>
+      {photoUrl ? <img src={photoUrl} alt="" /> : <span>{initial}</span>}
     </div>
   );
 }
@@ -103,15 +118,188 @@ function ClanRankingList({ clans }: { clans: ClanSummary[] }) {
   );
 }
 
+function WarfrontTab() {
+  return (
+    <div className={styles.warfrontStack}>
+      <section className={styles.warfrontHero}>
+        <div className={styles.warfrontScene}>
+          <AssetImage assetKey="war.active" className={styles.warfrontHeroArt} />
+          <div className={styles.warfrontHeroShade} />
+          <div className={styles.warfrontSignal}>SEASON 2 · WARFRONT</div>
+        </div>
+        <div className={styles.warfrontIntro}>
+          <span>THE NEXT ERA OF ARENA</span>
+          <h2>When rankings become a battlefield.</h2>
+          <p>
+            Season 2 opens clan-versus-clan Warfront. Your clan will match with a rival, prepare a shared plan,
+            choose its loadout and fight through coordinated member activity. The result belongs to the whole clan.
+          </p>
+        </div>
+      </section>
+
+      <section className={styles.warFlowPanel}>
+        <div className={styles.sectionHeading}>
+          <div><span>HOW WARFRONT PLAYS</span><strong>One battle. Three clear phases.</strong></div>
+          <em>Season 2</em>
+        </div>
+
+        <div className={styles.warFlowGrid}>
+          <article>
+            <div className={styles.warFlowArt}><AssetImage assetKey="war.matchmaking" /></div>
+            <span>01 · MATCH</span>
+            <strong>Find a rival clan</strong>
+            <p>Arena searches the seasonal pool and presents the opponent before anyone commits resources.</p>
+          </article>
+          <article>
+            <div className={styles.warFlowArt}><AssetImage assetKey="war.preparation" /></div>
+            <span>02 · PREPARE</span>
+            <strong>Build one clan plan</strong>
+            <p>Review the opponent, prepare shared items and lock the clan setup before the countdown begins.</p>
+          </article>
+          <article>
+            <div className={styles.warFlowArt}><AssetImage assetKey="war.active" /></div>
+            <span>03 · BATTLE</span>
+            <strong>Fight through activity</strong>
+            <p>Verified member actions move live war progress until the battle closes and the result is sealed.</p>
+          </article>
+        </div>
+      </section>
+
+      <section className={styles.defenceBrief}>
+        <div className={styles.defenceBriefArt}>
+          <AssetImage assetKey="war.defenceSetup" />
+        </div>
+        <div className={styles.defenceBriefCopy}>
+          <span>WAR DOESN&apos;T END AT ATTACK</span>
+          <h3>Defend the headquarters.</h3>
+          <p>
+            Incoming wars will make Defence matter too. Protection, recovery and defensive clan items give the HQ a
+            life after every battle instead of turning Warfront into a single result screen.
+          </p>
+          <div className={styles.warFeatureRow}>
+            <span><HugeiconsIcon icon={Sword01Icon} size={15} strokeWidth={1.55} /> Clan War</span>
+            <span><HugeiconsIcon icon={ChampionIcon} size={15} strokeWidth={1.55} /> Defence</span>
+            <span><HugeiconsIcon icon={UserGroupIcon} size={15} strokeWidth={1.55} /> Rewards</span>
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.warfrontLock}>
+        <div>
+          <span>SEASON 1 STATUS</span>
+          <strong>Warfront is built for the next season.</strong>
+          <p>For now, Arena stays focused on one simple competition: climb the Player and Clan rankings.</p>
+        </div>
+        <button type="button" disabled>Unlocks in Season 2</button>
+      </section>
+    </div>
+  );
+}
+
+function RankingsTab({
+  rankingMode,
+  onSelectRanking,
+  rankedClans,
+  ownClan,
+  level,
+  currentName,
+  currentPhotoUrl,
+}: {
+  rankingMode: ArenaRankingMode;
+  onSelectRanking: (mode: ArenaRankingMode) => void;
+  rankedClans: ClanSummary[];
+  ownClan: ClanSummary | null;
+  level: number;
+  currentName: string;
+  currentPhotoUrl?: string | null;
+}) {
+  return (
+    <div className={styles.rankingsStack}>
+      <section className={styles.seasonHero}>
+        <div className={styles.seasonGlow} />
+        <div className={styles.seasonCopy}>
+          <span>FOUNDING SEASON</span>
+          <h2>Season {String(arenaSeason.number).padStart(2, "0")}</h2>
+          <p>Every verified action moves your seasonal score. Finish as high as you can before the reset.</p>
+          <div className={styles.seasonMeta}>
+            <strong>{arenaSeason.daysLeft} days left</strong>
+            <span>{Math.round(arenaSeason.progress * 100)}% complete</span>
+          </div>
+          <div className={styles.progressTrack}><i style={{ transform: `scaleX(${arenaSeason.progress})` }} /></div>
+        </div>
+        <AssetImage assetKey="arena.rewardCapsule" className={styles.seasonArt} />
+      </section>
+
+      <section className={styles.rankingsPanel}>
+        <div className={styles.panelHeading}>
+          <div><span>GLOBAL STANDINGS</span><strong>Season Leaderboard</strong></div>
+          <em>Live mock data</em>
+        </div>
+
+        <nav className={styles.rankingSwitch} aria-label="Arena ranking type">
+          <button type="button" className={rankingMode === "players" ? styles.rankingSwitchActive : ""} onClick={() => onSelectRanking("players")}>Players</button>
+          <button type="button" className={rankingMode === "clans" ? styles.rankingSwitchActive : ""} onClick={() => onSelectRanking("clans")}>Clans</button>
+        </nav>
+
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={rankingMode}
+            className={styles.rankingContent}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={mobileMotion.tab}
+          >
+            {rankingMode === "players" ? (
+              <>
+                <PlayerPodium players={arenaPlayerRanking} />
+                <PlayerRankingList players={arenaPlayerRanking} />
+                <div className={styles.selfRankRow}>
+                  <span>#{arenaSeason.playerRank}</span>
+                  <CurrentPlayerAvatar name={currentName} photoUrl={currentPhotoUrl} />
+                  <div><strong>You</strong><p>Level {level} · Current season standing</p></div>
+                  <b>{arenaSeason.playerScore.toLocaleString()}</b>
+                </div>
+              </>
+            ) : (
+              <>
+                <ClanPodium clans={rankedClans} />
+                <ClanRankingList clans={rankedClans} />
+                {ownClan ? (
+                  <div className={styles.selfRankRow}>
+                    <span>#{ownClan.rank}</span>
+                    <ClanMark clan={ownClan} />
+                    <div><strong>{ownClan.name}</strong><p>Your clan · Level {ownClan.level}</p></div>
+                    <b>{ownClan.score.toLocaleString()}</b>
+                  </div>
+                ) : (
+                  <div className={styles.noClanRank}>
+                    <HugeiconsIcon icon={UserGroupIcon} size={20} strokeWidth={1.55} />
+                    <div><strong>No clan standing yet</strong><p>Join or found a clan to appear in the Clan Leaderboard.</p></div>
+                  </div>
+                )}
+              </>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </section>
+    </div>
+  );
+}
+
 export function ArenaPage() {
+  const [section, setSection] = useState<ArenaSection>("warfront");
   const [rankingMode, setRankingMode] = useState<ArenaRankingMode>("players");
   const level = useEarnStore((state) => state.level);
   const clan = useClanStore();
   const { adapter } = useTelegram();
+  const telegramUser = adapter.getUser();
+  const currentName = telegramUser?.first_name ?? "Explorer";
+  const currentPhotoUrl = telegramUser?.photo_url ?? null;
 
   useEffect(() => {
-    void preloadAssets(arenaPreloadAssets);
-  }, []);
+    void preloadAssets(section === "warfront" ? arenaWarfrontPreloadAssets : arenaRankingPreloadAssets);
+  }, [section]);
 
   const rankedClans = useMemo(() => [...clanCatalog].sort((a, b) => a.rank - b.rank), []);
   const ownClan = useMemo(() => {
@@ -135,6 +323,12 @@ export function ArenaPage() {
     return getClanById(clan.activeClanId);
   }, [clan.activeClanId, clan.createdClan, clan.membership]);
 
+  const selectSection = (next: ArenaSection) => {
+    if (next === section) return;
+    adapter.selectionChanged();
+    setSection(next);
+  };
+
   const selectRanking = (mode: ArenaRankingMode) => {
     if (mode === rankingMode) return;
     adapter.selectionChanged();
@@ -147,118 +341,44 @@ export function ArenaPage() {
         <GameHeader />
 
         <header className={styles.pageHeader}>
-          <span>ARENA · SEASON 1</span>
-          <h1>Rise through the ranks.</h1>
-          <p>The Arena is Dexo Land&apos;s competition hub. Season 1 is about standing; Warfront arrives in Season 2.</p>
+          <span>ARENA · COMPETITION HUB</span>
+          <h1>Compete. Rise. Prepare.</h1>
+          <p>Season 1 ranks players and clans. Season 2 turns the Arena into a battlefield.</p>
         </header>
 
-        <div className={styles.stack}>
-          <section className={styles.seasonHero}>
-            <div className={styles.seasonGlow} />
-            <div className={styles.seasonCopy}>
-              <span>FOUNDING SEASON</span>
-              <h2>Season {String(arenaSeason.number).padStart(2, "0")}</h2>
-              <p>Every verified action moves your seasonal score. Finish as high as you can before the reset.</p>
-              <div className={styles.seasonMeta}>
-                <strong>{arenaSeason.daysLeft} days left</strong>
-                <span>{Math.round(arenaSeason.progress * 100)}% complete</span>
-              </div>
-              <div className={styles.progressTrack}><i style={{ transform: `scaleX(${arenaSeason.progress})` }} /></div>
-            </div>
-            <AssetImage assetKey="arena.rewardCapsule" className={styles.seasonArt} />
-          </section>
+        <nav className={styles.arenaTabs} aria-label="Arena sections">
+          <button type="button" className={section === "warfront" ? styles.arenaTabActive : ""} onClick={() => selectSection("warfront")}>
+            <span>Warfront</span><em>S2</em>
+          </button>
+          <button type="button" className={section === "rankings" ? styles.arenaTabActive : ""} onClick={() => selectSection("rankings")}>
+            <span>Rankings</span>
+          </button>
+        </nav>
 
-          <section className={styles.yourStanding}>
-            <div className={styles.standingLead}>
-              <span>YOUR SEASON</span>
-              <strong>Keep climbing.</strong>
-              <p>Rankings stay simple in Season 1: one score for players and one for clans.</p>
-            </div>
-            <div className={styles.standingStats}>
-              <article><span>PLAYER RANK</span><strong>#{arenaSeason.playerRank}</strong></article>
-              <article><span>YOUR SCORE</span><strong>{arenaSeason.playerScore.toLocaleString()}</strong></article>
-              <article><span>LEVEL</span><strong>{level}</strong></article>
-            </div>
-          </section>
-
-          <section className={styles.rankingsPanel}>
-            <div className={styles.panelHeading}>
-              <div><span>GLOBAL STANDINGS</span><strong>Season Leaderboard</strong></div>
-              <em>Live mock data</em>
-            </div>
-
-            <nav className={styles.rankingSwitch} aria-label="Arena ranking type">
-              <button type="button" className={rankingMode === "players" ? styles.rankingSwitchActive : ""} onClick={() => selectRanking("players")}>Players</button>
-              <button type="button" className={rankingMode === "clans" ? styles.rankingSwitchActive : ""} onClick={() => selectRanking("clans")}>Clans</button>
-            </nav>
-
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={rankingMode}
-                className={styles.rankingContent}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                transition={mobileMotion.tab}
-              >
-                {rankingMode === "players" ? (
-                  <>
-                    <PlayerPodium players={arenaPlayerRanking} />
-                    <PlayerRankingList players={arenaPlayerRanking} />
-                    <div className={styles.selfRankRow}>
-                      <span>#247</span>
-                      <div className={styles.selfGlyph}><HugeiconsIcon icon={AdventureIcon} size={18} strokeWidth={1.55} /></div>
-                      <div><strong>You</strong><p>Level {level} · Current season standing</p></div>
-                      <b>{arenaSeason.playerScore.toLocaleString()}</b>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <ClanPodium clans={rankedClans} />
-                    <ClanRankingList clans={rankedClans} />
-                    {ownClan ? (
-                      <div className={styles.selfRankRow}>
-                        <span>#{ownClan.rank}</span>
-                        <ClanMark clan={ownClan} />
-                        <div><strong>{ownClan.name}</strong><p>Your clan · Level {ownClan.level}</p></div>
-                        <b>{ownClan.score.toLocaleString()}</b>
-                      </div>
-                    ) : (
-                      <div className={styles.noClanRank}>
-                        <HugeiconsIcon icon={UserGroupIcon} size={20} strokeWidth={1.55} />
-                        <div><strong>No clan standing yet</strong><p>Join or found a clan to appear in the Clan Leaderboard.</p></div>
-                      </div>
-                    )}
-                  </>
-                )}
-              </motion.div>
-            </AnimatePresence>
-          </section>
-
-          <section className={styles.warfront}>
-            <div className={styles.warScene}>
-              <AssetImage assetKey="war.matchmaking" className={styles.warArt} />
-              <div className={styles.warShade} />
-              <span className={styles.seasonTwoBadge}>SEASON 2</span>
-            </div>
-            <div className={styles.warCopy}>
-              <span>WARFRONT PROTOCOL</span>
-              <h2>Clan wars are next.</h2>
-              <p>Season 2 expands Arena with clan-versus-clan War, Defence and post-battle protection. The system stays locked until then.</p>
-              <div className={styles.futurePillRow}>
-                <span><HugeiconsIcon icon={Sword01Icon} size={15} strokeWidth={1.55} /> War</span>
-                <span><HugeiconsIcon icon={ChampionIcon} size={15} strokeWidth={1.55} /> Defence</span>
-                <span><HugeiconsIcon icon={UserGroupIcon} size={15} strokeWidth={1.55} /> Rivalry</span>
-              </div>
-              <button type="button" disabled>Unlocks in Season 2</button>
-            </div>
-          </section>
-
-          <section className={styles.arenaNote}>
-            <HugeiconsIcon icon={AdventureIcon} size={20} strokeWidth={1.5} />
-            <div><strong>One competition hub.</strong><p>Rankings live here permanently. New competitive modes will open inside Arena instead of adding more destinations to the main navigation.</p></div>
-          </section>
-        </div>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={section}
+            className={styles.sectionContent}
+            initial={{ opacity: 0, x: 7 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -5 }}
+            transition={mobileMotion.tab}
+          >
+            {section === "warfront" ? (
+              <WarfrontTab />
+            ) : (
+              <RankingsTab
+                rankingMode={rankingMode}
+                onSelectRanking={selectRanking}
+                rankedClans={rankedClans}
+                ownClan={ownClan}
+                level={level}
+                currentName={currentName}
+                currentPhotoUrl={currentPhotoUrl}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
       </main>
     </GameShell>
   );

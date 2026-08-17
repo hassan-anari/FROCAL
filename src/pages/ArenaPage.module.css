@@ -10,7 +10,7 @@
 .pageHeader {
   display: grid;
   gap: .18rem;
-  margin: .9rem 0 .78rem;
+  margin: .9rem 0 .7rem;
 }
 
 .pageHeader > span {
@@ -40,8 +40,54 @@
   line-height: 1.5;
 }
 
-.stack { display: grid; gap: .78rem; }
+.arenaTabs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: .25rem;
+  margin-bottom: .78rem;
+  padding: .22rem;
+  border: 1px solid rgba(125, 177, 239, .1);
+  border-radius: 16px;
+  background: rgba(3, 8, 20, .7);
+}
 
+.arenaTabs button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .38rem;
+  min-height: 42px;
+  border: 0;
+  border-radius: 12px;
+  color: rgba(177, 190, 219, .54);
+  background: transparent;
+  font-size: .68rem;
+  font-weight: 820;
+  transition: color 160ms ease, background 180ms ease, box-shadow 180ms ease;
+}
+
+.arenaTabs em {
+  padding: .13rem .27rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: .46rem;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: .06em;
+  opacity: .72;
+}
+
+.arenaTabs .arenaTabActive {
+  color: #f5f8ff;
+  background: linear-gradient(115deg, rgba(50, 100, 181, .58), rgba(91, 64, 188, .66));
+  box-shadow: inset 0 0 0 1px rgba(139, 197, 255, .08);
+}
+
+.sectionContent,
+.warfrontStack,
+.rankingsStack { display: grid; gap: .78rem; }
+
+/* Season 1 rankings */
 .seasonHero {
   position: relative;
   display: grid;
@@ -78,8 +124,10 @@
 
 .seasonCopy > span,
 .panelHeading span,
-.standingLead > span,
-.warCopy > span {
+.sectionHeading span,
+.warfrontIntro > span,
+.defenceBriefCopy > span,
+.warfrontLock span {
   color: #72e6ff;
   font-size: .57rem;
   font-weight: 900;
@@ -139,31 +187,6 @@
   filter: drop-shadow(0 18px 18px rgba(0,0,0,.36));
 }
 
-.yourStanding {
-  display: grid;
-  gap: .65rem;
-  padding: .78rem;
-  border: 1px solid rgba(125, 177, 239, .1);
-  border-radius: 20px;
-  background: linear-gradient(150deg, rgba(8, 18, 39, .88), rgba(5, 9, 22, .9));
-}
-.standingLead { display: grid; gap: .1rem; }
-.standingLead strong { color: #f2f7ff; font-size: .84rem; }
-.standingLead p { margin: 0; color: rgba(189, 204, 232, .56); font-size: .65rem; line-height: 1.42; }
-.standingStats { display: grid; grid-template-columns: repeat(3, 1fr); gap: .42rem; }
-.standingStats article {
-  display: grid;
-  gap: .08rem;
-  min-width: 0;
-  padding: .6rem .42rem;
-  border: 1px solid rgba(125, 177, 239, .08);
-  border-radius: 14px;
-  background: rgba(4, 10, 25, .54);
-  text-align: center;
-}
-.standingStats span { color: rgba(182, 198, 226, .52); font-size: .53rem; font-weight: 800; letter-spacing: .07em; }
-.standingStats strong { color: #f1f8ff; font-size: .78rem; }
-
 .rankingsPanel {
   display: grid;
   gap: .65rem;
@@ -175,15 +198,19 @@
     linear-gradient(150deg, rgba(8, 18, 39, .92), rgba(5, 9, 22, .94));
 }
 
-.panelHeading {
+.panelHeading,
+.sectionHeading {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: .75rem;
 }
-.panelHeading > div { display: grid; gap: .1rem; }
-.panelHeading strong { color: #f3f8ff; font-size: .86rem; }
-.panelHeading em { color: rgba(183, 198, 226, .47); font-size: .57rem; font-style: normal; }
+.panelHeading > div,
+.sectionHeading > div { display: grid; gap: .1rem; }
+.panelHeading strong,
+.sectionHeading strong { color: #f3f8ff; font-size: .86rem; }
+.panelHeading em,
+.sectionHeading em { color: rgba(183, 198, 226, .47); font-size: .57rem; font-style: normal; }
 
 .rankingSwitch {
   display: grid;
@@ -289,6 +316,28 @@
 .playerAvatarLarge > span { width: 34px; height: 34px; font-size: .66rem; }
 .playerFrame { position: absolute; z-index: 2; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
 
+.currentPlayerAvatar {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  overflow: hidden;
+  border: 1px solid rgba(142, 193, 255, .23);
+  border-radius: 12px;
+  box-shadow: 0 7px 16px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.06);
+}
+.currentPlayerAvatar img { width: 100%; height: 100%; object-fit: cover; }
+.currentPlayerAvatar span {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  color: white;
+  background: linear-gradient(145deg, #48d9ff, #806cff 58%, #cf56ff);
+  font-size: .72rem;
+  font-weight: 850;
+}
+
 .clanMark > span {
   position: absolute;
   z-index: 1;
@@ -336,16 +385,6 @@
   border-color: rgba(88, 222, 255, .14);
   background: linear-gradient(145deg, rgba(12, 38, 57, .58), rgba(13, 12, 41, .58));
 }
-.selfGlyph {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  border: 1px solid rgba(102, 222, 255, .12);
-  border-radius: 12px;
-  color: #8cecff;
-  background: rgba(24, 84, 104, .12);
-}
 .noClanRank {
   display: grid;
   grid-template-columns: auto minmax(0,1fr);
@@ -361,99 +400,197 @@
 .noClanRank strong { color: #eef6ff; font-size: .68rem; }
 .noClanRank p { margin: 0; color: rgba(182, 198, 226, .53); font-size: .58rem; line-height: 1.4; }
 
-.warfront {
+/* Season 2 Warfront */
+.warfrontHero {
   overflow: hidden;
-  border: 1px solid rgba(135, 110, 239, .14);
-  border-radius: 23px;
-  background: linear-gradient(150deg, rgba(11, 14, 38, .95), rgba(5, 8, 20, .96));
+  border: 1px solid rgba(135, 110, 239, .16);
+  border-radius: 25px;
+  background:
+    radial-gradient(circle at 75% 12%, rgba(82, 101, 255, .1), transparent 10rem),
+    linear-gradient(150deg, rgba(11, 14, 38, .97), rgba(5, 8, 20, .98));
+  box-shadow: 0 20px 44px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.03);
 }
-.warScene {
+
+.warfrontScene {
   position: relative;
-  min-height: 190px;
+  min-height: 250px;
   overflow: hidden;
   border-bottom: 1px solid rgba(130, 173, 235, .08);
-  background: radial-gradient(circle at 50% 50%, rgba(92, 71, 210, .12), transparent 11rem);
+  background:
+    radial-gradient(circle at 50% 58%, rgba(88, 88, 245, .15), transparent 12rem),
+    #050918;
 }
-.warArt {
+
+.warfrontHeroArt {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: min(105%, 430px);
-  transform: translate(-50%, -51%);
-  filter: drop-shadow(0 22px 24px rgba(0,0,0,.4));
-}
-.warShade {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(0deg, rgba(5,8,20,.92), transparent 48%), linear-gradient(90deg, rgba(5,8,20,.28), transparent 30%, rgba(5,8,20,.16));
-}
-.seasonTwoBadge {
-  position: absolute;
-  top: .7rem;
-  right: .72rem;
-  padding: .28rem .5rem;
-  border: 1px solid rgba(121, 222, 255, .17);
-  border-radius: 999px;
-  color: #8aebff;
-  background: rgba(4, 12, 29, .78);
-  font-size: .56rem;
-  font-weight: 900;
-  letter-spacing: .09em;
-}
-.warCopy { display: grid; gap: .22rem; padding: .78rem; }
-.warCopy h2 { margin: 0; color: #f4f7ff; font-size: 1.02rem; font-weight: 880; letter-spacing: -.035em; }
-.warCopy p { margin: 0; color: rgba(190, 205, 233, .6); font-size: .67rem; line-height: 1.47; }
-.futurePillRow { display: flex; flex-wrap: wrap; gap: .38rem; margin: .4rem 0 .25rem; }
-.futurePillRow span {
-  display: inline-flex;
-  align-items: center;
-  gap: .25rem;
-  min-height: 29px;
-  padding: 0 .48rem;
-  border: 1px solid rgba(123, 182, 240, .09);
-  border-radius: 999px;
-  color: rgba(218, 236, 251, .72);
-  background: rgba(6, 15, 34, .58);
-  font-size: .59rem;
-  font-weight: 760;
-}
-.warCopy button {
-  width: 100%;
-  min-height: 42px;
-  margin-top: .15rem;
-  border: 1px solid rgba(127, 180, 238, .1);
-  border-radius: 13px;
-  color: rgba(187, 203, 232, .42);
-  background: rgba(4, 9, 22, .58);
-  font-size: .65rem;
-  font-weight: 800;
+  width: min(112%, 470px);
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 26px 28px rgba(0,0,0,.46));
 }
 
-.arenaNote {
+.warfrontHeroShade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(0deg, rgba(5,8,20,.95) 0%, transparent 42%),
+    linear-gradient(90deg, rgba(5,8,20,.18), transparent 36%, rgba(5,8,20,.12));
+}
+
+.warfrontSignal {
+  position: absolute;
+  top: .78rem;
+  left: .78rem;
+  padding: .3rem .52rem;
+  border: 1px solid rgba(121, 222, 255, .18);
+  border-radius: 999px;
+  color: #91efff;
+  background: rgba(4, 12, 29, .82);
+  box-shadow: 0 8px 20px rgba(0,0,0,.25);
+  font-size: .55rem;
+  font-weight: 900;
+  letter-spacing: .1em;
+}
+
+.warfrontIntro { display: grid; gap: .24rem; padding: .86rem .84rem .9rem; }
+.warfrontIntro h2 {
+  max-width: 340px;
+  margin: 0;
+  color: #f5f8ff;
+  font-size: 1.15rem;
+  font-weight: 900;
+  letter-spacing: -.045em;
+  line-height: 1.05;
+}
+.warfrontIntro p {
+  max-width: 390px;
+  margin: .08rem 0 0;
+  color: rgba(193, 207, 234, .64);
+  font-size: .69rem;
+  line-height: 1.52;
+}
+
+.warFlowPanel {
   display: grid;
-  grid-template-columns: auto minmax(0,1fr);
-  align-items: center;
-  gap: .55rem;
-  padding: .68rem .72rem;
+  gap: .62rem;
+  padding: .78rem;
+  border: 1px solid rgba(127, 177, 240, .11);
+  border-radius: 22px;
+  background: linear-gradient(150deg, rgba(8, 18, 39, .91), rgba(5, 9, 22, .94));
+}
+
+.warFlowGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: .45rem;
+}
+
+.warFlowGrid article {
+  display: grid;
+  align-content: start;
+  gap: .12rem;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0 0 .56rem;
   border: 1px solid rgba(125, 177, 239, .08);
-  border-radius: 17px;
-  color: #78e5ff;
+  border-radius: 16px;
+  background: rgba(4, 10, 25, .5);
+}
+
+.warFlowArt {
+  display: grid;
+  place-items: center;
+  min-height: 96px;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 55%, rgba(90, 81, 221, .12), transparent 5.5rem);
+}
+.warFlowArt img { width: 108px; max-width: 110%; filter: drop-shadow(0 10px 12px rgba(0,0,0,.33)); }
+.warFlowGrid article > span,
+.warFlowGrid article > strong,
+.warFlowGrid article > p { margin-inline: .48rem; }
+.warFlowGrid article > span { margin-top: .38rem; color: #73e7ff; font-size: .49rem; font-weight: 900; letter-spacing: .09em; }
+.warFlowGrid article > strong { color: #eff6ff; font-size: .64rem; line-height: 1.24; }
+.warFlowGrid article > p { margin-top: .04rem; margin-bottom: 0; color: rgba(184, 200, 229, .52); font-size: .55rem; line-height: 1.38; }
+
+.defenceBrief {
+  position: relative;
+  display: grid;
+  grid-template-columns: 128px minmax(0,1fr);
+  align-items: center;
+  gap: .5rem;
+  min-height: 166px;
+  overflow: hidden;
+  padding: .7rem .72rem .7rem .28rem;
+  border: 1px solid rgba(103, 211, 255, .11);
+  border-radius: 21px;
+  background:
+    radial-gradient(circle at 8% 50%, rgba(73, 211, 255, .09), transparent 8rem),
+    linear-gradient(145deg, rgba(8, 22, 43, .88), rgba(8, 9, 26, .92));
+}
+.defenceBriefArt { display: grid; place-items: center; min-height: 130px; }
+.defenceBriefArt img { width: 142px; max-width: none; filter: drop-shadow(0 16px 16px rgba(0,0,0,.35)); }
+.defenceBriefCopy { position: relative; z-index: 2; display: grid; gap: .17rem; min-width: 0; }
+.defenceBriefCopy h3 { margin: 0; color: #f2f7ff; font-size: .9rem; font-weight: 880; letter-spacing: -.03em; }
+.defenceBriefCopy p { margin: 0; color: rgba(190, 205, 233, .58); font-size: .62rem; line-height: 1.45; }
+
+.warFeatureRow { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .32rem; }
+.warFeatureRow span {
+  display: inline-flex;
+  align-items: center;
+  gap: .23rem;
+  min-height: 27px;
+  padding: 0 .42rem;
+  border: 1px solid rgba(123, 182, 240, .09);
+  border-radius: 999px;
+  color: rgba(220, 237, 252, .74);
+  background: rgba(6, 15, 34, .58);
+  font-size: .54rem;
+  font-weight: 780;
+}
+
+.warfrontLock {
+  display: grid;
+  gap: .58rem;
+  padding: .76rem;
+  border: 1px solid rgba(125, 177, 239, .09);
+  border-radius: 18px;
   background: rgba(5, 12, 28, .52);
 }
-.arenaNote > div { display: grid; gap: .06rem; }
-.arenaNote strong { color: #edf6ff; font-size: .68rem; }
-.arenaNote p { margin: 0; color: rgba(185, 202, 230, .54); font-size: .59rem; line-height: 1.4; }
+.warfrontLock > div { display: grid; gap: .1rem; }
+.warfrontLock strong { color: #edf6ff; font-size: .75rem; }
+.warfrontLock p { margin: 0; color: rgba(185, 202, 230, .54); font-size: .61rem; line-height: 1.43; }
+.warfrontLock button {
+  width: 100%;
+  min-height: 41px;
+  border: 1px solid rgba(127, 180, 238, .1);
+  border-radius: 13px;
+  color: rgba(187, 203, 232, .43);
+  background: rgba(4, 9, 22, .58);
+  font-size: .64rem;
+  font-weight: 820;
+}
 
 @media (max-width: 350px) {
   .seasonCopy { max-width: 70%; }
   .seasonArt { right: -.8rem; width: 132px; }
-  .standingStats { gap: .3rem; }
   .podium { gap: .28rem; }
   .podiumCard { padding-inline: .2rem; }
   .rankingList article,
   .selfRankRow { grid-template-columns: 30px 36px minmax(0,1fr) auto; gap: .3rem; }
   .playerAvatar,
   .clanMark { width: 36px; height: 36px; }
+  .warfrontScene { min-height: 225px; }
+  .warFlowGrid { grid-template-columns: 1fr; }
+  .warFlowGrid article { grid-template-columns: 92px minmax(0,1fr); grid-template-rows: auto auto 1fr; padding: .5rem; gap: .08rem .48rem; }
+  .warFlowArt { grid-row: 1 / 4; min-height: 86px; }
+  .warFlowArt img { width: 98px; }
+  .warFlowGrid article > span,
+  .warFlowGrid article > strong,
+  .warFlowGrid article > p { margin-inline: 0; }
+  .warFlowGrid article > span { margin-top: .12rem; }
+  .defenceBrief { grid-template-columns: 104px minmax(0,1fr); }
+  .defenceBriefArt img { width: 120px; }
 }
 
 @media (min-width: 460px) {
@@ -461,9 +598,13 @@
   .seasonHero { min-height: 210px; }
   .seasonArt { width: 175px; right: 1rem; }
   .seasonCopy { max-width: 62%; }
-  .warScene { min-height: 220px; }
+  .warfrontScene { min-height: 290px; }
+  .warfrontHeroArt { width: min(104%, 500px); }
+  .warFlowArt { min-height: 112px; }
+  .warFlowArt img { width: 122px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rankingContent { transform: none !important; }
+  .rankingContent,
+  .sectionContent { transform: none !important; }
 }
