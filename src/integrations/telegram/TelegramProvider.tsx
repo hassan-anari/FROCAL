@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createTelegramAdapter, type TelegramAdapter, type TelegramInsets } from "./adapter";
 import type { TelegramThemeParams } from "./types";
 
@@ -67,8 +67,12 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
   const [insets, setInsets] = useState(() => adapter.getInsets());
   const [isFullscreen, setIsFullscreen] = useState(() => adapter.getIsFullscreen());
   const isMobileClient = adapter.isMobileClient();
+  const bootstrappedRef = useRef(false);
 
-  useEffect(() => {
+  // Subscribe before requesting fullscreen so a very fast fullscreenChanged
+  // event cannot race the React state. Boot commands run in a layout effect,
+  // before the browser exposes the first interactive frame.
+  useLayoutEffect(() => {
     const updateTheme = () => {
       setTheme(adapter.getTheme());
       setColorScheme(adapter.getColorScheme());
@@ -95,15 +99,23 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
     };
     window.addEventListener("resize", onBrowserResize, { passive: true });
 
-    adapter.ready();
-    adapter.expand();
+    if (!bootstrappedRef.current) {
+      bootstrappedRef.current = true;
+      adapter.expand();
 
-    // Keep the portrait game experience immersive on mobile without forcing
-    // Menu Button launches into fullscreen. If a desktop client opens the
-    // Main Mini App in true fullscreen, leave that mode and keep a bounded
-    // game canvas instead of stretching the mobile UI across the monitor.
-    if (!isMobileClient && adapter.getIsFullscreen()) adapter.exitFullscreen();
-    adapter.setChromeColors("#03050d", "#03050d", "#03050d");
+      // Main Mini Apps can be launched natively in fullscreen. Menu Button
+      // launches cannot always declare that presentation mode, so request true
+      // fullscreen immediately on Telegram mobile before signalling ready.
+      // Desktop is intentionally left in whatever native presentation Telegram
+      // chose; CSS bounds and centers the portrait canvas without resizing the
+      // Telegram WebView after launch.
+      if (adapter.isTelegram && isMobileClient && !adapter.getIsFullscreen()) {
+        adapter.requestFullscreen();
+      }
+
+      adapter.setChromeColors("#03050d", "#03050d", "#03050d");
+      adapter.ready();
+    }
 
     return () => {
       unsubscribers.forEach((unsubscribe) => unsubscribe());
@@ -111,13 +123,10 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
     };
   }, [adapter, isMobileClient]);
 
-  useEffect(() => {
-    if (adapter.isTelegram && !isMobileClient && isFullscreen) {
-      adapter.exitFullscreen();
-    }
-  }, [adapter, isFullscreen, isMobileClient]);
-
-  useEffect(() => {
+  // Keep Telegram runtime attributes, viewport height and safe-area variables
+  // synchronized before paint. index.html seeds the same values even earlier
+  // so Desktop never gets an initial full-width game frame.
+  useLayoutEffect(() => {
     applyTelegramEnvironment(
       adapter,
       theme,

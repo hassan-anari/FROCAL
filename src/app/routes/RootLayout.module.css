@@ -1,4 +1,5 @@
 .host {
+  width: 100%;
   min-height: 100dvh;
   box-sizing: border-box;
   background:
@@ -24,17 +25,28 @@
   display: none;
 }
 
+/*
+ * Desktop Telegram may present the Main Mini App in a wide/fullscreen WebView.
+ * Keep that native shell untouched and center the portrait game canvas inside
+ * it. Never resize/exit the Telegram WebView after launch: doing so causes the
+ * visible wide -> narrow -> left jump on Desktop.
+ */
 @media (min-width: 520px) {
   .host {
-    display: grid;
-    place-items: start center;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    min-height: var(--app-height);
     padding: 24px;
   }
 
   .viewport {
+    flex: 0 1 var(--miniapp-max-width);
     width: min(100%, var(--miniapp-max-width));
+    max-width: var(--miniapp-max-width);
     height: min(calc(var(--app-height) - 48px), 920px);
     min-height: 560px;
+    margin-inline: auto;
     border: 1px solid rgba(136, 166, 255, .18);
     border-radius: 28px;
     box-shadow:
@@ -42,6 +54,8 @@
       0 0 70px rgba(84, 70, 255, .12);
   }
 
+  /* Wide-screen phones/tablets still use the full mobile game surface. The
+     platform flag is seeded synchronously in index.html before React paints. */
   :global(html[data-runtime="telegram"][data-telegram-mobile="true"]) .host {
     display: block;
     padding: 0;
@@ -49,6 +63,7 @@
 
   :global(html[data-runtime="telegram"][data-telegram-mobile="true"]) .viewport {
     width: 100%;
+    max-width: none;
     height: var(--app-height);
     border: 0;
     border-radius: 0;

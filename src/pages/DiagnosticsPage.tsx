@@ -323,7 +323,7 @@ export function DiagnosticsPage() {
             <div><dt>Theme</dt><dd>{colorScheme}</dd></div>
             <div><dt>Stable height</dt><dd>{Math.round(stableHeight)}px</dd></div>
             <div><dt>Fullscreen</dt><dd>{isFullscreen ? "yes" : "no"}</dd></div>
-            <div><dt>Mobile policy</dt><dd>{isMobileClient ? "mobile" : "bounded"}</dd></div>
+            <div><dt>Layout policy</dt><dd>{isMobileClient ? "mobile fullscreen" : "centered portrait"}</dd></div>
             <div><dt>User</dt><dd>{adapter.getUser()?.first_name ?? "browser"}</dd></div>
             <div><dt>Start param</dt><dd>{adapter.getStartParam() ?? "—"}</dd></div>
           </dl>

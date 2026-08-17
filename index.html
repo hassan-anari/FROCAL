@@ -9,6 +9,70 @@
     <link rel="icon" href="/assets/brand/dalexio-logo.svg" />
     <title>Dexo Land</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+      // Seed Telegram layout data before React/CSS modules paint. This avoids
+      // a one-frame desktop stretch and keeps mobile safe-area sizing stable.
+      (() => {
+        const app = window.Telegram?.WebApp;
+        if (!app) return;
+
+        const hasLaunchContext = Boolean(
+          app.initData?.trim()
+          || app.initDataUnsafe?.user
+          || app.initDataUnsafe?.start_param
+        );
+        if (!hasLaunchContext) return;
+
+        const root = document.documentElement;
+        const platform = String(app.platform || "unknown").toLowerCase();
+        const isMobile = platform === "ios" || platform === "android" || platform.startsWith("android_");
+
+        root.dataset.runtime = "telegram";
+        root.dataset.telegramPlatform = platform;
+        root.dataset.telegramMobile = isMobile ? "true" : "false";
+        root.dataset.telegramFullscreen = app.isFullscreen ? "true" : "false";
+
+        const stableHeight = app.viewportStableHeight || app.viewportHeight;
+        if (stableHeight) root.style.setProperty("--tg-stable-height", `${stableHeight}px`);
+
+        const setInsets = (prefix, inset) => {
+          const value = inset || {};
+          root.style.setProperty(`${prefix}-top`, `${Math.max(0, value.top || 0)}px`);
+          root.style.setProperty(`${prefix}-right`, `${Math.max(0, value.right || 0)}px`);
+          root.style.setProperty(`${prefix}-bottom`, `${Math.max(0, value.bottom || 0)}px`);
+          root.style.setProperty(`${prefix}-left`, `${Math.max(0, value.left || 0)}px`);
+        };
+
+        setInsets("--tg-safe-area-inset", app.safeAreaInset);
+        setInsets("--tg-content-safe-area-inset", app.contentSafeAreaInset);
+      })();
+    </script>
+    <style>
+      /* Critical pre-React shell sizing. The same rules are repeated in the
+         CSS module after boot; these only prevent an initial wide flash. */
+      html, body, #root {
+        width: 100%;
+        min-height: 100%;
+        margin: 0;
+        background: #01030a;
+      }
+      @media (min-width: 520px) {
+        html:not([data-telegram-mobile="true"]) .dalexio-app-host {
+          display: flex;
+          justify-content: center;
+          align-items: flex-start;
+          width: 100%;
+          min-height: var(--tg-stable-height, 100dvh);
+          box-sizing: border-box;
+          padding: 24px;
+        }
+        html:not([data-telegram-mobile="true"]) .dalexio-app-viewport {
+          width: min(440px, calc(100vw - 48px));
+          max-width: 440px;
+          margin-inline: auto;
+        }
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>

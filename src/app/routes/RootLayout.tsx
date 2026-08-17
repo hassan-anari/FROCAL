@@ -6,8 +6,8 @@ import styles from "./RootLayout.module.css";
 export function RootLayout() {
   return (
     <AppErrorBoundary>
-      <div className={styles.host}>
-        <div className={styles.viewport}>
+      <div className={`dalexio-app-host ${styles.host}`}>
+        <div className={`dalexio-app-viewport ${styles.viewport}`}>
           <Outlet />
           <DevScenarioPanel />
         </div>
