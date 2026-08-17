@@ -243,7 +243,7 @@
   display: grid;
   align-content: center;
   gap: .18rem;
-  padding: .6rem 0 2rem;
+  padding: .6rem 0 1.35rem;
 }
 .roleCopy > span { color: #70e7ff; font-size: .64rem; font-weight: 850; letter-spacing: .13em; }
 .soldierCard .roleCopy > span { color: #b9a6ff; }
@@ -332,7 +332,7 @@
   border-radius: 16px;
   background: rgba(4, 9, 21, .82);
 }
-.subnav { grid-template-columns: repeat(3, 1fr); }
+.subnav { grid-template-columns: repeat(2, 1fr); }
 .hqNav { grid-template-columns: repeat(4, 1fr); position: sticky; z-index: 5; top: calc(var(--safe-top) + 3.5rem); }
 .filterNav { grid-template-columns: 1fr 1fr; }
 .subnav button,
@@ -1100,6 +1100,16 @@
   line-height: .98;
   text-overflow: clip;
   white-space: nowrap;
+}
+
+.pageHeaderWrap h1 {
+  max-width: 100%;
+  overflow: visible;
+  font-size: clamp(1.44rem, 6.8vw, 2.1rem);
+  line-height: 1.02;
+  text-wrap: balance;
+  white-space: normal;
+  overflow-wrap: normal;
 }
 
 .pageHeader p,

@@ -3,7 +3,7 @@ import type { AssetKey } from "@/assets/registry";
 export type ClanRole = "captain" | "soldier";
 export type ClanMembershipStatus = "none" | "pending" | "member";
 export type JoinRequestState = "none" | "pending" | "rejected";
-export type SoldierClanTab = "discover" | "search" | "ranking";
+export type SoldierClanTab = "discover" | "search";
 export type HeadquartersTab = "home" | "tasks" | "members" | "inventory";
 export type TaskFilter = "active" | "completed";
 export type ClanTaskType = "group" | "individual";

@@ -340,7 +340,6 @@ function SoldierNetwork({
     );
   }, [query]);
 
-  const ranking = [...clanCatalog].sort((a, b) => a.rank - b.rank);
   const featured = suggested[0];
 
   return (
@@ -349,9 +348,9 @@ function SoldierNetwork({
       {requestState === "rejected" ? <PendingJoinCard clan={pendingClan} rejected /> : null}
 
       <nav className={styles.subnav} aria-label="Clan discovery sections">
-        {(["discover", "search", "ranking"] as const).map((item) => (
+        {(["discover", "search"] as const).map((item) => (
           <button key={item} type="button" className={tab === item ? styles.subnavActive : ""} onClick={() => setTab(item)}>
-            {item === "discover" ? "Discover" : item === "search" ? "Search" : "Ranking"}
+            {item === "discover" ? "Discover" : "Search"}
           </button>
         ))}
       </nav>
@@ -400,31 +399,6 @@ function SoldierNetwork({
             </section>
           ) : null}
 
-          {tab === "ranking" ? (
-            <section className={styles.panel}>
-              <SectionTitle eyebrow="SEASON CLAN RANKING" title="Clan standings" />
-              <div className={styles.podium}>
-                {ranking.slice(0, 3).map((clan, index) => (
-                  <button type="button" key={clan.id} onClick={() => onOpenClan(clan.id)}>
-                    <em>#{index + 1}</em>
-                    <ClanEmblem clan={clan} size="sm" />
-                    <strong>{clan.name}</strong>
-                    <span>{clan.score.toLocaleString()}</span>
-                  </button>
-                ))}
-              </div>
-              <div className={styles.rankingList}>
-                {ranking.slice(3).map((clan) => (
-                  <button type="button" key={clan.id} onClick={() => onOpenClan(clan.id)}>
-                    <span>#{clan.rank}</span>
-                    <ClanEmblem clan={clan} size="sm" />
-                    <div><strong>{clan.name}</strong><em>Level {clan.level} · {clan.members}/{clan.capacity}</em></div>
-                    <b>{clan.score.toLocaleString()}</b>
-                  </button>
-                ))}
-              </div>
-            </section>
-          ) : null}
         </motion.div>
       </AnimatePresence>
     </div>
@@ -953,7 +927,7 @@ export function ClanPage() {
       <main className={styles.page}>
         <GameHeader />
 
-        <header className={`${styles.pageHeader} ${clan.membership === "member" ? styles.pageHeaderCompact : ""}`}>
+        <header className={`${styles.pageHeader} ${clan.membership === "member" ? styles.pageHeaderCompact : ""} ${earnLevel >= 5 && clan.role === null ? styles.pageHeaderWrap : ""}`}>
           <span>{pageCopy.eyebrow}</span>
           <h1>{pageCopy.title}</h1>
           <p>{pageCopy.subtitle}</p>
