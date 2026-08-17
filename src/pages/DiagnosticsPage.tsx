@@ -1,8 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { StatusChip } from "@/design-system/primitives/StatusChip";
 import { Button } from "@/design-system/primitives/Button";
+import {
+  getMobilePerformanceSnapshot,
+  mobilePerformanceSampleEvent,
+  resetMobilePerformanceMetrics,
+  setMobilePerformanceMonitorEnabled,
+  type MobilePerfSnapshot,
+} from "@/design-system/performance/mobilePerf";
 import { assetRegistry, listAssetsForPhase } from "@/assets/registry";
 import { useOnboardingStore } from "@/game/onboarding/onboardingStore";
 import { useScenarioStore } from "@/game/scenarios/scenarioStore";
@@ -34,6 +41,7 @@ export function DiagnosticsPage() {
   const clan = useClanStore();
   const arena = useArenaWarStore();
   const { adapter, colorScheme, stableHeight, insets, isFullscreen, isMobileClient } = useTelegram();
+  const [perfSnapshot, setPerfSnapshot] = useState<MobilePerfSnapshot>(() => getMobilePerformanceSnapshot());
   const bootstrap = useQuery({
     queryKey: queryKeys.bootstrap(scenario),
     queryFn: () => loadBootstrap(scenario, adapter.platform),
@@ -44,7 +52,18 @@ export function DiagnosticsPage() {
     return adapter.showBackButton(() => navigate({ to: returnPath }));
   }, [adapter, navigate]);
 
+  useEffect(() => {
+    const refresh = () => setPerfSnapshot(getMobilePerformanceSnapshot());
+    window.addEventListener(mobilePerformanceSampleEvent, refresh);
+    refresh();
+    return () => window.removeEventListener(mobilePerformanceSampleEvent, refresh);
+  }, []);
+
   const safeArea = insets.contentSafeArea;
+  const recentPerfSamples = perfSnapshot.samples.slice(0, 5);
+  const averageInputToFrame = recentPerfSamples.length > 0
+    ? recentPerfSamples.reduce((sum, sample) => sum + sample.inputToFrameMs, 0) / recentPerfSamples.length
+    : 0;
 
   const resetJourney = () => {
     onboarding.reset();
@@ -262,6 +281,43 @@ export function DiagnosticsPage() {
             <Button tone="secondary" size="sm" onClick={() => openArenaStatus("debuff")}>Temporary debuff</Button>
             <Button tone="secondary" size="sm" onClick={openSeasonOneArena}>Open public Arena</Button>
           </div>
+        </article>
+
+        <article>
+          <StatusChip>{perfSnapshot.enabled ? "Mobile perf recording" : "Mobile perf ready"}</StatusChip>
+          <h2>Mobile interaction performance</h2>
+          <dl>
+            <div><dt>Recorder</dt><dd>{perfSnapshot.enabled ? "ON" : "OFF"}</dd></div>
+            <div><dt>Recent samples</dt><dd>{perfSnapshot.samples.length}</dd></div>
+            <div><dt>Avg tap → frame</dt><dd>{averageInputToFrame ? `${averageInputToFrame.toFixed(1)}ms` : "—"}</dd></div>
+            <div><dt>Worst frame gap</dt><dd>{perfSnapshot.worstFrameGapMs ? `${perfSnapshot.worstFrameGapMs.toFixed(1)}ms` : "—"}</dd></div>
+            <div><dt>Long tasks</dt><dd>{perfSnapshot.longTaskCount}</dd></div>
+            <div><dt>Worst long task</dt><dd>{perfSnapshot.worstLongTaskMs ? `${perfSnapshot.worstLongTaskMs.toFixed(1)}ms` : "unsupported / none"}</dd></div>
+          </dl>
+          {recentPerfSamples.length > 0 ? (
+            <>
+              <h2>Latest interactions</h2>
+              <dl>
+                {recentPerfSamples.map((sample) => (
+                  <div key={sample.id}>
+                    <dt>{sample.label}</dt>
+                    <dd>{sample.inputToFrameMs.toFixed(1)} / {sample.frameGapMs.toFixed(1)}ms</dd>
+                  </div>
+                ))}
+              </dl>
+            </>
+          ) : null}
+          <div className={styles.actions}>
+            <Button
+              tone="secondary"
+              size="sm"
+              onClick={() => setMobilePerformanceMonitorEnabled(!perfSnapshot.enabled)}
+            >
+              {perfSnapshot.enabled ? "Stop recorder" : "Start recorder"}
+            </Button>
+            <Button tone="secondary" size="sm" onClick={resetMobilePerformanceMetrics}>Reset metrics</Button>
+          </div>
+          <p>Values show tap→next-frame / following frame gap. Test Bottom Nav, tabs and overlays on the real Telegram phone client, then return here.</p>
         </article>
 
         <article>

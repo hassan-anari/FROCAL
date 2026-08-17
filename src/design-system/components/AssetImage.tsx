@@ -5,7 +5,7 @@ interface AssetImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, "src
   assetKey: AssetKey;
 }
 
-export function AssetImage({ assetKey, onError, ...props }: AssetImageProps) {
+export function AssetImage({ assetKey, onError, decoding = "async", ...props }: AssetImageProps) {
   const asset = getAsset(assetKey);
   const [failedAssetKey, setFailedAssetKey] = useState<AssetKey | null>(null);
   const src = failedAssetKey === assetKey ? "/assets/system/missing-asset.svg" : asset.path;
@@ -15,6 +15,7 @@ export function AssetImage({ assetKey, onError, ...props }: AssetImageProps) {
       {...props}
       src={src}
       alt={asset.alt}
+      decoding={decoding}
       onError={(event) => {
         setFailedAssetKey(assetKey);
         onError?.(event);

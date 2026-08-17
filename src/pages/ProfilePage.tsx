@@ -243,7 +243,7 @@ export function ProfilePage() {
           ))}
         </nav>
 
-        <AnimatePresence mode="popLayout" initial={false}>
+        <AnimatePresence mode="sync" initial={false}>
           <motion.div
             key={activeTab}
             className={styles.tabContent}
@@ -428,7 +428,7 @@ export function ProfilePage() {
                   ))}
                 </nav>
 
-                <AnimatePresence mode="popLayout" initial={false}>
+                <AnimatePresence mode="sync" initial={false}>
                   <motion.div
                     key={collectionTab}
                     className={styles.collectionContent}

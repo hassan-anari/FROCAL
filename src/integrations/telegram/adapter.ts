@@ -59,6 +59,14 @@ function isMobileTelegramPlatform(platform?: string): boolean {
   return value === "ios" || value === "android" || value.startsWith("android_");
 }
 
+function scheduleNativeFeedback(callback: () => void): void {
+  if (typeof window === "undefined") {
+    callback();
+    return;
+  }
+  window.requestAnimationFrame(() => callback());
+}
+
 function getTelegramWebApp(): TelegramWebAppLike | null {
   if (typeof window === "undefined") return null;
   return window.Telegram?.WebApp ?? null;
@@ -116,13 +124,13 @@ export function createTelegramAdapter(): TelegramAdapter {
       if (isTelegram) app?.enableVerticalSwipes?.();
     },
     hapticImpact: (style = "light") => {
-      if (isTelegram) app?.HapticFeedback?.impactOccurred(style);
+      if (isTelegram) scheduleNativeFeedback(() => app?.HapticFeedback?.impactOccurred(style));
     },
     hapticNotice: (type) => {
-      if (isTelegram) app?.HapticFeedback?.notificationOccurred(type);
+      if (isTelegram) scheduleNativeFeedback(() => app?.HapticFeedback?.notificationOccurred(type));
     },
     selectionChanged: () => {
-      if (isTelegram) app?.HapticFeedback?.selectionChanged();
+      if (isTelegram) scheduleNativeFeedback(() => app?.HapticFeedback?.selectionChanged());
     },
     openTelegramLink: (url) => {
       if (isTelegram && app?.openTelegramLink) app.openTelegramLink(url);

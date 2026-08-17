@@ -86,15 +86,6 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
   const initials = firstName.trim().slice(0, 1).toUpperCase();
   const unreadCount = useMemo(() => notifications.filter((item) => !item.isRead).length, [notifications]);
 
-  useEffect(() => {
-    if (!notificationsOpen) return;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = previous;
-    };
-  }, [notificationsOpen]);
-
   useEffect(() => () => {
     if (seasonTapTimer.current !== null) window.clearTimeout(seasonTapTimer.current);
   }, []);

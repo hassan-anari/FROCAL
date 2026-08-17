@@ -27,9 +27,6 @@
   overscroll-behavior: contain;
   scrollbar-width: none;
   padding-bottom: calc(96px + var(--safe-bottom));
-  backface-visibility: hidden;
-  transform: translateZ(0);
-  will-change: opacity, transform;
 }
 
 .content::-webkit-scrollbar { display: none; }
@@ -108,7 +105,7 @@
   width: 34px;
   height: 30px;
   color: currentColor;
-  transition: color 170ms ease, transform 190ms ease, filter 190ms ease;
+  transition: color 150ms ease, transform 170ms ease;
 }
 
 .stationCode {
@@ -155,7 +152,6 @@
 .active .navGlyph {
   color: var(--nav-accent);
   transform: translateY(-2px) scale(1.08);
-  filter: drop-shadow(0 0 8px rgba(var(--nav-accent-rgb), .42));
 }
 
 .active .navGlyph::after {
@@ -164,8 +160,8 @@
   inset: 3px;
   z-index: -1;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(var(--nav-accent-rgb), .14), transparent 68%);
-  filter: blur(3px);
+  background: radial-gradient(circle, rgba(var(--nav-accent-rgb), .2), transparent 68%);
+  box-shadow: 0 0 9px rgba(var(--nav-accent-rgb), .18);
 }
 
 .active .stationCode {
@@ -218,4 +214,28 @@
   .stationCode,
   .stationNode,
   .navLabel { transition: none !important; }
+}
+
+/*
+ * Route motion deliberately lives on this tiny viewport overlay instead of the
+ * scroll container. Animating the full scroll surface made mobile WebViews
+ * promote a large, image-heavy layer every time the user changed destinations.
+ */
+.routeVeil {
+  position: absolute;
+  z-index: 30;
+  inset: 0 0 calc(80px + var(--safe-bottom));
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(90deg, rgba(92, 221, 255, .045), transparent 34% 66%, rgba(174, 91, 255, .045));
+  animation: routeVeilIn 180ms cubic-bezier(.22, 1, .36, 1) both;
+}
+
+@keyframes routeVeilIn {
+  0% { opacity: .62; }
+  100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .routeVeil { animation: none; }
 }
