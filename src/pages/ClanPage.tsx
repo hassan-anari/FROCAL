@@ -126,16 +126,27 @@ function formatRemaining(ms: number): string {
   return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
-function RoomHero({ tab, shop = false }: { tab: HeadquartersTab; shop?: boolean }) {
-  const content = tab === "home"
-    ? { eyebrow: "HEADQUARTERS", title: "Main Hall", copy: "Your clan command space and live operational status." }
-    : tab === "tasks"
-      ? { eyebrow: "OPERATIONS", title: "Mission Room", copy: "Track shared objectives and individual clan contribution." }
-      : tab === "members"
-        ? { eyebrow: "ROSTER", title: "Roster Room", copy: "Review the active lineup, roles and contribution order." }
-        : shop
-          ? { eyebrow: "ARMORY", title: "Clan Shop", copy: "Spend shared Treasury on reusable clan equipment." }
-          : { eyebrow: "LOADOUT", title: "Inventory Room", copy: "Store, inspect and activate the clan's shared equipment." };
+function RoomHero({ tab, shop = false, effects = 0, hqStateLabel = "ONLINE" }: { tab: HeadquartersTab; shop?: boolean; effects?: number; hqStateLabel?: string }) {
+  if (tab === "home") {
+    return (
+      <section className={styles.homeHero}>
+        <div className={styles.homeHeroCopy}><span>HEADQUARTERS OVERVIEW</span><strong>Command overview</strong><p>Core systems, current status and clan facilities live here.</p></div>
+        <div className={styles.homeHeroMetrics}>
+          <article><span>STATUS</span><strong>{hqStateLabel}</strong></article>
+          <article><span>FACILITIES</span><strong>3 online</strong></article>
+          <article><span>EFFECTS</span><strong>{effects} active</strong></article>
+        </div>
+      </section>
+    );
+  }
+
+  const content = tab === "tasks"
+    ? { eyebrow: "OPERATIONS", title: "Mission Room", copy: "Track shared objectives and individual clan contribution." }
+    : tab === "members"
+      ? { eyebrow: "ROSTER", title: "Roster Room", copy: "Review the active lineup, roles and contribution order." }
+      : shop
+        ? { eyebrow: "ARMORY", title: "Clan Shop", copy: "Spend shared Treasury on reusable clan equipment." }
+        : { eyebrow: "LOADOUT", title: "Inventory Room", copy: "Store, inspect and activate the clan's shared equipment." };
   return (
     <section className={styles.roomHero}>
       <div className={styles.roomHeroCopy}><span>{content.eyebrow}</span><strong>{content.title}</strong><p>{content.copy}</p></div>
@@ -664,7 +675,11 @@ function Headquarters({
   const hqState: "normal" | "upgrade" | "recovery" | "max" = hasRecoveryEffect
     ? "recovery"
     : clan.hqState ?? "normal";
-  const hqStateLabel = hqState === "upgrade" ? "UPGRADE READY" : hqState === "recovery" ? "RECOVERY MODE" : hqState === "max" ? "MAX LEVEL" : null;
+  const hqStateLabel = hqState === "upgrade" ? "UPGRADE READY" : hqState === "recovery" ? "RECOVERY MODE" : hqState === "max" ? "MAX LEVEL" : "ONLINE";
+  const hqLoopSecond = Math.floor(now / 1000) % 40;
+  const showStatusArt = hqState !== "normal" && hqLoopSecond < 10;
+  const hqDisplayKey = showStatusArt ? getClanHqStateAssetKey(hqState, clan.level) : getClanHqStateAssetKey("normal", clan.level);
+  const activeEffectCount = activeEffects.filter((effect) => effect.endsAt > now).length;
 
   return (
     <div className={styles.stack}>
@@ -686,10 +701,19 @@ function Headquarters({
             animate={{ y: [0, -4, 0] }}
             transition={{ duration: 4.6, repeat: Infinity, ease: "easeInOut" }}
           >
-            <AssetImage assetKey={getClanHqStateAssetKey(hqState, clan.level)} className={styles.hqArt} />
+            <motion.div
+              key={hqDisplayKey}
+              initial={{ opacity: 0, scale: .985 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.01 }}
+              transition={{ duration: .45, ease: "easeOut" }}
+              className={styles.hqArtSwap}
+            >
+              <AssetImage assetKey={hqDisplayKey} className={styles.hqArt} />
+            </motion.div>
           </motion.div>
           <div className={styles.hqLevelPill}>HQ LVL {clan.level}</div>
-          {hqStateLabel ? <div className={`${styles.hqStatePill} ${styles[`hqState${hqState}`]}`}>{hqStateLabel}</div> : null}
+          {showStatusArt ? <div className={`${styles.hqStatePill} ${styles[`hqState${hqState}`]}`}>{hqStateLabel}</div> : null}
         </div>
 
         <div className={styles.hqHud}>
@@ -723,7 +747,7 @@ function Headquarters({
           exit={{ opacity: 0, y: -5 }}
           transition={mobileMotion.tab}
         >
-          <RoomHero tab={tab} shop={tab === "inventory" && inventoryMode === "shop"} />
+          <RoomHero tab={tab} shop={tab === "inventory" && inventoryMode === "shop"} effects={activeEffectCount} hqStateLabel={hqStateLabel} />
 
           {tab === "home" ? (
             <>
@@ -831,9 +855,16 @@ function Headquarters({
               {inventoryMode === "owned" || !captain ? (
                 <section className={styles.panel}>
                   <SectionTitle eyebrow="SHARED LOADOUT" title="Clan Inventory" action={<span className={styles.sectionHint}>{totalOwnedItems} items · {ownedItems.length} types</span>} />
-                  <div className={styles.itemGrid}>
-                    {ownedItems.map((item) => <ItemCard key={item.id} item={item} quantity={itemQuantity(item.id)} onOpen={() => onOpenItem(item.id, "inventory")} />)}
-                  </div>
+                  {ownedItems.length > 0 ? (
+                    <div className={styles.itemGrid}>
+                      {ownedItems.map((item) => <ItemCard key={item.id} item={item} quantity={itemQuantity(item.id)} onOpen={() => onOpenItem(item.id, "inventory")} />)}
+                    </div>
+                  ) : (
+                    <div className={styles.inventoryEmpty}>
+                      <strong>No shared items yet</strong>
+                      <p>The clan inventory is empty. Buy equipment from the Shop and it will appear here for activation and use.</p>
+                    </div>
+                  )}
                 </section>
               ) : (
                 <section className={styles.panel}>

@@ -229,19 +229,26 @@
 .trophyHero {
   position: relative;
   display: grid;
-  grid-template-columns: 132px minmax(0,1fr);
+  grid-template-columns: 138px minmax(0,1fr);
   align-items: center;
   min-height: 150px;
   overflow: hidden;
-  padding: .65rem;
+  padding: .8rem;
   border: 1px solid rgba(154, 141, 255, .13);
   border-radius: 20px;
   background:
     radial-gradient(circle at 24% 45%, rgba(119, 94, 235, .13), transparent 8rem),
     linear-gradient(150deg, rgba(10, 20, 42, .9), rgba(7, 9, 23, .93));
 }
-.trophyHeroArt { width: 138px; height: 138px; object-fit: contain; filter: drop-shadow(0 14px 15px rgba(0,0,0,.34)); }
-.trophyHero > div { display: grid; gap: .18rem; min-width: 0; }
+.trophyHeroArt {
+  justify-self: start;
+  width: 128px;
+  height: 128px;
+  object-fit: contain;
+  margin-left: .06rem;
+  filter: drop-shadow(0 14px 15px rgba(0,0,0,.34));
+}
+.trophyHero > div { display: grid; gap: .26rem; min-width: 0; padding-right: .1rem; }
 .trophyHero span { color: #82eaff; font-size: .58rem; font-weight: 900; letter-spacing: .11em; }
 .trophyHero strong { color: #f4f7ff; font-size: .83rem; }
 .trophyHero p { margin: 0; color: rgba(191, 205, 233, .6); font-size: .65rem; line-height: 1.42; }
@@ -283,6 +290,6 @@
 .achievementUnlocked > i > em { background: #65e0b6; }
 
 @media (max-width: 350px) {
-  .trophyHero { grid-template-columns: 110px minmax(0,1fr); }
-  .trophyHeroArt { width: 116px; height: 116px; }
+  .trophyHero { grid-template-columns: 112px minmax(0,1fr); gap: .56rem; padding: .72rem; }
+  .trophyHeroArt { width: 104px; height: 104px; }
 }

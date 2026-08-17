@@ -569,6 +569,7 @@
 .hqRank { align-self: start; padding: .28rem .42rem; border: 1px solid rgba(var(--clan-accent-rgb), .13); border-radius: 999px; color: var(--clan-accent); background: rgba(4,10,22,.62); font-size: .66rem; font-weight: 850; }
 .hqArtStage { position: relative; z-index: 2; display: grid; place-items: center; min-height: 280px; margin-top: -.3rem; }
 .hqArtFloat { display: grid; place-items: center; width: 100%; }
+.hqArtSwap { display: grid; place-items: center; width: 100%; }
 .hqArt { width: min(82vw, 335px); filter: drop-shadow(0 24px 26px rgba(0,0,0,.42)); }
 .hqLevelPill {
   position: absolute;
@@ -765,6 +766,18 @@
 .memberList b { color: rgba(227, 237, 252, .78); font-size: .67rem; font-weight: 790; }
 
 .itemGrid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: .5rem; }
+.inventoryEmpty {
+  display: grid;
+  place-items: center;
+  min-height: 174px;
+  padding: 1rem .9rem;
+  border: 1px dashed rgba(123, 180, 245, .13);
+  border-radius: 19px;
+  background: linear-gradient(160deg, rgba(10, 23, 48, .54), rgba(4, 9, 22, .6));
+  text-align: center;
+}
+.inventoryEmpty strong { color: #eef6ff; font-size: .82rem; }
+.inventoryEmpty p { max-width: 270px; margin: .3rem 0 0; color: rgba(188, 204, 232, .58); font-size: .67rem; line-height: 1.5; }
 .itemCard {
   display: grid;
   overflow: hidden;
@@ -1142,14 +1155,40 @@
 .activeEffectsTrack strong { overflow: hidden; color: #eff8ff; font-size: .66rem; text-overflow: ellipsis; white-space: nowrap; }
 .activeEffectsTrack span { color: #79e9c1; font-size: .58rem; font-weight: 780; }
 
+.homeHero {
+  display: grid;
+  gap: .7rem;
+  padding: .78rem .8rem;
+  border: 1px solid rgba(125, 177, 239, .11);
+  border-radius: 19px;
+  background:
+    radial-gradient(circle at 92% 20%, rgba(86, 86, 216, .1), transparent 7rem),
+    linear-gradient(150deg, rgba(8, 20, 42, .88), rgba(5, 9, 22, .92));
+}
+.homeHeroCopy { display: grid; gap: .1rem; }
+.homeHeroCopy > span { color: #70e6ff; font-size: .58rem; font-weight: 900; letter-spacing: .12em; }
+.homeHeroCopy > strong { color: #f3f7ff; font-size: .84rem; }
+.homeHeroCopy > p { max-width: 280px; margin: 0; color: rgba(190, 205, 233, .58); font-size: .65rem; line-height: 1.44; }
+.homeHeroMetrics { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: .45rem; }
+.homeHeroMetrics article {
+  display: grid;
+  gap: .08rem;
+  min-height: 56px;
+  padding: .55rem .5rem;
+  border: 1px solid rgba(123, 179, 242, .08);
+  border-radius: 14px;
+  background: rgba(4, 10, 25, .46);
+}
+.homeHeroMetrics span { color: rgba(187, 202, 230, .58); font-size: .56rem; font-weight: 820; letter-spacing: .08em; }
+.homeHeroMetrics strong { color: #eff7ff; font-size: .7rem; }
 .roomHero {
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 132px;
   align-items: center;
-  min-height: 116px;
+  min-height: 120px;
   overflow: hidden;
-  padding: .7rem .72rem;
+  padding: .78rem .86rem;
   border: 1px solid rgba(125, 177, 239, .11);
   border-radius: 19px;
   background:
@@ -1163,8 +1202,8 @@
 .roomHeroArt {
   position: absolute;
   top: 50%;
-  right: -.3rem;
-  width: 145px;
+  right: .38rem;
+  width: 132px;
   transform: translateY(-50%);
   filter: drop-shadow(0 13px 14px rgba(0,0,0,.35));
   opacity: .96;
@@ -1207,6 +1246,7 @@
 
 @media (max-width: 360px) {
   .facilityRail { grid-template-columns: 1fr; }
+  .homeHeroMetrics { grid-template-columns: 1fr; }
   .roomHero { grid-template-columns: minmax(0,1fr) 112px; }
-  .roomHeroArt { width: 126px; }
+  .roomHeroArt { right: .25rem; width: 116px; }
 }
