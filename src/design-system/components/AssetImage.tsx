@@ -1,14 +1,15 @@
 import { useState, type ImgHTMLAttributes } from "react";
-import { getAsset, type AssetKey } from "@/assets/registry";
+import { getAsset, getAssetPath, type AssetKey } from "@/assets/registry";
+import { retainRenderedAssetImage } from "@/assets/runtimeImageCache";
 
 interface AssetImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, "src" | "alt"> {
   assetKey: AssetKey;
 }
 
-export function AssetImage({ assetKey, onError, decoding = "async", ...props }: AssetImageProps) {
+export function AssetImage({ assetKey, onError, onLoad, decoding = "async", ...props }: AssetImageProps) {
   const asset = getAsset(assetKey);
   const [failedAssetKey, setFailedAssetKey] = useState<AssetKey | null>(null);
-  const src = failedAssetKey === assetKey ? "/assets/system/missing-asset.svg" : asset.path;
+  const src = failedAssetKey === assetKey ? getAssetPath("system.missing") : getAssetPath(assetKey);
 
   return (
     <img
@@ -16,6 +17,10 @@ export function AssetImage({ assetKey, onError, decoding = "async", ...props }: 
       src={src}
       alt={asset.alt}
       decoding={decoding}
+      onLoad={(event) => {
+        retainRenderedAssetImage(event.currentTarget);
+        onLoad?.(event);
+      }}
       onError={(event) => {
         setFailedAssetKey(assetKey);
         onError?.(event);

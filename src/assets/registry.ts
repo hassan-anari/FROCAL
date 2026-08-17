@@ -18,8 +18,13 @@ export function getAsset(key: AssetKey): AssetRecord {
   return asset;
 }
 
+function withAssetVersion(path: string): string {
+  const separator = path.includes("?") ? "&" : "?";
+  return `${path}${separator}v=${encodeURIComponent(manifest.version)}`;
+}
+
 export function getAssetPath(key: AssetKey): string {
-  return getAsset(key).path;
+  return withAssetVersion(getAsset(key).path);
 }
 
 export function listAssetsForPhase(phase: number): AssetRecord[] {
