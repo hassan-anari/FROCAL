@@ -13,6 +13,8 @@ export interface MobilePerfSample {
   longTaskTotalMs: number;
   worstLongTaskMs: number;
   stableByMs: number;
+  occurrence: number;
+  isFirstOccurrence: boolean;
 }
 
 export interface MobilePerfSnapshot {
@@ -36,6 +38,7 @@ interface ActiveInteraction {
   startedAt: number;
   deadlineAt: number;
   frameBudgetMs: number;
+  occurrence: number;
   firstFrameAt: number | null;
   previousFrameAt: number | null;
   maxFrameGapMs: number;
@@ -50,7 +53,6 @@ interface ActiveInteraction {
 
 const storageKey = "dalexio-mobile-perf-enabled";
 const sampleEvent = "dalexio:mobile-perf-sample";
-const maxSamples = 24;
 const interactionWindowMs = 450;
 const longTaskRetentionMs = 8_000;
 const defaultFrameBudgetMs = 16.7;
@@ -69,7 +71,9 @@ let totalLongTaskCount = 0;
 let worstLongTaskMs = 0;
 let worstInteractionFrameGapMs = 0;
 let totalDroppedFrames = 0;
+let lastPointerDownAt = 0;
 const activeInteractions = new Map<number, ActiveInteraction>();
+const interactionOccurrences = new Map<string, number>();
 
 function canUseDom(): boolean {
   return typeof window !== "undefined" && typeof document !== "undefined";
@@ -91,11 +95,14 @@ function emit(): void {
 
 function labelForTarget(target: EventTarget | null): string {
   if (!(target instanceof Element)) return "interaction";
-  const control = target.closest<HTMLElement>("button, a, [role='tab'], [role='button']");
-  if (!control) return "interaction";
-  const explicit = control.getAttribute("aria-label") || control.getAttribute("title") || control.dataset.perfLabel;
-  const text = control.textContent?.replace(/\s+/g, " ").trim();
-  return (explicit || text || control.tagName.toLowerCase()).slice(0, 56);
+  const control = target.closest<HTMLElement>(
+    "[data-perf-label], button, a, input, select, summary, [role='tab'], [role='button'], [role='menuitem'], [role='option']",
+  );
+  const element = control ?? target.closest<HTMLElement>("[aria-label], [title], h1, h2, h3, p, span, div") ?? target;
+  const explicit = element.getAttribute("aria-label") || element.getAttribute("title") || (element instanceof HTMLElement ? element.dataset.perfLabel : undefined);
+  const text = element.textContent?.replace(/\s+/g, " ").trim();
+  const fallback = element.id ? `${element.tagName.toLowerCase()}#${element.id}` : element.tagName.toLowerCase();
+  return (explicit || text || fallback || "interaction").slice(0, 72);
 }
 
 function pruneLongTasks(now: number): void {
@@ -167,9 +174,11 @@ function finalizeInteraction(interaction: ActiveInteraction): void {
       longTaskTotalMs,
       worstLongTaskMs: interactionWorstLongTaskMs,
       stableByMs: interaction.stableByMs,
+      occurrence: interaction.occurrence,
+      isFirstOccurrence: interaction.occurrence === 1,
     },
     ...samples,
-  ].slice(0, maxSamples);
+  ];
   emit();
 }
 
@@ -220,12 +229,15 @@ function interactionFrame(interactionId: number, now: number): void {
 function recordInteraction(label: string, startedAt: number): void {
   if (!enabled || !canUseDom()) return;
   const id = nextId++;
+  const occurrence = (interactionOccurrences.get(label) ?? 0) + 1;
+  interactionOccurrences.set(label, occurrence);
   const interaction: ActiveInteraction = {
     id,
     label,
     startedAt,
     deadlineAt: startedAt + interactionWindowMs,
     frameBudgetMs: estimatedFrameBudgetMs,
+    occurrence,
     firstFrameAt: null,
     previousFrameAt: null,
     maxFrameGapMs: 0,
@@ -243,11 +255,15 @@ function recordInteraction(label: string, startedAt: number): void {
 
 function handlePointerDown(event: PointerEvent): void {
   if (!enabled || event.button > 0) return;
-  const control = event.target instanceof Element
-    ? event.target.closest("button, a, [role='tab'], [role='button']")
-    : null;
-  if (!control) return;
-  recordInteraction(labelForTarget(control), performance.now());
+  lastPointerDownAt = performance.now();
+}
+
+function handleClick(event: MouseEvent): void {
+  if (!enabled) return;
+  const now = performance.now();
+  const startedAt = lastPointerDownAt > 0 && now - lastPointerDownAt < 1_000 ? lastPointerDownAt : now;
+  lastPointerDownAt = 0;
+  recordInteraction(labelForTarget(event.target), startedAt);
 }
 
 function startLongTaskObserver(): void {
@@ -311,10 +327,13 @@ function syncEnabledState(): void {
   if (!canUseDom()) return;
   if (enabled) {
     document.addEventListener("pointerdown", handlePointerDown, true);
+    document.addEventListener("click", handleClick, true);
     startLongTaskObserver();
     startFrameMonitor();
   } else {
     document.removeEventListener("pointerdown", handlePointerDown, true);
+    document.removeEventListener("click", handleClick, true);
+    lastPointerDownAt = 0;
     stopLongTaskObserver();
     stopFrameMonitor();
     cancelActiveInteractions();
@@ -352,6 +371,8 @@ export function resetMobilePerformanceMetrics(): void {
   worstLongTaskMs = 0;
   worstInteractionFrameGapMs = 0;
   totalDroppedFrames = 0;
+  lastPointerDownAt = 0;
+  interactionOccurrences.clear();
   emit();
 }
 

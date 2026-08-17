@@ -60,12 +60,15 @@ export function DiagnosticsPage() {
   }, []);
 
   const safeArea = insets.contentSafeArea;
-  const recentPerfSamples = perfSnapshot.samples.slice(0, 5);
-  const averageInputToFrame = recentPerfSamples.length > 0
-    ? recentPerfSamples.reduce((sum, sample) => sum + sample.inputToFrameMs, 0) / recentPerfSamples.length
+  const allPerfSamples = perfSnapshot.samples;
+  const firstOpenSamples = allPerfSamples.filter((sample) => sample.isFirstOccurrence);
+  const averageInputToFrame = allPerfSamples.length > 0
+    ? allPerfSamples.reduce((sum, sample) => sum + sample.inputToFrameMs, 0) / allPerfSamples.length
     : 0;
-  const recentDroppedFrames = recentPerfSamples.reduce((sum, sample) => sum + sample.droppedFrames, 0);
-  const recentLongTasks = recentPerfSamples.reduce((sum, sample) => sum + sample.longTaskCount, 0);
+  const firstOpenDroppedFrames = firstOpenSamples.reduce((sum, sample) => sum + sample.droppedFrames, 0);
+  const firstOpenLongTasks = firstOpenSamples.reduce((sum, sample) => sum + sample.longTaskCount, 0);
+  const worstFirstOpenGap = firstOpenSamples.reduce((worst, sample) => Math.max(worst, sample.maxFrameGapMs), 0);
+  const worstFirstOpenLongTask = firstOpenSamples.reduce((worst, sample) => Math.max(worst, sample.worstLongTaskMs), 0);
 
   const resetJourney = () => {
     onboarding.reset();
@@ -292,21 +295,24 @@ export function DiagnosticsPage() {
             <div><dt>Recorder</dt><dd>{perfSnapshot.enabled ? "ON" : "OFF"}</dd></div>
             <div><dt>Interaction window</dt><dd>450ms</dd></div>
             <div><dt>Frame budget</dt><dd>~{perfSnapshot.estimatedFrameBudgetMs.toFixed(1)}ms</dd></div>
-            <div><dt>Recent samples</dt><dd>{perfSnapshot.samples.length}</dd></div>
+            <div><dt>Logged interactions</dt><dd>{perfSnapshot.samples.length}</dd></div>
             <div><dt>Avg tap → frame</dt><dd>{averageInputToFrame ? `${averageInputToFrame.toFixed(1)}ms` : "—"}</dd></div>
             <div><dt>Worst interaction gap</dt><dd>{perfSnapshot.worstInteractionFrameGapMs ? `${perfSnapshot.worstInteractionFrameGapMs.toFixed(1)}ms` : "—"}</dd></div>
-            <div><dt>Dropped · latest 5</dt><dd>{recentDroppedFrames}</dd></div>
-            <div><dt>Long tasks · latest 5</dt><dd>{recentLongTasks}</dd></div>
+            <div><dt>First-open samples</dt><dd>{firstOpenSamples.length}</dd></div>
+            <div><dt>First-open worst gap</dt><dd>{worstFirstOpenGap ? `${worstFirstOpenGap.toFixed(1)}ms` : "—"}</dd></div>
+            <div><dt>First-open dropped</dt><dd>{firstOpenDroppedFrames}</dd></div>
+            <div><dt>First-open long tasks</dt><dd>{firstOpenLongTasks}</dd></div>
+            <div><dt>First-open worst LT</dt><dd>{worstFirstOpenLongTask ? `${worstFirstOpenLongTask.toFixed(1)}ms` : "none"}</dd></div>
             <div><dt>Long tasks · total</dt><dd>{perfSnapshot.totalLongTaskCount}</dd></div>
             <div><dt>Worst long task</dt><dd>{perfSnapshot.worstLongTaskMs ? `${perfSnapshot.worstLongTaskMs.toFixed(1)}ms` : "unsupported / none"}</dd></div>
           </dl>
-          {recentPerfSamples.length > 0 ? (
+          {allPerfSamples.length > 0 ? (
             <>
-              <h2>Latest interactions · full 450ms</h2>
+              <h2>All interactions · full 450ms</h2>
               <dl>
-                {recentPerfSamples.map((sample) => (
+                {allPerfSamples.map((sample) => (
                   <div key={sample.id}>
-                    <dt>{sample.label}</dt>
+                    <dt>{sample.isFirstOccurrence ? "FIRST · " : `#${sample.occurrence} · `}{sample.label}</dt>
                     <dd>tap {sample.inputToFrameMs.toFixed(1)} · max {sample.maxFrameGapMs.toFixed(1)} · drop {sample.droppedFrames} · LT {sample.longTaskCount ? `${sample.worstLongTaskMs.toFixed(0)}ms` : "0"}</dd>
                   </div>
                 ))}
@@ -323,7 +329,7 @@ export function DiagnosticsPage() {
             </Button>
             <Button tone="secondary" size="sm" onClick={resetMobilePerformanceMetrics}>Reset metrics</Button>
           </div>
-          <p>Each sample follows the full 450ms after pointer-down. “max” is the worst frame gap inside that interaction, “drop” estimates missed refresh frames using the detected phone cadence, and “LT” is the worst attributed long task.</p>
+          <p>Every interaction is kept until Reset metrics; there is no sample cap. FIRST marks the first recorded use of that control after reset so cold / first-open performance can be judged separately from repeat opens. Each sample follows the full 450ms after pointer-down.</p>
         </article>
 
         <article>
