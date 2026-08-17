@@ -3,9 +3,8 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { preloadAssets } from "@/assets/preload";
+import { preloadAssetsIdle } from "@/assets/preload";
 import { DexoStage } from "@/design-system/components/DexoStage";
-import { GameShell } from "@/design-system/components/GameShell";
 import { Button } from "@/design-system/primitives/Button";
 import {
   TYPING_DAILY_LIMIT,
@@ -100,9 +99,7 @@ export function TypingChallengePage() {
     adapter.hapticNotice(passed ? "success" : "warning");
   }, [adapter, attemptsRemaining, input, recordTypingResult, result, started, target, timeLeft]);
 
-  useEffect(() => {
-    void preloadAssets(["dexo.personalityFocused"]);
-  }, []);
+  useEffect(() => preloadAssetsIdle(["dexo.personalityFocused"], { delay: 420, batchSize: 1 }), []);
 
   useEffect(() => {
     const cleanupBack = adapter.showBackButton(returnToTypingTab);
@@ -154,8 +151,7 @@ export function TypingChallengePage() {
   };
 
   return (
-    <GameShell hideNavigation>
-      <main className={styles.page}>
+    <main className={styles.page}>
         <header className={styles.header}>
           <button type="button" onClick={returnToTypingTab} aria-label="Back to Typing tab">
             <HugeiconsIcon icon={ArrowRight01Icon} size={18} strokeWidth={1.8} />
@@ -245,7 +241,6 @@ export function TypingChallengePage() {
             </motion.div>
           )}
         </AnimatePresence>
-      </main>
-    </GameShell>
+    </main>
   );
 }

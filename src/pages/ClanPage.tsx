@@ -10,7 +10,6 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { AssetImage } from "@/design-system/components/AssetImage";
 import { GameHeader } from "@/design-system/components/GameHeader";
-import { GameShell } from "@/design-system/components/GameShell";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
 import { pulseBackgroundMotion } from "@/design-system/motion/usePauseBackgroundMotion";
 import { Button } from "@/design-system/primitives/Button";
@@ -356,13 +355,12 @@ function SoldierNetwork({
         ))}
       </nav>
 
-      <AnimatePresence mode="sync" initial={false}>
         <motion.div
           key={tab}
           className={styles.tabContent}
-          initial={{ opacity: 0, y: 7 }}
+          initial={{ opacity: .96, y: 5 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -5 }}
+         
           transition={mobileMotion.tab}
         >
           {tab === "discover" ? (
@@ -401,7 +399,6 @@ function SoldierNetwork({
           ) : null}
 
         </motion.div>
-      </AnimatePresence>
     </div>
   );
 }
@@ -716,13 +713,12 @@ function Headquarters({
         ))}
       </nav>
 
-      <AnimatePresence mode="sync" initial={false}>
         <motion.div
           key={tab}
           className={styles.tabContent}
-          initial={{ opacity: 0, y: 7 }}
+          initial={{ opacity: .96, y: 5 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -5 }}
+         
           transition={mobileMotion.tab}
         >
           <RoomHero tab={tab} shop={tab === "inventory" && inventoryMode === "shop"} effects={activeEffectCount} hqStateLabel={hqStateLabel} />
@@ -863,7 +859,6 @@ function Headquarters({
             </>
           ) : null}
         </motion.div>
-      </AnimatePresence>
     </div>
   );
 }
@@ -924,8 +919,7 @@ export function ClanPage() {
   };
 
   return (
-    <GameShell>
-      <main className={styles.page}>
+    <main className={styles.page}>
         <GameHeader />
 
         <header className={`${styles.pageHeader} ${clan.membership === "member" ? styles.pageHeaderCompact : ""} ${earnLevel >= 5 && clan.role === null ? styles.pageHeaderWrap : ""}`}>
@@ -1020,7 +1014,6 @@ export function ClanPage() {
             />
           ) : null}
         </AnimatePresence>
-      </main>
-    </GameShell>
+    </main>
   );
 }

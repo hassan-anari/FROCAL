@@ -93,8 +93,14 @@ html.motion-page-hidden *::after {
 
 /* Mobile WebViews stay smoother when ambient CSS effects pause briefly while
    the user is navigating, switching tabs, or interacting with an overlay. */
-html.motion-overlay-open [data-game-scroll] *,
-html.motion-overlay-open [data-game-scroll] *::before,
-html.motion-overlay-open [data-game-scroll] *::after {
-  animation-play-state: paused !important;
+html.motion-overlay-open [data-game-scroll] {
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
+
+button,
+[role="button"] {
+  touch-action: manipulation;
 }

@@ -2,14 +2,12 @@ import { ArrowRight01Icon, Notification03Icon } from "@hugeicons/core-free-icons
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useScenarioStore } from "@/game/scenarios/scenarioStore";
 import { useEarnStore } from "@/game/earn/earnStore";
 import { loadBootstrap } from "@/integrations/api/bootstrap";
 import { queryKeys } from "@/integrations/api/queryKeys";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
-import { mobileMotion } from "@/design-system/motion/mobileMotion";
 import { usePauseBackgroundMotion } from "@/design-system/motion/usePauseBackgroundMotion";
 import styles from "./GameHeader.module.css";
 
@@ -86,15 +84,6 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
   const initials = firstName.trim().slice(0, 1).toUpperCase();
   const unreadCount = useMemo(() => notifications.filter((item) => !item.isRead).length, [notifications]);
 
-  useEffect(() => {
-    if (!notificationsOpen) return;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = previous;
-    };
-  }, [notificationsOpen]);
-
   useEffect(() => () => {
     if (seasonTapTimer.current !== null) window.clearTimeout(seasonTapTimer.current);
   }, []);
@@ -161,59 +150,50 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
         </div>
       </header>
 
-      <AnimatePresence>
-        {notificationsOpen ? (
-          <motion.div
-            className={styles.notificationBackdrop}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={mobileMotion.micro}
-            onPointerDown={(event) => {
-              if (event.target === event.currentTarget) setNotificationsOpen(false);
-            }}
-          >
-            <motion.section
-              className={styles.notificationPanel}
-              initial={{ opacity: 0, y: -16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={mobileMotion.overlay}
-              aria-label="Notifications"
-            >
-              <header className={styles.notificationHeader}>
-                <div>
-                  <span>Activity feed</span>
-                  <h2>Notifications</h2>
-                </div>
-                <div className={styles.notificationHeaderActions}>
-                  {unreadCount > 0 ? <button type="button" className={styles.markAllButton} onClick={markAllRead}>Mark all read</button> : null}
-                  <button type="button" className={styles.closeButton} onClick={() => setNotificationsOpen(false)} aria-label="Close notifications">×</button>
-                </div>
-              </header>
+      <div
+        className={`${styles.notificationBackdrop} ${notificationsOpen ? styles.notificationOpen : ""}`}
+        aria-hidden={!notificationsOpen}
+        onPointerDown={(event) => {
+          if (event.target === event.currentTarget) setNotificationsOpen(false);
+        }}
+      >
+        <section
+          className={styles.notificationPanel}
+          aria-label="Notifications"
+          role="dialog"
+          aria-modal={notificationsOpen ? "true" : undefined}
+        >
+          <header className={styles.notificationHeader}>
+            <div>
+              <span>Activity feed</span>
+              <h2>Notifications</h2>
+            </div>
+            <div className={styles.notificationHeaderActions}>
+              {unreadCount > 0 ? <button type="button" className={styles.markAllButton} onClick={markAllRead}>Mark all read</button> : null}
+              <button type="button" className={styles.closeButton} onClick={() => setNotificationsOpen(false)} aria-label="Close notifications">×</button>
+            </div>
+          </header>
 
-              <div className={styles.notificationList}>
-                {notifications.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    className={`${styles.notificationItem} ${item.isRead ? styles.notificationRead : ""}`}
-                    onClick={() => markRead(item.id)}
-                  >
-                    <span className={`${styles.notificationGlyph} ${styles[item.type]}`}>{item.type.slice(0, 1).toUpperCase()}</span>
-                    <span className={styles.notificationCopy}>
-                      <span>{item.title}</span>
-                      <strong>{item.message}</strong>
-                      <small>{item.createdAt} ago</small>
-                    </span>
-                    <HugeiconsIcon icon={ArrowRight01Icon} size={16} strokeWidth={1.7} />
-                  </button>
-                ))}
-              </div>
-            </motion.section>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+          <div className={styles.notificationList}>
+            {notifications.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={`${styles.notificationItem} ${item.isRead ? styles.notificationRead : ""}`}
+                onClick={() => markRead(item.id)}
+              >
+                <span className={`${styles.notificationGlyph} ${styles[item.type]}`}>{item.type.slice(0, 1).toUpperCase()}</span>
+                <span className={styles.notificationCopy}>
+                  <span>{item.title}</span>
+                  <strong>{item.message}</strong>
+                  <small>{item.createdAt} ago</small>
+                </span>
+                <HugeiconsIcon icon={ArrowRight01Icon} size={16} strokeWidth={1.7} />
+              </button>
+            ))}
+          </div>
+        </section>
+      </div>
     </>
   );
 }

@@ -32,6 +32,10 @@
 .content::-webkit-scrollbar { display: none; }
 .contentFull { padding-bottom: 0; }
 
+.routeSurface {
+  min-height: 100%;
+}
+
 /*
  * A single navigation rail instead of five app-style tab buttons.
  * Every destination has equal visual weight. The rail/node metaphor makes the

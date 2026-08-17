@@ -7,12 +7,11 @@ import {
   Wallet01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
-import { preloadAssets } from "@/assets/preload";
+import { preloadAssetsIdle } from "@/assets/preload";
 import { AssetImage } from "@/design-system/components/AssetImage";
 import { GameHeader } from "@/design-system/components/GameHeader";
-import { GameShell } from "@/design-system/components/GameShell";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
 import { pulseBackgroundMotion } from "@/design-system/motion/usePauseBackgroundMotion";
 import { Button } from "@/design-system/primitives/Button";
@@ -537,11 +536,13 @@ export function ArenaPage() {
 
   useEffect(() => {
     if (arena.experienceMode === "season1") {
-      void preloadAssets(seasonOneSection === "warfront" ? arenaWarfrontPreloadAssets : arenaRankingPreloadAssets);
-      return;
+      return preloadAssetsIdle(
+        seasonOneSection === "warfront" ? arenaWarfrontPreloadAssets : arenaRankingPreloadAssets,
+        { delay: 420, batchSize: 1 },
+      );
     }
     const assets = arena.hubSection === "overview" ? arenaOverviewPreloadAssets : arena.hubSection === "war" ? arenaWarPreloadAssets : arena.hubSection === "history" ? arenaHistoryPreloadAssets : arenaRankingPreloadAssets;
-    void preloadAssets(assets);
+    return preloadAssetsIdle(assets, { delay: 420, batchSize: 1 });
   }, [arena.experienceMode, arena.hubSection, seasonOneSection]);
 
   const selectSection = (section: ArenaHubSection) => {
@@ -576,8 +577,7 @@ export function ArenaPage() {
   };
 
   return (
-    <GameShell>
-      <main className={styles.page}>
+    <main className={styles.page}>
         <GameHeader />
 
         {arena.experienceMode === "season1" ? (
@@ -597,11 +597,9 @@ export function ArenaPage() {
               </button>
             </nav>
 
-            <AnimatePresence mode="sync" initial={false}>
-              <motion.div key={seasonOneSection} className={styles.sectionContent} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={mobileMotion.tab}>
+            <motion.div key={seasonOneSection} className={styles.sectionContent} initial={{ opacity: .96, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={mobileMotion.tab}>
                 {seasonOneSection === "warfront" ? <SeasonOneWarfront /> : <Rankings mode={rankingMode} onMode={(mode) => { adapter.selectionChanged(); setRankingMode(mode); }} rankedClans={rankedClans} ownClan={ownClan} level={level} currentName={currentName} currentPhotoUrl={currentPhotoUrl} showSeasonHero />}
-              </motion.div>
-            </AnimatePresence>
+            </motion.div>
           </>
         ) : (
           <>
@@ -615,18 +613,15 @@ export function ArenaPage() {
               {(["overview", "war", "history", "rankings"] as ArenaHubSection[]).map((section) => <button key={section} type="button" className={arena.hubSection === section ? styles.arenaTabActive : ""} onClick={() => selectSection(section)}>{section === "overview" ? "Overview" : section === "war" ? "War" : section === "history" ? "History" : "Rankings"}</button>)}
             </nav>
 
-            <AnimatePresence mode="sync" initial={false}>
-              <motion.div key={arena.hubSection} className={styles.sectionContent} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={mobileMotion.tab}>
+            <motion.div key={arena.hubSection} className={styles.sectionContent} initial={{ opacity: .96, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={mobileMotion.tab}>
                 {arena.hubSection === "overview" ? <ArenaOverview captain={captain} ownClan={ownClan} rival={rival} scenario={arena.scenario} ownProgress={arena.battleProgress} enemyProgress={arena.enemyProgress} onOpenWar={() => arena.setHubSection("war")} onFindTarget={openTargeting} onOpenHistory={() => arena.setHubSection("history")} /> : null}
                 {arena.hubSection === "war" ? warContent() : null}
                 {arena.hubSection === "history" ? <WarHistory onOpenRankings={() => arena.setHubSection("rankings")} /> : null}
                 {arena.hubSection === "rankings" ? <Rankings mode={rankingMode} onMode={(mode) => { adapter.selectionChanged(); setRankingMode(mode); }} rankedClans={rankedClans} ownClan={ownClan} level={level} currentName={currentName} currentPhotoUrl={currentPhotoUrl} /> : null}
-              </motion.div>
-            </AnimatePresence>
+            </motion.div>
           </>
         )}
-      </main>
-    </GameShell>
+    </main>
   );
 
 }

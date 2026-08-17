@@ -39,25 +39,7 @@ export function ClanModal({ eyebrow, title, onClose, children, footer }: ClanMod
   usePauseBackgroundMotion(true);
 
   useEffect(() => {
-    const scrollRoot = document.querySelector<HTMLElement>("[data-game-scroll]");
-    const appRoot = document.getElementById("root");
     const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const scrollTop = scrollRoot?.scrollTop ?? 0;
-    const previousOverflow = scrollRoot?.style.overflow ?? "";
-    const previousTouchAction = scrollRoot?.style.touchAction ?? "";
-    const previousOverscroll = scrollRoot?.style.overscrollBehavior ?? "";
-    const rootWasInert = appRoot?.hasAttribute("inert") ?? false;
-    const rootAriaHidden = appRoot?.getAttribute("aria-hidden") ?? null;
-
-    if (scrollRoot) {
-      scrollRoot.style.overflow = "hidden";
-      scrollRoot.style.touchAction = "none";
-      scrollRoot.style.overscrollBehavior = "none";
-    }
-    if (appRoot) {
-      appRoot.setAttribute("inert", "");
-      appRoot.setAttribute("aria-hidden", "true");
-    }
 
     const timer = window.setTimeout(() => {
       sheetRef.current?.querySelector<HTMLElement>("[data-clan-primary], [data-clan-close]")?.focus({ preventScroll: true });
@@ -94,17 +76,6 @@ export function ClanModal({ eyebrow, title, onClose, children, footer }: ClanMod
     return () => {
       window.clearTimeout(timer);
       document.removeEventListener("keydown", onKeyDown);
-      if (scrollRoot) {
-        scrollRoot.style.overflow = previousOverflow;
-        scrollRoot.style.touchAction = previousTouchAction;
-        scrollRoot.style.overscrollBehavior = previousOverscroll;
-        scrollRoot.scrollTop = scrollTop;
-      }
-      if (appRoot) {
-        if (!rootWasInert) appRoot.removeAttribute("inert");
-        if (rootAriaHidden === null) appRoot.removeAttribute("aria-hidden");
-        else appRoot.setAttribute("aria-hidden", rootAriaHidden);
-      }
       previousFocus?.focus({ preventScroll: true });
     };
   }, []);

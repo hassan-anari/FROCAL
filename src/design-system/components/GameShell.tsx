@@ -8,7 +8,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { motion } from "motion/react";
-import { useLayoutEffect, type ReactNode } from "react";
+import { useLayoutEffect, useRef, type ReactNode } from "react";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
 import { pulseBackgroundMotion } from "@/design-system/motion/usePauseBackgroundMotion";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
@@ -36,10 +36,12 @@ export function GameShell({ children, className = "", hideNavigation = false }: 
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const { adapter } = useTelegram();
+  const scrollRef = useRef<HTMLDivElement | null>(null);
   const direction = Number(sessionStorage.getItem(directionKey) ?? "0");
 
   useLayoutEffect(() => {
-    pulseBackgroundMotion(240);
+    if (scrollRef.current) scrollRef.current.scrollTop = 0;
+    pulseBackgroundMotion(210);
   }, [pathname]);
 
   const openRoute = (to: GameRoute) => {
@@ -47,23 +49,28 @@ export function GameShell({ children, className = "", hideNavigation = false }: 
     const currentIndex = navigation.findIndex((item) => item.to === pathname);
     const nextIndex = navigation.findIndex((item) => item.to === to);
     sessionStorage.setItem(directionKey, String(Math.sign(nextIndex - currentIndex)));
-    adapter.selectionChanged();
     void navigate({ to });
+    adapter.selectionChanged();
   };
 
   return (
     <div className={`${styles.shell} ${className}`}>
       <div className={styles.ambient} aria-hidden="true" />
-      <motion.div
-        key={pathname}
+      <div
+        ref={scrollRef}
         data-game-scroll
         className={`${styles.content} ${hideNavigation ? styles.contentFull : ""}`}
-        initial={{ opacity: 0, x: direction * 6 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={mobileMotion.page}
       >
-        {children}
-      </motion.div>
+        <motion.div
+          key={pathname}
+          className={styles.routeSurface}
+          initial={{ opacity: .95, x: direction * 5 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={mobileMotion.page}
+        >
+          {children}
+        </motion.div>
+      </div>
       {hideNavigation ? null : (
         <nav className={styles.nav} aria-label="Primary game navigation">
           {navigation.map((item) => {

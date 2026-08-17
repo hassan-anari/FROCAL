@@ -1,6 +1,5 @@
 import { ArrowRight01Icon, Wallet01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import type { AssetKey } from "@/assets/registry";
@@ -8,7 +7,6 @@ import { DexoStage } from "@/design-system/components/DexoStage";
 import { Button } from "@/design-system/primitives/Button";
 import type { EarnHistoryEntry, LevelUpEvent, RewardEvent } from "@/game/earn/types";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
-import { mobileMotion } from "@/design-system/motion/mobileMotion";
 import { usePauseBackgroundMotion } from "@/design-system/motion/usePauseBackgroundMotion";
 import styles from "./EarnOverlays.module.css";
 
@@ -23,47 +21,27 @@ interface OverlayShellProps {
 function OverlayShell({ open, onClose, ariaLabel, children, placement = "sheet" }: OverlayShellProps) {
   usePauseBackgroundMotion(open);
 
-  useEffect(() => {
-    if (!open) return;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = previous;
-    };
-  }, [open]);
-
   if (typeof document === "undefined") return null;
 
   return createPortal(
-    <AnimatePresence>
-      {open ? (
-        <motion.div
-          className={styles.overlay}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={mobileMotion.micro}
-          role="presentation"
-          onPointerDown={(event) => {
-            if (event.target === event.currentTarget) onClose();
-          }}
-        >
-          <motion.section
-            className={`${styles.surface} ${styles[placement]}`}
-            initial={placement === "sheet" ? { opacity: 0, y: 18 } : { opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={placement === "sheet" ? { opacity: 0, y: 12 } : { opacity: 0, y: 7 }}
-            transition={mobileMotion.overlay}
-            role="dialog"
-            aria-modal="true"
-            aria-label={ariaLabel}
-          >
-            {placement === "sheet" ? <span className={styles.handle} aria-hidden="true" /> : null}
-            {children}
-          </motion.section>
-        </motion.div>
-      ) : null}
-    </AnimatePresence>,
+    <div
+      className={`${styles.overlay} ${open ? styles.overlayOpen : ""}`}
+      role="presentation"
+      aria-hidden={!open}
+      onPointerDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <section
+        className={`${styles.surface} ${styles[placement]}`}
+        role="dialog"
+        aria-modal={open ? "true" : undefined}
+        aria-label={ariaLabel}
+      >
+        {placement === "sheet" ? <span className={styles.handle} aria-hidden="true" /> : null}
+        {children}
+      </section>
+    </div>,
     document.body,
   );
 }

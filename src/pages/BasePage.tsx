@@ -4,12 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { preloadAssets } from "@/assets/preload";
+import { preloadAssetsIdle } from "@/assets/preload";
 import { getAssetPath } from "@/assets/registry";
 import type { AssetKey } from "@/assets/registry";
 import { DexoStage } from "@/design-system/components/DexoStage";
 import { GameHeader } from "@/design-system/components/GameHeader";
-import { GameShell } from "@/design-system/components/GameShell";
 import { Button } from "@/design-system/primitives/Button";
 import { useOnboardingStore } from "@/game/onboarding/onboardingStore";
 import { useScenarioStore } from "@/game/scenarios/scenarioStore";
@@ -95,7 +94,7 @@ export function BasePage() {
     if (onboarding.status !== "completed") void navigate({ to: "/onboarding" });
   }, [navigate, onboarding.status]);
 
-  useEffect(() => { void preloadAssets(baseReactionAssets); }, []);
+  useEffect(() => preloadAssetsIdle(baseReactionAssets, { delay: 520, batchSize: 1 }), []);
 
   useEffect(() => {
     if (!dialogue) { setTypedDialogue(""); setIsTyping(false); return; }
@@ -148,8 +147,7 @@ export function BasePage() {
   };
 
   return (
-    <GameShell>
-      <main className={styles.page}>
+    <main className={styles.page}>
         <GameHeader />
 
         <AnimatePresence initial={false}>
@@ -277,7 +275,6 @@ export function BasePage() {
           <div><span>Season score</span><strong>{player.seasonScore}</strong></div>
           <div><span>Clan status</span><strong>Open</strong></div>
         </section>
-      </main>
-    </GameShell>
+    </main>
   );
 }

@@ -7,11 +7,10 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useNavigate } from "@tanstack/react-router";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
-import { preloadAssets } from "@/assets/preload";
+import { preloadAssetsIdle } from "@/assets/preload";
 import { GameHeader } from "@/design-system/components/GameHeader";
-import { GameShell } from "@/design-system/components/GameShell";
 import { Button } from "@/design-system/primitives/Button";
 import { HistorySheet, LevelUpReveal, NetworkGuideSheet, RewardReveal, type NetworkGuideKind } from "@/features/earn/EarnOverlays";
 import {
@@ -142,18 +141,16 @@ export function EarnPage() {
   const networkHistory = earn.history.filter((entry) => entry.type === "referral" || entry.type === "group").slice(0, 5);
   const tier = referralTier(earn.verifiedReferrals);
 
-  useEffect(() => {
-    void preloadAssets([
-      "dexo.platform",
-      "dexo.personalityFocused",
-      "dexo.personalityVictory",
-      "dexo.level05",
-      "dexo.level10",
-      "dexo.level15",
-      "dexo.level20",
-      "dexo.level30",
-    ]);
-  }, []);
+  useEffect(() => preloadAssetsIdle([
+    "dexo.platform",
+    "dexo.personalityFocused",
+    "dexo.personalityVictory",
+    "dexo.level05",
+    "dexo.level10",
+    "dexo.level15",
+    "dexo.level20",
+    "dexo.level30",
+  ], { delay: 520, batchSize: 1 }), []);
 
   useEffect(() => {
     sessionStorage.setItem(earnTabStorageKey, activeTab);
@@ -249,12 +246,9 @@ export function EarnPage() {
   };
 
   const renderMission = (mission: EarnMission, index: number, compact = false) => (
-    <motion.article
+    <article
       key={mission.id}
       className={`${styles.missionCard} ${styles[`mission_${missionTone[mission.id]}`]} ${compact ? styles.missionCompact : ""}`}
-      initial={{ opacity: 0, y: 7 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ ...mobileMotion.reveal, delay: index * .025 }}
     >
       <div className={styles.missionHeader}>
         <span className={styles.missionNumber}>{missionNumber[mission.id]}</span>
@@ -277,11 +271,11 @@ export function EarnPage() {
           {mission.status === "claimed" ? <i>✓</i> : <HugeiconsIcon icon={ArrowRight01Icon} size={15} strokeWidth={1.8} />}
         </button>
       </div>
-    </motion.article>
+    </article>
   );
 
   return (
-    <GameShell>
+    <>
       <main className={styles.page}>
         <GameHeader />
 
@@ -312,13 +306,12 @@ export function EarnPage() {
           ))}
         </nav>
 
-        <AnimatePresence mode="sync" initial={false}>
-          <motion.div
+        <motion.div
             key={activeTab}
             className={styles.tabContent}
-            initial={{ opacity: 0, x: 7 }}
+            initial={{ opacity: .96, x: 5 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -5 }}
+           
             transition={mobileMotion.tab}
           >
             {activeTab === "earn" ? (
@@ -541,8 +534,7 @@ export function EarnPage() {
                 </section>
               </>
             ) : null}
-          </motion.div>
-        </AnimatePresence>
+        </motion.div>
 
         <section className={styles.sharedStats} aria-label="Earn summary">
           <div><span>Daily streak</span><strong>{earn.streak || 0}d</strong></div>
@@ -556,6 +548,6 @@ export function EarnPage() {
       <NetworkGuideSheet kind={guideOpen} onClose={() => setGuideOpen(null)} />
       <RewardReveal reward={earn.rewardEvent} onClose={earn.dismissReward} />
       <LevelUpReveal event={earn.rewardEvent ? null : earn.levelUpEvent} onClose={earn.dismissLevelUp} />
-    </GameShell>
+    </>
   );
 }
