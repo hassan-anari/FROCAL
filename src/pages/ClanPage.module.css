@@ -693,8 +693,20 @@
   color: inherit;
   text-align: left;
 }
-.commandArt { display: grid; place-items: center; width: 58px; height: 72px; }
-.commandArt img { width: 74px; max-width: none; filter: drop-shadow(0 10px 10px rgba(0,0,0,.3)); }
+.commandArt {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 72px;
+  overflow: hidden;
+}
+.commandArt img {
+  width: 52px;
+  height: 52px;
+  max-width: 52px;
+  object-fit: contain;
+  filter: drop-shadow(0 9px 10px rgba(0,0,0,.28));
+}
 .commandRow button > div { display: grid; gap: .08rem; }
 .commandRow button div span,
 .rankPanel span { color: #70e5ff; font-size: .64rem; font-weight: 850; letter-spacing: .09em; }
@@ -1156,20 +1168,39 @@
 .activeEffectsTrack span { color: #79e9c1; font-size: .58rem; font-weight: 780; }
 
 .homeHero {
+  position: relative;
   display: grid;
-  gap: .7rem;
+  gap: .68rem;
+  overflow: hidden;
   padding: .78rem .8rem;
   border: 1px solid rgba(125, 177, 239, .11);
   border-radius: 19px;
   background:
-    radial-gradient(circle at 92% 20%, rgba(86, 86, 216, .1), transparent 7rem),
+    radial-gradient(circle at 88% 20%, rgba(86, 86, 216, .12), transparent 8rem),
     linear-gradient(150deg, rgba(8, 20, 42, .88), rgba(5, 9, 22, .92));
 }
-.homeHeroCopy { display: grid; gap: .1rem; }
+.homeHeroTop {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 126px;
+  align-items: center;
+  min-height: 76px;
+}
+.homeHeroCopy { position: relative; z-index: 2; display: grid; gap: .1rem; min-width: 0; }
 .homeHeroCopy > span { color: #70e6ff; font-size: .58rem; font-weight: 900; letter-spacing: .12em; }
 .homeHeroCopy > strong { color: #f3f7ff; font-size: .84rem; }
-.homeHeroCopy > p { max-width: 280px; margin: 0; color: rgba(190, 205, 233, .58); font-size: .65rem; line-height: 1.44; }
-.homeHeroMetrics { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: .45rem; }
+.homeHeroCopy > p { max-width: 220px; margin: 0; color: rgba(190, 205, 233, .58); font-size: .65rem; line-height: 1.44; }
+.homeHeroArt {
+  position: absolute;
+  top: 50%;
+  right: .18rem;
+  width: 118px;
+  transform: translateY(-50%);
+  object-fit: contain;
+  filter: drop-shadow(0 12px 14px rgba(0,0,0,.34));
+  opacity: .96;
+}
+.homeHeroMetrics { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: .45rem; }
 .homeHeroMetrics article {
   display: grid;
   gap: .08rem;
@@ -1213,7 +1244,7 @@
 .facilityCard {
   position: relative;
   display: grid;
-  grid-template-columns: 62px minmax(0,1fr) auto;
+  grid-template-columns: 58px minmax(0,1fr) auto;
   align-items: center;
   gap: .4rem;
   min-width: 0;
@@ -1230,7 +1261,13 @@
 .facilityCard span { color: #70e5ff; font-size: .55rem; font-weight: 900; letter-spacing: .09em; }
 .facilityCard strong { overflow: hidden; color: #f0f6ff; font-size: .69rem; text-overflow: ellipsis; white-space: nowrap; }
 .facilityCard p { margin: 0; color: rgba(185, 202, 231, .52); font-size: .59rem; line-height: 1.32; }
-.facilityArt { width: 66px; height: 74px; object-fit: contain; filter: drop-shadow(0 9px 9px rgba(0,0,0,.3)); }
+.facilityArt {
+  justify-self: center;
+  width: 52px;
+  height: 58px;
+  object-fit: contain;
+  filter: drop-shadow(0 9px 10px rgba(0,0,0,.3));
+}
 
 /* Keep the mission progress ring clean: no colored bubble inside the ring. */
 .taskSignal {
@@ -1246,7 +1283,10 @@
 
 @media (max-width: 360px) {
   .facilityRail { grid-template-columns: 1fr; }
-  .homeHeroMetrics { grid-template-columns: 1fr; }
+  .homeHeroTop { grid-template-columns: minmax(0,1fr) 102px; }
+  .homeHeroArt { right: .08rem; width: 96px; }
+  .homeHeroMetrics { gap: .32rem; }
+  .homeHeroMetrics article { padding: .48rem .4rem; }
   .roomHero { grid-template-columns: minmax(0,1fr) 112px; }
   .roomHeroArt { right: .25rem; width: 116px; }
 }

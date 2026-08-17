@@ -19,6 +19,8 @@ export const clanPreloadAssets = [
   "clan.shop",
   "clan.treasury",
   "clan.trophyHall",
+  "clan.treasuryReward",
+  "clan.trophySymbol",
   "clan.upgradeCenter",
   "clan.hq.level1",
   "clan.hq.level2",

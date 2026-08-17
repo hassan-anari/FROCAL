@@ -847,6 +847,20 @@
       "alt": "Roster slot utility module",
       "category": "clan-item",
       "requiredInPhase": 5
+    },
+    {
+      "key": "clan.treasuryReward",
+      "path": "/assets/clan/reward-asset-clan-reward.webp",
+      "alt": "Clan treasury reward chest",
+      "category": "clan",
+      "requiredInPhase": 5
+    },
+    {
+      "key": "clan.trophySymbol",
+      "path": "/assets/clan/clan-emblem-symbol.webp",
+      "alt": "Clan honor trophy symbol",
+      "category": "clan",
+      "requiredInPhase": 5
     }
   ]
 }

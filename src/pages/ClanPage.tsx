@@ -130,7 +130,10 @@ function RoomHero({ tab, shop = false, effects = 0, hqStateLabel = "ONLINE" }: {
   if (tab === "home") {
     return (
       <section className={styles.homeHero}>
-        <div className={styles.homeHeroCopy}><span>HEADQUARTERS OVERVIEW</span><strong>Command overview</strong><p>Core systems, current status and clan facilities live here.</p></div>
+        <div className={styles.homeHeroTop}>
+          <div className={styles.homeHeroCopy}><span>HEADQUARTERS OVERVIEW</span><strong>Command overview</strong><p>Core systems, current status and clan facilities live here.</p></div>
+          <AssetImage assetKey="clan.hq" className={styles.homeHeroArt} />
+        </div>
         <div className={styles.homeHeroMetrics}>
           <article><span>STATUS</span><strong>{hqStateLabel}</strong></article>
           <article><span>FACILITIES</span><strong>3 online</strong></article>
@@ -766,7 +769,7 @@ function Headquarters({
 
               <section className={styles.commandRow}>
                 <button type="button" onClick={() => setTab("inventory")}>
-                  <span className={styles.commandArt}><AssetImage assetKey="clan.upgradeCenter" /></span>
+                  <span className={styles.commandArt}><AssetImage assetKey="clan.utilityHqUpgrade" /></span>
                   <div><span>PROGRESSION</span><strong>Next HQ upgrade</strong><p>{Math.round(levelProgress * 100)}% ready</p></div>
                   <HugeiconsIcon icon={ArrowRight01Icon} size={16} strokeWidth={1.7} />
                 </button>
@@ -779,11 +782,11 @@ function Headquarters({
 
               <section className={styles.facilityRail} aria-label="Clan facilities">
                 <article className={styles.facilityCard}>
-                  <AssetImage assetKey="clan.treasury" className={styles.facilityArt} />
-                  <div><span>TREASURY ROOM</span><strong>{treasury.toLocaleString()} credits</strong><p>Shared resources ready for clan operations.</p></div>
+                  <AssetImage assetKey="clan.treasuryReward" className={styles.facilityArt} />
+                  <div><span>TREASURY</span><strong>{treasury.toLocaleString()} credits</strong><p>Shared resources ready for clan operations.</p></div>
                 </article>
                 <button type="button" className={styles.facilityCard} onClick={onOpenTrophies}>
-                  <AssetImage assetKey="clan.trophyHall" className={styles.facilityArt} />
+                  <AssetImage assetKey="clan.trophySymbol" className={styles.facilityArt} />
                   <div><span>TROPHY HALL</span><strong>{clanAchievements.filter((achievement) => achievement.unlocked).length}/{clanAchievements.length} honors</strong><p>Open the clan achievement archive.</p></div>
                   <HugeiconsIcon icon={ArrowRight01Icon} size={16} strokeWidth={1.7} />
                 </button>
