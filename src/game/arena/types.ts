@@ -14,21 +14,45 @@ export interface ArenaPlayerRank {
   accentHue: number;
 }
 
+export type ArenaWarStage =
+  | "matchmaking"
+  | "opponent"
+  | "preview"
+  | "confirm"
+  | "prepare"
+  | "items"
+  | "countdown"
+  | "battle"
+  | "final"
+  | "result"
+  | "defence"
+  | "status";
+
+export type ArenaWarResult = "victory" | "defeat" | "draw" | "successfulAttack" | "successfulDefence";
+export type ArenaWarStatus = "protection" | "recovery" | "reward" | "debuff";
+
 export interface ArenaWarStep {
-  id:
-    | "matchmaking"
-    | "opponent"
-    | "preview"
-    | "confirm"
-    | "prepare"
-    | "items"
-    | "countdown"
-    | "battle"
-    | "final"
-    | "defence";
+  id: Exclude<ArenaWarStage, "result" | "status">;
   title: string;
   description: string;
   asset: AssetKey;
+}
+
+export interface ArenaWarResultMeta {
+  id: ArenaWarResult;
+  title: string;
+  subtitle: string;
+  asset: AssetKey;
+  scoreDelta: number;
+  reward: number;
+}
+
+export interface ArenaWarStatusMeta {
+  id: ArenaWarStatus;
+  title: string;
+  subtitle: string;
+  asset: AssetKey;
+  durationLabel: string;
 }
 
 export interface ArenaSeasonSummary {

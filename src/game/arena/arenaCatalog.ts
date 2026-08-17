@@ -1,4 +1,4 @@
-import type { ArenaPlayerRank, ArenaSeasonSummary, ArenaWarStep } from "./types";
+import type { ArenaPlayerRank, ArenaSeasonSummary, ArenaWarResultMeta, ArenaWarStatusMeta, ArenaWarStep } from "./types";
 
 export const arenaSeason: ArenaSeasonSummary = {
   number: 1,
@@ -33,11 +33,48 @@ export const warFlow: ArenaWarStep[] = [
   { id: "defence", title: "Defence setup", description: "Prepare protection for incoming attacks.", asset: "war.defenceSetup" },
 ];
 
+export const warResults: ArenaWarResultMeta[] = [
+  { id: "victory", title: "Victory", subtitle: "Your clan controlled the battle and secured the seasonal win.", asset: "war.victory", scoreDelta: 620, reward: 2_400 },
+  { id: "defeat", title: "Defeat", subtitle: "The rival clan finished stronger. Recovery begins immediately.", asset: "war.defeat", scoreDelta: -180, reward: 600 },
+  { id: "draw", title: "Draw", subtitle: "Both clans closed the battle level. The seasonal score is shared.", asset: "war.draw", scoreDelta: 120, reward: 1_000 },
+  { id: "successfulAttack", title: "Attack secured", subtitle: "The offensive objective was completed before the window closed.", asset: "war.successfulAttack", scoreDelta: 420, reward: 1_800 },
+  { id: "successfulDefence", title: "Defence held", subtitle: "Your headquarters absorbed the attack and protected its standing.", asset: "war.successfulDefence", scoreDelta: 360, reward: 1_600 },
+];
+
+export const warStatuses: ArenaWarStatusMeta[] = [
+  { id: "protection", title: "Protection active", subtitle: "The headquarters cannot be targeted while the protection window is online.", asset: "war.statusProtection", durationLabel: "02h 00m" },
+  { id: "recovery", title: "Recovery mode", subtitle: "War systems are stabilizing before the clan can enter another conflict.", asset: "war.statusRecovery", durationLabel: "00h 45m" },
+  { id: "reward", title: "Reward ready", subtitle: "The battle reward is sealed and ready for the clan Treasury.", asset: "war.statusReward", durationLabel: "READY" },
+  { id: "debuff", title: "Temporary debuff", subtitle: "A short post-war penalty is affecting the next preparation window.", asset: "war.statusDebuff", durationLabel: "00h 30m" },
+];
+
 export const arenaWarfrontPreloadAssets = [
   "war.active",
   "war.matchmaking",
   "war.preparation",
   "war.defenceSetup",
+] as const;
+
+export const arenaWarDebugPreloadAssets = [
+  "war.matchmaking",
+  "war.opponent",
+  "war.opponentPreview",
+  "war.confirmation",
+  "war.preparation",
+  "war.itemSelection",
+  "war.countdown",
+  "war.active",
+  "war.finalMoments",
+  "war.defenceSetup",
+  "war.victory",
+  "war.defeat",
+  "war.draw",
+  "war.successfulAttack",
+  "war.successfulDefence",
+  "war.statusProtection",
+  "war.statusRecovery",
+  "war.statusReward",
+  "war.statusDebuff",
 ] as const;
 
 export const arenaRankingPreloadAssets = [

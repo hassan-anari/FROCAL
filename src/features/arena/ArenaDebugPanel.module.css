@@ -1,0 +1,50 @@
+.root {
+  position: fixed;
+  right: calc(.7rem + var(--safe-right));
+  bottom: calc(5.4rem + var(--safe-bottom));
+  z-index: 95;
+  display: flex;
+  align-items: flex-end;
+  gap: .48rem;
+}
+.toggle {
+  min-height: 36px;
+  padding: 0 .58rem;
+  border: 1px solid rgba(153, 127, 255, .28);
+  border-radius: 999px;
+  color: #d9d3ff;
+  background: rgba(10, 9, 28, .9);
+  box-shadow: 0 10px 25px rgba(0,0,0,.28);
+  font-size: .59rem;
+  font-weight: 850;
+}
+.panel {
+  display: grid;
+  gap: .62rem;
+  width: min(82vw, 310px);
+  max-height: min(72vh, 560px);
+  overflow-y: auto;
+  padding: .72rem;
+  border: 1px solid rgba(139, 119, 246, .18);
+  border-radius: 19px;
+  background: rgba(5, 8, 22, .96);
+  box-shadow: 0 24px 55px rgba(0,0,0,.45);
+}
+.panel header { display: grid; gap: .05rem; }
+.panel header span { color: #a99dff; font-size: .51rem; font-weight: 900; letter-spacing: .1em; }
+.panel header strong { color: #f1f4ff; font-size: .76rem; }
+.panel label { display: grid; gap: .24rem; color: rgba(190,204,231,.62); font-size: .57rem; font-weight: 760; }
+.panel select { width: 100%; min-height: 36px; padding: 0 .45rem; border: 1px solid rgba(125,177,239,.11); border-radius: 10px; color: #eef6ff; background: #071025; font-size: .59rem; }
+.unlockRow { display: flex !important; grid-template-columns: auto minmax(0,1fr); align-items: center; gap: .42rem !important; padding: .48rem; border: 1px solid rgba(126,180,242,.08); border-radius: 11px; background: rgba(8,18,39,.56); }
+.unlockRow input { accent-color: #8f78ff; }
+.twoCol { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .42rem; }
+.sliderGroup { display: grid; gap: .45rem; padding: .5rem; border: 1px solid rgba(126,180,242,.08); border-radius: 12px; background: rgba(8,18,39,.48); }
+.sliderGroup label { grid-template-columns: minmax(0,1fr) auto; align-items: center; }
+.sliderGroup b { color: #82eaff; font-size: .58rem; }
+.sliderGroup input { grid-column: 1 / -1; width: 100%; accent-color: #7f6fff; }
+.reset { min-height: 36px; border: 1px solid rgba(255,145,164,.13); border-radius: 10px; color: #ffc0ca; background: rgba(78,25,38,.25); font-size: .58rem; font-weight: 820; }
+.panel p { margin: 0; color: rgba(180,197,225,.48); font-size: .52rem; line-height: 1.4; }
+.panel code { color: #8cecff; }
+@media (max-width: 350px) { .twoCol { grid-template-columns: 1fr; } }
+
+.open {}
