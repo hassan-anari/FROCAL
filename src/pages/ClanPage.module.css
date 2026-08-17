@@ -686,7 +686,7 @@
 }
 .commandRow > button {
   display: grid;
-  grid-template-columns: 58px minmax(0,1fr) auto;
+  grid-template-columns: 68px minmax(0,1fr) auto;
   align-items: center;
   gap: .5rem;
   padding: .55rem;
@@ -696,14 +696,14 @@
 .commandArt {
   display: grid;
   place-items: center;
-  width: 58px;
-  height: 72px;
-  overflow: hidden;
+  width: 68px;
+  height: 76px;
+  overflow: visible;
 }
 .commandArt img {
-  width: 52px;
-  height: 52px;
-  max-width: 52px;
+  width: 70px;
+  height: 70px;
+  max-width: 70px;
   object-fit: contain;
   filter: drop-shadow(0 9px 10px rgba(0,0,0,.28));
 }
@@ -1184,7 +1184,7 @@
   display: grid;
   grid-template-columns: minmax(0,1fr) 126px;
   align-items: center;
-  min-height: 76px;
+  min-height: 104px;
 }
 .homeHeroCopy { position: relative; z-index: 2; display: grid; gap: .1rem; min-width: 0; }
 .homeHeroCopy > span { color: #70e6ff; font-size: .58rem; font-weight: 900; letter-spacing: .12em; }
@@ -1193,8 +1193,8 @@
 .homeHeroArt {
   position: absolute;
   top: 50%;
-  right: .18rem;
-  width: 118px;
+  right: .28rem;
+  width: 108px;
   transform: translateY(-50%);
   object-fit: contain;
   filter: drop-shadow(0 12px 14px rgba(0,0,0,.34));
@@ -1283,8 +1283,8 @@
 
 @media (max-width: 360px) {
   .facilityRail { grid-template-columns: 1fr; }
-  .homeHeroTop { grid-template-columns: minmax(0,1fr) 102px; }
-  .homeHeroArt { right: .08rem; width: 96px; }
+  .homeHeroTop { grid-template-columns: minmax(0,1fr) 102px; min-height: 92px; }
+  .homeHeroArt { right: .16rem; width: 90px; }
   .homeHeroMetrics { gap: .32rem; }
   .homeHeroMetrics article { padding: .48rem .4rem; }
   .roomHero { grid-template-columns: minmax(0,1fr) 112px; }
