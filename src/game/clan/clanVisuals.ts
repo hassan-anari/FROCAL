@@ -12,6 +12,14 @@ export const clanPreloadAssets = [
   "profile.frame.clan",
   "profile.frame.captain",
   "clan.emblemCrest",
+  "clan.hq",
+  "clan.operations",
+  "clan.roster",
+  "clan.inventory",
+  "clan.shop",
+  "clan.treasury",
+  "clan.trophyHall",
+  "clan.upgradeCenter",
   "clan.hq.level1",
   "clan.hq.level2",
   "clan.hq.level3",
@@ -24,12 +32,14 @@ export const clanPreloadAssets = [
   "clan.boosterXp",
   "clan.boosterContribution",
   "clan.boosterMission",
+  "clan.boosterCoordination",
   "clan.defenceEarlyWarning",
   "clan.defenceEmergencyRepair",
   "clan.defenceFirewall",
   "clan.defenceProtectionDome",
   "clan.utilityAlliancePermit",
   "clan.utilityCapacity",
+  "clan.utilityRosterSlot",
   "clan.utilityEventPass",
   "clan.utilityHqUpgrade",
 ] as const satisfies readonly AssetKey[];
@@ -44,6 +54,20 @@ export function getClanHqAssetKey(level: number): AssetKey {
 
 export function getClanEmblemAssetKey(): AssetKey {
   return "clan.emblemCrest";
+}
+
+export function getClanRoomAssetKey(tab: "home" | "tasks" | "members" | "inventory", shop = false): AssetKey {
+  if (tab === "home") return "clan.hq";
+  if (tab === "tasks") return "clan.operations";
+  if (tab === "members") return "clan.roster";
+  return shop ? "clan.shop" : "clan.inventory";
+}
+
+export function getClanHqStateAssetKey(state: "normal" | "upgrade" | "recovery" | "max", level: number): AssetKey {
+  if (state === "upgrade") return "clan.hq.stateUpgrade";
+  if (state === "recovery") return "clan.hq.stateRecovery";
+  if (state === "max") return "clan.hq.stateMax";
+  return getClanHqAssetKey(level);
 }
 
 export function getIdentityInitials(name: string): string {

@@ -7,13 +7,14 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion } from "motion/react";
-import { useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { AssetImage } from "@/design-system/components/AssetImage";
 import { GameHeader } from "@/design-system/components/GameHeader";
 import { GameShell } from "@/design-system/components/GameShell";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
 import { Button } from "@/design-system/primitives/Button";
 import {
+  ClanAchievementsSheet,
   ClanItemSheet,
   ClanPreviewSheet,
   JoinRequestsSheet,
@@ -32,6 +33,7 @@ import {
 } from "@/game/clan/clanCatalog";
 import { useClanStore } from "@/game/clan/clanStore";
 import type {
+  ClanActiveEffect,
   ClanEligibleGroup,
   ClanInventoryItem,
   ClanJoinApplicant,
@@ -42,7 +44,7 @@ import type {
   SoldierClanTab,
   TaskFilter,
 } from "@/game/clan/types";
-import { clanRoleArt, getClanEmblemAssetKey, getClanHqAssetKey, getIdentityHue, getIdentityInitials } from "@/game/clan/clanVisuals";
+import { clanRoleArt, getClanEmblemAssetKey, getClanHqStateAssetKey, getClanRoomAssetKey, getIdentityHue, getIdentityInitials } from "@/game/clan/clanVisuals";
 import { useEarnStore } from "@/game/earn/earnStore";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import styles from "./ClanPage.module.css";
@@ -50,8 +52,9 @@ import styles from "./ClanPage.module.css";
 type OverlayState =
   | { type: "role"; role: ClanRole }
   | { type: "clan"; clanId: string }
-  | { type: "item"; itemId: string }
+  | { type: "item"; itemId: string; source: "inventory" | "shop" }
   | { type: "requests" }
+  | { type: "trophies" }
   | null;
 
 function ClanEmblem({
@@ -112,6 +115,54 @@ function SectionTitle({ eyebrow, title, action }: { eyebrow: string; title: stri
       <div><span>{eyebrow}</span><h2>{title}</h2></div>
       {action}
     </header>
+  );
+}
+
+function formatRemaining(ms: number): string {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
+
+function RoomHero({ tab, shop = false }: { tab: HeadquartersTab; shop?: boolean }) {
+  const content = tab === "home"
+    ? { eyebrow: "HEADQUARTERS", title: "Main Hall", copy: "Your clan command space and live operational status." }
+    : tab === "tasks"
+      ? { eyebrow: "OPERATIONS", title: "Mission Room", copy: "Track shared objectives and individual clan contribution." }
+      : tab === "members"
+        ? { eyebrow: "ROSTER", title: "Roster Room", copy: "Review the active lineup, roles and contribution order." }
+        : shop
+          ? { eyebrow: "ARMORY", title: "Clan Shop", copy: "Spend shared Treasury on reusable clan equipment." }
+          : { eyebrow: "LOADOUT", title: "Inventory Room", copy: "Store, inspect and activate the clan's shared equipment." };
+  return (
+    <section className={styles.roomHero}>
+      <div className={styles.roomHeroCopy}><span>{content.eyebrow}</span><strong>{content.title}</strong><p>{content.copy}</p></div>
+      <AssetImage assetKey={getClanRoomAssetKey(tab, shop)} className={styles.roomHeroArt} />
+    </section>
+  );
+}
+
+function ActiveEffectsStrip({ effects, now }: { effects: ClanActiveEffect[]; now: number }) {
+  const active = effects
+    .filter((effect) => effect.endsAt > now)
+    .map((effect) => ({ effect, item: getClanItemById(effect.itemId) }))
+    .filter((entry): entry is { effect: ClanActiveEffect; item: ClanInventoryItem } => entry.item !== null);
+  if (active.length === 0) return null;
+
+  return (
+    <section className={styles.activeEffects}>
+      <div className={styles.activeEffectsHeading}><span>ACTIVE CLAN EFFECTS</span><strong>{active.length} online</strong></div>
+      <div className={styles.activeEffectsTrack}>
+        {active.map(({ effect, item }) => (
+          <article key={effect.id}>
+            <AssetImage assetKey={item.artKey} className={styles.activeEffectArt} />
+            <div><strong>{item.name}</strong><span>{item.activationVerb} · {formatRemaining(effect.endsAt - now)}</span></div>
+          </article>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -219,7 +270,7 @@ function ClanCard({
 function FeaturedClan({ clan, onOpen }: { clan: ClanSummary; onOpen: () => void }) {
   return (
     <button type="button" className={`${styles.featuredClan} ${styles[clan.accent]}`} onClick={onOpen}>
-      <AssetImage assetKey={getClanHqAssetKey(clan.level)} className={styles.featuredHq} />
+      <AssetImage assetKey={getClanHqStateAssetKey(clan.hqState ?? "normal", clan.level)} className={styles.featuredHq} />
       <div className={styles.featuredShade} />
       <div className={styles.featuredTop}>
         <ClanEmblem clan={clan} size="md" />
@@ -573,21 +624,31 @@ function Headquarters({
   captain,
   treasury,
   ownedItemIds,
+  activeEffects,
   applicants,
   onOpenItem,
   onOpenRequests,
+  onOpenTrophies,
 }: {
   clan: ClanSummary;
   captain: boolean;
   treasury: number;
   ownedItemIds: string[];
+  activeEffects: ClanActiveEffect[];
   applicants: ClanJoinApplicant[];
-  onOpenItem: (itemId: string) => void;
+  onOpenItem: (itemId: string, source: "inventory" | "shop") => void;
   onOpenRequests: () => void;
+  onOpenTrophies: () => void;
 }) {
   const [tab, setTab] = useState<HeadquartersTab>("home");
   const [taskFilter, setTaskFilter] = useState<TaskFilter>("active");
   const [inventoryMode, setInventoryMode] = useState<"owned" | "shop">("owned");
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const pendingRequests = applicants.filter((applicant) => applicant.status === "pending").length;
   const itemQuantity = (itemId: string) => ownedItemIds.filter((ownedId) => ownedId === itemId).length;
@@ -599,6 +660,11 @@ function Headquarters({
   const totalOwnedItems = ownedItemIds.length;
   const levelProgress = clan.id === "captain-created" ? .42 : .68;
   const nextLevel = clan.level + 1;
+  const hasRecoveryEffect = activeEffects.some((effect) => effect.itemId === "supply-cache" && effect.endsAt > now);
+  const hqState: "normal" | "upgrade" | "recovery" | "max" = hasRecoveryEffect
+    ? "recovery"
+    : clan.hqState ?? "normal";
+  const hqStateLabel = hqState === "upgrade" ? "UPGRADE READY" : hqState === "recovery" ? "RECOVERY MODE" : hqState === "max" ? "MAX LEVEL" : null;
 
   return (
     <div className={styles.stack}>
@@ -620,9 +686,10 @@ function Headquarters({
             animate={{ y: [0, -4, 0] }}
             transition={{ duration: 4.6, repeat: Infinity, ease: "easeInOut" }}
           >
-            <AssetImage assetKey={getClanHqAssetKey(clan.level)} className={styles.hqArt} />
+            <AssetImage assetKey={getClanHqStateAssetKey(hqState, clan.level)} className={styles.hqArt} />
           </motion.div>
           <div className={styles.hqLevelPill}>HQ LVL {clan.level}</div>
+          {hqStateLabel ? <div className={`${styles.hqStatePill} ${styles[`hqState${hqState}`]}`}>{hqStateLabel}</div> : null}
         </div>
 
         <div className={styles.hqHud}>
@@ -636,6 +703,8 @@ function Headquarters({
           <div className={styles.progressTrack}><i style={{ transform: `scaleX(${levelProgress})` }} /></div>
         </div>
       </section>
+
+      <ActiveEffectsStrip effects={activeEffects} now={now} />
 
       <nav className={styles.hqNav} aria-label="Clan headquarters sections">
         {(["home", "tasks", "members", "inventory"] as const).map((item) => (
@@ -654,6 +723,8 @@ function Headquarters({
           exit={{ opacity: 0, y: -5 }}
           transition={mobileMotion.tab}
         >
+          <RoomHero tab={tab} shop={tab === "inventory" && inventoryMode === "shop"} />
+
           {tab === "home" ? (
             <>
               {captain && pendingRequests > 0 ? (
@@ -671,7 +742,7 @@ function Headquarters({
 
               <section className={styles.commandRow}>
                 <button type="button" onClick={() => setTab("inventory")}>
-                  <span className={styles.commandArt}><AssetImage assetKey="clan.utilityHqUpgrade" /></span>
+                  <span className={styles.commandArt}><AssetImage assetKey="clan.upgradeCenter" /></span>
                   <div><span>PROGRESSION</span><strong>Next HQ upgrade</strong><p>{Math.round(levelProgress * 100)}% ready</p></div>
                   <HugeiconsIcon icon={ArrowRight01Icon} size={16} strokeWidth={1.7} />
                 </button>
@@ -682,22 +753,16 @@ function Headquarters({
                 </div>
               </section>
 
-              <section className={styles.panel}>
-                <SectionTitle eyebrow="CLAN HONORS" title="Progress worth keeping" />
-                <div className={styles.honorRail}>
-                  {clanAchievements.map((achievement) => {
-                    const ratio = Math.min(1, achievement.current / Math.max(1, achievement.target));
-                    return (
-                      <article key={achievement.id} className={achievement.unlocked ? styles.honorUnlocked : ""}>
-                        <span className={styles.honorRing} style={{ "--honor-progress": `${ratio * 360}deg` } as CSSProperties}>
-                          <i>{achievement.unlocked ? "✓" : Math.round(ratio * 100)}</i>
-                        </span>
-                        <strong>{achievement.name}</strong>
-                        <small>{achievement.unlocked ? "Unlocked" : `${Math.round(ratio * 100)}%`}</small>
-                      </article>
-                    );
-                  })}
-                </div>
+              <section className={styles.facilityRail} aria-label="Clan facilities">
+                <article className={styles.facilityCard}>
+                  <AssetImage assetKey="clan.treasury" className={styles.facilityArt} />
+                  <div><span>TREASURY ROOM</span><strong>{treasury.toLocaleString()} credits</strong><p>Shared resources ready for clan operations.</p></div>
+                </article>
+                <button type="button" className={styles.facilityCard} onClick={onOpenTrophies}>
+                  <AssetImage assetKey="clan.trophyHall" className={styles.facilityArt} />
+                  <div><span>TROPHY HALL</span><strong>{clanAchievements.filter((achievement) => achievement.unlocked).length}/{clanAchievements.length} honors</strong><p>Open the clan achievement archive.</p></div>
+                  <HugeiconsIcon icon={ArrowRight01Icon} size={16} strokeWidth={1.7} />
+                </button>
               </section>
 
               <section className={styles.panel}>
@@ -767,7 +832,7 @@ function Headquarters({
                 <section className={styles.panel}>
                   <SectionTitle eyebrow="SHARED LOADOUT" title="Clan Inventory" action={<span className={styles.sectionHint}>{totalOwnedItems} items · {ownedItems.length} types</span>} />
                   <div className={styles.itemGrid}>
-                    {ownedItems.map((item) => <ItemCard key={item.id} item={item} quantity={itemQuantity(item.id)} onOpen={() => onOpenItem(item.id)} />)}
+                    {ownedItems.map((item) => <ItemCard key={item.id} item={item} quantity={itemQuantity(item.id)} onOpen={() => onOpenItem(item.id, "inventory")} />)}
                   </div>
                 </section>
               ) : (
@@ -779,7 +844,7 @@ function Headquarters({
                       <section key={group.kind} className={styles.shopGroup}>
                         <div className={styles.shopGroupTitle}><span>{group.kind.toUpperCase()}</span><strong>{group.items.length} ITEMS</strong></div>
                         <div className={styles.itemGrid}>
-                          {group.items.map((item) => <ItemCard key={item.id} item={item} quantity={itemQuantity(item.id)} shop onOpen={() => onOpenItem(item.id)} />)}
+                          {group.items.map((item) => <ItemCard key={item.id} item={item} quantity={itemQuantity(item.id)} shop onOpen={() => onOpenItem(item.id, "shop")} />)}
                         </div>
                       </section>
                     ))}
@@ -843,6 +908,12 @@ export function ClanPage() {
     if (success) setOverlay(null);
   };
 
+  const activateItem = (item: ClanInventoryItem) => {
+    const success = clan.activateItem(item.id);
+    adapter.hapticNotice(success ? "success" : "warning");
+    if (success) setOverlay(null);
+  };
+
   return (
     <GameShell>
       <main className={styles.page}>
@@ -877,9 +948,11 @@ export function ClanPage() {
             captain={clan.role === "captain"}
             treasury={clan.treasury}
             ownedItemIds={clan.ownedItemIds}
+            activeEffects={clan.activeEffects}
             applicants={clan.applicants}
-            onOpenItem={(itemId) => setOverlay({ type: "item", itemId })}
+            onOpenItem={(itemId, source) => setOverlay({ type: "item", itemId, source })}
             onOpenRequests={() => setOverlay({ type: "requests" })}
+            onOpenTrophies={() => setOverlay({ type: "trophies" })}
           />
         ) : null}
 
@@ -910,11 +983,18 @@ export function ClanPage() {
                 quantity={clan.ownedItemIds.filter((ownedId) => ownedId === item.id).length}
                 captain={clan.role === "captain"}
                 treasury={clan.treasury}
+                source={overlay.source}
+                activeUntil={clan.activeEffects.find((effect) => effect.itemId === item.id && effect.endsAt > Date.now())?.endsAt ?? null}
                 onClose={() => setOverlay(null)}
                 onPurchase={() => purchaseItem(item)}
+                onActivate={() => activateItem(item)}
               />
             );
           })() : null}
+
+          {overlay?.type === "trophies" ? (
+            <ClanAchievementsSheet achievements={clanAchievements} onClose={() => setOverlay(null)} />
+          ) : null}
 
           {overlay?.type === "requests" ? (
             <JoinRequestsSheet

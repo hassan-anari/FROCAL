@@ -1,5 +1,5 @@
 {
-  "version": 7,
+  "version": 8,
   "assets": [
     {
       "key": "brand.logo",
@@ -11,7 +11,7 @@
     {
       "key": "brand.logoTagline",
       "path": "/assets/brand/dalexio-logo-tagline.svg",
-      "alt": "Dalexio \u2014 Play Grow Unite Compete",
+      "alt": "Dalexio — Play Grow Unite Compete",
       "category": "brand",
       "requiredInPhase": 0
     },
@@ -290,42 +290,42 @@
     },
     {
       "key": "clan.hq",
-      "path": "/assets/clan/clan-hq.webp",
-      "alt": "Clan headquarters",
+      "path": "/assets/clan/clan-room-main-hall.webp",
+      "alt": "Clan main hall",
       "category": "clan",
       "requiredInPhase": 5
     },
     {
       "key": "clan.roster",
-      "path": "/assets/clan/clan-room-roster.webp",
+      "path": "/assets/clan/clan-room-roster-room.webp",
       "alt": "Clan roster room",
       "category": "clan",
       "requiredInPhase": 5
     },
     {
       "key": "clan.treasury",
-      "path": "/assets/clan/clan-room-treasury.webp",
+      "path": "/assets/clan/clan-room-treasury-room.webp",
       "alt": "Clan treasury room",
       "category": "clan",
       "requiredInPhase": 5
     },
     {
       "key": "clan.operations",
-      "path": "/assets/clan/clan-room-operations.webp",
+      "path": "/assets/clan/clan-room-operations-room.webp",
       "alt": "Clan operations room",
       "category": "clan",
       "requiredInPhase": 5
     },
     {
       "key": "clan.inventory",
-      "path": "/assets/clan/clan-room-inventory.webp",
+      "path": "/assets/clan/clan-room-inventory-room.webp",
       "alt": "Clan inventory room",
       "category": "clan",
       "requiredInPhase": 5
     },
     {
       "key": "clan.alliance",
-      "path": "/assets/clan/clan-room-alliance.webp",
+      "path": "/assets/clan/clan-room-alliance-room.webp",
       "alt": "Clan alliance room",
       "category": "clan",
       "requiredInPhase": 5
@@ -803,6 +803,48 @@
       "key": "clan.utilityHqUpgrade",
       "path": "/assets/clan/utility-item-hq-upgrade-kit.webp",
       "alt": "Headquarters upgrade utility kit",
+      "category": "clan-item",
+      "requiredInPhase": 5
+    },
+    {
+      "key": "clan.shop",
+      "path": "/assets/clan/clan-room-clan-shop.webp",
+      "alt": "Clan shop room",
+      "category": "clan",
+      "requiredInPhase": 5
+    },
+    {
+      "key": "clan.trophyHall",
+      "path": "/assets/clan/clan-room-trophy-hall.webp",
+      "alt": "Clan trophy hall",
+      "category": "clan",
+      "requiredInPhase": 5
+    },
+    {
+      "key": "clan.upgradeCenter",
+      "path": "/assets/clan/clan-room-upgrade-center.webp",
+      "alt": "Clan upgrade center",
+      "category": "clan",
+      "requiredInPhase": 5
+    },
+    {
+      "key": "clan.warRoom",
+      "path": "/assets/clan/clan-room-war-room.webp",
+      "alt": "Clan war room",
+      "category": "clan",
+      "requiredInPhase": 5
+    },
+    {
+      "key": "clan.boosterCoordination",
+      "path": "/assets/clan/clan-booster-coordination-booster.webp",
+      "alt": "Clan coordination booster",
+      "category": "clan-item",
+      "requiredInPhase": 5
+    },
+    {
+      "key": "clan.utilityRosterSlot",
+      "path": "/assets/clan/utility-item-roster-slot-module.webp",
+      "alt": "Roster slot utility module",
       "category": "clan-item",
       "requiredInPhase": 5
     }

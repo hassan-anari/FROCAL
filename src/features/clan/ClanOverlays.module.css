@@ -225,3 +225,64 @@
   .requestStats { grid-template-columns: repeat(2, minmax(0,1fr)); }
   .clanHeroHq { left: 45%; width: 210px; }
 }
+
+.trophyHero {
+  position: relative;
+  display: grid;
+  grid-template-columns: 132px minmax(0,1fr);
+  align-items: center;
+  min-height: 150px;
+  overflow: hidden;
+  padding: .65rem;
+  border: 1px solid rgba(154, 141, 255, .13);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 24% 45%, rgba(119, 94, 235, .13), transparent 8rem),
+    linear-gradient(150deg, rgba(10, 20, 42, .9), rgba(7, 9, 23, .93));
+}
+.trophyHeroArt { width: 138px; height: 138px; object-fit: contain; filter: drop-shadow(0 14px 15px rgba(0,0,0,.34)); }
+.trophyHero > div { display: grid; gap: .18rem; min-width: 0; }
+.trophyHero span { color: #82eaff; font-size: .58rem; font-weight: 900; letter-spacing: .11em; }
+.trophyHero strong { color: #f4f7ff; font-size: .83rem; }
+.trophyHero p { margin: 0; color: rgba(191, 205, 233, .6); font-size: .65rem; line-height: 1.42; }
+
+.achievementList { display: grid; gap: .48rem; }
+.achievementList article {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  gap: .24rem .65rem;
+  overflow: hidden;
+  padding: .66rem;
+  border: 1px solid rgba(132, 176, 236, .09);
+  border-radius: 15px;
+  background: rgba(5, 11, 27, .64);
+}
+.achievementList article > div { display: grid; gap: .08rem; }
+.achievementList article span { color: rgba(120, 219, 245, .68); font-size: .52rem; font-weight: 900; letter-spacing: .09em; }
+.achievementList article strong { color: #eff6ff; font-size: .72rem; }
+.achievementList article p { margin: 0; color: rgba(187, 202, 231, .56); font-size: .63rem; line-height: 1.38; }
+.achievementList article > b { align-self: center; color: rgba(209, 225, 245, .7); font-size: .66rem; }
+.achievementList article > i {
+  position: relative;
+  grid-column: 1 / -1;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(116, 150, 205, .12);
+}
+.achievementList article > i > em {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #54dcff, #8f6eff);
+}
+.achievementUnlocked { border-color: rgba(99, 229, 185, .13) !important; }
+.achievementUnlocked span { color: #7eeac3 !important; }
+.achievementUnlocked > i > em { background: #65e0b6; }
+
+@media (max-width: 350px) {
+  .trophyHero { grid-template-columns: 110px minmax(0,1fr); }
+  .trophyHeroArt { width: 116px; height: 116px; }
+}

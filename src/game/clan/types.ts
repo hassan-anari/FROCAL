@@ -9,6 +9,7 @@ export type TaskFilter = "active" | "completed";
 export type ClanTaskType = "group" | "individual";
 export type ClanTaskStatus = "active" | "completed";
 export type ClanInventoryMode = "owned" | "shop";
+export type ClanItemActivationMode = "timed" | "context";
 
 export interface ClanSummary {
   id: string;
@@ -25,6 +26,7 @@ export interface ClanSummary {
   imageUrl?: string | null;
   fresh?: boolean;
   match?: number;
+  hqState?: "normal" | "upgrade" | "recovery" | "max";
 }
 
 export interface ClanMember {
@@ -69,6 +71,17 @@ export interface ClanInventoryItem {
   rarity: "Core" | "Rare" | "Epic";
   kind: "Booster" | "Defence" | "Utility";
   artKey: AssetKey;
+  activationMode: ClanItemActivationMode;
+  activationVerb: "Activate" | "Arm" | "Use";
+  durationMinutes?: number;
+  contextLabel?: string;
+}
+
+export interface ClanActiveEffect {
+  id: string;
+  itemId: string;
+  startedAt: number;
+  endsAt: number;
 }
 
 export interface ClanJoinApplicant {

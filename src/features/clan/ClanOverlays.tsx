@@ -10,8 +10,8 @@ import { createPortal } from "react-dom";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
 import { usePauseBackgroundMotion } from "@/design-system/motion/usePauseBackgroundMotion";
 import { Button } from "@/design-system/primitives/Button";
-import type { ClanInventoryItem, ClanJoinApplicant, ClanRole, ClanSummary } from "@/game/clan/types";
-import { clanRoleArt, getClanEmblemAssetKey, getClanHqAssetKey, getIdentityHue, getIdentityInitials } from "@/game/clan/clanVisuals";
+import type { ClanAchievement, ClanInventoryItem, ClanJoinApplicant, ClanRole, ClanSummary } from "@/game/clan/types";
+import { clanRoleArt, getClanEmblemAssetKey, getClanHqStateAssetKey, getIdentityHue, getIdentityInitials } from "@/game/clan/clanVisuals";
 import styles from "./ClanOverlays.module.css";
 
 interface ClanModalProps {
@@ -234,7 +234,7 @@ export function ClanPreviewSheet({
       }
     >
       <div className={`${styles.clanHero} ${styles[clan.accent]}`}>
-        <AssetImage assetKey={getClanHqAssetKey(clan.level)} className={styles.clanHeroHq} />
+        <AssetImage assetKey={getClanHqStateAssetKey(clan.hqState ?? "normal", clan.level)} className={styles.clanHeroHq} />
         <div className={styles.clanHeroShade} />
         <div className={styles.clanHeroIdentity}>
           <div className={styles.clanMark} style={{ "--identity-hue": getIdentityHue(clan.name) } as CSSProperties}>
@@ -269,42 +269,66 @@ export function ClanItemSheet({
   quantity,
   captain,
   treasury,
+  source,
+  activeUntil,
   onClose,
   onPurchase,
+  onActivate,
 }: {
   item: ClanInventoryItem;
   quantity: number;
   captain: boolean;
   treasury: number;
+  source: "inventory" | "shop";
+  activeUntil: number | null;
   onClose: () => void;
   onPurchase: () => void;
+  onActivate: () => void;
 }) {
   const canBuy = captain && treasury >= item.price;
-  let label = "Got it";
-  if (captain && treasury < item.price) label = "Not enough Treasury";
-  else if (captain) label = `Buy +1 · ${item.price.toLocaleString()}`;
+  const active = activeUntil !== null && activeUntil > Date.now();
+  const canActivate = captain && source === "inventory" && item.activationMode === "timed" && quantity > 0 && !active;
+  const durationLabel = item.durationMinutes ? `${item.durationMinutes >= 60 ? `${item.durationMinutes / 60}h` : `${item.durationMinutes}m`}` : null;
+
+  let footer: ReactNode;
+  if (source === "shop" && captain) {
+    footer = (
+      <Button
+        type="button"
+        tone={canBuy ? "primary" : "secondary"}
+        size="sm"
+        className={styles.primary}
+        data-clan-primary
+        disabled={!canBuy}
+        onClick={onPurchase}
+      >
+        {canBuy ? `Buy +1 · ${item.price.toLocaleString()}` : "Not enough Treasury"}
+      </Button>
+    );
+  } else if (captain && item.activationMode === "timed") {
+    footer = (
+      <Button
+        type="button"
+        tone={canActivate ? "primary" : "secondary"}
+        size="sm"
+        className={styles.primary}
+        data-clan-primary
+        disabled={!canActivate}
+        onClick={onActivate}
+      >
+        {active ? "Effect already active" : quantity <= 0 ? "No item stored" : `${item.activationVerb}${durationLabel ? ` · ${durationLabel}` : ""}`}
+      </Button>
+    );
+  } else {
+    footer = (
+      <Button type="button" tone="secondary" size="sm" className={styles.primary} data-clan-primary onClick={onClose}>
+        {item.contextLabel ?? "Stored for a contextual clan action"}
+      </Button>
+    );
+  }
 
   return (
-    <ClanModal
-      eyebrow="Clan inventory"
-      title={item.name}
-      onClose={onClose}
-      footer={
-        captain ? (
-          <Button
-            type="button"
-            tone={canBuy ? "primary" : "secondary"}
-            size="sm"
-            className={styles.primary}
-            data-clan-primary
-            disabled={!canBuy}
-            onClick={onPurchase}
-          >
-            {label}
-          </Button>
-        ) : undefined
-      }
-    >
+    <ClanModal eyebrow={source === "shop" ? "Clan shop" : "Clan inventory"} title={item.name} onClose={onClose} footer={footer}>
       <div className={styles.itemArt}><AssetImage assetKey={item.artKey} className={styles.itemArtImage} /></div>
       <div className={styles.centerCopy}>
         <strong>{item.kind} · {item.rarity}</strong>
@@ -317,6 +341,38 @@ export function ClanItemSheet({
       <div className={styles.detailList}>
         <div><span>Price</span><strong>{item.price.toLocaleString()} Treasury</strong></div>
         <div><span>Inventory</span><strong>{quantity > 0 ? `×${quantity} stored` : "None stored"}</strong></div>
+        <div><span>Use</span><strong>{item.activationMode === "timed" ? `${item.activationVerb}${durationLabel ? ` · ${durationLabel}` : ""}` : item.contextLabel ?? "Context action"}</strong></div>
+        {active ? <div><span>Status</span><strong>Active now</strong></div> : null}
+      </div>
+    </ClanModal>
+  );
+}
+
+export function ClanAchievementsSheet({
+  achievements,
+  onClose,
+}: {
+  achievements: readonly ClanAchievement[];
+  onClose: () => void;
+}) {
+  const unlocked = achievements.filter((achievement) => achievement.unlocked).length;
+  return (
+    <ClanModal eyebrow="Headquarters archive" title="Trophy Hall" onClose={onClose}>
+      <div className={styles.trophyHero}>
+        <AssetImage assetKey="clan.trophyHall" className={styles.trophyHeroArt} />
+        <div><span>CLAN ACHIEVEMENTS</span><strong>{unlocked}/{achievements.length} unlocked</strong><p>Shared milestones belong to the clan. Personal achievements remain in your Profile.</p></div>
+      </div>
+      <div className={styles.achievementList}>
+        {achievements.map((achievement) => {
+          const ratio = Math.min(1, achievement.current / Math.max(1, achievement.target));
+          return (
+            <article key={achievement.id} className={achievement.unlocked ? styles.achievementUnlocked : ""}>
+              <div><span>{achievement.unlocked ? "UNLOCKED" : "IN PROGRESS"}</span><strong>{achievement.name}</strong><p>{achievement.description}</p></div>
+              <b>{Math.round(ratio * 100)}%</b>
+              <i><em style={{ transform: `scaleX(${ratio})` }} /></i>
+            </article>
+          );
+        })}
       </div>
     </ClanModal>
   );

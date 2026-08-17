@@ -1,7 +1,8 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { clanJoinApplicants, initialOwnedClanItemIds } from "./clanCatalog";
+import { clanJoinApplicants, getClanItemById, initialOwnedClanItemIds } from "./clanCatalog";
 import type {
+  ClanActiveEffect,
   ClanJoinApplicant,
   ClanMembershipStatus,
   ClanRole,
@@ -18,6 +19,7 @@ interface ClanState {
   createdClan: CreatedClan | null;
   treasury: number;
   ownedItemIds: string[];
+  activeEffects: ClanActiveEffect[];
   applicants: ClanJoinApplicant[];
   chooseRole: (role: ClanRole) => void;
   createClan: (clan: CreatedClan) => void;
@@ -25,6 +27,7 @@ interface ClanState {
   rejectCurrentJoinForDiagnostics: () => void;
   acceptCurrentJoinForDiagnostics: () => void;
   purchaseItem: (itemId: string, price: number) => boolean;
+  activateItem: (itemId: string) => boolean;
   acceptApplicant: (id: string) => void;
   rejectApplicant: (id: string) => void;
   setSoldierDiscoveryForDiagnostics: () => void;
@@ -46,6 +49,7 @@ const initialState = {
   createdClan: null as CreatedClan | null,
   treasury: 12_840,
   ownedItemIds: [...initialOwnedClanItemIds] as string[],
+  activeEffects: [] as ClanActiveEffect[],
   applicants: cloneJoinApplicants(),
 };
 
@@ -129,6 +133,30 @@ export const useClanStore = create<ClanState>()(
         return true;
       },
 
+      activateItem: (itemId) => {
+        const state = get();
+        if (state.role !== "captain" || state.membership !== "member") return false;
+        const item = getClanItemById(itemId);
+        if (!item || item.activationMode !== "timed" || !item.durationMinutes) return false;
+        const ownedIndex = state.ownedItemIds.indexOf(itemId);
+        if (ownedIndex < 0) return false;
+
+        const now = Date.now();
+        const activeEffects = state.activeEffects.filter((effect) => effect.endsAt > now);
+        if (activeEffects.some((effect) => effect.itemId === itemId)) return false;
+
+        const nextOwned = [...state.ownedItemIds];
+        nextOwned.splice(ownedIndex, 1);
+        set({
+          ownedItemIds: nextOwned,
+          activeEffects: [
+            ...activeEffects,
+            { id: `${itemId}-${now}`, itemId, startedAt: now, endsAt: now + item.durationMinutes * 60_000 },
+          ],
+        });
+        return true;
+      },
+
       acceptApplicant: (id) => set((state) => ({
         applicants: state.applicants.map((applicant) => applicant.id === id ? { ...applicant, status: "accepted" } : applicant),
       })),
@@ -183,6 +211,7 @@ export const useClanStore = create<ClanState>()(
         createdClan: state.createdClan,
         treasury: state.treasury,
         ownedItemIds: state.ownedItemIds,
+        activeEffects: state.activeEffects,
         applicants: state.applicants,
       }),
     },
