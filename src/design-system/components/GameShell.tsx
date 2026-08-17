@@ -22,11 +22,11 @@ interface GameShellProps {
 }
 
 const navigation = [
-  { to: "/base", label: "Base", icon: Home01Icon },
-  { to: "/earn", label: "Earn", icon: MoneyReceiveSquareIcon },
-  { to: "/clan", label: "Clan", icon: ChampionIcon },
-  { to: "/arena", label: "Arena", icon: AdventureIcon },
-  { to: "/profile", label: "Profile", icon: UserSquareIcon },
+  { to: "/base", label: "Base", icon: Home01Icon, accentClass: styles.accentBase },
+  { to: "/earn", label: "Earn", icon: MoneyReceiveSquareIcon, accentClass: styles.accentEarn },
+  { to: "/clan", label: "Clan", icon: ChampionIcon, accentClass: styles.accentClan },
+  { to: "/arena", label: "Arena", icon: AdventureIcon, accentClass: styles.accentArena },
+  { to: "/profile", label: "Profile", icon: UserSquareIcon, accentClass: styles.accentProfile },
 ] as const;
 
 const directionKey = "dalexio-nav-direction";
@@ -61,14 +61,13 @@ export function GameShell({ children, className = "", hideNavigation = false }: 
       </motion.div>
       {hideNavigation ? null : (
         <nav className={styles.nav} aria-label="Primary game navigation">
-          <span className={styles.routeRail} aria-hidden="true" />
           {navigation.map((item) => {
             const active = pathname === item.to;
             return (
               <button
                 key={item.to}
                 type="button"
-                className={`${styles.navItem} ${active ? styles.active : ""}`}
+                className={`${styles.navItem} ${item.accentClass} ${active ? styles.active : ""}`}
                 onClick={() => openRoute(item.to)}
                 aria-label={item.label}
                 title={item.label}

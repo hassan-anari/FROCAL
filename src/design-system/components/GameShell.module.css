@@ -63,40 +63,22 @@
   contain: layout paint;
 }
 
-.nav::before,
-.nav::after {
+.nav::before {
   content: "";
   position: absolute;
-  pointer-events: none;
-}
-
-.nav::before {
   inset: 0;
   border-radius: inherit;
-  background:
-    linear-gradient(90deg, transparent 4%, rgba(72, 219, 255, .08) 18%, transparent 36%, transparent 64%, rgba(137, 91, 255, .08) 82%, transparent 96%);
-  opacity: .75;
-}
-
-.nav::after {
-  left: 12px;
-  right: 12px;
-  top: 5px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(103, 218, 255, .18), rgba(143, 105, 255, .2), transparent);
-}
-
-.routeRail {
-  position: absolute;
-  z-index: 0;
-  left: 9.5%;
-  right: 9.5%;
-  top: 39px;
-  height: 1px;
   pointer-events: none;
-  background: linear-gradient(90deg, rgba(68, 118, 175, .05), rgba(87, 174, 221, .22) 18%, rgba(109, 109, 205, .18) 50%, rgba(87, 174, 221, .22) 82%, rgba(68, 118, 175, .05));
-  box-shadow: 0 0 8px rgba(78, 178, 228, .06);
+  background:
+    radial-gradient(circle at 12% 50%, rgba(72, 219, 255, .045), transparent 21%),
+    radial-gradient(circle at 88% 50%, rgba(137, 91, 255, .045), transparent 21%);
 }
+
+.accentBase { --nav-accent: #69e7ff; --nav-accent-rgb: 105, 231, 255; --nav-accent-2: #5b9dff; }
+.accentEarn { --nav-accent: #69e5ba; --nav-accent-rgb: 105, 229, 186; --nav-accent-2: #69d9ff; }
+.accentClan { --nav-accent: #f3c76b; --nav-accent-rgb: 243, 199, 107; --nav-accent-2: #ff9f68; }
+.accentArena { --nav-accent: #b989ff; --nav-accent-rgb: 185, 137, 255; --nav-accent-2: #718cff; }
+.accentProfile { --nav-accent: #83a9ff; --nav-accent-rgb: 131, 169, 255; --nav-accent-2: #8ce6ff; }
 
 .navItem {
   position: relative;
@@ -150,7 +132,7 @@
   border-radius: 999px;
   background: #081121;
   box-shadow: 0 0 0 3px rgba(4, 9, 22, .92);
-  transition: width 190ms ease, border-color 190ms ease, background 190ms ease, box-shadow 190ms ease;
+  transition: border-color 190ms ease, background 190ms ease, box-shadow 190ms ease;
 }
 
 .navLabel {
@@ -166,32 +148,64 @@
   transition: color 170ms ease, transform 170ms ease;
 }
 
+.navItem::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -1px;
+  width: 30px;
+  height: 3px;
+  border-radius: 999px;
+  transform: translateX(-50%) scaleX(.35);
+  opacity: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--nav-accent), var(--nav-accent-2), transparent);
+  box-shadow: 0 0 10px rgba(var(--nav-accent-rgb), .38);
+  transition: opacity 180ms ease, transform 210ms ease;
+}
+
 .active {
-  color: rgba(238, 248, 255, .98);
+  color: var(--nav-accent);
 }
 
 .active .navGlyph {
-  color: #c9f7ff;
+  color: var(--nav-accent);
   transform: translateY(-2px) scale(1.08);
-  filter: drop-shadow(0 0 7px rgba(87, 211, 255, .35));
+  filter: drop-shadow(0 0 8px rgba(var(--nav-accent-rgb), .42));
+}
+
+.active .navGlyph::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(var(--nav-accent-rgb), .14), transparent 68%);
+  filter: blur(3px);
 }
 
 .active .stationCode {
-  color: rgba(145, 224, 255, .68);
+  color: var(--nav-accent);
 }
 
 .active .stationNode {
-  width: 19px;
-  border-color: rgba(116, 224, 255, .55);
-  background: linear-gradient(90deg, #48ddff, #8f6fff);
+  width: 6px;
+  border-color: rgba(var(--nav-accent-rgb), .8);
+  background: var(--nav-accent);
   box-shadow:
     0 0 0 3px rgba(4, 9, 22, .96),
-    0 0 12px rgba(79, 203, 255, .56);
+    0 0 10px rgba(var(--nav-accent-rgb), .68);
 }
 
 .active .navLabel {
-  color: #edfaff;
+  color: var(--nav-accent);
   transform: translateY(1px);
+  text-shadow: 0 0 10px rgba(var(--nav-accent-rgb), .2);
+}
+
+.active::after {
+  opacity: 1;
+  transform: translateX(-50%) scaleX(1);
 }
 
 @media (hover: hover) {
@@ -218,6 +232,7 @@
 @media (prefers-reduced-motion: reduce) {
   .content { transform: none !important; }
   .navItem,
+  .navItem::after,
   .navGlyph,
   .stationCode,
   .stationNode,
