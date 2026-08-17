@@ -219,3 +219,9 @@
 .guideSteps p { margin: 0; color: rgba(179, 194, 225, .58); font-size: .58rem; line-height: 1.45; }
 .guideSheet aside { padding: .7rem; border-left: 2px solid rgba(255, 206, 100, .7); border-radius: 0 13px 13px 0; color: rgba(213, 220, 239, .68); background: rgba(255, 196, 74, .055); font-size: .57rem; line-height: 1.5; }
 .guideSheet > button { width: 100%; }
+
+.overlay { contain: layout paint style; isolation: isolate; }
+.surface { contain: layout paint style; isolation: isolate; will-change: transform, opacity; }
+@media (max-width: 520px) {
+  .surface { box-shadow: 0 14px 32px rgba(0, 0, 0, .4), inset 0 1px 0 rgba(255,255,255,.06); }
+}

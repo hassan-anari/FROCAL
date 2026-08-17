@@ -45,14 +45,15 @@ export function ClanModal({ eyebrow, title, onClose, children, footer }: ClanMod
     const previousOverflow = scrollRoot?.style.overflow ?? "";
     const previousTouchAction = scrollRoot?.style.touchAction ?? "";
     const previousOverscroll = scrollRoot?.style.overscrollBehavior ?? "";
-    if (scrollRoot) {
+    const lockTimer = window.setTimeout(() => {
+      if (!scrollRoot) return;
       scrollRoot.style.overflow = "hidden";
       scrollRoot.style.touchAction = "none";
       scrollRoot.style.overscrollBehavior = "none";
-    }
+    }, 180);
     const timer = window.setTimeout(() => {
       sheetRef.current?.querySelector<HTMLElement>("[data-clan-primary], [data-clan-close]")?.focus({ preventScroll: true });
-    }, 20);
+    }, 260);
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -83,6 +84,7 @@ export function ClanModal({ eyebrow, title, onClose, children, footer }: ClanMod
     document.addEventListener("keydown", onKeyDown);
 
     return () => {
+      window.clearTimeout(lockTimer);
       window.clearTimeout(timer);
       document.removeEventListener("keydown", onKeyDown);
       if (scrollRoot) {

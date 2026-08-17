@@ -340,3 +340,25 @@
   .identity strong { max-width: 74px; }
   .level { min-width: 43px; padding-inline: .44rem; }
 }
+
+/* Overlay compositor isolation for Telegram Android WebView. */
+.notificationBackdrop {
+  contain: layout paint style;
+  isolation: isolate;
+}
+
+.notificationPanel {
+  contain: layout paint style;
+  isolation: isolate;
+}
+
+.notificationItem {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 78px;
+}
+
+@media (max-width: 520px) {
+  .notificationPanel {
+    box-shadow: 0 12px 28px rgba(0,0,0,.34), inset 0 -1px 0 rgba(255,255,255,.025);
+  }
+}

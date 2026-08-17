@@ -64,15 +64,16 @@ function OverlayFrame({ eyebrow, title, onClose, children, footer }: OverlayFram
     const previousOverflow = scrollRoot?.style.overflow ?? "";
     const previousTouchAction = scrollRoot?.style.touchAction ?? "";
     const previousOverscroll = scrollRoot?.style.overscrollBehavior ?? "";
-    if (scrollRoot) {
+    const lockTimer = window.setTimeout(() => {
+      if (!scrollRoot) return;
       scrollRoot.style.overflow = "hidden";
       scrollRoot.style.touchAction = "none";
       scrollRoot.style.overscrollBehavior = "none";
-    }
+    }, 180);
     const focusTimer = window.setTimeout(() => {
       const preferred = sheetRef.current?.querySelector<HTMLElement>("[data-modal-primary], [data-modal-close]");
       preferred?.focus({ preventScroll: true });
-    }, 20);
+    }, 260);
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -104,6 +105,7 @@ function OverlayFrame({ eyebrow, title, onClose, children, footer }: OverlayFram
     document.addEventListener("keydown", handleKeyDown);
 
     return () => {
+      window.clearTimeout(lockTimer);
       window.clearTimeout(focusTimer);
       document.removeEventListener("keydown", handleKeyDown);
       if (scrollRoot) {

@@ -3,7 +3,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import { preloadAssets } from "@/assets/preload";
 import { AssetImage } from "@/design-system/components/AssetImage";
 import { AppLoader } from "@/design-system/components/AppLoader";
@@ -81,7 +81,7 @@ export function FoundationPage() {
     setIsEntering(true);
 
     window.setTimeout(() => {
-      void navigate({ to: onboardingStatus === "completed" ? "/base" : "/onboarding" });
+      startTransition(() => { void navigate({ to: onboardingStatus === "completed" ? "/base" : "/onboarding" }); });
     }, 520);
   };
 

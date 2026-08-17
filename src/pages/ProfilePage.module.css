@@ -251,3 +251,18 @@
   .collectionContent,
   .achievementCard { transform: none !important; }
 }
+
+/* Skip layout/raster work for off-screen collection rows on mobile WebViews. */
+.achievementCard,
+.collectionCard,
+.titleCard,
+.connectionCard,
+.showcaseGrid > button {
+  content-visibility: auto;
+  contain: layout paint style;
+}
+.achievementCard { contain-intrinsic-size: auto 118px; }
+.collectionCard { contain-intrinsic-size: auto 154px; }
+.titleCard { contain-intrinsic-size: auto 96px; }
+.connectionCard { contain-intrinsic-size: auto 82px; }
+.showcaseGrid > button { contain-intrinsic-size: auto 150px; }

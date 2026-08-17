@@ -1,5 +1,6 @@
 import { createRootRoute, createRoute, createRouter } from "@tanstack/react-router";
 import { RootLayout } from "./routes/RootLayout";
+import { GameRouteLayout } from "./routes/GameRouteLayout";
 import { FoundationPage } from "@/pages/FoundationPage";
 import { OnboardingPage } from "@/pages/OnboardingPage";
 import { BasePage } from "@/pages/BasePage";
@@ -11,6 +12,12 @@ import { ProfilePage } from "@/pages/ProfilePage";
 import { DiagnosticsPage } from "@/pages/DiagnosticsPage";
 
 const rootRoute = createRootRoute({ component: RootLayout });
+
+const gameRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  id: "_game",
+  component: GameRouteLayout,
+});
 
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -25,38 +32,38 @@ const onboardingRoute = createRoute({
 });
 
 const baseRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/base",
+  getParentRoute: () => gameRoute,
+  path: "base",
   component: BasePage,
 });
 
 const earnRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/earn",
+  getParentRoute: () => gameRoute,
+  path: "earn",
   component: EarnPage,
 });
 
 const typingChallengeRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/earn/typing",
+  getParentRoute: () => gameRoute,
+  path: "earn/typing",
   component: TypingChallengePage,
 });
 
 const clanRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/clan",
+  getParentRoute: () => gameRoute,
+  path: "clan",
   component: ClanPage,
 });
 
 const arenaRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/arena",
+  getParentRoute: () => gameRoute,
+  path: "arena",
   component: ArenaPage,
 });
 
 const profileRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/profile",
+  getParentRoute: () => gameRoute,
+  path: "profile",
   component: ProfilePage,
 });
 
@@ -69,12 +76,7 @@ const diagnosticsRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   indexRoute,
   onboardingRoute,
-  baseRoute,
-  earnRoute,
-  typingChallengeRoute,
-  clanRoute,
-  arenaRoute,
-  profileRoute,
+  gameRoute.addChildren([baseRoute, earnRoute, typingChallengeRoute, clanRoute, arenaRoute, profileRoute]),
   diagnosticsRoute,
 ]);
 

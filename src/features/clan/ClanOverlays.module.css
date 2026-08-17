@@ -293,3 +293,9 @@
   .trophyHero { grid-template-columns: 112px minmax(0,1fr); gap: .56rem; padding: .72rem; }
   .trophyHeroArt { width: 104px; height: 104px; }
 }
+
+.backdrop { contain: layout paint style; isolation: isolate; }
+.sheet { contain: layout paint style; isolation: isolate; will-change: transform, opacity; }
+@media (max-width: 520px) {
+  .sheet { box-shadow: 0 16px 36px rgba(0, 0, 0, .42), inset 0 1px 0 rgba(255,255,255,.045); }
+}

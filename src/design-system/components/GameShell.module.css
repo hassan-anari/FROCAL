@@ -239,3 +239,32 @@
 @media (prefers-reduced-motion: reduce) {
   .routeVeil { animation: none; }
 }
+
+/* Persistent game chrome: Header/Nav stay mounted while only the route body swaps. */
+.headerSlot {
+  position: relative;
+  z-index: 75;
+  padding:
+    calc(.78rem + var(--safe-top))
+    calc(.78rem + var(--safe-right))
+    0
+    calc(.78rem + var(--safe-left));
+  contain: layout style;
+}
+
+.routeContent {
+  position: relative;
+  min-height: calc(100% - 48px);
+}
+
+.routeContent > :global(main) {
+  padding-top: 0 !important;
+}
+
+.routeContentFull {
+  min-height: 100%;
+}
+
+.routeContentFull > :global(main) {
+  padding-top: calc(.78rem + var(--safe-top)) !important;
+}

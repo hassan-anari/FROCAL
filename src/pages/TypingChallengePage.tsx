@@ -5,7 +5,6 @@ import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { preloadAssets } from "@/assets/preload";
 import { DexoStage } from "@/design-system/components/DexoStage";
-import { GameShell } from "@/design-system/components/GameShell";
 import { Button } from "@/design-system/primitives/Button";
 import {
   TYPING_DAILY_LIMIT,
@@ -81,7 +80,7 @@ export function TypingChallengePage() {
 
   const returnToTypingTab = useCallback(() => {
     sessionStorage.setItem(earnTabStorageKey, "typing");
-    void navigate({ to: "/earn" });
+    startTransition(() => { void navigate({ to: "/earn" }); });
   }, [navigate]);
 
   const finish = useCallback(() => {
@@ -154,7 +153,7 @@ export function TypingChallengePage() {
   };
 
   return (
-    <GameShell hideNavigation>
+    <>
       <main className={styles.page}>
         <header className={styles.header}>
           <button type="button" onClick={returnToTypingTab} aria-label="Back to Typing tab">
@@ -246,6 +245,6 @@ export function TypingChallengePage() {
           )}
         </AnimatePresence>
       </main>
-    </GameShell>
+    </>
   );
 }

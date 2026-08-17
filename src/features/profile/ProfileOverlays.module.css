@@ -689,3 +689,19 @@
     animation: none !important;
   }
 }
+
+.backdrop { contain: layout paint style; isolation: isolate; }
+.sheet { contain: layout paint style; isolation: isolate; will-change: transform, opacity; }
+@media (max-width: 520px) {
+  .sheet { box-shadow: 0 16px 36px rgba(0, 0, 0, .42), inset 0 1px 0 rgba(255, 255, 255, .045); }
+}
+
+.frameOption,
+.textOptions button,
+.featureOptions > button {
+  content-visibility: auto;
+  contain: layout paint style;
+}
+.frameOption { contain-intrinsic-size: auto 96px; }
+.textOptions button { contain-intrinsic-size: auto 56px; }
+.featureOptions > button { contain-intrinsic-size: auto 94px; }

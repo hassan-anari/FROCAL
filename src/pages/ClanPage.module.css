@@ -1302,3 +1302,20 @@
   .roomHero { grid-template-columns: minmax(0,1fr) 112px; }
   .roomHeroArt { right: .25rem; width: 116px; }
 }
+
+/* Large Clan HQ lists are isolated so only visible rows are rasterized. */
+.clanCard,
+.taskCard,
+.itemCard,
+.facilityCard,
+.memberList > *,
+.rankingList > * {
+  content-visibility: auto;
+  contain: layout paint style;
+}
+.clanCard { contain-intrinsic-size: auto 96px; }
+.taskCard { contain-intrinsic-size: auto 120px; }
+.itemCard { contain-intrinsic-size: auto 126px; }
+.facilityCard { contain-intrinsic-size: auto 110px; }
+.memberList > *,
+.rankingList > * { contain-intrinsic-size: auto 68px; }

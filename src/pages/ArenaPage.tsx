@@ -7,14 +7,13 @@ import {
   Wallet01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { preloadAssets } from "@/assets/preload";
 import { AssetImage } from "@/design-system/components/AssetImage";
-import { GameHeader } from "@/design-system/components/GameHeader";
-import { GameShell } from "@/design-system/components/GameShell";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
 import { Button } from "@/design-system/primitives/Button";
+import { DeferredMount } from "@/design-system/performance/DeferredMount";
 import {
   arenaHistoryPreloadAssets,
   arenaOverviewPreloadAssets,
@@ -447,6 +446,7 @@ function SeasonOneWarfront() {
         </div>
       </section>
 
+      <DeferredMount minHeight={540}>
       <section className={styles.panel}>
         <SectionTitle eyebrow="HOW WARFRONT PLAYS" title="A clear clan competition loop" />
         <div className={styles.seasonPreviewFlow}>
@@ -487,6 +487,7 @@ function SeasonOneWarfront() {
         </div>
         <Button tone="secondary" size="sm" disabled>Unlocks in Season 2</Button>
       </section>
+      </DeferredMount>
     </div>
   );
 }
@@ -503,11 +504,13 @@ function Rankings({ mode, onMode, rankedClans, ownClan, level, currentName, curr
   return (
     <div className={styles.stack}>
       {showSeasonHero ? <section className={styles.seasonHero}><div><span>FOUNDING SEASON</span><h2>Season {String(arenaSeason.number).padStart(2, "0")}</h2><p>Every verified action moves your seasonal score. Finish as high as you can before the reset.</p><div><strong>{arenaSeason.daysLeft} days left</strong><span>{Math.round(arenaSeason.progress * 100)}% complete</span></div><ProgressBar value={arenaSeason.progress * 100} /></div><AssetImage assetKey="arena.rewardCapsule" /></section> : null}
+      <DeferredMount minHeight={520}>
       <section className={styles.panel}>
         <SectionTitle eyebrow="GLOBAL STANDINGS" title="Season Leaderboard" />
         <nav className={styles.rankingSwitch}><button type="button" className={mode === "players" ? styles.rankingSwitchActive : ""} onClick={() => onMode("players")}>Players</button><button type="button" className={mode === "clans" ? styles.rankingSwitchActive : ""} onClick={() => onMode("clans")}>Clans</button></nav>
         {mode === "players" ? <><PlayerPodium players={arenaPlayerRanking} /><div className={styles.rankingList}>{arenaPlayerRanking.slice(3).map((player) => <article key={player.id}><span>#{player.rank}</span><PlayerAvatar player={player} /><div><strong>{player.name}</strong><p>LVL {player.level} · {player.clan ?? "Independent"}</p></div><b>{player.score.toLocaleString()}</b></article>)}</div><div className={styles.selfRank}><span>#{arenaSeason.playerRank}</span><CurrentPlayerAvatar name={currentName} photoUrl={currentPhotoUrl} /><div><strong>You</strong><p>Level {level} · Current standing</p></div><b>{arenaSeason.playerScore.toLocaleString()}</b></div></> : <><ClanPodium clans={rankedClans} /><div className={styles.rankingList}>{rankedClans.slice(3, 8).map((entry) => <article key={entry.id}><span>#{entry.rank}</span><ClanMark clan={entry} /><div><strong>{entry.name}</strong><p>LVL {entry.level} · {entry.members}/{entry.capacity} members</p></div><b>{entry.score.toLocaleString()}</b></article>)}</div>{ownClan ? <div className={styles.selfRank}><span>#{ownClan.rank}</span><ClanMark clan={ownClan} /><div><strong>{ownClan.name}</strong><p>Your clan · Level {ownClan.level}</p></div><b>{ownClan.score.toLocaleString()}</b></div> : <div className={styles.noClanGate}><HugeiconsIcon icon={UserGroupIcon} size={20} strokeWidth={1.55} /><div><strong>No clan standing yet</strong><p>Join or found a clan to appear in Clan Rankings.</p></div></div>}</>}
       </section>
+      </DeferredMount>
     </div>
   );
 }
@@ -573,10 +576,8 @@ export function ArenaPage() {
   };
 
   return (
-    <GameShell>
+    <>
       <main className={styles.page}>
-        <GameHeader />
-
         {arena.experienceMode === "season1" ? (
           <>
             <header className={styles.pageHeader}>
@@ -594,11 +595,9 @@ export function ArenaPage() {
               </button>
             </nav>
 
-            <AnimatePresence mode="sync" initial={false}>
-              <motion.div key={seasonOneSection} className={styles.sectionContent} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={mobileMotion.tab}>
+            <motion.div key={seasonOneSection} className={styles.sectionContent} initial={{ opacity: .96 }} animate={{ opacity: 1 }} exit={{ opacity: .98 }} transition={mobileMotion.tab}>
                 {seasonOneSection === "warfront" ? <SeasonOneWarfront /> : <Rankings mode={rankingMode} onMode={(mode) => { adapter.selectionChanged(); setRankingMode(mode); }} rankedClans={rankedClans} ownClan={ownClan} level={level} currentName={currentName} currentPhotoUrl={currentPhotoUrl} showSeasonHero />}
               </motion.div>
-            </AnimatePresence>
           </>
         ) : (
           <>
@@ -612,18 +611,16 @@ export function ArenaPage() {
               {(["overview", "war", "history", "rankings"] as ArenaHubSection[]).map((section) => <button key={section} type="button" className={arena.hubSection === section ? styles.arenaTabActive : ""} onClick={() => selectSection(section)}>{section === "overview" ? "Overview" : section === "war" ? "War" : section === "history" ? "History" : "Rankings"}</button>)}
             </nav>
 
-            <AnimatePresence mode="sync" initial={false}>
-              <motion.div key={arena.hubSection} className={styles.sectionContent} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={mobileMotion.tab}>
+            <motion.div key={arena.hubSection} className={styles.sectionContent} initial={{ opacity: .96 }} animate={{ opacity: 1 }} exit={{ opacity: .98 }} transition={mobileMotion.tab}>
                 {arena.hubSection === "overview" ? <ArenaOverview captain={captain} ownClan={ownClan} rival={rival} scenario={arena.scenario} ownProgress={arena.battleProgress} enemyProgress={arena.enemyProgress} onOpenWar={() => arena.setHubSection("war")} onFindTarget={openTargeting} onOpenHistory={() => arena.setHubSection("history")} /> : null}
                 {arena.hubSection === "war" ? warContent() : null}
                 {arena.hubSection === "history" ? <WarHistory onOpenRankings={() => arena.setHubSection("rankings")} /> : null}
                 {arena.hubSection === "rankings" ? <Rankings mode={rankingMode} onMode={(mode) => { adapter.selectionChanged(); setRankingMode(mode); }} rankedClans={rankedClans} ownClan={ownClan} level={level} currentName={currentName} currentPhotoUrl={currentPhotoUrl} /> : null}
               </motion.div>
-            </AnimatePresence>
           </>
         )}
       </main>
-    </GameShell>
+    </>
   );
 
 }

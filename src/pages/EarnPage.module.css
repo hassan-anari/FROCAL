@@ -473,3 +473,16 @@
   .rosterStatus { grid-column: 2; justify-items: start; text-align: left; }
   .rosterStatus small { max-width: none; }
 }
+
+/* Off-screen Earn rows should not consume first-route paint/layout budget. */
+.missionCard,
+.rosterList article,
+.networkHistory article,
+.todayRuns article {
+  content-visibility: auto;
+  contain: layout paint style;
+}
+.missionCard { contain-intrinsic-size: auto 132px; }
+.rosterList article { contain-intrinsic-size: auto 68px; }
+.networkHistory article,
+.todayRuns article { contain-intrinsic-size: auto 62px; }

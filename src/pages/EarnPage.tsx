@@ -7,12 +7,11 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useNavigate } from "@tanstack/react-router";
-import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useMemo, useState } from "react";
+import { motion } from "motion/react";
+import { startTransition, useEffect, useMemo, useState } from "react";
 import { preloadAssets } from "@/assets/preload";
-import { GameHeader } from "@/design-system/components/GameHeader";
-import { GameShell } from "@/design-system/components/GameShell";
 import { Button } from "@/design-system/primitives/Button";
+import { DeferredMount } from "@/design-system/performance/DeferredMount";
 import { HistorySheet, LevelUpReveal, NetworkGuideSheet, RewardReveal, type NetworkGuideKind } from "@/features/earn/EarnOverlays";
 import {
   TYPING_DAILY_LIMIT,
@@ -175,7 +174,7 @@ export function EarnPage() {
 
   const openTypingArena = () => {
     sessionStorage.setItem(earnTabStorageKey, "typing");
-    void navigate({ to: "/earn/typing" });
+    startTransition(() => { void navigate({ to: "/earn/typing" }); });
   };
 
   const handleMissionAction = (mission: EarnMission) => {
@@ -197,7 +196,7 @@ export function EarnPage() {
 
     earn.startMission(mission.id);
     if (mission.action === "profile") {
-      void navigate({ to: "/profile" });
+      startTransition(() => { void navigate({ to: "/profile" }); });
       return;
     }
     if (mission.href) {
@@ -247,12 +246,9 @@ export function EarnPage() {
   };
 
   const renderMission = (mission: EarnMission, index: number, compact = false) => (
-    <motion.article
+    <article
       key={mission.id}
       className={`${styles.missionCard} ${styles[`mission_${missionTone[mission.id]}`]} ${compact ? styles.missionCompact : ""}`}
-      initial={{ opacity: 0, y: 7 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ ...mobileMotion.reveal, delay: index * .025 }}
     >
       <div className={styles.missionHeader}>
         <span className={styles.missionNumber}>{missionNumber[mission.id]}</span>
@@ -275,14 +271,12 @@ export function EarnPage() {
           {mission.status === "claimed" ? <i>✓</i> : <HugeiconsIcon icon={ArrowRight01Icon} size={15} strokeWidth={1.8} />}
         </button>
       </div>
-    </motion.article>
+    </article>
   );
 
   return (
-    <GameShell>
+    <>
       <main className={styles.page}>
-        <GameHeader />
-
         <header className={styles.pageHeader}>
           <div>
             <span>EARN CENTER</span>
@@ -310,13 +304,12 @@ export function EarnPage() {
           ))}
         </nav>
 
-        <AnimatePresence mode="sync" initial={false}>
-          <motion.div
+        <motion.div
             key={activeTab}
             className={styles.tabContent}
-            initial={{ opacity: 0, x: 7 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -5 }}
+            initial={{ opacity: .96 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: .98 }}
             transition={mobileMotion.tab}
           >
             {activeTab === "earn" ? (
@@ -361,6 +354,7 @@ export function EarnPage() {
                   <div className={styles.levelTrack}><motion.i animate={{ scaleX: levelProgress / 100 }} initial={false} style={{ transformOrigin: "0 50%" }} transition={mobileMotion.reveal} /></div>
                 </section>
 
+                <DeferredMount minHeight={360}>
                 <section className={styles.missionsSection} aria-label="Active missions">
                   <header className={styles.sectionHeader}>
                     <div><span>AVAILABLE NOW</span><h2>Active Missions</h2></div>
@@ -384,6 +378,7 @@ export function EarnPage() {
                     )}
                   </div>
                 </section>
+                </DeferredMount>
               </>
             ) : null}
 
@@ -540,20 +535,21 @@ export function EarnPage() {
               </>
             ) : null}
           </motion.div>
-        </AnimatePresence>
 
-        <section className={styles.sharedStats} aria-label="Earn summary">
-          <div><span>Daily streak</span><strong>{earn.streak || 0}d</strong></div>
-          <div><span>Lifetime XP</span><strong>{formatNumber(earn.lifetimeXp)}</strong></div>
-          <div><span>Referrals</span><strong>{earn.referralCount}</strong></div>
-          <div><span>Active groups</span><strong>{earn.activeGroups}</strong></div>
-        </section>
+        <DeferredMount minHeight={90}>
+          <section className={styles.sharedStats} aria-label="Earn summary">
+            <div><span>Daily streak</span><strong>{earn.streak || 0}d</strong></div>
+            <div><span>Lifetime XP</span><strong>{formatNumber(earn.lifetimeXp)}</strong></div>
+            <div><span>Referrals</span><strong>{earn.referralCount}</strong></div>
+            <div><span>Active groups</span><strong>{earn.activeGroups}</strong></div>
+          </section>
+        </DeferredMount>
       </main>
 
       <HistorySheet open={historyOpen} onClose={() => setHistoryOpen(false)} history={earn.history} />
       <NetworkGuideSheet kind={guideOpen} onClose={() => setGuideOpen(null)} />
       <RewardReveal reward={earn.rewardEvent} onClose={earn.dismissReward} />
       <LevelUpReveal event={earn.rewardEvent ? null : earn.levelUpEvent} onClose={earn.dismissLevelUp} />
-    </GameShell>
+    </>
   );
 }

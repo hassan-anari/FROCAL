@@ -9,10 +9,9 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 import { preloadAssets } from "@/assets/preload";
 import { AssetImage } from "@/design-system/components/AssetImage";
-import { GameHeader } from "@/design-system/components/GameHeader";
-import { GameShell } from "@/design-system/components/GameShell";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
 import { Button } from "@/design-system/primitives/Button";
+import { DeferredMount } from "@/design-system/performance/DeferredMount";
 import { usePauseBackgroundMotion } from "@/design-system/motion/usePauseBackgroundMotion";
 import {
   CustomizeProfileSheet,
@@ -123,9 +122,17 @@ export function ProfilePage() {
   }, [activeFrame.asset]);
 
   useEffect(() => {
-    const mission = earn.missions["complete-profile"];
-    if (mission.status === "in-progress") earn.completeMission("complete-profile");
-  }, [earn]);
+    if (earn.missions["complete-profile"].status !== "in-progress") return;
+    let timer: number | null = null;
+    let idleHandle: number | null = null;
+    const complete = () => earn.completeMission("complete-profile");
+    if (typeof window.requestIdleCallback === "function") idleHandle = window.requestIdleCallback(complete, { timeout: 1200 });
+    else timer = window.setTimeout(complete, 320);
+    return () => {
+      if (idleHandle !== null && typeof window.cancelIdleCallback === "function") window.cancelIdleCallback(idleHandle);
+      if (timer !== null) window.clearTimeout(timer);
+    };
+  }, [earn.completeMission, earn.missions]);
 
   const filteredAchievements = useMemo(
     () => achievementDefinitions.filter((achievement) => achievementFilter === "all" || achievement.category === achievementFilter),
@@ -219,10 +226,8 @@ export function ProfilePage() {
   };
 
   return (
-    <GameShell>
+    <>
       <main className={styles.page}>
-        <GameHeader />
-
         <header className={styles.pageHeader}>
           <span>PLAYER IDENTITY</span>
           <h1>Shape your legacy.</h1>
@@ -243,13 +248,12 @@ export function ProfilePage() {
           ))}
         </nav>
 
-        <AnimatePresence mode="sync" initial={false}>
-          <motion.div
+        <motion.div
             key={activeTab}
             className={styles.tabContent}
-            initial={{ opacity: 0, x: 7 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -5 }}
+            initial={{ opacity: .96 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: .98 }}
             transition={mobileMotion.tab}
           >
             {activeTab === "overview" ? (
@@ -293,6 +297,7 @@ export function ProfilePage() {
                   </div>
                 </section>
 
+                <DeferredMount minHeight={520}>
                 <section className={styles.summarySection}>
                   <header className={styles.sectionHeader}>
                     <div><span>PROGRESS</span><h2>Journey summary</h2></div>
@@ -352,6 +357,7 @@ export function ProfilePage() {
                     </button>
                   </div>
                 </section>
+                </DeferredMount>
               </div>
             ) : null}
 
@@ -373,20 +379,18 @@ export function ProfilePage() {
                     </button>
                   ))}
                 </div>
-                <div className={styles.achievementList}>
+                <DeferredMount minHeight={420}>
+                  <div className={styles.achievementList}>
                   {filteredAchievements.map((achievement, index) => {
                     const unlocked = profile.unlockedAchievementIds.includes(achievement.id);
                     const progress = profile.achievementProgress[achievement.id];
                     const ratio = clampRatio(progress.current, progress.target);
                     return (
-                      <motion.button
+                      <button
                         key={achievement.id}
                         type="button"
                         className={`${styles.achievementCard} ${unlocked ? styles.achievementUnlocked : ""}`}
                         onClick={() => openAchievement(achievement.id)}
-                        initial={{ opacity: 0, y: 7 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ ...mobileMotion.reveal, delay: index * .018 }}
                       >
                         <div className={styles.achievementArt}>
                           <AssetImage assetKey={achievement.asset} loading="lazy" draggable={false} />
@@ -402,10 +406,11 @@ export function ProfilePage() {
                           </div>
                         </div>
                         <HugeiconsIcon icon={ArrowRight01Icon} size={16} strokeWidth={1.65} />
-                      </motion.button>
+                      </button>
                     );
                   })}
-                </div>
+                  </div>
+                </DeferredMount>
               </section>
             ) : null}
 
@@ -428,13 +433,13 @@ export function ProfilePage() {
                   ))}
                 </nav>
 
-                <AnimatePresence mode="sync" initial={false}>
+                <DeferredMount minHeight={420}>
                   <motion.div
                     key={collectionTab}
                     className={styles.collectionContent}
-                    initial={{ opacity: 0, x: 6 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -4 }}
+                    initial={{ opacity: .97 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: .98 }}
                     transition={mobileMotion.tab}
                   >
                     {collectionTab === "frames" ? (
@@ -492,11 +497,10 @@ export function ProfilePage() {
                       </div>
                     ) : null}
                   </motion.div>
-                </AnimatePresence>
+                </DeferredMount>
               </section>
             ) : null}
           </motion.div>
-        </AnimatePresence>
       </main>
 
       <AnimatePresence>
@@ -537,7 +541,7 @@ export function ProfilePage() {
         ) : null}
         {detailItem ? <ProfileDetailSheet item={detailItem} onClose={() => setDetailItem(null)} /> : null}
       </AnimatePresence>
-    </GameShell>
+    </>
   );
 }
 

@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useScenarioStore } from "@/game/scenarios/scenarioStore";
 import { useEarnStore } from "@/game/earn/earnStore";
 import { loadBootstrap } from "@/integrations/api/bootstrap";
@@ -152,8 +153,9 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
         </div>
       </header>
 
-      <AnimatePresence>
-        {notificationsOpen ? (
+      {typeof document !== "undefined" ? createPortal(
+        <AnimatePresence>
+          {notificationsOpen ? (
           <motion.div
             className={styles.notificationBackdrop}
             initial={{ opacity: 0 }}
@@ -203,8 +205,10 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
               </div>
             </motion.section>
           </motion.div>
-        ) : null}
-      </AnimatePresence>
+          ) : null}
+        </AnimatePresence>,
+        document.body,
+      ) : null}
     </>
   );
 }

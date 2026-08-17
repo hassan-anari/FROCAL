@@ -9,10 +9,9 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { AssetImage } from "@/design-system/components/AssetImage";
-import { GameHeader } from "@/design-system/components/GameHeader";
-import { GameShell } from "@/design-system/components/GameShell";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
 import { Button } from "@/design-system/primitives/Button";
+import { DeferredMount } from "@/design-system/performance/DeferredMount";
 import {
   ClanAchievementsSheet,
   ClanItemSheet,
@@ -158,7 +157,12 @@ function RoomHero({ tab, shop = false, effects = 0, hqStateLabel = "ONLINE" }: {
   );
 }
 
-function ActiveEffectsStrip({ effects, now }: { effects: ClanActiveEffect[]; now: number }) {
+function ActiveEffectsStrip({ effects }: { effects: ClanActiveEffect[] }) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
   const active = effects
     .filter((effect) => effect.endsAt > now)
     .map((effect) => ({ effect, item: getClanItemById(effect.itemId) }))
@@ -355,13 +359,13 @@ function SoldierNetwork({
         ))}
       </nav>
 
-      <AnimatePresence mode="sync" initial={false}>
-        <motion.div
+      <DeferredMount minHeight={420}>
+      <motion.div
           key={tab}
           className={styles.tabContent}
-          initial={{ opacity: 0, y: 7 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -5 }}
+          initial={{ opacity: .96 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: .98 }}
           transition={mobileMotion.tab}
         >
           {tab === "discover" ? (
@@ -400,7 +404,7 @@ function SoldierNetwork({
           ) : null}
 
         </motion.div>
-      </AnimatePresence>
+      </DeferredMount>
     </div>
   );
 }
@@ -631,10 +635,10 @@ function Headquarters({
   const [tab, setTab] = useState<HeadquartersTab>("home");
   const [taskFilter, setTaskFilter] = useState<TaskFilter>("active");
   const [inventoryMode, setInventoryMode] = useState<"owned" | "shop">("owned");
-  const [now, setNow] = useState(() => Date.now());
+  const [hqClock, setHqClock] = useState(() => Date.now());
 
   useEffect(() => {
-    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    const timer = window.setInterval(() => setHqClock(Date.now()), 10_000);
     return () => window.clearInterval(timer);
   }, []);
 
@@ -648,15 +652,15 @@ function Headquarters({
   const totalOwnedItems = ownedItemIds.length;
   const levelProgress = clan.id === "captain-created" ? .42 : .68;
   const nextLevel = clan.level + 1;
-  const hasRecoveryEffect = activeEffects.some((effect) => effect.itemId === "supply-cache" && effect.endsAt > now);
+  const hasRecoveryEffect = activeEffects.some((effect) => effect.itemId === "supply-cache" && effect.endsAt > hqClock);
   const hqState: "normal" | "upgrade" | "recovery" | "max" = hasRecoveryEffect
     ? "recovery"
     : clan.hqState ?? "normal";
   const hqStateLabel = hqState === "upgrade" ? "UPGRADE READY" : hqState === "recovery" ? "RECOVERY MODE" : hqState === "max" ? "MAX LEVEL" : "ONLINE";
-  const hqLoopSecond = Math.floor(now / 1000) % 40;
+  const hqLoopSecond = Math.floor(hqClock / 1000) % 40;
   const showStatusArt = hqState !== "normal" && hqLoopSecond < 10;
   const hqDisplayKey = showStatusArt ? getClanHqStateAssetKey(hqState, clan.level) : getClanHqStateAssetKey("normal", clan.level);
-  const activeEffectCount = activeEffects.filter((effect) => effect.endsAt > now).length;
+  const activeEffectCount = activeEffects.filter((effect) => effect.endsAt > hqClock).length;
 
   return (
     <div className={styles.stack}>
@@ -705,7 +709,7 @@ function Headquarters({
         </div>
       </section>
 
-      <ActiveEffectsStrip effects={activeEffects} now={now} />
+      <ActiveEffectsStrip effects={activeEffects} />
 
       <nav className={styles.hqNav} aria-label="Clan headquarters sections">
         {(["home", "tasks", "members", "inventory"] as const).map((item) => (
@@ -715,13 +719,13 @@ function Headquarters({
         ))}
       </nav>
 
-      <AnimatePresence mode="sync" initial={false}>
-        <motion.div
+      <DeferredMount minHeight={520}>
+      <motion.div
           key={tab}
           className={styles.tabContent}
-          initial={{ opacity: 0, y: 7 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -5 }}
+          initial={{ opacity: .96 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: .98 }}
           transition={mobileMotion.tab}
         >
           <RoomHero tab={tab} shop={tab === "inventory" && inventoryMode === "shop"} effects={activeEffectCount} hqStateLabel={hqStateLabel} />
@@ -862,7 +866,7 @@ function Headquarters({
             </>
           ) : null}
         </motion.div>
-      </AnimatePresence>
+      </DeferredMount>
     </div>
   );
 }
@@ -923,10 +927,8 @@ export function ClanPage() {
   };
 
   return (
-    <GameShell>
+    <>
       <main className={styles.page}>
-        <GameHeader />
-
         <header className={`${styles.pageHeader} ${clan.membership === "member" ? styles.pageHeaderCompact : ""} ${earnLevel >= 5 && clan.role === null ? styles.pageHeaderWrap : ""}`}>
           <span>{pageCopy.eyebrow}</span>
           <h1>{pageCopy.title}</h1>
@@ -1020,6 +1022,6 @@ export function ClanPage() {
           ) : null}
         </AnimatePresence>
       </main>
-    </GameShell>
+    </>
   );
 }

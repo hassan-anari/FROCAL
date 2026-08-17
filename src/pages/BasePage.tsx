@@ -3,13 +3,12 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 import { preloadAssets } from "@/assets/preload";
 import { getAssetPath } from "@/assets/registry";
 import type { AssetKey } from "@/assets/registry";
 import { DexoStage } from "@/design-system/components/DexoStage";
-import { GameHeader } from "@/design-system/components/GameHeader";
-import { GameShell } from "@/design-system/components/GameShell";
+import { DeferredMount } from "@/design-system/performance/DeferredMount";
 import { Button } from "@/design-system/primitives/Button";
 import { useOnboardingStore } from "@/game/onboarding/onboardingStore";
 import { useScenarioStore } from "@/game/scenarios/scenarioStore";
@@ -148,10 +147,8 @@ export function BasePage() {
   };
 
   return (
-    <GameShell>
+    <>
       <main className={styles.page}>
-        <GameHeader />
-
         <AnimatePresence initial={false}>
           {promoBannerVisible ? (
             <motion.aside
@@ -220,7 +217,7 @@ export function BasePage() {
               </div>
               <h2>Defend your clan outpost</h2>
               <p>KRYPT-9 is probing the eastern relay. Join the preparation phase before deployment locks.</p>
-              <Button size="lg" className={styles.criticalButton} trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={18} strokeWidth={1.8} />} onClick={() => void navigate({ to: "/arena" })}>
+              <Button size="lg" className={styles.criticalButton} trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={18} strokeWidth={1.8} />} onClick={() => startTransition(() => { void navigate({ to: "/arena" }); })}>
                 Join clan defence
               </Button>
             </motion.section>
@@ -230,7 +227,7 @@ export function BasePage() {
         <section className={styles.objectives} aria-label="Next objectives">
           <header className={styles.sectionHeader}>
             <h2>Next Objective</h2>
-            <button type="button" onClick={() => void navigate({ to: "/earn" })}>All missions <HugeiconsIcon icon={ArrowRight01Icon} size={14} strokeWidth={1.7} /></button>
+            <button type="button" onClick={() => startTransition(() => { void navigate({ to: "/earn" }); })}>All missions <HugeiconsIcon icon={ArrowRight01Icon} size={14} strokeWidth={1.7} /></button>
           </header>
 
           <div className={styles.objectiveTimeline}>
@@ -259,25 +256,27 @@ export function BasePage() {
           </div>
         </section>
 
-        <section className={styles.lastVisit} aria-label="Since your last visit">
-          <header className={styles.sectionHeader}><h2>Since Your Last Visit</h2></header>
-          <div className={styles.activityList}>
-            {activityFeed.map((item) => (
-              <article key={item.id} className={styles.activityItem}>
-                <i className={styles[item.tone]} />
-                <div><strong>{item.title}</strong><small>{item.time}</small></div>
-                <span>{item.status}</span>
-              </article>
-            ))}
-          </div>
-        </section>
+        <DeferredMount minHeight={220}>
+          <section className={styles.lastVisit} aria-label="Since your last visit">
+            <header className={styles.sectionHeader}><h2>Since Your Last Visit</h2></header>
+            <div className={styles.activityList}>
+              {activityFeed.map((item) => (
+                <article key={item.id} className={styles.activityItem}>
+                  <i className={styles[item.tone]} />
+                  <div><strong>{item.title}</strong><small>{item.time}</small></div>
+                  <span>{item.status}</span>
+                </article>
+              ))}
+            </div>
+          </section>
 
-        <section className={styles.quickStats} aria-label="Base status">
-          <div><span>Daily streak</span><strong>{streak || 0} day{streak === 1 ? "" : "s"}</strong></div>
-          <div><span>Season score</span><strong>{player.seasonScore}</strong></div>
-          <div><span>Clan status</span><strong>Open</strong></div>
-        </section>
+          <section className={styles.quickStats} aria-label="Base status">
+            <div><span>Daily streak</span><strong>{streak || 0} day{streak === 1 ? "" : "s"}</strong></div>
+            <div><span>Season score</span><strong>{player.seasonScore}</strong></div>
+            <div><span>Clan status</span><strong>Open</strong></div>
+          </section>
+        </DeferredMount>
       </main>
-    </GameShell>
+    </>
   );
 }
