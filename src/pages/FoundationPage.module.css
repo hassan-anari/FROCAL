@@ -53,19 +53,6 @@
   animation: coreBreathe 4.8s ease-in-out infinite;
 }
 
-.lightSweep {
-  position: absolute;
-  z-index: -4;
-  top: -18%;
-  left: 47%;
-  width: 18%;
-  height: 82%;
-  rotate: 5deg;
-  pointer-events: none;
-  background: linear-gradient(180deg, transparent, rgba(123, 231, 255, .07) 34%, rgba(150, 91, 255, .13) 62%, transparent);
-  opacity: .82;
-  animation: lightPulse 6.4s ease-in-out infinite;
-}
 
 .atmosphere {
   position: absolute;
@@ -292,10 +279,6 @@
   50% { opacity: .95; transform: scale(1.04); }
 }
 
-@keyframes lightPulse {
-  0%, 100% { opacity: .34; transform: translateX(-16%) scaleY(.94); }
-  50% { opacity: .72; transform: translateX(18%) scaleY(1.05); }
-}
 
 @keyframes particleRise {
   0% { transform: translate3d(0, 24px, 0); opacity: 0; }
@@ -332,7 +315,6 @@
 }
 
 .isEntering .cityGlow,
-.isEntering .lightSweep,
 .isEntering .atmosphere,
 .isEntering .particles {
   opacity: 0;
@@ -345,16 +327,26 @@
 
 
 @media (max-width: 520px) {
+  .stage,
+  .errorState {
+    background:
+      radial-gradient(ellipse at 50% 58%, rgba(48, 33, 104, .18), transparent 54%),
+      #02040d;
+  }
+
   .backdrop {
-    inset: -4% -3% -3%;
-    width: 106%;
-    height: 108%;
-    object-position: 50% 64%;
-    transform: translate3d(0, 0, 0) scale(1.01);
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: 50% 56%;
+    transform: translate3d(0, 3.5%, 0) scale(1.10);
+    animation: none;
+    filter: saturate(1.04) contrast(1.06) brightness(.7);
   }
 
   .isEntering .backdrop {
-    transform: translate3d(0, 1%, 0) scale(1.025);
+    transform: translate3d(0, 4.5%, 0) scale(1.12);
   }
 }
 
@@ -402,7 +394,6 @@
 @media (prefers-reduced-motion: reduce) {
   .backdrop,
   .cityGlow,
-  .lightSweep,
   .particles i {
     animation: none;
   }

@@ -90,7 +90,6 @@ export function FoundationPage() {
       <AssetImage assetKey="world.foundationBackdrop" className={styles.backdrop} />
       <div className={styles.scrim} aria-hidden="true" />
       <div className={styles.cityGlow} aria-hidden="true" />
-      <div className={styles.lightSweep} aria-hidden="true" />
       <div className={styles.atmosphere} aria-hidden="true" />
       <div className={styles.particles} aria-hidden="true">
         {particles.map((particle) => <i key={particle} />)}
