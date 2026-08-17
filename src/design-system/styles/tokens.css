@@ -53,7 +53,8 @@
 
   --miniapp-max-width: 440px;
 
-  --safe-top: max(env(safe-area-inset-top), var(--tg-safe-area-inset-top, 0px), var(--tg-content-safe-area-inset-top, 0px));
+  --safe-top-base: max(env(safe-area-inset-top), var(--tg-safe-area-inset-top, 0px), var(--tg-content-safe-area-inset-top, 0px));
+  --safe-top: var(--safe-top-base);
   --safe-right: max(env(safe-area-inset-right), var(--tg-safe-area-inset-right, 0px), var(--tg-content-safe-area-inset-right, 0px));
   --safe-bottom: max(env(safe-area-inset-bottom), var(--tg-safe-area-inset-bottom, 0px), var(--tg-content-safe-area-inset-bottom, 0px));
   --safe-left: max(env(safe-area-inset-left), var(--tg-safe-area-inset-left, 0px), var(--tg-content-safe-area-inset-left, 0px));
@@ -67,4 +68,15 @@
   --tg-theme-secondary-bg: #0b1430;
   --tg-theme-accent: #45ddff;
   --tg-theme-bottom-bar: #03050d;
+}
+
+
+/*
+ * True Telegram fullscreen overlays native controls above the WebView.
+ * Telegram's contentSafeArea keeps content technically safe; this small
+ * mobile-only breathing room keeps the game header visually separated from
+ * Close/Back and action controls without affecting Menu Button launches.
+ */
+:root[data-runtime="telegram"][data-telegram-mobile="true"][data-telegram-fullscreen="true"] {
+  --safe-top: calc(var(--safe-top-base) + 14px);
 }

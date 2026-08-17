@@ -8,6 +8,8 @@ interface TelegramContextValue {
   colorScheme: "light" | "dark";
   stableHeight: number;
   insets: TelegramInsets;
+  isFullscreen: boolean;
+  isMobileClient: boolean;
 }
 
 const TelegramContext = createContext<TelegramContextValue | null>(null);
@@ -26,11 +28,15 @@ function applyTelegramEnvironment(
   colorScheme: "light" | "dark",
   stableHeight: number,
   insets: TelegramInsets,
+  isFullscreen: boolean,
+  isMobileClient: boolean,
 ) {
   const root = document.documentElement;
   root.dataset.telegram = colorScheme;
   root.dataset.runtime = adapter.platform;
   root.dataset.telegramPlatform = adapter.getClientPlatform();
+  root.dataset.telegramFullscreen = isFullscreen ? "true" : "false";
+  root.dataset.telegramMobile = isMobileClient ? "true" : "false";
   root.style.setProperty("--tg-stable-height", `${stableHeight}px`);
 
   setInsetVariables("--tg-safe-area-inset", insets.safeArea);
@@ -59,6 +65,8 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
   const [colorScheme, setColorScheme] = useState(() => adapter.getColorScheme());
   const [stableHeight, setStableHeight] = useState(() => adapter.getStableHeight());
   const [insets, setInsets] = useState(() => adapter.getInsets());
+  const [isFullscreen, setIsFullscreen] = useState(() => adapter.getIsFullscreen());
+  const isMobileClient = adapter.isMobileClient();
 
   useEffect(() => {
     const updateTheme = () => {
@@ -67,12 +75,19 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
     };
     const updateViewport = () => setStableHeight(adapter.getStableHeight());
     const updateInsets = () => setInsets(adapter.getInsets());
+    const updateFullscreen = () => {
+      setIsFullscreen(adapter.getIsFullscreen());
+      setStableHeight(adapter.getStableHeight());
+      setInsets(adapter.getInsets());
+    };
 
     const unsubscribers = [
       adapter.subscribe("themeChanged", updateTheme),
       adapter.subscribe("viewportChanged", updateViewport),
       adapter.subscribe("safeAreaChanged", updateInsets),
       adapter.subscribe("contentSafeAreaChanged", updateInsets),
+      adapter.subscribe("fullscreenChanged", updateFullscreen),
+      adapter.subscribe("fullscreenFailed", updateFullscreen),
     ];
 
     const onBrowserResize = () => {
@@ -82,20 +97,40 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
 
     adapter.ready();
     adapter.expand();
+
+    // Keep the portrait game experience immersive on mobile without forcing
+    // Menu Button launches into fullscreen. If a desktop client opens the
+    // Main Mini App in true fullscreen, leave that mode and keep a bounded
+    // game canvas instead of stretching the mobile UI across the monitor.
+    if (!isMobileClient && adapter.getIsFullscreen()) adapter.exitFullscreen();
     adapter.setChromeColors("#03050d", "#03050d", "#03050d");
 
     return () => {
       unsubscribers.forEach((unsubscribe) => unsubscribe());
       window.removeEventListener("resize", onBrowserResize);
     };
-  }, [adapter]);
+  }, [adapter, isMobileClient]);
 
   useEffect(() => {
-    applyTelegramEnvironment(adapter, theme, colorScheme, stableHeight, insets);
-  }, [adapter, theme, colorScheme, stableHeight, insets]);
+    if (adapter.isTelegram && !isMobileClient && isFullscreen) {
+      adapter.exitFullscreen();
+    }
+  }, [adapter, isFullscreen, isMobileClient]);
+
+  useEffect(() => {
+    applyTelegramEnvironment(
+      adapter,
+      theme,
+      colorScheme,
+      stableHeight,
+      insets,
+      isFullscreen,
+      isMobileClient,
+    );
+  }, [adapter, theme, colorScheme, stableHeight, insets, isFullscreen, isMobileClient]);
 
   return (
-    <TelegramContext.Provider value={{ adapter, theme, colorScheme, stableHeight, insets }}>
+    <TelegramContext.Provider value={{ adapter, theme, colorScheme, stableHeight, insets, isFullscreen, isMobileClient }}>
       {children}
     </TelegramContext.Provider>
   );

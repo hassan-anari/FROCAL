@@ -37,6 +37,8 @@ export type TelegramEvent =
   | "viewportChanged"
   | "safeAreaChanged"
   | "contentSafeAreaChanged"
+  | "fullscreenChanged"
+  | "fullscreenFailed"
   | "activated"
   | "deactivated";
 
@@ -56,6 +58,8 @@ export interface TelegramWebAppLike {
   isFullscreen?: boolean;
   ready?: () => void;
   expand?: () => void;
+  requestFullscreen?: () => void;
+  exitFullscreen?: () => void;
   close?: () => void;
   disableVerticalSwipes?: () => void;
   enableVerticalSwipes?: () => void;

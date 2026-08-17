@@ -33,6 +33,8 @@ describe("Telegram adapter", () => {
     expect(adapter.isTelegram).toBe(true);
     expect(adapter.platform).toBe("telegram");
     expect(adapter.getClientPlatform()).toBe("android");
+    expect(adapter.isMobileClient()).toBe(true);
+    expect(adapter.getIsFullscreen()).toBe(false);
     expect(adapter.getUser()?.username).toBe("dexo");
     expect(ready).toHaveBeenCalledOnce();
   });
@@ -52,4 +54,29 @@ describe("Telegram adapter", () => {
       contentSafeArea: { top: 18, right: 0, bottom: 20, left: 0 },
     });
   });
+
+  it("exposes fullscreen controls without forcing them", () => {
+    const requestFullscreen = vi.fn();
+    const exitFullscreen = vi.fn();
+    window.Telegram = {
+      WebApp: {
+        initData: "query_id=test",
+        platform: "tdesktop",
+        isFullscreen: true,
+        requestFullscreen,
+        exitFullscreen,
+      },
+    };
+
+    const adapter = createTelegramAdapter();
+    expect(adapter.isMobileClient()).toBe(false);
+    expect(adapter.getIsFullscreen()).toBe(true);
+
+    adapter.requestFullscreen();
+    adapter.exitFullscreen();
+
+    expect(requestFullscreen).toHaveBeenCalledOnce();
+    expect(exitFullscreen).toHaveBeenCalledOnce();
+  });
+
 });

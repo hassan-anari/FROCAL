@@ -33,7 +33,7 @@ export function DiagnosticsPage() {
   const profile = useProfileStore();
   const clan = useClanStore();
   const arena = useArenaWarStore();
-  const { adapter, colorScheme, stableHeight, insets } = useTelegram();
+  const { adapter, colorScheme, stableHeight, insets, isFullscreen, isMobileClient } = useTelegram();
   const bootstrap = useQuery({
     queryKey: queryKeys.bootstrap(scenario),
     queryFn: () => loadBootstrap(scenario, adapter.platform),
@@ -322,6 +322,8 @@ export function DiagnosticsPage() {
             <div><dt>Client</dt><dd>{adapter.getClientPlatform()}</dd></div>
             <div><dt>Theme</dt><dd>{colorScheme}</dd></div>
             <div><dt>Stable height</dt><dd>{Math.round(stableHeight)}px</dd></div>
+            <div><dt>Fullscreen</dt><dd>{isFullscreen ? "yes" : "no"}</dd></div>
+            <div><dt>Mobile policy</dt><dd>{isMobileClient ? "mobile" : "bounded"}</dd></div>
             <div><dt>User</dt><dd>{adapter.getUser()?.first_name ?? "browser"}</dd></div>
             <div><dt>Start param</dt><dd>{adapter.getStartParam() ?? "—"}</dd></div>
           </dl>

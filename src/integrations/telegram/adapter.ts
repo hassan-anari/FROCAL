@@ -18,6 +18,8 @@ export interface TelegramAdapter {
   readonly isTelegram: boolean;
   readonly platform: "telegram" | "browser";
   getClientPlatform(): string;
+  isMobileClient(): boolean;
+  getIsFullscreen(): boolean;
   getUser(): TelegramUser | null;
   getStartParam(): string | null;
   getTheme(): TelegramThemeParams;
@@ -26,6 +28,8 @@ export interface TelegramAdapter {
   getInsets(): TelegramInsets;
   ready(): void;
   expand(): void;
+  requestFullscreen(): void;
+  exitFullscreen(): void;
   disableVerticalSwipes(): void;
   enableVerticalSwipes(): void;
   hapticImpact(style?: HapticImpact): void;
@@ -47,6 +51,12 @@ function normalizeInset(value?: TelegramSafeAreaInset): Required<TelegramSafeAre
     bottom: Math.max(0, value?.bottom ?? 0),
     left: Math.max(0, value?.left ?? 0),
   };
+}
+
+
+function isMobileTelegramPlatform(platform?: string): boolean {
+  const value = platform?.trim().toLowerCase() ?? "";
+  return value === "ios" || value === "android" || value.startsWith("android_");
 }
 
 function getTelegramWebApp(): TelegramWebAppLike | null {
@@ -72,6 +82,8 @@ export function createTelegramAdapter(): TelegramAdapter {
     isTelegram,
     platform: isTelegram ? "telegram" : "browser",
     getClientPlatform: () => (isTelegram ? app?.platform ?? "unknown" : "browser"),
+    isMobileClient: () => isTelegram && isMobileTelegramPlatform(app?.platform),
+    getIsFullscreen: () => Boolean(isTelegram && app?.isFullscreen),
     getUser: () => (isTelegram ? app?.initDataUnsafe?.user ?? null : null),
     getStartParam: () => (isTelegram ? app?.initDataUnsafe?.start_param ?? null : null),
     getTheme: () => (isTelegram ? app?.themeParams ?? {} : {}),
@@ -90,6 +102,12 @@ export function createTelegramAdapter(): TelegramAdapter {
     },
     expand: () => {
       if (isTelegram) app?.expand?.();
+    },
+    requestFullscreen: () => {
+      if (isTelegram) app?.requestFullscreen?.();
+    },
+    exitFullscreen: () => {
+      if (isTelegram) app?.exitFullscreen?.();
     },
     disableVerticalSwipes: () => {
       if (isTelegram) app?.disableVerticalSwipes?.();
