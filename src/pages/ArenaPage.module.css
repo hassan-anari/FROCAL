@@ -516,20 +516,20 @@
 .defenceBrief {
   position: relative;
   display: grid;
-  grid-template-columns: 128px minmax(0,1fr);
+  grid-template-columns: 138px minmax(0,1fr);
   align-items: center;
-  gap: .5rem;
+  gap: .72rem;
   min-height: 166px;
   overflow: hidden;
-  padding: .7rem .72rem .7rem .28rem;
+  padding: .72rem .78rem .72rem .4rem;
   border: 1px solid rgba(103, 211, 255, .11);
   border-radius: 21px;
   background:
     radial-gradient(circle at 8% 50%, rgba(73, 211, 255, .09), transparent 8rem),
     linear-gradient(145deg, rgba(8, 22, 43, .88), rgba(8, 9, 26, .92));
 }
-.defenceBriefArt { display: grid; place-items: center; min-height: 130px; }
-.defenceBriefArt img { width: 142px; max-width: none; filter: drop-shadow(0 16px 16px rgba(0,0,0,.35)); }
+.defenceBriefArt { display: grid; place-items: center; min-height: 130px; overflow: hidden; }
+.defenceBriefArt img { width: 126px; max-width: 100%; filter: drop-shadow(0 16px 16px rgba(0,0,0,.35)); }
 .defenceBriefCopy { position: relative; z-index: 2; display: grid; gap: .17rem; min-width: 0; }
 .defenceBriefCopy h3 { margin: 0; color: #f2f7ff; font-size: .9rem; font-weight: 880; letter-spacing: -.03em; }
 .defenceBriefCopy p { margin: 0; color: rgba(190, 205, 233, .58); font-size: .62rem; line-height: 1.45; }
@@ -589,8 +589,8 @@
   .warFlowGrid article > strong,
   .warFlowGrid article > p { margin-inline: 0; }
   .warFlowGrid article > span { margin-top: .12rem; }
-  .defenceBrief { grid-template-columns: 104px minmax(0,1fr); }
-  .defenceBriefArt img { width: 120px; }
+  .defenceBrief { grid-template-columns: 112px minmax(0,1fr); gap: .55rem; padding-left: .35rem; }
+  .defenceBriefArt img { width: 104px; }
 }
 
 @media (min-width: 460px) {
