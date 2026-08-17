@@ -44,12 +44,14 @@
 .pageHeader h1 {
   max-width: 100%;
   margin: 0;
-  overflow: hidden;
+  overflow: visible;
   color: #f7f9ff;
   font-size: clamp(1.48rem, 7vw, 2.55rem);
   font-weight: 860;
   letter-spacing: -.068em;
-  line-height: .95;
+  line-height: 1.04;
+  padding-bottom: .06em;
+  margin-bottom: -.06em;
   text-overflow: clip;
   white-space: nowrap;
 }

@@ -1,9 +1,9 @@
 import {
   ArrowRight01Icon,
   InformationCircleIcon,
-  Sword01Icon,
+  CoinsDollarIcon,
+  KeyboardIcon,
   UserGroupIcon,
-  Wallet01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useNavigate } from "@tanstack/react-router";
@@ -31,9 +31,9 @@ type EarnTab = "earn" | "network" | "typing";
 const earnTabStorageKey = "dalexio-earn-active-tab";
 
 const tabs = [
-  { id: "earn", label: "Earn", icon: Wallet01Icon },
+  { id: "earn", label: "Earn", icon: CoinsDollarIcon },
   { id: "network", label: "Network", icon: UserGroupIcon },
-  { id: "typing", label: "Typing", icon: Sword01Icon },
+  { id: "typing", label: "Typing", icon: KeyboardIcon },
 ] as const;
 
 const missionNumber: Record<MissionId, string> = {
@@ -498,7 +498,7 @@ export function EarnPage() {
             {activeTab === "typing" ? (
               <>
                 <section className={styles.typingHero}>
-                  <span className={styles.typingIcon}><HugeiconsIcon icon={Sword01Icon} size={25} strokeWidth={1.7} /></span>
+                  <span className={styles.typingIcon}><HugeiconsIcon icon={KeyboardIcon} size={25} strokeWidth={1.7} /></span>
                   <div><span>PERMANENT MINI GAME</span><h2>Typing Arena</h2><p>Train speed and accuracy every day. The challenge rules remain the same, with up to five runs per day.</p></div>
                   <strong>{typingRemaining}/{TYPING_DAILY_LIMIT}</strong>
                 </section>

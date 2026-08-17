@@ -1,6 +1,5 @@
 import {
   ArrowRight01Icon,
-  UserCircleIcon,
   Wallet01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -276,7 +275,6 @@ export function ProfilePage() {
                       tone="secondary"
                       size="sm"
                       className={styles.secondaryAction}
-                      leadingIcon={<UserCircleIconView />}
                       onClick={() => setCustomizeOpen(true)}
                     >
                       Customize
@@ -542,6 +540,3 @@ export function ProfilePage() {
   );
 }
 
-function UserCircleIconView() {
-  return <HugeiconsIcon icon={UserCircleIcon} size={17} strokeWidth={1.7} />;
-}

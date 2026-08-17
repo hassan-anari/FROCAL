@@ -187,7 +187,7 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
                   <h2>Notifications</h2>
                 </div>
                 <div className={styles.notificationHeaderActions}>
-                  {unreadCount > 0 ? <button type="button" onClick={markAllRead}>Mark all read</button> : null}
+                  {unreadCount > 0 ? <button type="button" className={styles.markAllButton} onClick={markAllRead}>Mark all read</button> : null}
                   <button type="button" className={styles.closeButton} onClick={() => setNotificationsOpen(false)} aria-label="Close notifications">×</button>
                 </div>
               </header>
