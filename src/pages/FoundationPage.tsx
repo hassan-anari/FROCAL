@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { preloadAssetsIdle } from "@/assets/preload";
+import { preloadAssets } from "@/assets/preload";
 import { AssetImage } from "@/design-system/components/AssetImage";
 import { AppLoader } from "@/design-system/components/AppLoader";
 import { Button } from "@/design-system/primitives/Button";
@@ -54,7 +54,9 @@ export function FoundationPage() {
     return () => adapter.enableVerticalSwipes();
   }, [adapter]);
 
-  useEffect(() => preloadAssetsIdle(phaseOneAssets, { delay: 900, batchSize: 1 }), []);
+  useEffect(() => {
+    void preloadAssets(phaseOneAssets);
+  }, []);
 
   if (bootstrap.isPending) return <AppLoader />;
 

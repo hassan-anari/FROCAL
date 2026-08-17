@@ -4,11 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { preloadAssetsIdle } from "@/assets/preload";
+import { preloadAssets } from "@/assets/preload";
 import { getAssetPath } from "@/assets/registry";
 import type { AssetKey } from "@/assets/registry";
 import { DexoStage } from "@/design-system/components/DexoStage";
 import { GameHeader } from "@/design-system/components/GameHeader";
+import { GameShell } from "@/design-system/components/GameShell";
 import { Button } from "@/design-system/primitives/Button";
 import { useOnboardingStore } from "@/game/onboarding/onboardingStore";
 import { useScenarioStore } from "@/game/scenarios/scenarioStore";
@@ -94,7 +95,7 @@ export function BasePage() {
     if (onboarding.status !== "completed") void navigate({ to: "/onboarding" });
   }, [navigate, onboarding.status]);
 
-  useEffect(() => preloadAssetsIdle(baseReactionAssets, { delay: 520, batchSize: 1 }), []);
+  useEffect(() => { void preloadAssets(baseReactionAssets); }, []);
 
   useEffect(() => {
     if (!dialogue) { setTypedDialogue(""); setIsTyping(false); return; }
@@ -147,7 +148,8 @@ export function BasePage() {
   };
 
   return (
-    <main className={styles.page}>
+    <GameShell>
+      <main className={styles.page}>
         <GameHeader />
 
         <AnimatePresence initial={false}>
@@ -228,7 +230,7 @@ export function BasePage() {
         <section className={styles.objectives} aria-label="Next objectives">
           <header className={styles.sectionHeader}>
             <h2>Next Objective</h2>
-            <button type="button" onClick={() => { sessionStorage.setItem("dalexio-earn-active-tab", "earn"); void navigate({ to: "/earn" }); }}>All missions <HugeiconsIcon icon={ArrowRight01Icon} size={14} strokeWidth={1.7} /></button>
+            <button type="button" onClick={() => void navigate({ to: "/earn" })}>All missions <HugeiconsIcon icon={ArrowRight01Icon} size={14} strokeWidth={1.7} /></button>
           </header>
 
           <div className={styles.objectiveTimeline}>
@@ -275,6 +277,7 @@ export function BasePage() {
           <div><span>Season score</span><strong>{player.seasonScore}</strong></div>
           <div><span>Clan status</span><strong>Open</strong></div>
         </section>
-    </main>
+      </main>
+    </GameShell>
   );
 }

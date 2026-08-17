@@ -8,9 +8,9 @@ import {
   Wallet01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, type CSSProperties, type ReactNode } from "react";
-import { preloadAssets, preloadAssetsIdle } from "@/assets/preload";
+import { preloadAssets } from "@/assets/preload";
 import type { AssetKey } from "@/assets/registry";
 import { AssetImage } from "@/design-system/components/AssetImage";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
@@ -234,7 +234,7 @@ export function ArenaWarExperience({ ownClan }: { ownClan: ClanSummary | null })
   const previousStage = useArenaWarStore((state) => state.previousStage);
   const resetWar = useArenaWarStore((state) => state.resetWar);
 
-  useEffect(() => preloadAssetsIdle(arenaWarDebugPreloadAssets, { delay: 700, batchSize: 1 }), []);
+  useEffect(() => { void preloadAssets(arenaWarDebugPreloadAssets); }, []);
 
   const homeClan = ownClan ?? getClanById("nova-vanguard")!;
   const rival = useMemo(() => {
@@ -257,7 +257,8 @@ export function ArenaWarExperience({ ownClan }: { ownClan: ClanSummary | null })
   return (
     <div className={styles.root}>
       <div className={styles.labBanner}><span>SEASON 2 WAR LAB</span><strong>Debug simulation · frontend only</strong></div>
-      <motion.div key={stage} className={styles.stageStack} initial={{ opacity: .96, x: 5 }} animate={{ opacity: 1, x: 0 }} transition={mobileMotion.tab}>
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div key={stage} className={styles.stageStack} initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -6 }} transition={mobileMotion.tab}>
           {stage === "matchmaking" ? <MatchmakingStage next={next} /> : null}
           {stage === "opponent" ? <OpponentStage ownClan={homeClan} rival={rival} next={next} back={back} /> : null}
           {stage === "preview" ? <PreviewStage ownClan={homeClan} rival={rival} next={next} back={back} /> : null}
@@ -270,7 +271,8 @@ export function ArenaWarExperience({ ownClan }: { ownClan: ClanSummary | null })
           {stage === "result" ? <ResultStage meta={resultMeta} next={next} back={back} /> : null}
           {stage === "defence" ? <DefenceStage next={next} back={back} /> : null}
           {stage === "status" ? <StatusStage meta={statusMeta} onReset={() => { adapter.hapticNotice("success"); resetWar(); }} back={back} /> : null}
-      </motion.div>
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }

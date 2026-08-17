@@ -7,12 +7,13 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
-import { preloadAssets, preloadAssetsIdle } from "@/assets/preload";
+import { preloadAssets } from "@/assets/preload";
 import { AssetImage } from "@/design-system/components/AssetImage";
 import { GameHeader } from "@/design-system/components/GameHeader";
+import { GameShell } from "@/design-system/components/GameShell";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
 import { Button } from "@/design-system/primitives/Button";
-import { pulseBackgroundMotion, usePauseBackgroundMotion } from "@/design-system/motion/usePauseBackgroundMotion";
+import { usePauseBackgroundMotion } from "@/design-system/motion/usePauseBackgroundMotion";
 import {
   CustomizeProfileSheet,
   ProfileDetailSheet,
@@ -114,16 +115,12 @@ export function ProfilePage() {
   const featuredAchievement = profile.featuredAchievementId ? achievementById[profile.featuredAchievementId] : null;
 
   useEffect(() => {
-    void preloadAssets([activeFrame.asset]);
-    const overlayAssets = [
+    void preloadAssets([
+      activeFrame.asset,
       "profile.cosmetic.achievementSlot",
       "profile.cosmetic.medalSlot",
-      ...visibleProfileFrames.map((frame) => frame.asset),
-      ...profile.unlockedMedalIds.map((id) => medalById[id].asset),
-      ...profile.unlockedAchievementIds.map((id) => achievementById[id].asset),
-    ] as const;
-    return preloadAssetsIdle(overlayAssets, { delay: 620, batchSize: 1 });
-  }, [activeFrame.asset, profile.unlockedAchievementIds, profile.unlockedMedalIds]);
+    ]);
+  }, [activeFrame.asset]);
 
   useEffect(() => {
     const mission = earn.missions["complete-profile"];
@@ -138,7 +135,6 @@ export function ProfilePage() {
   const switchTab = (tab: ProfileTab) => {
     if (tab === activeTab) return;
     adapter.selectionChanged();
-    pulseBackgroundMotion(220);
     setActiveTab(tab);
     sessionStorage.setItem(profileTabKey, tab);
   };
@@ -223,7 +219,7 @@ export function ProfilePage() {
   };
 
   return (
-    <>
+    <GameShell>
       <main className={styles.page}>
         <GameHeader />
 
@@ -247,12 +243,13 @@ export function ProfilePage() {
           ))}
         </nav>
 
-        <motion.div
+        <AnimatePresence mode="popLayout" initial={false}>
+          <motion.div
             key={activeTab}
             className={styles.tabContent}
-            initial={{ opacity: .96, x: 5 }}
+            initial={{ opacity: 0, x: 7 }}
             animate={{ opacity: 1, x: 0 }}
-           
+            exit={{ opacity: 0, x: -5 }}
             transition={mobileMotion.tab}
           >
             {activeTab === "overview" ? (
@@ -382,11 +379,14 @@ export function ProfilePage() {
                     const progress = profile.achievementProgress[achievement.id];
                     const ratio = clampRatio(progress.current, progress.target);
                     return (
-                      <button
+                      <motion.button
                         key={achievement.id}
                         type="button"
                         className={`${styles.achievementCard} ${unlocked ? styles.achievementUnlocked : ""}`}
                         onClick={() => openAchievement(achievement.id)}
+                        initial={{ opacity: 0, y: 7 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ ...mobileMotion.reveal, delay: index * .018 }}
                       >
                         <div className={styles.achievementArt}>
                           <AssetImage assetKey={achievement.asset} loading="lazy" draggable={false} />
@@ -402,7 +402,7 @@ export function ProfilePage() {
                           </div>
                         </div>
                         <HugeiconsIcon icon={ArrowRight01Icon} size={16} strokeWidth={1.65} />
-                      </button>
+                      </motion.button>
                     );
                   })}
                 </div>
@@ -428,7 +428,8 @@ export function ProfilePage() {
                   ))}
                 </nav>
 
-                <motion.div
+                <AnimatePresence mode="popLayout" initial={false}>
+                  <motion.div
                     key={collectionTab}
                     className={styles.collectionContent}
                     initial={{ opacity: 0, x: 6 }}
@@ -490,10 +491,12 @@ export function ProfilePage() {
                         })}
                       </div>
                     ) : null}
-                </motion.div>
+                  </motion.div>
+                </AnimatePresence>
               </section>
             ) : null}
-        </motion.div>
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       <AnimatePresence>
@@ -534,7 +537,7 @@ export function ProfilePage() {
         ) : null}
         {detailItem ? <ProfileDetailSheet item={detailItem} onClose={() => setDetailItem(null)} /> : null}
       </AnimatePresence>
-    </>
+    </GameShell>
   );
 }
 

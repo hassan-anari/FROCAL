@@ -58,9 +58,26 @@ function OverlayFrame({ eyebrow, title, onClose, children, footer }: OverlayFram
   closeRef.current = onClose;
 
   useEffect(() => {
+    const scrollRoot = document.querySelector<HTMLElement>("[data-game-scroll]");
+    const appRoot = document.getElementById("root");
     const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const scrollTop = scrollRoot?.scrollTop ?? 0;
+    const previousOverflow = scrollRoot?.style.overflow ?? "";
+    const previousTouchAction = scrollRoot?.style.touchAction ?? "";
+    const previousOverscroll = scrollRoot?.style.overscrollBehavior ?? "";
+    const rootWasInert = appRoot?.hasAttribute("inert") ?? false;
+    const rootAriaHidden = appRoot ? appRoot.getAttribute("aria-hidden") : null;
 
     document.documentElement.classList.add("profile-modal-open");
+    if (scrollRoot) {
+      scrollRoot.style.overflow = "hidden";
+      scrollRoot.style.touchAction = "none";
+      scrollRoot.style.overscrollBehavior = "none";
+    }
+    if (appRoot) {
+      appRoot.setAttribute("inert", "");
+      appRoot.setAttribute("aria-hidden", "true");
+    }
 
     const focusTimer = window.setTimeout(() => {
       const preferred = sheetRef.current?.querySelector<HTMLElement>("[data-modal-primary], [data-modal-close]");
@@ -100,6 +117,17 @@ function OverlayFrame({ eyebrow, title, onClose, children, footer }: OverlayFram
       window.clearTimeout(focusTimer);
       document.removeEventListener("keydown", handleKeyDown);
       document.documentElement.classList.remove("profile-modal-open");
+      if (scrollRoot) {
+        scrollRoot.style.overflow = previousOverflow;
+        scrollRoot.style.touchAction = previousTouchAction;
+        scrollRoot.style.overscrollBehavior = previousOverscroll;
+        scrollRoot.scrollTop = scrollTop;
+      }
+      if (appRoot) {
+        if (!rootWasInert) appRoot.removeAttribute("inert");
+        if (rootAriaHidden === null) appRoot.removeAttribute("aria-hidden");
+        else appRoot.setAttribute("aria-hidden", rootAriaHidden);
+      }
       previousFocus?.focus({ preventScroll: true });
     };
   }, []);
@@ -122,9 +150,9 @@ function OverlayFrame({ eyebrow, title, onClose, children, footer }: OverlayFram
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        initial={{ opacity: 0, y: 14 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 9 }}
+        initial={{ opacity: 0, y: 18, scale: 0.995 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 10, scale: 0.998 }}
         transition={mobileMotion.overlay}
         onPointerDown={(event) => event.stopPropagation()}
       >

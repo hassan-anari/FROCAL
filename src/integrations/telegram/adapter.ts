@@ -64,25 +64,6 @@ function getTelegramWebApp(): TelegramWebAppLike | null {
   return window.Telegram?.WebApp ?? null;
 }
 
-function runAfterNextPaint(task: () => void): void {
-  if (typeof window === "undefined") {
-    task();
-    return;
-  }
-
-  // Telegram's native bridge is only needed as tactile confirmation; it must
-  // never sit in front of a visual state change. Queue it after one paint so
-  // taps, tabs, routes and overlays can commit immediately on mobile WebViews.
-  if (typeof window.requestAnimationFrame === "function") {
-    window.requestAnimationFrame(() => {
-      window.setTimeout(task, 0);
-    });
-    return;
-  }
-
-  window.setTimeout(task, 0);
-}
-
 function hasTelegramLaunchContext(app: TelegramWebAppLike | null): app is TelegramWebAppLike {
   if (!app) return false;
   return Boolean(
@@ -135,13 +116,13 @@ export function createTelegramAdapter(): TelegramAdapter {
       if (isTelegram) app?.enableVerticalSwipes?.();
     },
     hapticImpact: (style = "light") => {
-      if (isTelegram) runAfterNextPaint(() => app?.HapticFeedback?.impactOccurred(style));
+      if (isTelegram) app?.HapticFeedback?.impactOccurred(style);
     },
     hapticNotice: (type) => {
-      if (isTelegram) runAfterNextPaint(() => app?.HapticFeedback?.notificationOccurred(type));
+      if (isTelegram) app?.HapticFeedback?.notificationOccurred(type);
     },
     selectionChanged: () => {
-      if (isTelegram) runAfterNextPaint(() => app?.HapticFeedback?.selectionChanged());
+      if (isTelegram) app?.HapticFeedback?.selectionChanged();
     },
     openTelegramLink: (url) => {
       if (isTelegram && app?.openTelegramLink) app.openTelegramLink(url);

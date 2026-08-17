@@ -10,8 +10,8 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { AssetImage } from "@/design-system/components/AssetImage";
 import { GameHeader } from "@/design-system/components/GameHeader";
+import { GameShell } from "@/design-system/components/GameShell";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
-import { pulseBackgroundMotion } from "@/design-system/motion/usePauseBackgroundMotion";
 import { Button } from "@/design-system/primitives/Button";
 import {
   ClanAchievementsSheet,
@@ -349,18 +349,19 @@ function SoldierNetwork({
 
       <nav className={styles.subnav} aria-label="Clan discovery sections">
         {(["discover", "search"] as const).map((item) => (
-          <button key={item} type="button" className={tab === item ? styles.subnavActive : ""} onClick={() => { if (tab !== item) pulseBackgroundMotion(220); setTab(item); }}>
+          <button key={item} type="button" className={tab === item ? styles.subnavActive : ""} onClick={() => setTab(item)}>
             {item === "discover" ? "Discover" : "Search"}
           </button>
         ))}
       </nav>
 
+      <AnimatePresence mode="sync" initial={false}>
         <motion.div
           key={tab}
           className={styles.tabContent}
-          initial={{ opacity: .96, y: 5 }}
+          initial={{ opacity: 0, y: 7 }}
           animate={{ opacity: 1, y: 0 }}
-         
+          exit={{ opacity: 0, y: -5 }}
           transition={mobileMotion.tab}
         >
           {tab === "discover" ? (
@@ -399,6 +400,7 @@ function SoldierNetwork({
           ) : null}
 
         </motion.div>
+      </AnimatePresence>
     </div>
   );
 }
@@ -707,18 +709,19 @@ function Headquarters({
 
       <nav className={styles.hqNav} aria-label="Clan headquarters sections">
         {(["home", "tasks", "members", "inventory"] as const).map((item) => (
-          <button key={item} type="button" className={tab === item ? styles.hqNavActive : ""} onClick={() => { if (tab !== item) pulseBackgroundMotion(220); setTab(item); }}>
+          <button key={item} type="button" className={tab === item ? styles.hqNavActive : ""} onClick={() => setTab(item)}>
             {item === "home" ? "HQ" : item === "tasks" ? "Missions" : item === "members" ? "Roster" : "Inventory"}
           </button>
         ))}
       </nav>
 
+      <AnimatePresence mode="sync" initial={false}>
         <motion.div
           key={tab}
           className={styles.tabContent}
-          initial={{ opacity: .96, y: 5 }}
+          initial={{ opacity: 0, y: 7 }}
           animate={{ opacity: 1, y: 0 }}
-         
+          exit={{ opacity: 0, y: -5 }}
           transition={mobileMotion.tab}
         >
           <RoomHero tab={tab} shop={tab === "inventory" && inventoryMode === "shop"} effects={activeEffectCount} hqStateLabel={hqStateLabel} />
@@ -821,8 +824,8 @@ function Headquarters({
             <>
               {captain ? (
                 <nav className={styles.filterNav}>
-                  <button type="button" className={inventoryMode === "owned" ? styles.filterActive : ""} onClick={() => { if (inventoryMode !== "owned") pulseBackgroundMotion(180); setInventoryMode("owned"); }}>Inventory</button>
-                  <button type="button" className={inventoryMode === "shop" ? styles.filterActive : ""} onClick={() => { if (inventoryMode !== "shop") pulseBackgroundMotion(180); setInventoryMode("shop"); }}>Shop</button>
+                  <button type="button" className={inventoryMode === "owned" ? styles.filterActive : ""} onClick={() => setInventoryMode("owned")}>Inventory</button>
+                  <button type="button" className={inventoryMode === "shop" ? styles.filterActive : ""} onClick={() => setInventoryMode("shop")}>Shop</button>
                 </nav>
               ) : null}
 
@@ -859,6 +862,7 @@ function Headquarters({
             </>
           ) : null}
         </motion.div>
+      </AnimatePresence>
     </div>
   );
 }
@@ -919,7 +923,8 @@ export function ClanPage() {
   };
 
   return (
-    <main className={styles.page}>
+    <GameShell>
+      <main className={styles.page}>
         <GameHeader />
 
         <header className={`${styles.pageHeader} ${clan.membership === "member" ? styles.pageHeaderCompact : ""} ${earnLevel >= 5 && clan.role === null ? styles.pageHeaderWrap : ""}`}>
@@ -1014,6 +1019,7 @@ export function ClanPage() {
             />
           ) : null}
         </AnimatePresence>
-    </main>
+      </main>
+    </GameShell>
   );
 }

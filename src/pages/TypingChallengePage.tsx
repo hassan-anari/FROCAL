@@ -3,8 +3,9 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { preloadAssetsIdle } from "@/assets/preload";
+import { preloadAssets } from "@/assets/preload";
 import { DexoStage } from "@/design-system/components/DexoStage";
+import { GameShell } from "@/design-system/components/GameShell";
 import { Button } from "@/design-system/primitives/Button";
 import {
   TYPING_DAILY_LIMIT,
@@ -99,7 +100,9 @@ export function TypingChallengePage() {
     adapter.hapticNotice(passed ? "success" : "warning");
   }, [adapter, attemptsRemaining, input, recordTypingResult, result, started, target, timeLeft]);
 
-  useEffect(() => preloadAssetsIdle(["dexo.personalityFocused"], { delay: 420, batchSize: 1 }), []);
+  useEffect(() => {
+    void preloadAssets(["dexo.personalityFocused"]);
+  }, []);
 
   useEffect(() => {
     const cleanupBack = adapter.showBackButton(returnToTypingTab);
@@ -151,7 +154,8 @@ export function TypingChallengePage() {
   };
 
   return (
-    <main className={styles.page}>
+    <GameShell hideNavigation>
+      <main className={styles.page}>
         <header className={styles.header}>
           <button type="button" onClick={returnToTypingTab} aria-label="Back to Typing tab">
             <HugeiconsIcon icon={ArrowRight01Icon} size={18} strokeWidth={1.8} />
@@ -217,7 +221,7 @@ export function TypingChallengePage() {
           </div>
         </section>
 
-        <AnimatePresence mode="sync">
+        <AnimatePresence mode="popLayout">
           {result ? (
             <motion.section key="result" className={`${styles.resultCard} ${result.passed ? styles.resultPassed : styles.resultFailed}`} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} transition={mobileMotion.reveal}>
               <span>{result.passed ? "ARENA CLEARED" : "RUN COMPLETE"}</span>
@@ -241,6 +245,7 @@ export function TypingChallengePage() {
             </motion.div>
           )}
         </AnimatePresence>
-    </main>
+      </main>
+    </GameShell>
   );
 }
