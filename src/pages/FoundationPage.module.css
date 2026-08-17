@@ -343,6 +343,21 @@
   opacity: 1;
 }
 
+
+@media (max-width: 520px) {
+  .backdrop {
+    inset: -4% -3% -3%;
+    width: 106%;
+    height: 108%;
+    object-position: 50% 64%;
+    transform: translate3d(0, 0, 0) scale(1.01);
+  }
+
+  .isEntering .backdrop {
+    transform: translate3d(0, 1%, 0) scale(1.025);
+  }
+}
+
 @media (max-height: 700px) {
   .hero {
     padding-top: .9rem;
