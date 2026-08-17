@@ -1,7 +1,7 @@
 {
-  "name": "dalexio-miniapp-phase5-clan",
+  "name": "dalexio-miniapp-phase6-arena",
   "private": true,
-  "version": "5.0.1",
+  "version": "6.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",

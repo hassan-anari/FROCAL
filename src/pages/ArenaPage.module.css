@@ -1,0 +1,469 @@
+.page {
+  min-height: 100%;
+  padding:
+    calc(.78rem + var(--safe-top))
+    calc(.74rem + var(--safe-right))
+    1.35rem
+    calc(.74rem + var(--safe-left));
+}
+
+.pageHeader {
+  display: grid;
+  gap: .18rem;
+  margin: .9rem 0 .78rem;
+}
+
+.pageHeader > span {
+  color: #7ee9ff;
+  font-size: .55rem;
+  font-weight: 820;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.pageHeader h1 {
+  max-width: 100%;
+  margin: 0;
+  color: #f7f9ff;
+  font-size: clamp(1.52rem, 7.2vw, 2.35rem);
+  font-weight: 860;
+  letter-spacing: -.068em;
+  line-height: 1.02;
+  overflow-wrap: anywhere;
+}
+
+.pageHeader p {
+  max-width: 350px;
+  margin: .15rem 0 0;
+  color: rgba(189, 201, 231, .68);
+  font-size: .74rem;
+  line-height: 1.5;
+}
+
+.stack { display: grid; gap: .78rem; }
+
+.seasonHero {
+  position: relative;
+  display: grid;
+  min-height: 190px;
+  overflow: hidden;
+  padding: .88rem;
+  border: 1px solid rgba(121, 184, 246, .14);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 82% 36%, rgba(98, 83, 235, .16), transparent 9rem),
+    linear-gradient(150deg, rgba(8, 22, 47, .94), rgba(11, 9, 32, .96));
+  box-shadow: 0 18px 40px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.035);
+}
+
+.seasonGlow {
+  position: absolute;
+  right: -25px;
+  bottom: -50px;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(93, 208, 255, .11), transparent 68%);
+  filter: blur(8px);
+}
+
+.seasonCopy {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  align-content: center;
+  gap: .2rem;
+  max-width: 65%;
+}
+
+.seasonCopy > span,
+.panelHeading span,
+.standingLead > span,
+.warCopy > span {
+  color: #72e6ff;
+  font-size: .57rem;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.seasonCopy h2 {
+  margin: 0;
+  color: #f5f8ff;
+  font-size: 1.3rem;
+  font-weight: 900;
+  letter-spacing: -.045em;
+}
+
+.seasonCopy p {
+  margin: 0;
+  color: rgba(191, 205, 233, .62);
+  font-size: .68rem;
+  line-height: 1.45;
+}
+
+.seasonMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  margin-top: .45rem;
+}
+.seasonMeta strong { color: #eff8ff; font-size: .67rem; }
+.seasonMeta span { color: rgba(184, 204, 232, .58); font-size: .62rem; }
+
+.progressTrack {
+  height: 5px;
+  margin-top: .25rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(123, 153, 208, .13);
+}
+.progressTrack i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: left center;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #56ddff, #826eff 62%, #ce5eff);
+  box-shadow: 0 0 14px rgba(90, 209, 255, .25);
+}
+
+.seasonArt {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  right: -.25rem;
+  width: 150px;
+  transform: translateY(-50%);
+  filter: drop-shadow(0 18px 18px rgba(0,0,0,.36));
+}
+
+.yourStanding {
+  display: grid;
+  gap: .65rem;
+  padding: .78rem;
+  border: 1px solid rgba(125, 177, 239, .1);
+  border-radius: 20px;
+  background: linear-gradient(150deg, rgba(8, 18, 39, .88), rgba(5, 9, 22, .9));
+}
+.standingLead { display: grid; gap: .1rem; }
+.standingLead strong { color: #f2f7ff; font-size: .84rem; }
+.standingLead p { margin: 0; color: rgba(189, 204, 232, .56); font-size: .65rem; line-height: 1.42; }
+.standingStats { display: grid; grid-template-columns: repeat(3, 1fr); gap: .42rem; }
+.standingStats article {
+  display: grid;
+  gap: .08rem;
+  min-width: 0;
+  padding: .6rem .42rem;
+  border: 1px solid rgba(125, 177, 239, .08);
+  border-radius: 14px;
+  background: rgba(4, 10, 25, .54);
+  text-align: center;
+}
+.standingStats span { color: rgba(182, 198, 226, .52); font-size: .53rem; font-weight: 800; letter-spacing: .07em; }
+.standingStats strong { color: #f1f8ff; font-size: .78rem; }
+
+.rankingsPanel {
+  display: grid;
+  gap: .65rem;
+  padding: .78rem;
+  border: 1px solid rgba(127, 177, 240, .12);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 90% 0%, rgba(118, 81, 224, .08), transparent 9rem),
+    linear-gradient(150deg, rgba(8, 18, 39, .92), rgba(5, 9, 22, .94));
+}
+
+.panelHeading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: .75rem;
+}
+.panelHeading > div { display: grid; gap: .1rem; }
+.panelHeading strong { color: #f3f8ff; font-size: .86rem; }
+.panelHeading em { color: rgba(183, 198, 226, .47); font-size: .57rem; font-style: normal; }
+
+.rankingSwitch {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: .25rem;
+  padding: .22rem;
+  border: 1px solid rgba(125, 177, 239, .09);
+  border-radius: 14px;
+  background: rgba(3, 8, 20, .68);
+}
+.rankingSwitch button {
+  min-height: 38px;
+  border: 0;
+  border-radius: 11px;
+  color: rgba(177, 190, 219, .52);
+  background: transparent;
+  font-size: .67rem;
+  font-weight: 800;
+  transition: color 160ms ease, background 180ms ease, box-shadow 180ms ease;
+}
+.rankingSwitch .rankingSwitchActive {
+  color: #f5f8ff;
+  background: linear-gradient(115deg, rgba(56, 111, 194, .55), rgba(93, 66, 190, .64));
+  box-shadow: inset 0 0 0 1px rgba(139, 197, 255, .08);
+}
+
+.rankingContent { display: grid; gap: .58rem; }
+.podium {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .42rem;
+}
+.podiumCard {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: .12rem;
+  min-width: 0;
+  padding: .62rem .3rem .55rem;
+  border: 1px solid rgba(128, 178, 238, .08);
+  border-radius: 16px;
+  background: rgba(4, 10, 25, .5);
+  text-align: center;
+}
+.podiumCard:nth-child(1) {
+  border-color: rgba(111, 226, 255, .14);
+  background: linear-gradient(155deg, rgba(12, 39, 58, .62), rgba(5, 10, 25, .6));
+}
+.podiumRank {
+  position: absolute;
+  top: .4rem;
+  left: .45rem;
+  color: #72e6ff;
+  font-size: .58rem;
+  font-weight: 900;
+}
+.podiumCard > strong {
+  width: 100%;
+  overflow: hidden;
+  color: #eff6ff;
+  font-size: .65rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.podiumCard p {
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+  color: rgba(179, 196, 225, .5);
+  font-size: .53rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.podiumCard > b { color: #d9f8ff; font-size: .62rem; }
+
+.playerAvatar,
+.clanMark {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+}
+.playerAvatarLarge,
+.clanMarkLarge { width: 54px; height: 54px; margin-top: .12rem; }
+.playerAvatar > span {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  overflow: hidden;
+  border-radius: 50%;
+  color: #eefbff;
+  background:
+    radial-gradient(circle at 32% 28%, hsla(var(--identity-hue), 95%, 74%, .34), transparent 44%),
+    linear-gradient(145deg, hsl(var(--identity-hue) 58% 34%), hsl(calc(var(--identity-hue) + 44) 55% 20%));
+  font-size: .57rem;
+  font-weight: 900;
+}
+.playerAvatarLarge > span { width: 34px; height: 34px; font-size: .66rem; }
+.playerFrame { position: absolute; z-index: 2; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+
+.clanMark > span {
+  position: absolute;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 51%;
+  height: 51%;
+  overflow: hidden;
+  clip-path: polygon(50% 0%, 88% 14%, 83% 70%, 50% 100%, 17% 70%, 12% 14%);
+  color: #f5fbff;
+  background:
+    radial-gradient(circle at 35% 28%, hsla(var(--identity-hue), 94%, 72%, .34), transparent 42%),
+    linear-gradient(145deg, hsl(var(--identity-hue) 62% 34%), hsl(calc(var(--identity-hue) + 46) 62% 20%));
+  font-size: .48rem;
+  font-weight: 900;
+}
+.clanMark > span img { width: 100%; height: 100%; object-fit: cover; }
+.clanMarkFrame { position: absolute; z-index: 2; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+
+.rankingList { display: grid; gap: .3rem; }
+.rankingList article,
+.selfRankRow {
+  display: grid;
+  grid-template-columns: 34px 40px minmax(0,1fr) auto;
+  align-items: center;
+  gap: .38rem;
+  min-height: 54px;
+  padding: .38rem .42rem;
+  border: 1px solid rgba(125, 177, 239, .065);
+  border-radius: 14px;
+  background: rgba(4, 10, 25, .42);
+}
+.listRank,
+.selfRankRow > span { color: rgba(135, 219, 242, .75); font-size: .61rem; font-weight: 900; }
+.rankingIdentity,
+.selfRankRow > div:nth-child(3) { display: grid; gap: .06rem; min-width: 0; }
+.rankingIdentity strong,
+.selfRankRow strong { overflow: hidden; color: #eff6ff; font-size: .67rem; text-overflow: ellipsis; white-space: nowrap; }
+.rankingIdentity span,
+.selfRankRow p { margin: 0; overflow: hidden; color: rgba(181, 198, 227, .5); font-size: .56rem; text-overflow: ellipsis; white-space: nowrap; }
+.rankingList article > b,
+.selfRankRow > b { color: rgba(230, 240, 254, .8); font-size: .61rem; }
+
+.selfRankRow {
+  border-color: rgba(88, 222, 255, .14);
+  background: linear-gradient(145deg, rgba(12, 38, 57, .58), rgba(13, 12, 41, .58));
+}
+.selfGlyph {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(102, 222, 255, .12);
+  border-radius: 12px;
+  color: #8cecff;
+  background: rgba(24, 84, 104, .12);
+}
+.noClanRank {
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr);
+  align-items: center;
+  gap: .55rem;
+  padding: .7rem;
+  border: 1px dashed rgba(125, 177, 239, .12);
+  border-radius: 15px;
+  color: #83e8ff;
+  background: rgba(4, 10, 25, .38);
+}
+.noClanRank > div { display: grid; gap: .08rem; }
+.noClanRank strong { color: #eef6ff; font-size: .68rem; }
+.noClanRank p { margin: 0; color: rgba(182, 198, 226, .53); font-size: .58rem; line-height: 1.4; }
+
+.warfront {
+  overflow: hidden;
+  border: 1px solid rgba(135, 110, 239, .14);
+  border-radius: 23px;
+  background: linear-gradient(150deg, rgba(11, 14, 38, .95), rgba(5, 8, 20, .96));
+}
+.warScene {
+  position: relative;
+  min-height: 190px;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(130, 173, 235, .08);
+  background: radial-gradient(circle at 50% 50%, rgba(92, 71, 210, .12), transparent 11rem);
+}
+.warArt {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(105%, 430px);
+  transform: translate(-50%, -51%);
+  filter: drop-shadow(0 22px 24px rgba(0,0,0,.4));
+}
+.warShade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(5,8,20,.92), transparent 48%), linear-gradient(90deg, rgba(5,8,20,.28), transparent 30%, rgba(5,8,20,.16));
+}
+.seasonTwoBadge {
+  position: absolute;
+  top: .7rem;
+  right: .72rem;
+  padding: .28rem .5rem;
+  border: 1px solid rgba(121, 222, 255, .17);
+  border-radius: 999px;
+  color: #8aebff;
+  background: rgba(4, 12, 29, .78);
+  font-size: .56rem;
+  font-weight: 900;
+  letter-spacing: .09em;
+}
+.warCopy { display: grid; gap: .22rem; padding: .78rem; }
+.warCopy h2 { margin: 0; color: #f4f7ff; font-size: 1.02rem; font-weight: 880; letter-spacing: -.035em; }
+.warCopy p { margin: 0; color: rgba(190, 205, 233, .6); font-size: .67rem; line-height: 1.47; }
+.futurePillRow { display: flex; flex-wrap: wrap; gap: .38rem; margin: .4rem 0 .25rem; }
+.futurePillRow span {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+  min-height: 29px;
+  padding: 0 .48rem;
+  border: 1px solid rgba(123, 182, 240, .09);
+  border-radius: 999px;
+  color: rgba(218, 236, 251, .72);
+  background: rgba(6, 15, 34, .58);
+  font-size: .59rem;
+  font-weight: 760;
+}
+.warCopy button {
+  width: 100%;
+  min-height: 42px;
+  margin-top: .15rem;
+  border: 1px solid rgba(127, 180, 238, .1);
+  border-radius: 13px;
+  color: rgba(187, 203, 232, .42);
+  background: rgba(4, 9, 22, .58);
+  font-size: .65rem;
+  font-weight: 800;
+}
+
+.arenaNote {
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr);
+  align-items: center;
+  gap: .55rem;
+  padding: .68rem .72rem;
+  border: 1px solid rgba(125, 177, 239, .08);
+  border-radius: 17px;
+  color: #78e5ff;
+  background: rgba(5, 12, 28, .52);
+}
+.arenaNote > div { display: grid; gap: .06rem; }
+.arenaNote strong { color: #edf6ff; font-size: .68rem; }
+.arenaNote p { margin: 0; color: rgba(185, 202, 230, .54); font-size: .59rem; line-height: 1.4; }
+
+@media (max-width: 350px) {
+  .seasonCopy { max-width: 70%; }
+  .seasonArt { right: -.8rem; width: 132px; }
+  .standingStats { gap: .3rem; }
+  .podium { gap: .28rem; }
+  .podiumCard { padding-inline: .2rem; }
+  .rankingList article,
+  .selfRankRow { grid-template-columns: 30px 36px minmax(0,1fr) auto; gap: .3rem; }
+  .playerAvatar,
+  .clanMark { width: 36px; height: 36px; }
+}
+
+@media (min-width: 460px) {
+  .page { padding-inline: calc(1rem + var(--safe-left)); }
+  .seasonHero { min-height: 210px; }
+  .seasonArt { width: 175px; right: 1rem; }
+  .seasonCopy { max-width: 62%; }
+  .warScene { min-height: 220px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rankingContent { transform: none !important; }
+}

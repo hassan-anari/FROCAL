@@ -1,5 +1,5 @@
 {
-  "version": 8,
+  "version": "6.0.0",
   "assets": [
     {
       "key": "brand.logo",
@@ -11,7 +11,7 @@
     {
       "key": "brand.logoTagline",
       "path": "/assets/brand/dalexio-logo-tagline.svg",
-      "alt": "Dalexio — Play Grow Unite Compete",
+      "alt": "Dalexio \u2014 Play Grow Unite Compete",
       "category": "brand",
       "requiredInPhase": 0
     },
@@ -332,64 +332,64 @@
     },
     {
       "key": "war.matchmaking",
-      "path": "/assets/war/war-matchmaking.webp",
-      "alt": "War matchmaking",
+      "path": "/assets/arena/war-scene-matchmaking.webp",
+      "alt": "War matchmaking scene",
       "category": "war",
       "requiredInPhase": 6
     },
     {
       "key": "war.opponent",
-      "path": "/assets/war/war-opponent-found.webp",
-      "alt": "Opponent found",
+      "path": "/assets/arena/war-scene-opponent-found.webp",
+      "alt": "Opponent found scene",
       "category": "war",
       "requiredInPhase": 6
     },
     {
       "key": "war.preparation",
-      "path": "/assets/war/war-preparation.webp",
-      "alt": "War preparation",
+      "path": "/assets/arena/war-scene-preparation-phase.webp",
+      "alt": "War preparation scene",
       "category": "war",
       "requiredInPhase": 6
     },
     {
       "key": "war.countdown",
-      "path": "/assets/war/war-countdown.webp",
-      "alt": "Battle countdown",
+      "path": "/assets/arena/war-scene-countdown.webp",
+      "alt": "War countdown scene",
       "category": "war",
       "requiredInPhase": 6
     },
     {
       "key": "war.active",
-      "path": "/assets/war/war-active-battle.webp",
-      "alt": "Active battle",
+      "path": "/assets/arena/war-scene-active-battle.webp",
+      "alt": "Active war battle scene",
       "category": "war",
       "requiredInPhase": 6
     },
     {
       "key": "war.victory",
-      "path": "/assets/war/war-victory.webp",
-      "alt": "War victory",
+      "path": "/assets/arena/war-result-victory.webp",
+      "alt": "War victory result",
       "category": "war",
       "requiredInPhase": 6
     },
     {
       "key": "war.defeat",
-      "path": "/assets/war/war-defeat.webp",
-      "alt": "War defeat",
+      "path": "/assets/arena/war-result-defeat.webp",
+      "alt": "War defeat result",
       "category": "war",
       "requiredInPhase": 6
     },
     {
       "key": "alliance.invitation",
-      "path": "/assets/alliance/alliance-invitation.webp",
+      "path": "/assets/arena/alliance-asset-alliance-invitation.webp",
       "alt": "Alliance invitation",
       "category": "alliance",
       "requiredInPhase": 7
     },
     {
       "key": "alliance.formed",
-      "path": "/assets/alliance/alliance-formed.webp",
-      "alt": "Alliance formed",
+      "path": "/assets/arena/alliance-asset-alliance-created.webp",
+      "alt": "Alliance created",
       "category": "alliance",
       "requiredInPhase": 7
     },
@@ -861,6 +861,160 @@
       "alt": "Clan honor trophy symbol",
       "category": "clan",
       "requiredInPhase": 5
+    },
+    {
+      "key": "war.opponentPreview",
+      "path": "/assets/arena/war-scene-opponent-preview.webp",
+      "alt": "Opponent preview scene",
+      "category": "war",
+      "requiredInPhase": 6
+    },
+    {
+      "key": "war.confirmation",
+      "path": "/assets/arena/war-scene-match-confirmation.webp",
+      "alt": "War match confirmation scene",
+      "category": "war",
+      "requiredInPhase": 6
+    },
+    {
+      "key": "war.itemSelection",
+      "path": "/assets/arena/war-scene-item-selection.webp",
+      "alt": "War item selection scene",
+      "category": "war",
+      "requiredInPhase": 6
+    },
+    {
+      "key": "war.finalMoments",
+      "path": "/assets/arena/war-scene-final-moments.webp",
+      "alt": "War final moments scene",
+      "category": "war",
+      "requiredInPhase": 6
+    },
+    {
+      "key": "war.defenceSetup",
+      "path": "/assets/arena/war-scene-defence-setup.webp",
+      "alt": "War defence setup scene",
+      "category": "war",
+      "requiredInPhase": 6
+    },
+    {
+      "key": "war.draw",
+      "path": "/assets/arena/war-result-draw.webp",
+      "alt": "War draw result",
+      "category": "war",
+      "requiredInPhase": 6
+    },
+    {
+      "key": "war.successfulAttack",
+      "path": "/assets/arena/war-result-successful-attack.webp",
+      "alt": "Successful attack result",
+      "category": "war",
+      "requiredInPhase": 6
+    },
+    {
+      "key": "war.successfulDefence",
+      "path": "/assets/arena/war-result-successful-defence.webp",
+      "alt": "Successful defence result",
+      "category": "war",
+      "requiredInPhase": 6
+    },
+    {
+      "key": "war.statusProtection",
+      "path": "/assets/arena/war-status-protection-active.webp",
+      "alt": "War protection active status",
+      "category": "war-status",
+      "requiredInPhase": 6
+    },
+    {
+      "key": "war.statusRecovery",
+      "path": "/assets/arena/war-status-recovery-mode.webp",
+      "alt": "War recovery status",
+      "category": "war-status",
+      "requiredInPhase": 6
+    },
+    {
+      "key": "war.statusReward",
+      "path": "/assets/arena/war-status-reward-ready.webp",
+      "alt": "War reward ready status",
+      "category": "war-status",
+      "requiredInPhase": 6
+    },
+    {
+      "key": "war.statusDebuff",
+      "path": "/assets/arena/war-status-temporary-debuff.webp",
+      "alt": "War temporary debuff status",
+      "category": "war-status",
+      "requiredInPhase": 6
+    },
+    {
+      "key": "arena.rewardCapsule",
+      "path": "/assets/arena/seasonal-item-seasonal-reward-capsule.webp",
+      "alt": "Seasonal reward capsule",
+      "category": "arena-season",
+      "requiredInPhase": 6
+    },
+    {
+      "key": "arena.eventKey",
+      "path": "/assets/arena/seasonal-item-event-access-key.webp",
+      "alt": "Event access key",
+      "category": "arena-season",
+      "requiredInPhase": 8
+    },
+    {
+      "key": "alliance.accepted",
+      "path": "/assets/arena/alliance-asset-alliance-accepted.webp",
+      "alt": "Alliance accepted",
+      "category": "alliance",
+      "requiredInPhase": 7
+    },
+    {
+      "key": "alliance.jointMission",
+      "path": "/assets/arena/alliance-asset-joint-mission.webp",
+      "alt": "Alliance joint mission",
+      "category": "alliance",
+      "requiredInPhase": 7
+    },
+    {
+      "key": "alliance.supportCall",
+      "path": "/assets/arena/alliance-asset-support-call.webp",
+      "alt": "Alliance support call",
+      "category": "alliance",
+      "requiredInPhase": 7
+    },
+    {
+      "key": "alliance.supportSent",
+      "path": "/assets/arena/alliance-asset-support-sent.webp",
+      "alt": "Alliance support sent",
+      "category": "alliance",
+      "requiredInPhase": 7
+    },
+    {
+      "key": "worldEvent.hub",
+      "path": "/assets/arena/world-event-event-hub.webp",
+      "alt": "World event hub",
+      "category": "world-event",
+      "requiredInPhase": 8
+    },
+    {
+      "key": "worldEvent.progress",
+      "path": "/assets/arena/world-event-global-progress.webp",
+      "alt": "World event global progress",
+      "category": "world-event",
+      "requiredInPhase": 8
+    },
+    {
+      "key": "worldEvent.milestone",
+      "path": "/assets/arena/world-event-milestone-reached.webp",
+      "alt": "World event milestone reached",
+      "category": "world-event",
+      "requiredInPhase": 8
+    },
+    {
+      "key": "worldEvent.completed",
+      "path": "/assets/arena/world-event-event-completed.webp",
+      "alt": "World event completed",
+      "category": "world-event",
+      "requiredInPhase": 8
     }
   ]
 }
