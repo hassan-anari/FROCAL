@@ -1,4 +1,8 @@
 .page {
+  --arena-cyan: #70e7ff;
+  --arena-violet: #9b87ff;
+  --arena-gold: #f2c978;
+  display: block;
   min-height: 100%;
   padding:
     calc(.78rem + var(--safe-top))
@@ -7,604 +11,325 @@
     calc(.74rem + var(--safe-left));
 }
 
-.pageHeader {
-  display: grid;
-  gap: .18rem;
-  margin: .9rem 0 .7rem;
-}
-
-.pageHeader > span {
-  color: #7ee9ff;
-  font-size: .55rem;
-  font-weight: 820;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-}
-
-.pageHeader h1 {
-  max-width: 100%;
-  margin: 0;
-  color: #f7f9ff;
-  font-size: clamp(1.52rem, 7.2vw, 2.35rem);
-  font-weight: 860;
-  letter-spacing: -.068em;
-  line-height: 1.02;
-  overflow-wrap: anywhere;
-}
-
-.pageHeader p {
-  max-width: 350px;
-  margin: .15rem 0 0;
-  color: rgba(189, 201, 231, .68);
-  font-size: .74rem;
-  line-height: 1.5;
-}
+.pageHeader { display: grid; gap: .18rem; margin: .9rem 0 .72rem; }
+.pageHeader > span { color: #8e8fff; font-size: .55rem; font-weight: 850; letter-spacing: .16em; text-transform: uppercase; }
+.pageHeader h1 { max-width: 100%; margin: 0; color: #f7f9ff; font-size: clamp(1.55rem, 7.2vw, 2.35rem); font-weight: 880; letter-spacing: -.066em; line-height: 1.02; }
+.pageHeader p { max-width: 360px; margin: .15rem 0 0; color: rgba(191,204,234,.67); font-size: .74rem; line-height: 1.5; }
 
 .arenaTabs {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: .25rem;
-  margin-bottom: .78rem;
-  padding: .22rem;
-  border: 1px solid rgba(125, 177, 239, .1);
-  border-radius: 16px;
-  background: rgba(3, 8, 20, .7);
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: .2rem;
+  margin-bottom: .8rem;
+  padding: .23rem;
+  border: 1px solid rgba(127, 150, 219, .09);
+  border-radius: 15px;
+  background: rgba(5, 10, 25, .68);
 }
+.arenaTabs button { position: relative; min-height: 40px; border: 0; border-radius: 11px; color: rgba(187,201,231,.53); background: transparent; font-size: .64rem; font-weight: 800; }
+.arenaTabs button::after { content: ""; position: absolute; right: 28%; bottom: 4px; left: 28%; height: 2px; transform: scaleX(0); border-radius: 999px; background: linear-gradient(90deg, #745fff, #6de7ff); transition: transform .18s ease; }
+.arenaTabs .arenaTabActive { color: #eff5ff; background: linear-gradient(150deg, rgba(81,65,167,.2), rgba(24,82,111,.14)); }
+.arenaTabs .arenaTabActive::after { transform: scaleX(1); }
 
-.arenaTabs button {
+.sectionContent, .stack { display: grid; gap: .72rem; }
+.panel {
+  padding: .75rem;
+  border: 1px solid rgba(126, 171, 235, .09);
+  border-radius: 20px;
+  background: linear-gradient(150deg, rgba(8,19,42,.9), rgba(5,9,23,.94));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+}
+.sectionTitle { display: flex; align-items: flex-start; justify-content: space-between; gap: .8rem; margin-bottom: .62rem; }
+.sectionTitle > div { display: grid; gap: .06rem; }
+.sectionTitle span { color: #77e8ff; font-size: .55rem; font-weight: 900; letter-spacing: .12em; }
+.sectionTitle h2 { margin: 0; color: #f1f6ff; font-size: .88rem; font-weight: 850; letter-spacing: -.025em; }
+.hint { color: rgba(190,205,233,.54) !important; font-size: .58rem !important; font-weight: 760 !important; letter-spacing: 0 !important; }
+
+.overviewHero {
+  position: relative;
+  min-height: 330px;
+  overflow: hidden;
+  border: 1px solid rgba(121, 112, 239, .16);
+  border-radius: 27px;
+  background: #050917;
+  box-shadow: 0 20px 45px rgba(0,0,0,.25);
+}
+.overviewHeroArt { position: absolute; top: -12px; right: -18px; width: min(86vw, 365px); filter: drop-shadow(0 20px 25px rgba(0,0,0,.35)); }
+.overviewShade { position: absolute; inset: 0; background: linear-gradient(0deg, rgba(4,7,18,.98) 8%, rgba(4,8,19,.72) 46%, rgba(4,8,19,.08) 80%), linear-gradient(90deg, rgba(4,8,20,.38), transparent 70%); }
+.overviewHeroCopy { position: absolute; z-index: 2; right: .85rem; bottom: .85rem; left: .85rem; display: grid; gap: .23rem; max-width: 330px; }
+.overviewHeroCopy > span { color: #8a8cff; font-size: .58rem; font-weight: 900; letter-spacing: .13em; }
+.overviewHeroCopy h2 { margin: 0; color: #f7f8ff; font-size: 1.22rem; font-weight: 900; letter-spacing: -.045em; line-height: 1.07; }
+.overviewHeroCopy p { margin: 0; color: rgba(198,210,237,.68); font-size: .7rem; line-height: 1.47; }
+.heroAction, .primaryAction, .primaryWide {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: .38rem;
-  min-height: 42px;
-  border: 0;
+  gap: .35rem;
+  min-height: 39px;
+  padding: 0 .72rem;
+  border: 1px solid rgba(114, 214, 255, .23);
   border-radius: 12px;
-  color: rgba(177, 190, 219, .54);
-  background: transparent;
-  font-size: .68rem;
-  font-weight: 820;
-  transition: color 160ms ease, background 180ms ease, box-shadow 180ms ease;
-}
-
-.arenaTabs em {
-  padding: .13rem .27rem;
-  border: 1px solid currentColor;
-  border-radius: 999px;
-  font-size: .46rem;
-  font-style: normal;
-  font-weight: 900;
-  letter-spacing: .06em;
-  opacity: .72;
-}
-
-.arenaTabs .arenaTabActive {
-  color: #f5f8ff;
-  background: linear-gradient(115deg, rgba(50, 100, 181, .58), rgba(91, 64, 188, .66));
-  box-shadow: inset 0 0 0 1px rgba(139, 197, 255, .08);
-}
-
-.sectionContent,
-.warfrontStack,
-.rankingsStack { display: grid; gap: .78rem; }
-
-/* Season 1 rankings */
-.seasonHero {
-  position: relative;
-  display: grid;
-  min-height: 190px;
-  overflow: hidden;
-  padding: .88rem;
-  border: 1px solid rgba(121, 184, 246, .14);
-  border-radius: 24px;
-  background:
-    radial-gradient(circle at 82% 36%, rgba(98, 83, 235, .16), transparent 9rem),
-    linear-gradient(150deg, rgba(8, 22, 47, .94), rgba(11, 9, 32, .96));
-  box-shadow: 0 18px 40px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.035);
-}
-
-.seasonGlow {
-  position: absolute;
-  right: -25px;
-  bottom: -50px;
-  width: 190px;
-  height: 190px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(93, 208, 255, .11), transparent 68%);
-  filter: blur(8px);
-}
-
-.seasonCopy {
-  position: relative;
-  z-index: 2;
-  display: grid;
-  align-content: center;
-  gap: .2rem;
-  max-width: 65%;
-}
-
-.seasonCopy > span,
-.panelHeading span,
-.sectionHeading span,
-.warfrontIntro > span,
-.defenceBriefCopy > span,
-.warfrontLock span {
-  color: #72e6ff;
-  font-size: .57rem;
-  font-weight: 900;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-}
-
-.seasonCopy h2 {
-  margin: 0;
-  color: #f5f8ff;
-  font-size: 1.3rem;
-  font-weight: 900;
-  letter-spacing: -.045em;
-}
-
-.seasonCopy p {
-  margin: 0;
-  color: rgba(191, 205, 233, .62);
-  font-size: .68rem;
-  line-height: 1.45;
-}
-
-.seasonMeta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: .75rem;
-  margin-top: .45rem;
-}
-.seasonMeta strong { color: #eff8ff; font-size: .67rem; }
-.seasonMeta span { color: rgba(184, 204, 232, .58); font-size: .62rem; }
-
-.progressTrack {
-  height: 5px;
-  margin-top: .25rem;
-  overflow: hidden;
-  border-radius: 999px;
-  background: rgba(123, 153, 208, .13);
-}
-.progressTrack i {
-  display: block;
-  width: 100%;
-  height: 100%;
-  transform-origin: left center;
-  border-radius: inherit;
-  background: linear-gradient(90deg, #56ddff, #826eff 62%, #ce5eff);
-  box-shadow: 0 0 14px rgba(90, 209, 255, .25);
-}
-
-.seasonArt {
-  position: absolute;
-  z-index: 1;
-  top: 50%;
-  right: -.25rem;
-  width: 150px;
-  transform: translateY(-50%);
-  filter: drop-shadow(0 18px 18px rgba(0,0,0,.36));
-}
-
-.rankingsPanel {
-  display: grid;
-  gap: .65rem;
-  padding: .78rem;
-  border: 1px solid rgba(127, 177, 240, .12);
-  border-radius: 22px;
-  background:
-    radial-gradient(circle at 90% 0%, rgba(118, 81, 224, .08), transparent 9rem),
-    linear-gradient(150deg, rgba(8, 18, 39, .92), rgba(5, 9, 22, .94));
-}
-
-.panelHeading,
-.sectionHeading {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: .75rem;
-}
-.panelHeading > div,
-.sectionHeading > div { display: grid; gap: .1rem; }
-.panelHeading strong,
-.sectionHeading strong { color: #f3f8ff; font-size: .86rem; }
-.panelHeading em,
-.sectionHeading em { color: rgba(183, 198, 226, .47); font-size: .57rem; font-style: normal; }
-
-.rankingSwitch {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: .25rem;
-  padding: .22rem;
-  border: 1px solid rgba(125, 177, 239, .09);
-  border-radius: 14px;
-  background: rgba(3, 8, 20, .68);
-}
-.rankingSwitch button {
-  min-height: 38px;
-  border: 0;
-  border-radius: 11px;
-  color: rgba(177, 190, 219, .52);
-  background: transparent;
-  font-size: .67rem;
-  font-weight: 800;
-  transition: color 160ms ease, background 180ms ease, box-shadow 180ms ease;
-}
-.rankingSwitch .rankingSwitchActive {
-  color: #f5f8ff;
-  background: linear-gradient(115deg, rgba(56, 111, 194, .55), rgba(93, 66, 190, .64));
-  box-shadow: inset 0 0 0 1px rgba(139, 197, 255, .08);
-}
-
-.rankingContent { display: grid; gap: .58rem; }
-.podium {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: .42rem;
-}
-.podiumCard {
-  position: relative;
-  display: grid;
-  justify-items: center;
-  gap: .12rem;
-  min-width: 0;
-  padding: .62rem .3rem .55rem;
-  border: 1px solid rgba(128, 178, 238, .08);
-  border-radius: 16px;
-  background: rgba(4, 10, 25, .5);
-  text-align: center;
-}
-.podiumCard:nth-child(1) {
-  border-color: rgba(111, 226, 255, .14);
-  background: linear-gradient(155deg, rgba(12, 39, 58, .62), rgba(5, 10, 25, .6));
-}
-.podiumRank {
-  position: absolute;
-  top: .4rem;
-  left: .45rem;
-  color: #72e6ff;
-  font-size: .58rem;
-  font-weight: 900;
-}
-.podiumCard > strong {
-  width: 100%;
-  overflow: hidden;
-  color: #eff6ff;
-  font-size: .65rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.podiumCard p {
-  width: 100%;
-  margin: 0;
-  overflow: hidden;
-  color: rgba(179, 196, 225, .5);
-  font-size: .53rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.podiumCard > b { color: #d9f8ff; font-size: .62rem; }
-
-.playerAvatar,
-.clanMark {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  flex: 0 0 auto;
-}
-.playerAvatarLarge,
-.clanMarkLarge { width: 54px; height: 54px; margin-top: .12rem; }
-.playerAvatar > span {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  place-items: center;
-  width: 25px;
-  height: 25px;
-  overflow: hidden;
-  border-radius: 50%;
-  color: #eefbff;
-  background:
-    radial-gradient(circle at 32% 28%, hsla(var(--identity-hue), 95%, 74%, .34), transparent 44%),
-    linear-gradient(145deg, hsl(var(--identity-hue) 58% 34%), hsl(calc(var(--identity-hue) + 44) 55% 20%));
-  font-size: .57rem;
-  font-weight: 900;
-}
-.playerAvatarLarge > span { width: 34px; height: 34px; font-size: .66rem; }
-.playerFrame { position: absolute; z-index: 2; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
-
-.currentPlayerAvatar {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  overflow: hidden;
-  border: 1px solid rgba(142, 193, 255, .23);
-  border-radius: 12px;
-  box-shadow: 0 7px 16px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.06);
-}
-.currentPlayerAvatar img { width: 100%; height: 100%; object-fit: cover; }
-.currentPlayerAvatar span {
-  display: grid;
-  place-items: center;
-  width: 100%;
-  height: 100%;
-  color: white;
-  background: linear-gradient(145deg, #48d9ff, #806cff 58%, #cf56ff);
-  font-size: .72rem;
+  color: #effcff;
+  background: linear-gradient(135deg, rgba(73,65,190,.78), rgba(31,129,164,.72));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 8px 20px rgba(40,74,165,.14);
+  font-size: .66rem;
   font-weight: 850;
 }
+.heroAction { justify-self: start; margin-top: .28rem; }
+.overviewScore { position: absolute; z-index: 3; top: .7rem; right: .7rem; display: flex; align-items: center; gap: .34rem; padding: .28rem .42rem; border: 1px solid rgba(126,174,241,.15); border-radius: 999px; color: #e9f6ff; background: rgba(4,10,23,.75); font-size: .62rem; font-weight: 850; }
+.overviewScore i { width: 13px; height: 1px; background: rgba(255,255,255,.2); }
 
-.clanMark > span {
-  position: absolute;
-  z-index: 1;
-  display: grid;
-  place-items: center;
-  width: 51%;
-  height: 51%;
-  overflow: hidden;
-  clip-path: polygon(50% 0%, 88% 14%, 83% 70%, 50% 100%, 17% 70%, 12% 14%);
-  color: #f5fbff;
-  background:
-    radial-gradient(circle at 35% 28%, hsla(var(--identity-hue), 94%, 72%, .34), transparent 42%),
-    linear-gradient(145deg, hsl(var(--identity-hue) 62% 34%), hsl(calc(var(--identity-hue) + 46) 62% 20%));
-  font-size: .48rem;
-  font-weight: 900;
-}
+.roleStrip { display: flex; align-items: center; justify-content: space-between; gap: .7rem; min-height: 72px; padding: .55rem .65rem .55rem .78rem; border: 1px solid rgba(112, 197, 240, .1); border-radius: 18px; background: linear-gradient(145deg, rgba(8,27,48,.7), rgba(21,12,47,.72)); }
+.roleStrip > div:first-child { display: grid; gap: .08rem; }
+.roleStrip span { color: #70e7ff; font-size: .56rem; font-weight: 900; letter-spacing: .11em; }
+.roleStrip strong { color: #eff6ff; font-size: .72rem; }
+
+.clanMark { position: relative; display: grid; place-items: center; width: 46px; height: 46px; flex: 0 0 auto; }
+.clanMark > span { position: relative; z-index: 1; display: grid; place-items: center; width: 26px; height: 26px; overflow: hidden; clip-path: polygon(50% 0%, 88% 14%, 83% 70%, 50% 100%, 17% 70%, 12% 14%); color: #eefbff; background: linear-gradient(145deg, hsl(var(--identity-hue) 60% 37%), hsl(calc(var(--identity-hue) + 45) 58% 20%)); font-size: .58rem; font-weight: 900; }
 .clanMark > span img { width: 100%; height: 100%; object-fit: cover; }
-.clanMarkFrame { position: absolute; z-index: 2; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+.clanMarkFrame { position: absolute; z-index: 2; width: 50px; height: 50px; object-fit: contain; }
+.clanMarkLarge { width: 70px; height: 70px; }
+.clanMarkLarge > span { width: 40px; height: 40px; font-size: .72rem; }
+.clanMarkLarge .clanMarkFrame { width: 76px; height: 76px; }
 
-.rankingList { display: grid; gap: .3rem; }
-.rankingList article,
-.selfRankRow {
-  display: grid;
-  grid-template-columns: 34px 40px minmax(0,1fr) auto;
-  align-items: center;
-  gap: .38rem;
-  min-height: 54px;
-  padding: .38rem .42rem;
-  border: 1px solid rgba(125, 177, 239, .065);
-  border-radius: 14px;
-  background: rgba(4, 10, 25, .42);
-}
-.listRank,
-.selfRankRow > span { color: rgba(135, 219, 242, .75); font-size: .61rem; font-weight: 900; }
-.rankingIdentity,
-.selfRankRow > div:nth-child(3) { display: grid; gap: .06rem; min-width: 0; }
-.rankingIdentity strong,
-.selfRankRow strong { overflow: hidden; color: #eff6ff; font-size: .67rem; text-overflow: ellipsis; white-space: nowrap; }
-.rankingIdentity span,
-.selfRankRow p { margin: 0; overflow: hidden; color: rgba(181, 198, 227, .5); font-size: .56rem; text-overflow: ellipsis; white-space: nowrap; }
-.rankingList article > b,
-.selfRankRow > b { color: rgba(230, 240, 254, .8); font-size: .61rem; }
+.commandGrid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: .52rem; }
+.commandGrid > button, .commandStatic { display: grid; grid-template-columns: 54px minmax(0,1fr) auto; align-items: center; gap: .42rem; min-height: 100px; padding: .55rem; border: 1px solid rgba(124,177,239,.09); border-radius: 18px; color: inherit; background: linear-gradient(150deg, rgba(9,21,44,.83), rgba(6,10,24,.91)); text-align: left; }
+.commandGrid > button > img { width: 58px; height: 70px; object-fit: contain; filter: drop-shadow(0 9px 10px rgba(0,0,0,.32)); }
+.commandGrid > button > div, .commandStatic > div { display: grid; gap: .07rem; min-width: 0; }
+.commandGrid span, .commandStatic span { color: #79e8ff; font-size: .52rem; font-weight: 900; letter-spacing: .09em; }
+.commandGrid strong, .commandStatic strong { color: #f1f6ff; font-size: .69rem; }
+.commandGrid p, .commandStatic p { margin: 0; color: rgba(185,201,230,.53); font-size: .59rem; line-height: 1.35; }
+.commandStatic > svg { color: #8e83ff; }
 
-.selfRankRow {
-  border-color: rgba(88, 222, 255, .14);
-  background: linear-gradient(145deg, rgba(12, 38, 57, .58), rgba(13, 12, 41, .58));
-}
-.noClanRank {
-  display: grid;
-  grid-template-columns: auto minmax(0,1fr);
-  align-items: center;
-  gap: .55rem;
-  padding: .7rem;
-  border: 1px dashed rgba(125, 177, 239, .12);
-  border-radius: 15px;
-  color: #83e8ff;
-  background: rgba(4, 10, 25, .38);
-}
-.noClanRank > div { display: grid; gap: .08rem; }
-.noClanRank strong { color: #eef6ff; font-size: .68rem; }
-.noClanRank p { margin: 0; color: rgba(182, 198, 226, .53); font-size: .58rem; line-height: 1.4; }
+.defenceCard { display: grid; grid-template-columns: 120px minmax(0,1fr); align-items: center; gap: .62rem; min-height: 126px; padding: .62rem .7rem; border: 1px solid rgba(126, 176, 240, .09); border-radius: 20px; background: linear-gradient(150deg, rgba(9,20,43,.86), rgba(6,9,22,.93)); }
+.defenceArt { display: grid; place-items: center; min-height: 110px; }
+.defenceArt img { width: 112px; height: 112px; object-fit: contain; filter: drop-shadow(0 12px 13px rgba(0,0,0,.3)); }
+.defenceCard > div:last-child { display: grid; gap: .12rem; }
+.defenceCard span { color: #8d88ff; font-size: .55rem; font-weight: 900; letter-spacing: .1em; }
+.defenceCard strong { color: #f1f5ff; font-size: .78rem; }
+.defenceCard p { margin: 0; color: rgba(188,202,231,.57); font-size: .64rem; line-height: 1.43; }
 
-/* Season 2 Warfront */
-.warfrontHero {
-  overflow: hidden;
-  border: 1px solid rgba(135, 110, 239, .16);
-  border-radius: 25px;
-  background:
-    radial-gradient(circle at 75% 12%, rgba(82, 101, 255, .1), transparent 10rem),
-    linear-gradient(150deg, rgba(11, 14, 38, .97), rgba(5, 8, 20, .98));
-  box-shadow: 0 20px 44px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.03);
-}
+.noClanGate, .rulesCard, .victoryRule { display: grid; grid-template-columns: auto minmax(0,1fr); align-items: center; gap: .55rem; padding: .65rem .7rem; border: 1px solid rgba(121,180,239,.1); border-radius: 17px; color: #73e8ff; background: rgba(7,17,35,.72); }
+.noClanGate > div, .rulesCard > div, .victoryRule > div { display: grid; gap: .08rem; }
+.noClanGate strong, .rulesCard strong, .victoryRule strong { color: #edf6ff; font-size: .71rem; }
+.noClanGate p, .rulesCard p, .victoryRule p { margin: 0; color: rgba(188,203,232,.57); font-size: .64rem; line-height: 1.42; }
 
-.warfrontScene {
-  position: relative;
-  min-height: 250px;
-  overflow: hidden;
-  border-bottom: 1px solid rgba(130, 173, 235, .08);
-  background:
-    radial-gradient(circle at 50% 58%, rgba(88, 88, 245, .15), transparent 12rem),
-    #050918;
-}
+.targetHero, .preparationHero, .soldierIdle { position: relative; display: grid; grid-template-columns: 136px minmax(0,1fr); align-items: center; gap: .55rem; min-height: 148px; overflow: hidden; padding: .72rem .78rem .72rem .2rem; border: 1px solid rgba(129, 121, 238, .14); border-radius: 22px; background: radial-gradient(circle at 10% 48%, rgba(106,88,225,.15), transparent 8rem), linear-gradient(145deg, rgba(8,20,43,.94), rgba(11,8,29,.95)); }
+.targetHero > img, .preparationHero > img, .soldierIdle > img { width: 145px; height: 145px; object-fit: contain; filter: drop-shadow(0 15px 16px rgba(0,0,0,.32)); }
+.targetHero > div, .preparationHero > div, .soldierIdle > div { position: relative; z-index: 2; display: grid; gap: .12rem; }
+.targetHero span, .preparationHero span, .soldierIdle span { color: #8b88ff; font-size: .56rem; font-weight: 900; letter-spacing: .11em; }
+.targetHero h2, .preparationHero h2, .soldierIdle h2 { margin: 0; color: #f3f7ff; font-size: .95rem; font-weight: 880; letter-spacing: -.035em; line-height: 1.12; }
+.targetHero p, .preparationHero p, .soldierIdle p { margin: 0; color: rgba(192,205,233,.61); font-size: .65rem; line-height: 1.45; }
 
-.warfrontHeroArt {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: min(112%, 470px);
-  transform: translate(-50%, -50%);
-  filter: drop-shadow(0 26px 28px rgba(0,0,0,.46));
-}
+.searchBox { display: grid; gap: .24rem; margin-bottom: .58rem; }
+.searchBox span { color: rgba(191,205,233,.55); font-size: .59rem; }
+.searchBox input { width: 100%; height: 42px; padding: 0 .68rem; border: 1px solid rgba(124,179,241,.11); border-radius: 13px; outline: none; color: #eef7ff; background: rgba(3,9,22,.7); font: inherit; font-size: .7rem; }
+.searchBox input:focus { border-color: rgba(112,225,255,.28); box-shadow: 0 0 0 2px rgba(81,197,231,.06); }
+.targetList { display: grid; gap: .4rem; }
+.targetCard { display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: .48rem; width: 100%; min-height: 68px; padding: .48rem .52rem; border: 1px solid rgba(125,178,239,.08); border-radius: 16px; color: inherit; background: rgba(4,11,27,.58); text-align: left; }
+.targetCard:disabled { opacity: .52; }
+.targetCopy { display: grid; gap: .06rem; min-width: 0; }
+.targetCopy > div { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.targetCopy strong { overflow: hidden; color: #f0f6ff; font-size: .71rem; text-overflow: ellipsis; white-space: nowrap; }
+.targetCopy em { flex: 0 0 auto; color: #77e8c2; font-size: .5rem; font-style: normal; font-weight: 850; }
+.targetCopy span, .targetCopy p { margin: 0; color: rgba(186,202,230,.52); font-size: .58rem; line-height: 1.35; }
 
-.warfrontHeroShade {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(0deg, rgba(5,8,20,.95) 0%, transparent 42%),
-    linear-gradient(90deg, rgba(5,8,20,.18), transparent 36%, rgba(5,8,20,.12));
-}
+.previewHero { position: relative; min-height: 250px; overflow: hidden; border: 1px solid rgba(132,120,239,.14); border-radius: 24px; background: #050816; }
+.previewHero > img { position: absolute; top: -22px; right: -5px; width: min(83vw, 330px); }
+.previewShade { position: absolute; inset: 0; background: linear-gradient(0deg, rgba(4,7,18,.98), rgba(5,8,19,.48) 62%, transparent); }
+.previewClan { position: absolute; z-index: 2; right: .75rem; bottom: .72rem; left: .75rem; display: grid; grid-template-columns: auto minmax(0,1fr); align-items: center; gap: .55rem; }
+.previewClan > div { display: grid; gap: .05rem; }
+.previewClan span { color: #8e8cff; font-size: .54rem; font-weight: 900; letter-spacing: .1em; }
+.previewClan h2 { margin: 0; color: #f5f7ff; font-size: 1.02rem; }
+.previewClan p { margin: 0; color: rgba(194,207,233,.6); font-size: .62rem; line-height: 1.4; }
+.comparePanel { padding: .72rem; border: 1px solid rgba(125,177,239,.09); border-radius: 20px; background: rgba(6,13,30,.82); }
+.compareStats { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: .43rem; }
+.compareStats article { display: grid; gap: .06rem; min-height: 68px; padding: .5rem; border: 1px solid rgba(126,177,239,.07); border-radius: 14px; background: rgba(4,10,25,.55); }
+.compareStats span { color: #78e7ff; font-size: .52rem; font-weight: 900; letter-spacing: .09em; }
+.compareStats strong { color: #f0f6ff; font-size: .82rem; }
+.compareStats em { color: rgba(187,202,230,.5); font-size: .57rem; font-style: normal; }
+.positive { color: #78e9c2 !important; }
+.negative { color: #ff8ca1 !important; }
+.formRow { display: flex; align-items: center; justify-content: space-between; gap: .6rem; margin-top: .5rem; padding-top: .5rem; border-top: 1px solid rgba(123,176,237,.07); }
+.formRow > span { color: rgba(191,205,233,.55); font-size: .55rem; font-weight: 800; }
+.formRow > div { display: flex; gap: .24rem; }
+.formRow i { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 7px; color: #7be8c0; background: rgba(67,190,146,.12); font-size: .55rem; font-style: normal; font-weight: 900; }
+.formRow .formLoss { color: #ff90a4; background: rgba(210,74,97,.12); }
+.formRow .formDraw { color: #dfc987; background: rgba(190,158,77,.12); }
 
-.warfrontSignal {
-  position: absolute;
-  top: .78rem;
-  left: .78rem;
-  padding: .3rem .52rem;
-  border: 1px solid rgba(121, 222, 255, .18);
-  border-radius: 999px;
-  color: #91efff;
-  background: rgba(4, 12, 29, .82);
-  box-shadow: 0 8px 20px rgba(0,0,0,.25);
-  font-size: .55rem;
-  font-weight: 900;
-  letter-spacing: .1em;
-}
+.actionBar { display: grid; grid-template-columns: auto minmax(0,1fr); gap: .5rem; }
+.secondaryAction { min-height: 40px; padding: 0 .7rem; border: 1px solid rgba(125,178,240,.11); border-radius: 12px; color: #dceafa; background: rgba(5,12,28,.72); font-size: .64rem; font-weight: 800; }
+.primaryAction { justify-self: stretch; }
+.primaryWide { width: 100%; }
 
-.warfrontIntro { display: grid; gap: .24rem; padding: .86rem .84rem .9rem; }
-.warfrontIntro h2 {
-  max-width: 340px;
-  margin: 0;
-  color: #f5f8ff;
-  font-size: 1.15rem;
-  font-weight: 900;
-  letter-spacing: -.045em;
-  line-height: 1.05;
-}
-.warfrontIntro p {
-  max-width: 390px;
-  margin: .08rem 0 0;
-  color: rgba(193, 207, 234, .64);
-  font-size: .69rem;
-  line-height: 1.52;
-}
+.warRules { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: .43rem; }
+.warRules article { display: grid; gap: .08rem; min-height: 92px; padding: .55rem; border: 1px solid rgba(125,178,239,.08); border-radius: 15px; background: rgba(5,12,28,.68); }
+.warRules span { color: #7ae8ff; font-size: .51rem; font-weight: 900; letter-spacing: .08em; }
+.warRules strong { color: #f1f6ff; font-size: .72rem; }
+.warRules p { margin: 0; color: rgba(184,201,230,.52); font-size: .57rem; line-height: 1.35; }
+.loadoutGrid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .45rem; }
+.loadoutCard { position: relative; display: grid; grid-template-columns: 72px minmax(0,1fr); align-items: center; gap: .35rem; min-height: 110px; padding: .4rem; border: 1px solid rgba(126,177,239,.08); border-radius: 16px; color: inherit; background: rgba(5,12,28,.65); text-align: left; }
+.loadoutCard > img { width: 72px; height: 80px; object-fit: contain; }
+.loadoutCard > div { display: grid; gap: .06rem; min-width: 0; }
+.loadoutCard span { color: #77e8ff; font-size: .5rem; font-weight: 850; }
+.loadoutCard strong { color: #eff6ff; font-size: .65rem; }
+.loadoutCard p { margin: 0; overflow: hidden; color: rgba(184,201,229,.5); font-size: .55rem; line-height: 1.28; }
+.loadoutCard em { position: absolute; right: .42rem; bottom: .36rem; color: rgba(188,204,232,.58); font-size: .49rem; font-style: normal; font-weight: 900; }
+.loadoutSelected { border-color: rgba(100,225,190,.2); background: linear-gradient(145deg, rgba(11,49,41,.65), rgba(13,17,40,.75)); }
+.loadoutSelected em { color: #78e9bf; }
+.emptyLoadout { display: grid; place-items: center; min-height: 110px; padding: .7rem; border: 1px dashed rgba(126,178,238,.12); border-radius: 15px; text-align: center; }
+.emptyLoadout strong { color: #eef6ff; font-size: .7rem; }
+.emptyLoadout p { margin: .15rem 0 0; color: rgba(187,203,231,.55); font-size: .62rem; }
 
-.warFlowPanel {
-  display: grid;
-  gap: .62rem;
-  padding: .78rem;
-  border: 1px solid rgba(127, 177, 240, .11);
-  border-radius: 22px;
-  background: linear-gradient(150deg, rgba(8, 18, 39, .91), rgba(5, 9, 22, .94));
-}
+.liveHero { position: relative; min-height: 260px; overflow: hidden; border: 1px solid rgba(129,118,239,.15); border-radius: 24px; background: #050817; }
+.liveHero > img { position: absolute; top: -17px; right: -7px; width: min(86vw, 350px); }
+.liveShade { position: absolute; inset: 0; background: linear-gradient(0deg, rgba(4,7,18,.98), rgba(5,8,20,.48) 62%, transparent); }
+.liveHero > div:last-child { position: absolute; z-index: 2; right: .76rem; bottom: .72rem; left: .76rem; display: grid; gap: .12rem; }
+.liveHero span { color: #8d88ff; font-size: .56rem; font-weight: 900; letter-spacing: .11em; }
+.liveHero h2 { margin: 0; color: #f5f7ff; font-size: 1.08rem; font-weight: 890; letter-spacing: -.04em; }
+.liveHero p { max-width: 315px; margin: 0; color: rgba(194,207,234,.62); font-size: .65rem; line-height: 1.44; }
 
-.warFlowGrid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0,1fr));
-  gap: .45rem;
-}
+.battleIdentity { padding: .62rem; border: 1px solid rgba(127,176,239,.1); border-radius: 20px; background: linear-gradient(150deg, rgba(8,20,42,.9), rgba(5,9,23,.93)); }
+.battleIdentity { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); gap: .42rem; align-items: center; }
+.battleClan { display: grid; grid-template-columns: auto minmax(0,1fr); align-items: center; gap: .32rem; min-width: 0; }
+.battleClan > div { display: grid; gap: .02rem; min-width: 0; }
+.battleClan span { color: #73e7ff; font-size: .46rem; font-weight: 900; letter-spacing: .08em; }
+.battleClan strong { overflow: hidden; color: #eff6ff; font-size: .65rem; text-overflow: ellipsis; white-space: nowrap; }
+.battleClan em { color: rgba(186,202,230,.52); font-size: .52rem; font-style: normal; }
+.battleClanEnemy { grid-template-columns: minmax(0,1fr) auto; text-align: right; }
+.battleVs { display: grid; justify-items: center; gap: 0; }
+.battleVs span { color: #9a8eff; font-size: .42rem; font-weight: 900; letter-spacing: .07em; }
+.battleVs strong { color: #f1f4ff; font-size: .72rem; }
+.battleVs em { color: rgba(192,206,233,.55); font-size: .5rem; font-style: normal; }
+.battleProgressGrid { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .5rem; padding-top: .48rem; border-top: 1px solid rgba(125,176,238,.07); }
+.battleProgressGrid > div { display: grid; grid-template-columns: 1fr auto; gap: .2rem .35rem; }
+.battleProgressGrid span { color: rgba(190,204,232,.55); font-size: .53rem; font-weight: 850; }
+.battleProgressGrid strong { color: #eff7ff; font-size: .59rem; }
+.battleProgressGrid .progressTrack { grid-column: 1 / -1; }
+.progressTrack { position: relative; height: 4px; overflow: hidden; border-radius: 999px; background: rgba(118,148,200,.12); }
+.progressTrack i { position: absolute; inset: 0; transform-origin: left center; border-radius: inherit; background: linear-gradient(90deg, #7468ff, #5be4ff); }
+.enemyTrack i { background: linear-gradient(90deg, #c95688, #ff8f7c); }
 
-.warFlowGrid article {
-  display: grid;
-  align-content: start;
-  gap: .12rem;
-  min-width: 0;
-  overflow: hidden;
-  padding: 0 0 .56rem;
-  border: 1px solid rgba(125, 177, 239, .08);
-  border-radius: 16px;
-  background: rgba(4, 10, 25, .5);
-}
+.taskList { display: grid; gap: .43rem; }
+.warTask { display: grid; grid-template-columns: 58px minmax(0,1fr); gap: .5rem; min-height: 91px; padding: .5rem; border: 1px solid rgba(124,177,239,.08); border-radius: 16px; background: rgba(4,11,27,.6); }
+.taskPercent { display: grid; place-items: center; align-content: center; gap: .06rem; border: 1px solid rgba(117,204,239,.09); border-radius: 13px; background: rgba(8,22,39,.55); }
+.taskPercent strong { color: #e7f8ff; font-size: .76rem; }
+.taskPercent span { color: #70e7ff; font-size: .45rem; font-weight: 900; }
+.taskCopy { display: grid; gap: .11rem; min-width: 0; }
+.taskCopy > div:first-child { display: flex; justify-content: space-between; gap: .5rem; }
+.taskCopy > div:first-child span { color: #7ce8ff; font-size: .49rem; font-weight: 900; letter-spacing: .08em; }
+.taskCopy > div:first-child em { color: rgba(188,202,230,.51); font-size: .49rem; font-style: normal; }
+.taskCopy > strong { color: #eef5ff; font-size: .68rem; }
+.taskCopy p { margin: 0; color: rgba(185,201,229,.53); font-size: .58rem; line-height: 1.35; }
+.warTaskDone { border-color: rgba(94,223,177,.12); }
+.warTaskDone .taskPercent span { color: #75e8be; }
+.warTaskDone .progressTrack i { background: #64dfb3; }
 
-.warFlowArt {
-  display: grid;
-  place-items: center;
-  min-height: 96px;
-  overflow: hidden;
-  background: radial-gradient(circle at 50% 55%, rgba(90, 81, 221, .12), transparent 5.5rem);
-}
-.warFlowArt img { width: 108px; max-width: 110%; filter: drop-shadow(0 10px 12px rgba(0,0,0,.33)); }
-.warFlowGrid article > span,
-.warFlowGrid article > strong,
-.warFlowGrid article > p { margin-inline: .48rem; }
-.warFlowGrid article > span { margin-top: .38rem; color: #73e7ff; font-size: .49rem; font-weight: 900; letter-spacing: .09em; }
-.warFlowGrid article > strong { color: #eff6ff; font-size: .64rem; line-height: 1.24; }
-.warFlowGrid article > p { margin-top: .04rem; margin-bottom: 0; color: rgba(184, 200, 229, .52); font-size: .55rem; line-height: 1.38; }
+.captainControl { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: .65rem; align-items: center; padding: .68rem .72rem; border: 1px solid rgba(143,124,237,.12); border-radius: 18px; background: linear-gradient(145deg, rgba(27,17,63,.66), rgba(7,20,39,.72)); }
+.captainControl > div:first-child { display: grid; gap: .07rem; }
+.captainControl span { color: #9a8dff; font-size: .52rem; font-weight: 900; letter-spacing: .09em; }
+.captainControl strong { color: #f0f5ff; font-size: .69rem; }
+.captainControl p { margin: 0; color: rgba(189,203,232,.54); font-size: .58rem; line-height: 1.38; }
+.deployedItems { display: flex; gap: .3rem; }
+.deployedItems > span { display: grid; justify-items: center; gap: .05rem; width: 58px; }
+.deployedItems img { width: 50px; height: 50px; object-fit: contain; }
+.deployedItems b { max-width: 58px; overflow: hidden; color: rgba(222,234,248,.72); font-size: .45rem; text-overflow: ellipsis; white-space: nowrap; }
+.deployedItems em { color: rgba(191,205,232,.48); font-size: .55rem; font-style: normal; }
 
-.defenceBrief {
-  position: relative;
-  display: grid;
-  grid-template-columns: 138px minmax(0,1fr);
-  align-items: center;
-  gap: .72rem;
-  min-height: 166px;
-  overflow: hidden;
-  padding: .72rem .78rem .72rem .4rem;
-  border: 1px solid rgba(103, 211, 255, .11);
-  border-radius: 21px;
-  background:
-    radial-gradient(circle at 8% 50%, rgba(73, 211, 255, .09), transparent 8rem),
-    linear-gradient(145deg, rgba(8, 22, 43, .88), rgba(8, 9, 26, .92));
-}
-.defenceBriefArt { display: grid; place-items: center; min-height: 130px; overflow: hidden; }
-.defenceBriefArt img { width: 126px; max-width: 100%; filter: drop-shadow(0 16px 16px rgba(0,0,0,.35)); }
-.defenceBriefCopy { position: relative; z-index: 2; display: grid; gap: .17rem; min-width: 0; }
-.defenceBriefCopy h3 { margin: 0; color: #f2f7ff; font-size: .9rem; font-weight: 880; letter-spacing: -.03em; }
-.defenceBriefCopy p { margin: 0; color: rgba(190, 205, 233, .58); font-size: .62rem; line-height: 1.45; }
+.liveFeed { padding: .72rem; border: 1px solid rgba(124,177,238,.08); border-radius: 19px; background: rgba(5,12,28,.7); }
+.liveFeed article { display: grid; grid-template-columns: 38px minmax(0,1fr); gap: .45rem; padding: .37rem 0; border-bottom: 1px solid rgba(126,177,238,.055); }
+.liveFeed article:last-child { border-bottom: 0; }
+.liveFeed article > span { color: #78e7ff; font-size: .52rem; font-weight: 850; }
+.liveFeed article > div { display: grid; gap: .04rem; }
+.liveFeed strong { color: #edf5ff; font-size: .64rem; }
+.liveFeed p { margin: 0; color: rgba(185,201,229,.51); font-size: .56rem; line-height: 1.35; }
 
-.warFeatureRow { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .32rem; }
-.warFeatureRow span {
-  display: inline-flex;
-  align-items: center;
-  gap: .23rem;
-  min-height: 27px;
-  padding: 0 .42rem;
-  border: 1px solid rgba(123, 182, 240, .09);
-  border-radius: 999px;
-  color: rgba(220, 237, 252, .74);
-  background: rgba(6, 15, 34, .58);
-  font-size: .54rem;
-  font-weight: 780;
-}
+.resultHero, .statusHero, .historyHero, .seasonHero { display: grid; grid-template-columns: minmax(0,1fr) 140px; align-items: center; gap: .5rem; min-height: 158px; overflow: hidden; padding: .72rem; border: 1px solid rgba(130,119,239,.13); border-radius: 22px; background: radial-gradient(circle at 86% 48%, rgba(111,89,225,.15), transparent 8rem), linear-gradient(145deg, rgba(8,20,42,.92), rgba(8,8,25,.95)); }
+.resultHero > img, .statusHero > img, .historyHero > img, .seasonHero > img { order: 2; width: 138px; height: 138px; object-fit: contain; filter: drop-shadow(0 14px 15px rgba(0,0,0,.32)); }
+.resultHero > div, .statusHero > div, .historyHero > div, .seasonHero > div { display: grid; gap: .11rem; }
+.resultHero span, .statusHero span, .historyHero span, .seasonHero span { color: #8f89ff; font-size: .55rem; font-weight: 900; letter-spacing: .1em; }
+.resultHero h2, .statusHero h2, .historyHero h2, .seasonHero h2 { margin: 0; color: #f3f6ff; font-size: .94rem; font-weight: 880; letter-spacing: -.035em; }
+.resultHero p, .statusHero p, .historyHero p, .seasonHero p { margin: 0; color: rgba(190,204,232,.57); font-size: .62rem; line-height: 1.4; }
+.statusHero > div > strong { margin-top: .2rem; color: #75e7c0; font-size: .64rem; }
+.resultStats, .statusGrid, .historySummary { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: .43rem; }
+.resultStats article { display: grid; grid-template-columns: auto minmax(0,1fr); align-items: center; gap: .38rem; min-height: 68px; padding: .5rem; border: 1px solid rgba(124,177,239,.08); border-radius: 14px; color: #7fe8ff; background: rgba(5,12,28,.68); }
+.resultStats article > div { display: grid; gap: .02rem; }
+.resultStats span, .statusGrid span, .historySummary span { color: rgba(188,203,232,.55); font-size: .49rem; font-weight: 850; letter-spacing: .07em; }
+.resultStats strong, .statusGrid strong, .historySummary strong { color: #eff6ff; font-size: .65rem; }
+.statusGrid article, .historySummary article { display: grid; gap: .07rem; min-height: 58px; padding: .5rem; border: 1px solid rgba(124,177,239,.08); border-radius: 14px; background: rgba(5,12,28,.65); }
 
-.warfrontLock {
-  display: grid;
-  gap: .58rem;
-  padding: .76rem;
-  border: 1px solid rgba(125, 177, 239, .09);
-  border-radius: 18px;
-  background: rgba(5, 12, 28, .52);
-}
-.warfrontLock > div { display: grid; gap: .1rem; }
-.warfrontLock strong { color: #edf6ff; font-size: .75rem; }
-.warfrontLock p { margin: 0; color: rgba(185, 202, 230, .54); font-size: .61rem; line-height: 1.43; }
-.warfrontLock button {
-  width: 100%;
-  min-height: 41px;
-  border: 1px solid rgba(127, 180, 238, .1);
-  border-radius: 13px;
-  color: rgba(187, 203, 232, .43);
-  background: rgba(4, 9, 22, .58);
-  font-size: .64rem;
-  font-weight: 820;
-}
+.historyList { display: grid; gap: .4rem; }
+.historyEntry { overflow: hidden; border: 1px solid rgba(124,177,239,.075); border-radius: 16px; background: rgba(4,11,27,.58); }
+.historyEntry > button { display: grid; grid-template-columns: 28px auto minmax(0,1fr) auto; align-items: center; gap: .42rem; width: 100%; min-height: 66px; padding: .45rem .5rem; border: 0; color: inherit; background: transparent; text-align: left; }
+.resultBadge { display: grid; place-items: center; width: 27px; height: 27px; border-radius: 8px; font-size: .61rem; font-weight: 900; }
+.resultvictory { color: #78e9bd; background: rgba(53,183,134,.13); }
+.resultdefeat { color: #ff8da2; background: rgba(207,67,95,.13); }
+.resultdraw { color: #e6cf8c; background: rgba(184,151,69,.13); }
+.historyEntry button > div:nth-child(3) { display: grid; gap: .04rem; min-width: 0; }
+.historyEntry button strong { overflow: hidden; color: #eff6ff; font-size: .68rem; text-overflow: ellipsis; white-space: nowrap; }
+.historyEntry button span { color: rgba(186,201,230,.52); font-size: .55rem; }
+.historyEntry button > b { color: #e6f2ff; font-size: .61rem; }
+.historyDetail { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: .3rem; padding: .5rem; border-top: 1px solid rgba(124,177,239,.07); }
+.historyDetail > div { display: grid; gap: .03rem; padding: .38rem; border-radius: 10px; background: rgba(8,17,34,.56); }
+.historyDetail span { color: rgba(188,203,231,.5); font-size: .48rem; }
+.historyDetail strong { color: #e9f3ff; font-size: .56rem; }
+.textAction { padding: .2rem 0; border: 0; color: #79e7ff; background: transparent; font-size: .57rem; font-weight: 800; }
 
-@media (max-width: 350px) {
-  .seasonCopy { max-width: 70%; }
-  .seasonArt { right: -.8rem; width: 132px; }
-  .podium { gap: .28rem; }
-  .podiumCard { padding-inline: .2rem; }
-  .rankingList article,
-  .selfRankRow { grid-template-columns: 30px 36px minmax(0,1fr) auto; gap: .3rem; }
-  .playerAvatar,
-  .clanMark { width: 36px; height: 36px; }
-  .warfrontScene { min-height: 225px; }
-  .warFlowGrid { grid-template-columns: 1fr; }
-  .warFlowGrid article { grid-template-columns: 92px minmax(0,1fr); grid-template-rows: auto auto 1fr; padding: .5rem; gap: .08rem .48rem; }
-  .warFlowArt { grid-row: 1 / 4; min-height: 86px; }
-  .warFlowArt img { width: 98px; }
-  .warFlowGrid article > span,
-  .warFlowGrid article > strong,
-  .warFlowGrid article > p { margin-inline: 0; }
-  .warFlowGrid article > span { margin-top: .12rem; }
-  .defenceBrief { grid-template-columns: 112px minmax(0,1fr); gap: .55rem; padding-left: .35rem; }
-  .defenceBriefArt img { width: 104px; }
+.playerAvatar { position: relative; display: grid; place-items: center; width: 43px; height: 43px; }
+.playerAvatar > span { position: relative; z-index: 1; display: grid; place-items: center; width: 27px; height: 27px; border-radius: 50%; color: #eefbff; background: linear-gradient(145deg, hsl(var(--identity-hue) 58% 38%), hsl(calc(var(--identity-hue) + 45) 58% 20%)); font-size: .54rem; font-weight: 900; }
+.playerFrame { position: absolute; z-index: 2; width: 47px; height: 47px; object-fit: contain; }
+.playerAvatarLarge { width: 58px; height: 58px; }
+.playerAvatarLarge > span { width: 36px; height: 36px; font-size: .65rem; }
+.playerAvatarLarge .playerFrame { width: 63px; height: 63px; }
+.currentPlayerAvatar { display: grid; place-items: center; width: 42px; height: 42px; overflow: hidden; border: 1px solid rgba(113,222,255,.18); border-radius: 50%; color: #eafaff; background: linear-gradient(145deg, #245273, #443263); font-size: .67rem; font-weight: 900; }
+.currentPlayerAvatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.seasonHero > div > div { display: flex; justify-content: space-between; gap: .7rem; margin-top: .18rem; }
+.seasonHero > div > div strong, .seasonHero > div > div span { color: rgba(208,220,241,.7); font-size: .55rem; letter-spacing: 0; }
+.seasonHero .progressTrack { margin-top: .15rem; }
+.rankingSwitch { display: grid; grid-template-columns: repeat(2,1fr); gap: .25rem; margin-bottom: .55rem; padding: .2rem; border: 1px solid rgba(123,176,239,.075); border-radius: 13px; background: rgba(4,10,24,.5); }
+.rankingSwitch button { min-height: 35px; border: 0; border-radius: 10px; color: rgba(187,202,230,.53); background: transparent; font-size: .62rem; font-weight: 800; }
+.rankingSwitch .rankingSwitchActive { color: #f0f6ff; background: linear-gradient(145deg, rgba(91,73,183,.22), rgba(34,106,136,.14)); }
+.podium { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: .36rem; margin-bottom: .5rem; }
+.podiumCard { position: relative; display: grid; justify-items: center; gap: .05rem; min-height: 132px; padding: .5rem .25rem; border: 1px solid rgba(125,177,239,.075); border-radius: 15px; background: rgba(4,11,27,.56); text-align: center; }
+.podiumRank { position: absolute; top: .34rem; left: .38rem; color: #8f8aff; font-size: .54rem; font-weight: 900; }
+.podiumCard > strong { max-width: 100%; overflow: hidden; color: #eff5ff; font-size: .6rem; text-overflow: ellipsis; white-space: nowrap; }
+.podiumCard p { max-width: 100%; margin: 0; overflow: hidden; color: rgba(184,200,228,.5); font-size: .49rem; text-overflow: ellipsis; white-space: nowrap; }
+.podiumCard > b { color: #79e8ff; font-size: .58rem; }
+.rankingList { display: grid; gap: .34rem; }
+.rankingList article, .selfRank { display: grid; grid-template-columns: 30px 44px minmax(0,1fr) auto; align-items: center; gap: .38rem; min-height: 57px; padding: .38rem .42rem; border: 1px solid rgba(124,177,239,.065); border-radius: 14px; background: rgba(4,11,27,.5); }
+.rankingList article > span, .selfRank > span { color: #8e89ff; font-size: .57rem; font-weight: 900; }
+.rankingList article > div:nth-child(3), .selfRank > div:nth-child(3) { display: grid; gap: .02rem; min-width: 0; }
+.rankingList strong, .selfRank strong { overflow: hidden; color: #eef5ff; font-size: .63rem; text-overflow: ellipsis; white-space: nowrap; }
+.rankingList p, .selfRank p { margin: 0; color: rgba(184,200,228,.5); font-size: .51rem; }
+.rankingList b, .selfRank b { color: #dcecff; font-size: .58rem; }
+.selfRank { margin-top: .45rem; border-color: rgba(110,224,255,.14); background: linear-gradient(145deg, rgba(9,38,53,.58), rgba(24,17,54,.6)); }
+
+@media (max-width: 370px) {
+  .page { padding-inline: calc(.62rem + var(--safe-left)); }
+  .arenaTabs button { font-size: .58rem; }
+  .commandGrid { grid-template-columns: 1fr; }
+  .defenceCard { grid-template-columns: 102px minmax(0,1fr); }
+  .defenceArt img { width: 96px; height: 96px; }
+  .targetHero, .preparationHero, .soldierIdle { grid-template-columns: 112px minmax(0,1fr); }
+  .targetHero > img, .preparationHero > img, .soldierIdle > img { width: 118px; height: 118px; }
+  .warRules { grid-template-columns: 1fr; }
+  .loadoutGrid { grid-template-columns: 1fr; }
+  .battleIdentity { grid-template-columns: 1fr auto 1fr; padding: .5rem; }
+  .battleClan .clanMark { display: none; }
+  .resultHero, .statusHero, .historyHero, .seasonHero { grid-template-columns: minmax(0,1fr) 108px; }
+  .resultHero > img, .statusHero > img, .historyHero > img, .seasonHero > img { width: 106px; height: 106px; }
+  .historyDetail { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
 
 @media (min-width: 460px) {
-  .page { padding-inline: calc(1rem + var(--safe-left)); }
-  .seasonHero { min-height: 210px; }
-  .seasonArt { width: 175px; right: 1rem; }
-  .seasonCopy { max-width: 62%; }
-  .warfrontScene { min-height: 290px; }
-  .warfrontHeroArt { width: min(104%, 500px); }
-  .warFlowArt { min-height: 112px; }
-  .warFlowArt img { width: 122px; }
+  .page { padding-inline: 1rem; }
+  .overviewHero { min-height: 360px; }
+  .overviewHeroArt { width: 390px; }
+  .targetHero, .preparationHero, .soldierIdle { grid-template-columns: 165px minmax(0,1fr); }
+  .targetHero > img, .preparationHero > img, .soldierIdle > img { width: 165px; height: 165px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rankingContent,
-  .sectionContent { transform: none !important; }
+  .arenaTabs button::after { transition: none; }
 }

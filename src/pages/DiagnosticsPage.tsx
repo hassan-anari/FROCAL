@@ -10,8 +10,8 @@ import { useBaseUiStore } from "@/game/ui/baseUiStore";
 import { getTypingAttemptsRemaining, useEarnStore } from "@/game/earn/earnStore";
 import { useProfileStore } from "@/game/profile/profileStore";
 import { useClanStore } from "@/game/clan/clanStore";
-import { useArenaWarStore, warStageOrder } from "@/game/arena/arenaStore";
-import type { ArenaWarResult, ArenaWarStage, ArenaWarStatus } from "@/game/arena/types";
+import { useArenaWarStore } from "@/game/arena/arenaStore";
+import type { ArenaHubSection, ArenaWarResult, ArenaWarStatus } from "@/game/arena/types";
 import { loadBootstrap } from "@/integrations/api/bootstrap";
 import { queryKeys } from "@/integrations/api/queryKeys";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
@@ -53,38 +53,75 @@ export function DiagnosticsPage() {
     void navigate({ to: "/onboarding" });
   };
 
-  const openArenaStage = (stage: ArenaWarStage) => {
-    arena.setDebugUnlocked(true);
-    arena.setStage(stage);
+  const openArena = (section: ArenaHubSection) => {
+    arena.setHubSection(section);
     adapter.selectionChanged();
     sessionStorage.setItem(returnPathKey, "/arena");
     void navigate({ to: "/arena" });
+  };
+
+  const openCaptainOverview = () => {
+    clan.setCaptainHeadquartersForDiagnostics();
+    arena.resetArena();
+    openArena("overview");
+  };
+
+  const openCaptainTargeting = () => {
+    clan.setCaptainHeadquartersForDiagnostics();
+    arena.resetArena();
+    arena.openTargeting();
+    openArena("war");
+  };
+
+  const openCaptainPreview = () => {
+    clan.setCaptainHeadquartersForDiagnostics();
+    arena.resetArena();
+    arena.selectOpponent("void-runners");
+    openArena("war");
+  };
+
+  const openCaptainPreparation = () => {
+    clan.setCaptainHeadquartersForDiagnostics();
+    arena.resetArena();
+    arena.selectOpponent("void-runners");
+    arena.beginPreparation();
+    openArena("war");
+  };
+
+  const openCaptainAttack = () => {
+    clan.setCaptainHeadquartersForDiagnostics();
+    arena.resetArena();
+    arena.showAttackForDiagnostics();
+    openArena("war");
+  };
+
+  const openCaptainDefence = () => {
+    clan.setCaptainHeadquartersForDiagnostics();
+    arena.resetArena();
+    arena.showDefenceForDiagnostics();
+    openArena("war");
+  };
+
+  const openSoldierWar = (direction: "attack" | "defence") => {
+    clan.setSoldierMemberForDiagnostics();
+    arena.resetArena();
+    if (direction === "attack") arena.showAttackForDiagnostics();
+    else arena.showDefenceForDiagnostics();
+    openArena("war");
   };
 
   const openArenaResult = (result: ArenaWarResult) => {
-    arena.setDebugUnlocked(true);
-    arena.setResult(result);
-    arena.setStage("result");
-    adapter.selectionChanged();
-    sessionStorage.setItem(returnPathKey, "/arena");
-    void navigate({ to: "/arena" });
+    clan.setCaptainHeadquartersForDiagnostics();
+    arena.resetArena();
+    arena.showResultForDiagnostics(result);
+    openArena("war");
   };
 
   const openArenaStatus = (status: ArenaWarStatus) => {
-    arena.setDebugUnlocked(true);
-    arena.setStatus(status);
-    arena.setStage("status");
-    adapter.selectionChanged();
-    sessionStorage.setItem(returnPathKey, "/arena");
-    void navigate({ to: "/arena" });
-  };
-
-  const openSeasonOneArena = () => {
-    arena.resetWar();
-    arena.setDebugUnlocked(false);
-    adapter.selectionChanged();
-    sessionStorage.setItem(returnPathKey, "/arena");
-    void navigate({ to: "/arena" });
+    clan.setCaptainHeadquartersForDiagnostics();
+    arena.resetArena();
+    arena.showStatusForDiagnostics(status);
+    openArena("war");
   };
 
   return (
@@ -167,24 +204,37 @@ export function DiagnosticsPage() {
 
         <article>
           <StatusChip>Arena Phase 6 ready</StatusChip>
-          <h2>Arena & Warfront scenarios</h2>
+          <h2>Arena / Warfront scenarios</h2>
           <dl>
-            <div><dt>Public season mode</dt><dd>{arena.debugUnlocked ? "Season 2 simulation" : "Season 1"}</dd></div>
-            <div><dt>War stage</dt><dd>{arena.stage}</dd></div>
-            <div><dt>Result</dt><dd>{arena.result}</dd></div>
-            <div><dt>Post-war status</dt><dd>{arena.status}</dd></div>
-            <div><dt>Your battle progress</dt><dd>{arena.battleProgress}%</dd></div>
-            <div><dt>Enemy progress</dt><dd>{arena.enemyProgress}%</dd></div>
+            <div><dt>Role</dt><dd>{clan.role ?? "none"}</dd></div>
+            <div><dt>Arena section</dt><dd>{arena.hubSection}</dd></div>
+            <div><dt>War scenario</dt><dd>{arena.scenario}</dd></div>
+            <div><dt>Direction</dt><dd>{arena.direction}</dd></div>
+            <div><dt>Your progress</dt><dd>{arena.battleProgress}%</dd></div>
+            <div><dt>Rival progress</dt><dd>{arena.enemyProgress}%</dd></div>
           </dl>
 
+          <h2>Captain scenarios</h2>
           <div className={styles.actions}>
-            <Button tone="secondary" size="sm" onClick={openSeasonOneArena}>Season 1 · Public Arena</Button>
-            <Button tone="secondary" size="sm" onClick={() => openArenaStage("matchmaking")}>Start Warfront</Button>
-            {warStageOrder.filter((stage) => stage !== "matchmaking" && stage !== "result" && stage !== "status").map((stage) => (
-              <Button key={stage} tone="secondary" size="sm" onClick={() => openArenaStage(stage)}>
-                {stage === "opponent" ? "Opponent found" : stage === "preview" ? "Opponent preview" : stage === "confirm" ? "Match confirm" : stage === "prepare" ? "Preparation" : stage === "items" ? "Item selection" : stage === "countdown" ? "Countdown" : stage === "battle" ? "Active battle" : stage === "final" ? "Final moments" : stage === "defence" ? "Defence setup" : "Matchmaking"}
-              </Button>
-            ))}
+            <Button tone="secondary" size="sm" onClick={openCaptainOverview}>Captain overview</Button>
+            <Button tone="secondary" size="sm" onClick={openCaptainTargeting}>Target browser</Button>
+            <Button tone="secondary" size="sm" onClick={openCaptainPreview}>Opponent preview</Button>
+            <Button tone="secondary" size="sm" onClick={openCaptainPreparation}>Attack preparation</Button>
+            <Button tone="secondary" size="sm" onClick={openCaptainAttack}>Active attack</Button>
+            <Button tone="secondary" size="sm" onClick={openCaptainDefence}>Under attack · Captain</Button>
+          </div>
+
+          <h2>Soldier scenarios</h2>
+          <div className={styles.actions}>
+            <Button tone="secondary" size="sm" onClick={() => { clan.setSoldierMemberForDiagnostics(); arena.resetArena(); openArena("overview"); }}>Soldier overview</Button>
+            <Button tone="secondary" size="sm" onClick={() => openSoldierWar("attack")}>Soldier · attacking</Button>
+            <Button tone="secondary" size="sm" onClick={() => openSoldierWar("defence")}>Soldier · defending</Button>
+          </div>
+
+          <h2>Arena persistent views</h2>
+          <div className={styles.actions}>
+            <Button tone="secondary" size="sm" onClick={() => { clan.setCaptainHeadquartersForDiagnostics(); arena.resetArena(); openArena("history"); }}>War history</Button>
+            <Button tone="secondary" size="sm" onClick={() => { arena.resetArena(); openArena("rankings"); }}>Rankings</Button>
           </div>
 
           <h2>War result states</h2>
@@ -196,13 +246,13 @@ export function DiagnosticsPage() {
             <Button tone="secondary" size="sm" onClick={() => openArenaResult("successfulDefence")}>Successful defence</Button>
           </div>
 
-          <h2>Post-war status states</h2>
+          <h2>Post-war status</h2>
           <div className={styles.actions}>
             <Button tone="secondary" size="sm" onClick={() => openArenaStatus("protection")}>Protection active</Button>
             <Button tone="secondary" size="sm" onClick={() => openArenaStatus("recovery")}>Recovery mode</Button>
             <Button tone="secondary" size="sm" onClick={() => openArenaStatus("reward")}>Reward ready</Button>
             <Button tone="secondary" size="sm" onClick={() => openArenaStatus("debuff")}>Temporary debuff</Button>
-            <Button tone="secondary" size="sm" onClick={() => navigate({ to: "/arena" })}>Open Arena</Button>
+            <Button tone="secondary" size="sm" onClick={() => openArena("overview")}>Open Arena</Button>
           </div>
         </article>
 
