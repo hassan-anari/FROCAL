@@ -9,10 +9,10 @@ interface IdleDeadlineLike {
   timeRemaining(): number;
 }
 
-interface IdleWindow extends Window {
+type IdleWindow = {
   requestIdleCallback?: (callback: (deadline: IdleDeadlineLike) => void, options?: { timeout?: number }) => number;
   cancelIdleCallback?: (handle: number) => void;
-}
+};
 
 interface IdlePreloadOptions {
   delay?: number;
