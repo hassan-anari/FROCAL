@@ -11,7 +11,6 @@ import { DexoStage } from "@/design-system/components/DexoStage";
 import { GameHeader } from "@/design-system/components/GameHeader";
 import { GameShell } from "@/design-system/components/GameShell";
 import { Button } from "@/design-system/primitives/Button";
-import { useArenaWarStore } from "@/game/arena/arenaStore";
 import { useOnboardingStore } from "@/game/onboarding/onboardingStore";
 import { useScenarioStore } from "@/game/scenarios/scenarioStore";
 import { useEarnStore } from "@/game/earn/earnStore";
@@ -71,7 +70,6 @@ const baseReactionAssets = ["dexo.platform", "dexo.level01", "dexo.level05", "de
 
 export function BasePage() {
   const navigate = useNavigate();
-  const openSeasonOneArena = useArenaWarStore((state) => state.openSeason1Public);
   const scenario = useScenarioStore((state) => state.activeScenario);
   const onboarding = useOnboardingStore();
   const criticalActionVisible = useBaseUiStore((state) => state.criticalActionVisible);
@@ -232,7 +230,7 @@ export function BasePage() {
         <section className={styles.objectives} aria-label="Next objectives">
           <header className={styles.sectionHeader}>
             <h2>Next Objective</h2>
-            <button type="button" onClick={() => { openSeasonOneArena(); void navigate({ to: "/arena" }); }}>All missions <HugeiconsIcon icon={ArrowRight01Icon} size={14} strokeWidth={1.7} /></button>
+            <button type="button" onClick={() => { sessionStorage.setItem("dalexio-earn-active-tab", "earn"); void navigate({ to: "/earn" }); }}>All missions <HugeiconsIcon icon={ArrowRight01Icon} size={14} strokeWidth={1.7} /></button>
           </header>
 
           <div className={styles.objectiveTimeline}>

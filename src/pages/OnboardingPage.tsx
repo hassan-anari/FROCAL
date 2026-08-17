@@ -196,7 +196,7 @@ export function OnboardingPage() {
       </header>
 
       <section className={styles.scene}>
-        <AnimatePresence mode="popLayout" initial={false}>
+        <AnimatePresence mode="sync" initial={false}>
           <motion.div
             key={`${onboarding.step}-${onboarding.guideIndex}`}
             className={styles.sceneInner}

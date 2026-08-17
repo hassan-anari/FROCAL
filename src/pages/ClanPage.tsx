@@ -12,6 +12,7 @@ import { AssetImage } from "@/design-system/components/AssetImage";
 import { GameHeader } from "@/design-system/components/GameHeader";
 import { GameShell } from "@/design-system/components/GameShell";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
+import { pulseBackgroundMotion } from "@/design-system/motion/usePauseBackgroundMotion";
 import { Button } from "@/design-system/primitives/Button";
 import {
   ClanAchievementsSheet,
@@ -349,7 +350,7 @@ function SoldierNetwork({
 
       <nav className={styles.subnav} aria-label="Clan discovery sections">
         {(["discover", "search"] as const).map((item) => (
-          <button key={item} type="button" className={tab === item ? styles.subnavActive : ""} onClick={() => setTab(item)}>
+          <button key={item} type="button" className={tab === item ? styles.subnavActive : ""} onClick={() => { if (tab !== item) pulseBackgroundMotion(220); setTab(item); }}>
             {item === "discover" ? "Discover" : "Search"}
           </button>
         ))}
@@ -709,7 +710,7 @@ function Headquarters({
 
       <nav className={styles.hqNav} aria-label="Clan headquarters sections">
         {(["home", "tasks", "members", "inventory"] as const).map((item) => (
-          <button key={item} type="button" className={tab === item ? styles.hqNavActive : ""} onClick={() => setTab(item)}>
+          <button key={item} type="button" className={tab === item ? styles.hqNavActive : ""} onClick={() => { if (tab !== item) pulseBackgroundMotion(220); setTab(item); }}>
             {item === "home" ? "HQ" : item === "tasks" ? "Missions" : item === "members" ? "Roster" : "Inventory"}
           </button>
         ))}
@@ -824,8 +825,8 @@ function Headquarters({
             <>
               {captain ? (
                 <nav className={styles.filterNav}>
-                  <button type="button" className={inventoryMode === "owned" ? styles.filterActive : ""} onClick={() => setInventoryMode("owned")}>Inventory</button>
-                  <button type="button" className={inventoryMode === "shop" ? styles.filterActive : ""} onClick={() => setInventoryMode("shop")}>Shop</button>
+                  <button type="button" className={inventoryMode === "owned" ? styles.filterActive : ""} onClick={() => { if (inventoryMode !== "owned") pulseBackgroundMotion(180); setInventoryMode("owned"); }}>Inventory</button>
+                  <button type="button" className={inventoryMode === "shop" ? styles.filterActive : ""} onClick={() => { if (inventoryMode !== "shop") pulseBackgroundMotion(180); setInventoryMode("shop"); }}>Shop</button>
                 </nav>
               ) : null}
 

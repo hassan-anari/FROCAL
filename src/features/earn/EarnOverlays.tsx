@@ -50,9 +50,9 @@ function OverlayShell({ open, onClose, ariaLabel, children, placement = "sheet" 
         >
           <motion.section
             className={`${styles.surface} ${styles[placement]}`}
-            initial={placement === "sheet" ? { opacity: 0, y: 22 } : { opacity: 0, scale: .975, y: 8 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={placement === "sheet" ? { opacity: 0, y: 16 } : { opacity: 0, scale: .985, y: 6 }}
+            initial={placement === "sheet" ? { opacity: 0, y: 18 } : { opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={placement === "sheet" ? { opacity: 0, y: 12 } : { opacity: 0, y: 7 }}
             transition={mobileMotion.overlay}
             role="dialog"
             aria-modal="true"

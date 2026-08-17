@@ -150,9 +150,9 @@ function OverlayFrame({ eyebrow, title, onClose, children, footer }: OverlayFram
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        initial={{ opacity: 0, y: 18, scale: 0.995 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 10, scale: 0.998 }}
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 9 }}
         transition={mobileMotion.overlay}
         onPointerDown={(event) => event.stopPropagation()}
       >

@@ -14,6 +14,7 @@ import { AssetImage } from "@/design-system/components/AssetImage";
 import { GameHeader } from "@/design-system/components/GameHeader";
 import { GameShell } from "@/design-system/components/GameShell";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
+import { pulseBackgroundMotion } from "@/design-system/motion/usePauseBackgroundMotion";
 import { Button } from "@/design-system/primitives/Button";
 import {
   arenaHistoryPreloadAssets,
@@ -546,12 +547,14 @@ export function ArenaPage() {
   const selectSection = (section: ArenaHubSection) => {
     if (section === arena.hubSection) return;
     adapter.selectionChanged();
+    pulseBackgroundMotion(220);
     arena.setHubSection(section);
   };
 
   const selectSeasonOneSection = (section: SeasonOneSection) => {
     if (section === seasonOneSection) return;
     adapter.selectionChanged();
+    pulseBackgroundMotion(220);
     setSeasonOneSection(section);
   };
 
@@ -594,7 +597,7 @@ export function ArenaPage() {
               </button>
             </nav>
 
-            <AnimatePresence mode="wait" initial={false}>
+            <AnimatePresence mode="sync" initial={false}>
               <motion.div key={seasonOneSection} className={styles.sectionContent} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={mobileMotion.tab}>
                 {seasonOneSection === "warfront" ? <SeasonOneWarfront /> : <Rankings mode={rankingMode} onMode={(mode) => { adapter.selectionChanged(); setRankingMode(mode); }} rankedClans={rankedClans} ownClan={ownClan} level={level} currentName={currentName} currentPhotoUrl={currentPhotoUrl} showSeasonHero />}
               </motion.div>
@@ -612,7 +615,7 @@ export function ArenaPage() {
               {(["overview", "war", "history", "rankings"] as ArenaHubSection[]).map((section) => <button key={section} type="button" className={arena.hubSection === section ? styles.arenaTabActive : ""} onClick={() => selectSection(section)}>{section === "overview" ? "Overview" : section === "war" ? "War" : section === "history" ? "History" : "Rankings"}</button>)}
             </nav>
 
-            <AnimatePresence mode="wait" initial={false}>
+            <AnimatePresence mode="sync" initial={false}>
               <motion.div key={arena.hubSection} className={styles.sectionContent} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={mobileMotion.tab}>
                 {arena.hubSection === "overview" ? <ArenaOverview captain={captain} ownClan={ownClan} rival={rival} scenario={arena.scenario} ownProgress={arena.battleProgress} enemyProgress={arena.enemyProgress} onOpenWar={() => arena.setHubSection("war")} onFindTarget={openTargeting} onOpenHistory={() => arena.setHubSection("history")} /> : null}
                 {arena.hubSection === "war" ? warContent() : null}

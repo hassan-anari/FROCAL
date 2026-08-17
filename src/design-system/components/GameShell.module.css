@@ -27,9 +27,6 @@
   overscroll-behavior: contain;
   scrollbar-width: none;
   padding-bottom: calc(96px + var(--safe-bottom));
-  backface-visibility: hidden;
-  transform: translateZ(0);
-  will-change: opacity, transform;
 }
 
 .content::-webkit-scrollbar { display: none; }
@@ -108,7 +105,7 @@
   width: 34px;
   height: 30px;
   color: currentColor;
-  transition: color 170ms ease, transform 190ms ease, filter 190ms ease;
+  transition: color 170ms ease, transform 190ms ease;
 }
 
 .stationCode {
@@ -155,7 +152,6 @@
 .active .navGlyph {
   color: var(--nav-accent);
   transform: translateY(-2px) scale(1.08);
-  filter: drop-shadow(0 0 8px rgba(var(--nav-accent-rgb), .42));
 }
 
 .active .navGlyph::after {

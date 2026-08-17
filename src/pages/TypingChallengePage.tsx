@@ -221,7 +221,7 @@ export function TypingChallengePage() {
           </div>
         </section>
 
-        <AnimatePresence mode="popLayout">
+        <AnimatePresence mode="sync">
           {result ? (
             <motion.section key="result" className={`${styles.resultCard} ${result.passed ? styles.resultPassed : styles.resultFailed}`} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} transition={mobileMotion.reveal}>
               <span>{result.passed ? "ARENA CLEARED" : "RUN COMPLETE"}</span>

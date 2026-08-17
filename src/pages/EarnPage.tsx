@@ -25,6 +25,7 @@ import {
 import type { EarnMission, MissionId } from "@/game/earn/types";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
+import { pulseBackgroundMotion } from "@/design-system/motion/usePauseBackgroundMotion";
 import styles from "./EarnPage.module.css";
 
 type EarnTab = "earn" | "network" | "typing";
@@ -170,6 +171,7 @@ export function EarnPage() {
   const switchTab = (tab: EarnTab) => {
     if (tab === activeTab) return;
     adapter.selectionChanged();
+    pulseBackgroundMotion(220);
     setActiveTab(tab);
   };
 
@@ -310,7 +312,7 @@ export function EarnPage() {
           ))}
         </nav>
 
-        <AnimatePresence mode="popLayout" initial={false}>
+        <AnimatePresence mode="sync" initial={false}>
           <motion.div
             key={activeTab}
             className={styles.tabContent}

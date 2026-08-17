@@ -257,7 +257,7 @@ export function ArenaWarExperience({ ownClan }: { ownClan: ClanSummary | null })
   return (
     <div className={styles.root}>
       <div className={styles.labBanner}><span>SEASON 2 WAR LAB</span><strong>Debug simulation · frontend only</strong></div>
-      <AnimatePresence mode="wait" initial={false}>
+      <AnimatePresence mode="sync" initial={false}>
         <motion.div key={stage} className={styles.stageStack} initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -6 }} transition={mobileMotion.tab}>
           {stage === "matchmaking" ? <MatchmakingStage next={next} /> : null}
           {stage === "opponent" ? <OpponentStage ownClan={homeClan} rival={rival} next={next} back={back} /> : null}

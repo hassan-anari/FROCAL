@@ -13,7 +13,7 @@ import { GameHeader } from "@/design-system/components/GameHeader";
 import { GameShell } from "@/design-system/components/GameShell";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
 import { Button } from "@/design-system/primitives/Button";
-import { usePauseBackgroundMotion } from "@/design-system/motion/usePauseBackgroundMotion";
+import { pulseBackgroundMotion, usePauseBackgroundMotion } from "@/design-system/motion/usePauseBackgroundMotion";
 import {
   CustomizeProfileSheet,
   ProfileDetailSheet,
@@ -135,6 +135,7 @@ export function ProfilePage() {
   const switchTab = (tab: ProfileTab) => {
     if (tab === activeTab) return;
     adapter.selectionChanged();
+    pulseBackgroundMotion(220);
     setActiveTab(tab);
     sessionStorage.setItem(profileTabKey, tab);
   };
@@ -243,7 +244,7 @@ export function ProfilePage() {
           ))}
         </nav>
 
-        <AnimatePresence mode="popLayout" initial={false}>
+        <AnimatePresence mode="sync" initial={false}>
           <motion.div
             key={activeTab}
             className={styles.tabContent}
@@ -428,7 +429,7 @@ export function ProfilePage() {
                   ))}
                 </nav>
 
-                <AnimatePresence mode="popLayout" initial={false}>
+                <AnimatePresence mode="sync" initial={false}>
                   <motion.div
                     key={collectionTab}
                     className={styles.collectionContent}

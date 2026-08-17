@@ -8,8 +8,9 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { motion } from "motion/react";
-import type { ReactNode } from "react";
+import { useLayoutEffect, type ReactNode } from "react";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
+import { pulseBackgroundMotion } from "@/design-system/motion/usePauseBackgroundMotion";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import styles from "./GameShell.module.css";
 
@@ -37,6 +38,10 @@ export function GameShell({ children, className = "", hideNavigation = false }: 
   const { adapter } = useTelegram();
   const direction = Number(sessionStorage.getItem(directionKey) ?? "0");
 
+  useLayoutEffect(() => {
+    pulseBackgroundMotion(240);
+  }, [pathname]);
+
   const openRoute = (to: GameRoute) => {
     if (pathname === to) return;
     const currentIndex = navigation.findIndex((item) => item.to === pathname);
@@ -53,8 +58,8 @@ export function GameShell({ children, className = "", hideNavigation = false }: 
         key={pathname}
         data-game-scroll
         className={`${styles.content} ${hideNavigation ? styles.contentFull : ""}`}
-        initial={{ opacity: 0, x: direction * 10, scale: 0.998 }}
-        animate={{ opacity: 1, x: 0, scale: 1 }}
+        initial={{ opacity: 0, x: direction * 6 }}
+        animate={{ opacity: 1, x: 0 }}
         transition={mobileMotion.page}
       >
         {children}
