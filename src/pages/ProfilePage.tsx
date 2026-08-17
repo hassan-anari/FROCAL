@@ -1,5 +1,6 @@
 import {
   ArrowRight01Icon,
+  UserCircleIcon,
   Wallet01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
