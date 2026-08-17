@@ -132,7 +132,7 @@
   border-radius: 999px;
   background: #081121;
   box-shadow: 0 0 0 3px rgba(4, 9, 22, .92);
-  transition: border-color 190ms ease, background 190ms ease, box-shadow 190ms ease;
+  transition: width 190ms ease, height 190ms ease, border-color 190ms ease, background 190ms ease, box-shadow 190ms ease;
 }
 
 .navLabel {
@@ -146,22 +146,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   transition: color 170ms ease, transform 170ms ease;
-}
-
-.navItem::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: -1px;
-  width: 30px;
-  height: 3px;
-  border-radius: 999px;
-  transform: translateX(-50%) scaleX(.35);
-  opacity: 0;
-  pointer-events: none;
-  background: linear-gradient(90deg, transparent, var(--nav-accent), var(--nav-accent-2), transparent);
-  box-shadow: 0 0 10px rgba(var(--nav-accent-rgb), .38);
-  transition: opacity 180ms ease, transform 210ms ease;
 }
 
 .active {
@@ -189,23 +173,21 @@
 }
 
 .active .stationNode {
-  width: 6px;
-  border-color: rgba(var(--nav-accent-rgb), .8);
-  background: var(--nav-accent);
+  width: 28px;
+  height: 7px;
+  border-color: rgba(var(--nav-accent-rgb), .88);
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--nav-accent), var(--nav-accent-2));
   box-shadow:
-    0 0 0 3px rgba(4, 9, 22, .96),
-    0 0 10px rgba(var(--nav-accent-rgb), .68);
+    inset 0 0 0 1px rgba(255, 255, 255, .08),
+    0 0 0 2px rgba(4, 9, 22, .94),
+    0 0 10px rgba(var(--nav-accent-rgb), .5);
 }
 
 .active .navLabel {
   color: var(--nav-accent);
   transform: translateY(1px);
   text-shadow: 0 0 10px rgba(var(--nav-accent-rgb), .2);
-}
-
-.active::after {
-  opacity: 1;
-  transform: translateX(-50%) scaleX(1);
 }
 
 @media (hover: hover) {
@@ -232,7 +214,6 @@
 @media (prefers-reduced-motion: reduce) {
   .content { transform: none !important; }
   .navItem,
-  .navItem::after,
   .navGlyph,
   .stationCode,
   .stationNode,
