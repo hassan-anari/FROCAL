@@ -32,6 +32,15 @@
         root.dataset.telegramMobile = isMobile ? "true" : "false";
         root.dataset.telegramFullscreen = app.isFullscreen ? "true" : "false";
 
+        // Desktop presentation is intentionally left to Telegram's native
+        // Fullsize/Normal shell. On mobile, request immersive fullscreen as
+        // early as possible so Main Mini App and Menu Button converge to the
+        // same experience with minimal visible resizing.
+        if (isMobile && !app.isFullscreen && typeof app.requestFullscreen === "function") {
+          root.dataset.telegramFullscreenRequested = "true";
+          try { app.requestFullscreen(); } catch (_) { /* provider keeps boot safe */ }
+        }
+
         const stableHeight = app.viewportStableHeight || app.viewportHeight;
         if (stableHeight) root.style.setProperty("--tg-stable-height", `${stableHeight}px`);
 

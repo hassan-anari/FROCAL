@@ -109,7 +109,13 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
       // Desktop is intentionally left in whatever native presentation Telegram
       // chose; CSS bounds and centers the portrait canvas without resizing the
       // Telegram WebView after launch.
-      if (adapter.isTelegram && isMobileClient && !adapter.getIsFullscreen()) {
+      if (
+        adapter.isTelegram
+        && isMobileClient
+        && !adapter.getIsFullscreen()
+        && document.documentElement.dataset.telegramFullscreenRequested !== "true"
+      ) {
+        document.documentElement.dataset.telegramFullscreenRequested = "true";
         adapter.requestFullscreen();
       }
 
