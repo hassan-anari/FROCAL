@@ -81,10 +81,10 @@ export function useBaseTapExperience({ enabled, initData, playerId }: UseBaseTap
   useEffect(() => {
     if (!batcher.result || batcher.resultVersion === handledResultVersionRef.current) return;
     handledResultVersionRef.current = batcher.resultVersion;
-    if (batcher.result.rejected_taps <= 0) return;
 
     setTodayPoints((current) => {
-      const next = Math.max(0, current - batcher.result!.rejected_taps);
+      const optimisticAfterReject = Math.max(0, current - batcher.result!.rejected_taps);
+      const next = Math.max(optimisticAfterReject, batcher.result!.daily_accepted_taps);
       persist(next);
       return next;
     });
