@@ -1,0 +1,86 @@
+.layer {
+  position: absolute;
+  z-index: 9;
+  inset: 0;
+  pointer-events: none;
+}
+
+.tapBurst {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  translate: -50% -50%;
+  color: #f8fbff;
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: -.04em;
+  text-shadow:
+    0 0 10px rgba(104, 231, 255, .9),
+    0 0 24px rgba(151, 93, 255, .58);
+  filter: drop-shadow(0 5px 12px rgba(0, 0, 0, .35));
+}
+
+.cooldown {
+  position: absolute;
+  left: 50%;
+  bottom: 4.25rem;
+  width: 44px;
+  height: 44px;
+  translate: -50% 0;
+  border-radius: 50%;
+  filter: drop-shadow(0 0 14px rgba(92, 208, 255, .16));
+  transition: filter .16s ease, opacity .16s ease;
+}
+
+.cooldown svg {
+  width: 100%;
+  height: 100%;
+  rotate: -90deg;
+  overflow: visible;
+}
+
+.cooldown circle {
+  fill: none;
+  stroke-width: 3.4;
+}
+
+.track {
+  stroke: rgba(139, 170, 237, .12);
+}
+
+.progress {
+  stroke: #65e7ff;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 5px rgba(101, 231, 255, .56));
+  transition: stroke .16s ease;
+}
+
+.cooling .progress {
+  stroke: #a96dff;
+  filter: drop-shadow(0 0 5px rgba(169, 109, 255, .56));
+}
+
+.cooldown i {
+  position: absolute;
+  inset: 15px;
+  border-radius: 50%;
+  background: #6ce8ff;
+  box-shadow: 0 0 13px rgba(108, 232, 255, .72);
+  transition: background .16s ease, box-shadow .16s ease, scale .16s ease;
+}
+
+.cooling i {
+  background: #9b63f6;
+  box-shadow: 0 0 12px rgba(155, 99, 246, .54);
+  scale: .76;
+}
+
+.ready {
+  filter: drop-shadow(0 0 16px rgba(101, 231, 255, .24));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tapBurst {
+    display: none;
+  }
+}
