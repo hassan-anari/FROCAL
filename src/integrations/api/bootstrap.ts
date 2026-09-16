@@ -75,7 +75,11 @@ function mapRemoteBootstrap(
 ): BootstrapPayload {
   const displayName = [payload.player.first_name, payload.player.last_name].filter(Boolean).join(" ").trim();
   const season = payload.season;
-  const nextThreshold = payload.progression.next_threshold ?? Math.max(payload.progression.lifetime_points, 1);
+  const levelProgress = payload.progression.points_into_level;
+  const levelTarget =
+    payload.progression.points_remaining === null
+      ? Math.max(levelProgress, 1)
+      : Math.max(levelProgress + payload.progression.points_remaining, 1);
   const parsedServerDate = serverDate ? new Date(serverDate) : new Date();
   const serverTime = Number.isNaN(parsedServerDate.getTime())
     ? new Date().toISOString()
@@ -103,8 +107,9 @@ function mapRemoteBootstrap(
       telegramUsername: payload.player.username || null,
       avatarUrl: null,
       level: payload.progression.level,
-      xp: payload.progression.lifetime_points,
-      xpToNextLevel: nextThreshold,
+      xp: levelProgress,
+      xpToNextLevel: levelTarget,
+      lifetimeXp: payload.progression.lifetime_points,
       seasonScore: season?.season_points ?? 0,
       clanId: null,
     },
@@ -131,6 +136,10 @@ function mapRemoteBootstrap(
 
 function dataSource(): "local" | "msw" | "remote" {
   return import.meta.env.VITE_DATA_SOURCE ?? (import.meta.env.PROD ? "remote" : "local");
+}
+
+export function isRemoteDataSource(): boolean {
+  return dataSource() === "remote";
 }
 
 export async function loadBootstrap(

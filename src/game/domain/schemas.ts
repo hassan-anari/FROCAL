@@ -9,6 +9,7 @@ export const userProfileSchema = z.object({
   level: z.number().int().nonnegative(),
   xp: z.number().int().nonnegative(),
   xpToNextLevel: z.number().int().positive(),
+  lifetimeXp: z.number().int().nonnegative().optional(),
   seasonScore: z.number().int().nonnegative(),
   clanId: z.string().nullable(),
 });
