@@ -20,6 +20,7 @@ export interface TelegramAdapter {
   getClientPlatform(): string;
   isMobileClient(): boolean;
   getIsFullscreen(): boolean;
+  getInitData(): string | null;
   getUser(): TelegramUser | null;
   getStartParam(): string | null;
   getTheme(): TelegramThemeParams;
@@ -52,7 +53,6 @@ function normalizeInset(value?: TelegramSafeAreaInset): Required<TelegramSafeAre
     left: Math.max(0, value?.left ?? 0),
   };
 }
-
 
 function isMobileTelegramPlatform(platform?: string): boolean {
   const value = platform?.trim().toLowerCase() ?? "";
@@ -92,6 +92,10 @@ export function createTelegramAdapter(): TelegramAdapter {
     getClientPlatform: () => (isTelegram ? app?.platform ?? "unknown" : "browser"),
     isMobileClient: () => isTelegram && isMobileTelegramPlatform(app?.platform),
     getIsFullscreen: () => Boolean(isTelegram && app?.isFullscreen),
+    getInitData: () => {
+      const initData = isTelegram ? app?.initData?.trim() : "";
+      return initData || null;
+    },
     getUser: () => (isTelegram ? app?.initDataUnsafe?.user ?? null : null),
     getStartParam: () => (isTelegram ? app?.initDataUnsafe?.start_param ?? null : null),
     getTheme: () => (isTelegram ? app?.themeParams ?? {} : {}),

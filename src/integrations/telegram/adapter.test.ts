@@ -12,6 +12,7 @@ describe("Telegram adapter", () => {
     const adapter = createTelegramAdapter();
     expect(adapter.isTelegram).toBe(false);
     expect(adapter.platform).toBe("browser");
+    expect(adapter.getInitData()).toBeNull();
   });
 
   it("uses Telegram capabilities when init data is available", () => {
@@ -35,6 +36,7 @@ describe("Telegram adapter", () => {
     expect(adapter.getClientPlatform()).toBe("android");
     expect(adapter.isMobileClient()).toBe(true);
     expect(adapter.getIsFullscreen()).toBe(false);
+    expect(adapter.getInitData()).toBe("query_id=test");
     expect(adapter.getUser()?.username).toBe("dexo");
     expect(ready).toHaveBeenCalledOnce();
   });
@@ -78,5 +80,4 @@ describe("Telegram adapter", () => {
     expect(requestFullscreen).toHaveBeenCalledOnce();
     expect(exitFullscreen).toHaveBeenCalledOnce();
   });
-
 });

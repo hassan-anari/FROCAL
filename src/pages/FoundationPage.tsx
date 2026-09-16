@@ -46,7 +46,7 @@ export function FoundationPage() {
 
   const bootstrap = useQuery({
     queryKey: queryKeys.bootstrap(activeScenario),
-    queryFn: () => loadBootstrap(activeScenario, adapter.platform),
+    queryFn: () => loadBootstrap(activeScenario, adapter.platform, adapter.getInitData()),
   });
 
   useEffect(() => {
