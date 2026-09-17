@@ -3,10 +3,13 @@ import { useEffect, useMemo, useState } from "react";
 import styles from "./BaseTapFeedback.module.css";
 
 interface BaseTapFeedbackProps {
+  tapSequence: number;
+}
+
+interface BaseTapCooldownRingProps {
   cooldownCycle: number;
   cooldownMs: number;
   isCoolingDown: boolean;
-  tapSequence: number;
 }
 
 interface TapBurst {
@@ -14,12 +17,7 @@ interface TapBurst {
   x: number;
 }
 
-export function BaseTapFeedback({
-  cooldownCycle,
-  cooldownMs,
-  isCoolingDown,
-  tapSequence,
-}: BaseTapFeedbackProps) {
+export function BaseTapFeedback({ tapSequence }: BaseTapFeedbackProps) {
   const [bursts, setBursts] = useState<TapBurst[]>([]);
   const xOffset = useMemo(() => ((tapSequence * 37) % 46) - 23, [tapSequence]);
 
@@ -49,28 +47,40 @@ export function BaseTapFeedback({
           </motion.span>
         ))}
       </AnimatePresence>
-
-      <div className={`${styles.cooldown} ${isCoolingDown ? styles.cooling : styles.ready}`}>
-        <svg viewBox="0 0 44 44" role="presentation">
-          <circle className={styles.track} cx="22" cy="22" r="18" />
-          {isCoolingDown ? (
-            <motion.circle
-              key={cooldownCycle}
-              className={styles.progress}
-              cx="22"
-              cy="22"
-              r="18"
-              pathLength="1"
-              initial={{ pathLength: 0 }}
-              animate={{ pathLength: 1 }}
-              transition={{ duration: cooldownMs / 1000, ease: "linear" }}
-            />
-          ) : (
-            <circle className={styles.progress} cx="22" cy="22" r="18" pathLength="1" />
-          )}
-        </svg>
-        <i />
-      </div>
     </div>
+  );
+}
+
+export function BaseTapCooldownRing({
+  cooldownCycle,
+  cooldownMs,
+  isCoolingDown,
+}: BaseTapCooldownRingProps) {
+  return (
+    <span
+      className={`${styles.cooldown} ${isCoolingDown ? styles.cooling : styles.ready}`}
+      aria-label={isCoolingDown ? "Base Tap cooling down" : "Base Tap ready"}
+      title={isCoolingDown ? "Base Tap cooling down" : "Base Tap ready"}
+    >
+      <svg viewBox="0 0 32 32" role="presentation">
+        <circle className={styles.track} cx="16" cy="16" r="12" />
+        {isCoolingDown ? (
+          <motion.circle
+            key={cooldownCycle}
+            className={styles.progress}
+            cx="16"
+            cy="16"
+            r="12"
+            pathLength="1"
+            initial={{ pathLength: 1 }}
+            animate={{ pathLength: 0 }}
+            transition={{ duration: cooldownMs / 1000, ease: "linear" }}
+          />
+        ) : (
+          <circle className={styles.progress} cx="16" cy="16" r="12" pathLength="1" />
+        )}
+      </svg>
+      <i />
+    </span>
   );
 }
