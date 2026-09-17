@@ -159,7 +159,7 @@ export function useBaseTapExperience({
       todayPoints: nextTodayPoints,
       cycleTaps: startsCooldown ? BASE_TAP_BURST_LIMIT : nextCycleTaps,
       cooldownUntil,
-      lifetimeFloor: Math.max(current.lifetimeFloor, serverLifetime + nextTodayPoints),
+      lifetimeFloor: Math.max(current.lifetimeFloor, serverLifetime) + 1,
     };
 
     commit(next);
