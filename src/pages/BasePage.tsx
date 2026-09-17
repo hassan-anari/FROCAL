@@ -11,14 +11,17 @@ import { DexoStage } from "@/design-system/components/DexoStage";
 import { DeferredMount } from "@/design-system/performance/DeferredMount";
 import { Button } from "@/design-system/primitives/Button";
 import { BaseHeroStats } from "@/game/base/BaseHeroStats";
+import { BaseTapCooldownIndicator } from "@/game/base/BaseTapCooldownIndicator";
 import { BaseTapFeedback } from "@/game/base/BaseTapFeedback";
 import { useBaseTapExperience } from "@/game/base/useBaseTapExperience";
 import { useOnboardingStore } from "@/game/onboarding/onboardingStore";
+import { progressionForLifetime } from "@/game/progression/s1Progression";
 import { useScenarioStore } from "@/game/scenarios/scenarioStore";
 import { useEarnStore } from "@/game/earn/earnStore";
 import { useBaseUiStore } from "@/game/ui/baseUiStore";
 import { isRemoteDataSource, loadBootstrap } from "@/integrations/api/bootstrap";
 import { loadDlxBalance } from "@/integrations/api/dlx";
+import { loadProfileOverview } from "@/integrations/api/profile";
 import { queryKeys } from "@/integrations/api/queryKeys";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
@@ -103,10 +106,18 @@ export function BasePage() {
   const bootstrap = useQuery({
     queryKey: queryKeys.bootstrap(scenario),
     queryFn: () => loadBootstrap(scenario, adapter.platform, initData),
+    enabled: !remoteData || Boolean(initData),
+  });
+
+  const profile = useQuery({
+    queryKey: queryKeys.profileOverview,
+    queryFn: () => loadProfileOverview(initData),
+    enabled: remoteData && adapter.isTelegram && Boolean(initData),
+    staleTime: 30_000,
   });
 
   const dlxBalance = useQuery({
-    queryKey: ["arena", "dlx", "balance"],
+    queryKey: queryKeys.dlxBalance,
     queryFn: () => loadDlxBalance(initData),
     enabled: remoteData && adapter.isTelegram && Boolean(initData),
     staleTime: 30_000,
@@ -114,7 +125,7 @@ export function BasePage() {
 
   const [activeReaction, setActiveReaction] = useState<ReactionKey | null>(null);
   const [promoAssetReady, setPromoAssetReady] = useState(false);
-  const [tapSequence, setTapSequence] = useState(0);
+  const [tapCount, setTapCount] = useState(0);
   const reactionCursor = useRef(0);
   const resetTimer = useRef<number | null>(null);
 
@@ -134,42 +145,61 @@ export function BasePage() {
   );
 
   const telegramFirstName = adapter.getUser()?.first_name ?? "Explorer";
-  const player = bootstrap.data?.player ?? {
+  const bootstrapPlayer = bootstrap.data?.player ?? null;
+  const phase2Player = bootstrapPlayer ?? {
     id: "pending-player",
     firstName: telegramFirstName,
     displayName: telegramFirstName,
     telegramUsername: null,
     avatarUrl: null,
     level: 1,
-    xp: 120,
-    xpToNextLevel: 500,
+    xp: 0,
+    xpToNextLevel: 1,
+    lifetimeXp: 0,
     seasonScore: 0,
     clanId: null,
   };
+  const playerId = bootstrapPlayer?.id ?? "pending-player";
+  const serverLifetime =
+    profile.data?.progression.lifetime_points ?? bootstrapPlayer?.lifetimeXp ?? null;
 
   const baseTap = useBaseTapExperience({
-    enabled: remoteData && adapter.isTelegram,
+    enabled: remoteData && adapter.isTelegram && serverLifetime !== null,
     initData,
-    playerId: player.id,
+    playerId,
+    serverLifetime: serverLifetime ?? 0,
   });
 
-  const currentLevel = remoteData ? player.level : Math.max(player.level, earnLevel);
+  const displayedLifetimeXp = remoteData
+    ? serverLifetime === null
+      ? null
+      : baseTap.visualLifetime
+    : lifetimeXp;
+  const liveProgression =
+    remoteData && displayedLifetimeXp !== null
+      ? progressionForLifetime(displayedLifetimeXp)
+      : null;
+  const currentLevel = remoteData
+    ? liveProgression?.level ?? profile.data?.progression.level ?? bootstrapPlayer?.level ?? 1
+    : Math.max(phase2Player.level, earnLevel);
   const currentLevelXp = remoteData
-    ? player.xp
+    ? liveProgression?.pointsIntoLevel ?? null
     : currentLevel === earnLevel
       ? earnLevelXp
-      : player.xp;
+      : phase2Player.xp;
   const currentLevelTarget = remoteData
-    ? player.xpToNextLevel
+    ? liveProgression?.levelSpan ?? null
     : currentLevel === earnLevel
       ? earnLevelTarget
-      : player.xpToNextLevel;
-  const serverLifetimeXp = remoteData ? (player.lifetimeXp ?? player.xp) : lifetimeXp;
-  const displayedLifetimeXp = serverLifetimeXp + (remoteData ? baseTap.todayPoints : 0);
-  const xpPercent = useMemo(
-    () => Math.min(100, Math.round((currentLevelXp / currentLevelTarget) * 100)),
-    [currentLevelTarget, currentLevelXp],
-  );
+      : phase2Player.xpToNextLevel;
+  const xpPercent = useMemo(() => {
+    if (remoteData) {
+      if (liveProgression?.nextThreshold === null && liveProgression) return 100;
+      if (currentLevelXp === null || currentLevelTarget === null || currentLevelTarget <= 0) return 0;
+      return Math.min(100, Math.round((currentLevelXp / currentLevelTarget) * 100));
+    }
+    return Math.min(100, Math.round(((currentLevelXp ?? 0) / Math.max(currentLevelTarget ?? 1, 1)) * 100));
+  }, [currentLevelTarget, currentLevelXp, liveProgression, remoteData]);
   const levelAsset = getLevelAsset(currentLevel);
   const displayedCharacter = activeReaction ? reactionLibrary[activeReaction].asset : levelAsset;
   const displayedScale = activeReaction
@@ -181,6 +211,14 @@ export function BasePage() {
   const currentMission = missionList.find((mission) => mission.status !== "claimed");
   const currentMissionProgress =
     currentMission?.status === "completed" ? 90 : currentMission?.status === "in-progress" ? 45 : 0;
+
+  const growthLabel = remoteData
+    ? liveProgression?.nextThreshold === null && liveProgression
+      ? "MAX LEVEL"
+      : currentLevelXp === null || currentLevelTarget === null
+        ? "— / — XP"
+        : `${currentLevelXp.toLocaleString()} / ${currentLevelTarget.toLocaleString()} XP`
+    : `${(currentLevelXp ?? 0).toLocaleString()} / ${(currentLevelTarget ?? 1).toLocaleString()} XP`;
 
   const scheduleReturn = () => {
     if (resetTimer.current !== null) window.clearTimeout(resetTimer.current);
@@ -199,7 +237,7 @@ export function BasePage() {
     scheduleReturn();
 
     if (remoteData && adapter.isTelegram) {
-      setTapSequence((sequence) => sequence + 1);
+      setTapCount((count) => count + 1);
     }
 
     adapter.hapticImpact(reaction === "victory" ? "medium" : "soft");
@@ -246,7 +284,7 @@ export function BasePage() {
             </div>
             <BaseHeroStats
               lifetimeXp={displayedLifetimeXp}
-              dlxReceived={dlxBalance.data?.confirmed ?? 0}
+              dlxReceived={remoteData ? dlxBalance.data?.net_confirmed ?? null : 0}
             />
           </div>
 
@@ -256,26 +294,27 @@ export function BasePage() {
             effect="base"
             showParticles={false}
             interactive
+            multiTouch={remoteData && adapter.isTelegram}
             onPress={triggerReaction}
             ariaLabel="Interact with Dexo"
             className={styles.dexoStage}
           />
 
-          {remoteData && adapter.isTelegram ? (
-            <BaseTapFeedback
-              cooldownCycle={baseTap.cooldownCycle}
-              cooldownMs={baseTap.cooldownMs}
-              isCoolingDown={baseTap.isCoolingDown}
-              tapSequence={tapSequence}
-            />
-          ) : null}
+          {remoteData && adapter.isTelegram ? <BaseTapFeedback tapCount={tapCount} /> : null}
 
           <div className={styles.progressFooter}>
             <div className={styles.xpLabels}>
               <span>Growth progress</span>
-              <strong>
-                {currentLevelXp} / {currentLevelTarget} XP
-              </strong>
+              <div className={styles.progressValue}>
+                {remoteData && adapter.isTelegram ? (
+                  <BaseTapCooldownIndicator
+                    cooldownCycle={baseTap.cooldownCycle}
+                    cooldownMs={baseTap.cooldownMs}
+                    isCoolingDown={baseTap.isCoolingDown}
+                  />
+                ) : null}
+                <strong>{growthLabel}</strong>
+              </div>
             </div>
             <div className={styles.xpTrack}>
               <motion.i
@@ -410,7 +449,7 @@ export function BasePage() {
             </div>
             <div>
               <span>Season score</span>
-              <strong>{player.seasonScore}</strong>
+              <strong>{phase2Player.seasonScore}</strong>
             </div>
             <div>
               <span>Clan status</span>
