@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react";
-import { type CSSProperties } from "react";
+import { type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
 import { AssetImage } from "./AssetImage";
 import type { AssetKey } from "@/assets/registry";
@@ -11,6 +11,7 @@ interface DexoStageProps {
   effect?: "idle" | "reveal" | "acquired" | "base";
   interactive?: boolean;
   onPress?: () => void;
+  onPointerPress?: (event: ReactPointerEvent<HTMLButtonElement>) => void;
   ariaLabel?: string;
   characterScale?: number;
   showParticles?: boolean;
@@ -25,6 +26,7 @@ export function DexoStage({
   effect = "idle",
   interactive = false,
   onPress,
+  onPointerPress,
   ariaLabel = "Dexo companion",
   characterScale = 1,
   showParticles,
@@ -57,7 +59,19 @@ export function DexoStage({
 
       <div className={styles.characterFloat}>
         {interactive ? (
-          <button type="button" className={styles.characterButton} onClick={onPress} aria-label={ariaLabel}>
+          <button
+            type="button"
+            className={styles.characterButton}
+            onPointerDown={(event) => {
+              if (!onPointerPress) return;
+              event.preventDefault();
+              onPointerPress(event);
+            }}
+            onClick={(event) => {
+              if (!onPointerPress || event.detail === 0) onPress?.();
+            }}
+            aria-label={ariaLabel}
+          >
             {characterLayer}
           </button>
         ) : characterLayer}
