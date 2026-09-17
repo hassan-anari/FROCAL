@@ -227,10 +227,10 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
           type="button"
           className={styles.seasonControl}
           onClick={handleSeasonTap}
-          aria-label={`${seasonCode} · ${seasonTitle}`}
+          aria-label={`${seasonCode} ${seasonTitle}`}
         >
           <span>{seasonCode}</span>
-          <strong>· {seasonTitle}</strong>
+          <strong>{seasonTitle}</strong>
         </button>
 
         <div className={styles.actions}>
