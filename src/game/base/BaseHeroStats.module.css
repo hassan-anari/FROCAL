@@ -15,7 +15,7 @@
 }
 
 .stats span {
-  color: rgba(139, 215, 255, .58);
+  color: rgba(183, 151, 255, .7);
   font-size: .45rem;
   font-weight: 790;
   letter-spacing: .12em;
@@ -29,18 +29,19 @@
   font-weight: 860;
   font-variant-numeric: tabular-nums;
   letter-spacing: -.045em;
+  background: linear-gradient(92deg, #f6edff 0%, #cba8ff 52%, #72e8ff 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  filter: drop-shadow(0 0 14px rgba(151, 93, 255, .12));
+}
+
+.stats > div:last-child span {
+  color: rgba(139, 215, 255, .58);
+}
+
+.stats > div:last-child strong {
   background: linear-gradient(92deg, #f8fbff 0%, #bceeff 48%, #a891ff 100%);
   background-clip: text;
   -webkit-background-clip: text;
   filter: drop-shadow(0 0 14px rgba(89, 206, 255, .12));
-}
-
-.stats > div:last-child span {
-  color: rgba(183, 151, 255, .7);
-}
-
-.stats > div:last-child strong {
-  background: linear-gradient(92deg, #f6edff 0%, #cba8ff 52%, #72e8ff 100%);
-  background-clip: text;
-  -webkit-background-clip: text;
 }
