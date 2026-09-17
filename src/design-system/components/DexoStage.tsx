@@ -10,6 +10,7 @@ interface DexoStageProps {
   className?: string;
   effect?: "idle" | "reveal" | "acquired" | "base";
   interactive?: boolean;
+  multiTouch?: boolean;
   onPress?: () => void;
   ariaLabel?: string;
   characterScale?: number;
@@ -24,6 +25,7 @@ export function DexoStage({
   className = "",
   effect = "idle",
   interactive = false,
+  multiTouch = false,
   onPress,
   ariaLabel = "Dexo companion",
   characterScale = 1,
@@ -57,7 +59,30 @@ export function DexoStage({
 
       <div className={styles.characterFloat}>
         {interactive ? (
-          <button type="button" className={styles.characterButton} onClick={onPress} aria-label={ariaLabel}>
+          <button
+            type="button"
+            className={styles.characterButton}
+            style={multiTouch ? { touchAction: "none" } : undefined}
+            onPointerDown={
+              multiTouch
+                ? (event) => {
+                    if (event.pointerType === "mouse" && event.button !== 0) return;
+                    event.preventDefault();
+                    onPress?.();
+                  }
+                : undefined
+            }
+            onClick={
+              multiTouch
+                ? (event) => {
+                    // Keyboard activation has detail=0. Pointer input is handled on pointerdown so
+                    // touch/mouse clicks do not double-count.
+                    if (event.detail === 0) onPress?.();
+                  }
+                : onPress
+            }
+            aria-label={ariaLabel}
+          >
             {characterLayer}
           </button>
         ) : characterLayer}
