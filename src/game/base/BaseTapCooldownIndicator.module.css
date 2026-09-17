@@ -5,7 +5,9 @@
   flex: 0 0 auto;
   width: 20px;
   height: 20px;
+  margin-right: .34rem;
   border-radius: 50%;
+  vertical-align: middle;
   filter: drop-shadow(0 0 8px rgba(101, 231, 255, .16));
   opacity: .88;
 }
