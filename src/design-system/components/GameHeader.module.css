@@ -95,7 +95,7 @@
 }
 
 .seasonControl strong {
-  max-width: 70px;
+  max-width: 100px;
   overflow: hidden;
   font-size: .57rem;
   font-weight: 760;
@@ -266,6 +266,13 @@
 }
 
 .notificationList::-webkit-scrollbar { display: none; }
+
+.notificationEmpty {
+  padding: 1.25rem .25rem;
+  color: rgba(166, 181, 215, .5);
+  font-size: .65rem;
+  text-align: center;
+}
 
 .notificationItem {
   display: grid;
