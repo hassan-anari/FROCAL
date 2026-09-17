@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./BaseTapFeedback.module.css";
 
 interface BaseTapFeedbackProps {
@@ -17,19 +17,31 @@ interface TapBurst {
   x: number;
 }
 
+function burstOffset(id: number): number {
+  return ((id * 37) % 46) - 23;
+}
+
 export function BaseTapFeedback({ tapSequence }: BaseTapFeedbackProps) {
   const [bursts, setBursts] = useState<TapBurst[]>([]);
-  const xOffset = useMemo(() => ((tapSequence * 37) % 46) - 23, [tapSequence]);
+  const lastSequenceRef = useRef(0);
 
   useEffect(() => {
-    if (tapSequence <= 0) return;
-    const burst = { id: tapSequence, x: xOffset };
-    setBursts((current) => [...current, burst]);
+    if (tapSequence <= lastSequenceRef.current) return;
+    const nextBursts = Array.from(
+      { length: tapSequence - lastSequenceRef.current },
+      (_, index) => {
+        const id = lastSequenceRef.current + index + 1;
+        return { id, x: burstOffset(id) };
+      },
+    );
+    lastSequenceRef.current = tapSequence;
+    setBursts((current) => [...current, ...nextBursts]);
+    const ids = new Set(nextBursts.map((item) => item.id));
     const timer = window.setTimeout(() => {
-      setBursts((current) => current.filter((item) => item.id !== burst.id));
+      setBursts((current) => current.filter((item) => !ids.has(item.id)));
     }, 900);
     return () => window.clearTimeout(timer);
-  }, [tapSequence, xOffset]);
+  }, [tapSequence]);
 
   return (
     <div className={styles.layer} aria-hidden="true">
