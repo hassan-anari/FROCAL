@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react";
-import { type CSSProperties } from "react";
+import { type CSSProperties, useRef } from "react";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
 import { AssetImage } from "./AssetImage";
 import type { AssetKey } from "@/assets/registry";
@@ -33,21 +33,36 @@ export function DexoStage({
   showPlatform = true,
 }: DexoStageProps) {
   const shouldShowParticles = showParticles ?? effect === "acquired";
+  const stableBaseCharacter = useRef(character);
+  const stableBaseScale = useRef(characterScale);
+  const personalitySwap = character.startsWith("dexo.personality");
+
+  // Keep the reaction system/assets intact, but suppress personality swaps on Base for now.
+  // Real level/stage asset changes are still allowed through immediately.
+  if (effect !== "base" || !personalitySwap) {
+    stableBaseCharacter.current = character;
+    stableBaseScale.current = characterScale;
+  }
+
+  const renderedCharacter =
+    effect === "base" && personalitySwap ? stableBaseCharacter.current : character;
+  const renderedScale =
+    effect === "base" && personalitySwap ? stableBaseScale.current : characterScale;
   const stageStyle = {
-    "--dexo-character-scale": characterScale,
+    "--dexo-character-scale": renderedScale,
   } as CSSProperties;
 
   const characterLayer = (
     <AnimatePresence mode="sync" initial={false}>
       <motion.div
-        key={character}
+        key={renderedCharacter}
         className={styles.characterLayer}
         initial={{ opacity: 0, scale: .975, y: 4 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 1.015, y: -3 }}
         transition={mobileMotion.reveal}
       >
-        <AssetImage assetKey={character} className={styles.character} draggable={false} />
+        <AssetImage assetKey={renderedCharacter} className={styles.character} draggable={false} />
       </motion.div>
     </AnimatePresence>
   );
