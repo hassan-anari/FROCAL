@@ -21,18 +21,20 @@
 }
 
 .cooldown {
-  position: absolute;
-  left: 50%;
-  bottom: 4.25rem;
-  width: 44px;
-  height: 44px;
-  translate: -50% 0;
+  position: relative;
+  display: inline-grid;
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  place-items: center;
   border-radius: 50%;
-  filter: drop-shadow(0 0 14px rgba(92, 208, 255, .16));
+  filter: drop-shadow(0 0 8px rgba(92, 208, 255, .12));
   transition: filter .16s ease, opacity .16s ease;
 }
 
 .cooldown svg {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   rotate: -90deg;
@@ -41,7 +43,7 @@
 
 .cooldown circle {
   fill: none;
-  stroke-width: 3.4;
+  stroke-width: 2.8;
 }
 
 .track {
@@ -51,32 +53,32 @@
 .progress {
   stroke: #65e7ff;
   stroke-linecap: round;
-  filter: drop-shadow(0 0 5px rgba(101, 231, 255, .56));
+  filter: drop-shadow(0 0 4px rgba(101, 231, 255, .5));
   transition: stroke .16s ease;
 }
 
 .cooling .progress {
   stroke: #a96dff;
-  filter: drop-shadow(0 0 5px rgba(169, 109, 255, .56));
+  filter: drop-shadow(0 0 4px rgba(169, 109, 255, .5));
 }
 
 .cooldown i {
-  position: absolute;
-  inset: 15px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: #6ce8ff;
-  box-shadow: 0 0 13px rgba(108, 232, 255, .72);
+  box-shadow: 0 0 8px rgba(108, 232, 255, .64);
   transition: background .16s ease, box-shadow .16s ease, scale .16s ease;
 }
 
 .cooling i {
   background: #9b63f6;
-  box-shadow: 0 0 12px rgba(155, 99, 246, .54);
-  scale: .76;
+  box-shadow: 0 0 8px rgba(155, 99, 246, .48);
+  scale: .78;
 }
 
 .ready {
-  filter: drop-shadow(0 0 16px rgba(101, 231, 255, .24));
+  opacity: .72;
 }
 
 @media (prefers-reduced-motion: reduce) {
