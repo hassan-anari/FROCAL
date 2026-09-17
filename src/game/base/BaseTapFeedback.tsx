@@ -1,12 +1,9 @@
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./BaseTapFeedback.module.css";
 
 interface BaseTapFeedbackProps {
-  cooldownCycle: number;
-  cooldownMs: number;
-  isCoolingDown: boolean;
-  tapSequence: number;
+  tapCount: number;
 }
 
 interface TapBurst {
@@ -14,24 +11,41 @@ interface TapBurst {
   x: number;
 }
 
-export function BaseTapFeedback({
-  cooldownCycle,
-  cooldownMs,
-  isCoolingDown,
-  tapSequence,
-}: BaseTapFeedbackProps) {
+function xOffset(id: number): number {
+  return ((id * 37) % 58) - 29;
+}
+
+export function BaseTapFeedback({ tapCount }: BaseTapFeedbackProps) {
   const [bursts, setBursts] = useState<TapBurst[]>([]);
-  const xOffset = useMemo(() => ((tapSequence * 37) % 46) - 23, [tapSequence]);
+  const previousCountRef = useRef(0);
+  const timersRef = useRef<number[]>([]);
 
   useEffect(() => {
-    if (tapSequence <= 0) return;
-    const burst = { id: tapSequence, x: xOffset };
-    setBursts((current) => [...current, burst]);
-    const timer = window.setTimeout(() => {
-      setBursts((current) => current.filter((item) => item.id !== burst.id));
-    }, 900);
-    return () => window.clearTimeout(timer);
-  }, [tapSequence, xOffset]);
+    const previous = previousCountRef.current;
+    previousCountRef.current = tapCount;
+    if (tapCount <= previous) return;
+
+    const additions = Array.from({ length: tapCount - previous }, (_, index) => {
+      const id = previous + index + 1;
+      return { id, x: xOffset(id) };
+    });
+    setBursts((current) => [...current, ...additions]);
+
+    additions.forEach((burst) => {
+      const timer = window.setTimeout(() => {
+        setBursts((current) => current.filter((item) => item.id !== burst.id));
+      }, 900);
+      timersRef.current.push(timer);
+    });
+  }, [tapCount]);
+
+  useEffect(
+    () => () => {
+      timersRef.current.forEach((timer) => window.clearTimeout(timer));
+      timersRef.current = [];
+    },
+    [],
+  );
 
   return (
     <div className={styles.layer} aria-hidden="true">
@@ -49,28 +63,6 @@ export function BaseTapFeedback({
           </motion.span>
         ))}
       </AnimatePresence>
-
-      <div className={`${styles.cooldown} ${isCoolingDown ? styles.cooling : styles.ready}`}>
-        <svg viewBox="0 0 44 44" role="presentation">
-          <circle className={styles.track} cx="22" cy="22" r="18" />
-          {isCoolingDown ? (
-            <motion.circle
-              key={cooldownCycle}
-              className={styles.progress}
-              cx="22"
-              cy="22"
-              r="18"
-              pathLength="1"
-              initial={{ pathLength: 0 }}
-              animate={{ pathLength: 1 }}
-              transition={{ duration: cooldownMs / 1000, ease: "linear" }}
-            />
-          ) : (
-            <circle className={styles.progress} cx="22" cy="22" r="18" pathLength="1" />
-          )}
-        </svg>
-        <i />
-      </div>
     </div>
   );
 }
