@@ -18,7 +18,6 @@ interface PendingBatch {
 }
 
 interface PersistedQueue {
-  day: string;
   buffer: number;
   pending: PendingBatch | null;
 }
@@ -28,10 +27,6 @@ export interface BaseTapBatcher {
   result: BaseTapResult | null;
   resultVersion: number;
   error: string | null;
-}
-
-function utcDay(): string {
-  return new Date().toISOString().slice(0, 10);
 }
 
 function storageKey(scope: string): string | null {
@@ -48,7 +43,6 @@ export function useBaseTapBatcher(
   const [error, setError] = useState<string | null>(null);
 
   const initDataRef = useRef(initData);
-  const queueDayRef = useRef(utcDay());
   const bufferRef = useRef(0);
   const timerRef = useRef<number | null>(null);
   const inFlightRef = useRef(false);
@@ -60,23 +54,11 @@ export function useBaseTapBatcher(
     const key = storageKey(storageScope);
     if (!key || typeof window === "undefined") return;
     const payload: PersistedQueue = {
-      day: queueDayRef.current,
       buffer: bufferRef.current,
       pending: pendingBatchRef.current,
     };
     window.localStorage.setItem(key, JSON.stringify(payload));
   }, [storageScope]);
-
-  const clearForNewDay = useCallback(() => {
-    const day = utcDay();
-    if (day === queueDayRef.current) return false;
-    queueDayRef.current = day;
-    bufferRef.current = 0;
-    pendingBatchRef.current = null;
-    setError(null);
-    persistQueue();
-    return true;
-  }, [persistQueue]);
 
   const scheduleFlush = useCallback((delay: number) => {
     if (timerRef.current !== null) return;
@@ -95,7 +77,6 @@ export function useBaseTapBatcher(
 
   useEffect(() => {
     const key = storageKey(storageScope);
-    queueDayRef.current = utcDay();
     bufferRef.current = 0;
     pendingBatchRef.current = null;
     if (!key || typeof window === "undefined") return;
@@ -104,10 +85,6 @@ export function useBaseTapBatcher(
       const raw = window.localStorage.getItem(key);
       if (!raw) return;
       const parsed = JSON.parse(raw) as Partial<PersistedQueue>;
-      if (parsed.day !== queueDayRef.current) {
-        window.localStorage.removeItem(key);
-        return;
-      }
       bufferRef.current =
         Number.isInteger(parsed.buffer) && (parsed.buffer ?? 0) > 0 ? parsed.buffer! : 0;
       if (
@@ -130,7 +107,6 @@ export function useBaseTapBatcher(
 
   const flush = useCallback(async () => {
     if (inFlightRef.current) return;
-    if (clearForNewDay()) return;
 
     const auth = initDataRef.current?.trim();
     if (!auth) return;
@@ -181,7 +157,7 @@ export function useBaseTapBatcher(
     } else if (!pending && bufferRef.current > 0) {
       scheduleFlush(DRAIN_DELAY_MS);
     }
-  }, [clearForNewDay, persistQueue, scheduleFlush]);
+  }, [persistQueue, scheduleFlush]);
 
   useEffect(() => {
     flushRef.current = flush;
@@ -198,7 +174,6 @@ export function useBaseTapBatcher(
 
   const queueTap = useCallback(() => {
     if (!initDataRef.current?.trim()) return false;
-    clearForNewDay();
 
     if (pendingBatchRef.current && pendingBatchRef.current.retries > MAX_AUTOMATIC_RETRIES) {
       pendingBatchRef.current.retries = 0;
@@ -214,7 +189,7 @@ export function useBaseTapBatcher(
       scheduleFlush(FLUSH_DELAY_MS);
     }
     return true;
-  }, [clearForNewDay, persistQueue, scheduleFlush]);
+  }, [persistQueue, scheduleFlush]);
 
   return { queueTap, result, resultVersion, error };
 }
