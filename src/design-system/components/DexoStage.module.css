@@ -52,6 +52,7 @@
   color: inherit;
   background: transparent;
   cursor: pointer;
+  touch-action: none;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -131,7 +132,6 @@
   68% { opacity: .75; }
   100% { translate: 0 -34px; }
 }
-
 
 :global(html.motion-overlay-open) .characterFloat,
 :global(html.motion-overlay-open) .ambientGlow,
