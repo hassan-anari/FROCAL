@@ -226,7 +226,7 @@ prove VPN-off reachability on users' devices.
 
 - Baseline: 33 unit tests passed with Playwright excluded; default unit discovery was incorrect.
 - Browser review baseline: 18 passed / 14 failed; previous audit was 17 / 15.
-- Final unit suite: **65 passed, 16 files, zero failures** (`npm test`).
+- Final unit suite: **66 passed, 16 files, zero failures** (`npm test`).
 - Final browser suite: **62 passed, zero failures**, 3.2 minutes, installed system
   Chromium, both demo and authenticated mobile/desktop projects. All original 32
   scenarios retained; 28 B1 scenarios plus two informational modal scenarios added.
@@ -254,7 +254,7 @@ Billing & plans section in your settings.” The owner must resolve this GitHub 
 billing/spending restriction and rerun the existing workflow. The API connector did
 not expose annotations; the reason was verified on the public Actions job page. No
 required checks were removed, disabled or marked successful. B1 acceptance is blocked
-on hosted execution. Do not merge or start B2 while this remains unresolved.
+on hosted execution at that attempt. The final PR CI evidence supersedes this historical failure. Do not merge or start B2 without completed checks and owner approval.
 
 The existing Vercel Git integration automatically created a **branch preview** when
 this requested PR branch was published. Its status reports Deployment has completed:
@@ -281,3 +281,13 @@ because the repository did not contain a committed dependency lockfile. The init
 CI addition missed that prerequisite. A lockfile generated offline from the existing
 installed dependency tree is now committed, keeping npm ci and npm caching enabled.
 No tests or checks were weakened. The new commit's CI result supersedes that failure.
+
+
+The first offline lockfile reconstruction contained versionless placeholders for
+platform-specific optional packages from the Cloud dependency tree; npm ci rejected
+it before tests ran. The corrected lock resolves that missing metadata in an isolated
+registry-backed directory and passes a **clean npm ci** (237 installed packages).
+Every previously installed package version remains unchanged. No npm cache/check is
+disabled. Final review also added a regression preventing the official SDK's same-tab
+merge from carrying a prior account's credential into a new incomplete launch; fresh
+SDK credentials still recover. The final unit count is 66.

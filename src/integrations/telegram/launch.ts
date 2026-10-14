@@ -8,6 +8,8 @@ export interface LaunchContext {
   startParam: string | null;
 }
 
+let ignoredCachedInitData: string | null = null;
+
 function readParams(): Record<string, string> {
   // Match Telegram's official hash format, including #path?tgWebAppData=… .
   const hash = window.location.hash.slice(1);
@@ -19,6 +21,15 @@ function readParams(): Record<string, string> {
   }
   // A new launch must take precedence over the previous account's same-tab data.
   if (Object.keys(current).length) {
+    if ("tgWebAppData" in current) ignoredCachedInitData = null;
+    else {
+      // The official SDK can merge old same-tab data into a new incomplete launch.
+      // A prior account's signed credential must not authenticate that new launch.
+      try {
+        const previous = JSON.parse(sessionStorage.getItem("__telegram__initParams") ?? "null");
+        if (typeof previous?.tgWebAppData === "string") ignoredCachedInitData = previous.tgWebAppData;
+      } catch { /* no usable prior credential */ }
+    }
     // Same-tab recovery mirrors the official SDK. Never put credentials in localStorage.
     // Replace rather than merge a new launch to avoid inheriting another account's data.
     try { const serialized = JSON.stringify(current); if (sessionStorage.getItem("__telegram__initParams") !== serialized) sessionStorage.setItem("__telegram__initParams", serialized); } catch { /* storage may be disabled */ }
@@ -37,7 +48,8 @@ export function readLaunchContext(): LaunchContext {
   const params = readParams();
   const app = window.Telegram?.WebApp;
   // Explicit launch data beats any SDK snapshot left from an earlier launch.
-  const initData = (params.tgWebAppData ?? app?.initData ?? "").trim() || null;
+  const sdkInitData = app?.initData === ignoredCachedInitData ? null : app?.initData;
+  const initData = (params.tgWebAppData ?? sdkInitData ?? "").trim() || null;
   const platform = params.tgWebAppPlatform ?? app?.platform ?? "unknown";
   const nativeWindow = window as Window & { TelegramWebviewProxy?: { postEvent?: unknown }; external?: External & { notify?: unknown } };
   const nativeBridge = typeof nativeWindow.TelegramWebviewProxy?.postEvent === "function"

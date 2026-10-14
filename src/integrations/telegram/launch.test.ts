@@ -57,3 +57,12 @@ it("recognizes a native bridge hint when the SDK and launch data are missing, wi
   expect(createTelegramAdapter().getInitData()).toBeNull();
   delete nativeWindow.TelegramWebviewProxy;
 });
+it("does not inherit a prior account's SDK credential in an incomplete new launch", () => {
+  sessionStorage.setItem("__telegram__initParams", JSON.stringify({ tgWebAppData: "prior-account-signed", tgWebAppPlatform: "android" }));
+  window.Telegram = { WebApp: { initData: "prior-account-signed", platform: "android" } };
+  history.replaceState({}, "", "/#tgWebAppPlatform=ios");
+  expect(readLaunchContext()).toMatchObject({ initData: null, hasContext: true });
+  expect(launchStatus(readLaunchContext(), true)).toBe("data-missing");
+  window.Telegram.WebApp!.initData = "fresh-account-signed";
+  expect(readLaunchContext().initData).toBe("fresh-account-signed");
+});
