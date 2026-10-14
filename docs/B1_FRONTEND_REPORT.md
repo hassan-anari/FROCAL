@@ -273,3 +273,11 @@ Dalexio-Game name to `hassan-anari/FROCAL`. Both names resolve to the same immut
 repository ID `1312056109`, same PR #2, base and implementation head. No repository
 rename or visibility change was performed by this task, and the local remote remains
 unchanged. Follow-up publication uses the server-returned canonical repository name.
+
+
+Actions rerun after the owner renamed/made the same repository public: attempt 2
+of the above runs started successfully, then both jobs failed in actions/setup-node
+because the repository did not contain a committed dependency lockfile. The initial
+CI addition missed that prerequisite. A lockfile generated offline from the existing
+installed dependency tree is now committed, keeping npm ci and npm caching enabled.
+No tests or checks were weakened. The new commit's CI result supersedes that failure.
