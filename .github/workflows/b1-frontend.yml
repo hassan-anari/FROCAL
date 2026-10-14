@@ -1,14 +1,14 @@
-name: B1 frontend validation
+name: Frontend validation
 on:
   pull_request:
     branches: [main]
   push:
-    branches: ['ai/b1-frontend-*']
+    branches: ['ai/b1-frontend-*', 'ai/b2-frontend-*']
   workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: b1-frontend-${{ github.ref }}
+  group: frontend-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   unit-build:
@@ -41,8 +41,54 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b1-playwright-evidence
+          name: frontend-playwright-evidence
           path: |
             playwright-report/
             test-results/
+          retention-days: 14
+  paired-b2:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: frocal_b2_ci
+          POSTGRES_USER: b2_test
+          POSTGRES_PASSWORD: isolated-test-only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U b2_test -d frocal_b2_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      POSTGRES_DB: frocal_b2_ci
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: '5432'
+      POSTGRES_USER: b2_test
+      POSTGRES_PASSWORD: isolated-test-only
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: hassan-anari/WEDCAL
+          ref: 34328c76ba3377396660b1549bf8e370ac514a71
+          path: work/backend
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.8.22'
+      - run: uv sync --frozen --python 3.13
+        working-directory: work/backend
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run validate:contracts
+      - run: npm run test:paired
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: b2-paired-results
+          path: test-results-paired/results.json
           retention-days: 14

@@ -1,3 +1,4 @@
+import { usePlayerProgression } from "@/integrations/api/usePlayerProgression";
 import { profilePhotoUrl } from "@/integrations/api/bootstrapContract";
 import { useProfileOverview } from "@/integrations/api/useProfileOverview";
 import { isRemoteDataSource } from "@/integrations/api/bootstrap";
@@ -101,10 +102,11 @@ export function ProfilePage() {
   const [detailItem, setDetailItem] = useState<ProfileDetailItem | null>(null);
   usePauseBackgroundMotion(customizeOpen || shareOpen || detailItem !== null);
 
-  const level = remoteData ? player?.level ?? 1 : Math.max(earn.level, player?.level ?? 1);
-  const lifetimeXp = remoteData ? player?.lifetimeXp ?? 0 : Math.max(earn.lifetimeXp, player?.lifetimeXp ?? 0);
-  const levelXp = remoteData ? player?.xp ?? 0 : earn.levelXp;
-  const levelTarget = remoteData ? player?.xpToNextLevel ?? 1 : earn.xpToNextLevel;
+  const progression = usePlayerProgression();
+  const level = remoteData ? progression.level : Math.max(earn.level, player?.level ?? 1);
+  const lifetimeXp = remoteData ? progression.lifetimeXp : Math.max(earn.lifetimeXp, player?.lifetimeXp ?? 0);
+  const levelXp = remoteData ? progression.levelXp : earn.levelXp;
+  const levelTarget = remoteData ? progression.xpToNextLevel : earn.xpToNextLevel;
   const levelRatio = clampRatio(levelXp, levelTarget);
   const completedMissions = remoteData ? overview.data?.journey.claimed_missions ?? 0 : Math.max(
     1,
@@ -264,7 +266,7 @@ export function ProfilePage() {
               <div className={styles.stack}>
                 <section className={styles.identityCard}>
                   <div className={styles.identityTop}>
-                    <ProfileAvatar firstName={firstName} photoUrl={photoUrl} frameId={profile.activeFrameId} size="lg" />
+                    <ProfileAvatar owner={player?.id} firstName={firstName} photoUrl={photoUrl} frameId={profile.activeFrameId} size="lg" />
                     <div className={styles.identityCopy}>
                       <span>SEASON ONE EXPLORER</span>
                       <h2>{firstName}</h2>

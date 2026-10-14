@@ -14,25 +14,22 @@ const baseTapResultSchema = z.object({
 
 export type BaseTapResult = z.infer<typeof baseTapResultSchema>;
 
-export function createBaseTapIdempotencyKey(): string {
-  const entropy =
-    typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
-      ? crypto.randomUUID()
-      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  return `base-tap:${entropy}`.slice(0, 100);
-}
-
-export async function submitBaseTapBatch(input: {
+/** Receipt-only recovery during the verified paused v1/protocol-2 cutover.
+ * Never called for physical touches or unkeyed legacy buffers. */
+export async function recoverLegacyTapReceipt(input: {
   tapCount: number;
   initData: string;
   idempotencyKey: string;
-}): Promise<BaseTapResult> {
+  signal: AbortSignal;
+}): Promise<BaseTapResult | null> {
   if (!Number.isInteger(input.tapCount) || input.tapCount <= 0) {
     throw new Error("Base Tap batch size must be a positive integer");
   }
 
   const response = await apiRequest("/base/taps", {
     method: "POST",
+    signal: input.signal,
+    returnErrorResponse: true,
     initData: input.initData,
     headers: {
       "Content-Type": "application/json",
@@ -41,5 +38,9 @@ export async function submitBaseTapBatch(input: {
     body: JSON.stringify({ tap_count: input.tapCount }),
   });
 
-  return baseTapResultSchema.parse(await response.json());
+  if (response.status === 409) return null; // Missing/expired receipt; retain all old evidence.
+  if (!response.ok) throw new Error("Legacy receipt recovery unavailable");
+  const result = baseTapResultSchema.parse(await response.json());
+  if (result.created) throw new Error("Legacy cutover barrier changed; recovery must stop");
+  return result;
 }

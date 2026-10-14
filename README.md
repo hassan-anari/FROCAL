@@ -59,5 +59,19 @@ B1 implementation and compatibility/device gates are documented in
 For sandbox environments with a preinstalled Chromium, use
 `PLAYWRIGHT_CHROMIUM_EXECUTABLE=/usr/bin/chromium npm run test:e2e` with permission
 for the local browser/server processes. CI uses Playwright's pinned installed browser.
-Production defaults to remote API data; select `VITE_DATA_SOURCE=local` or `msw`
-explicitly for demo development. No fallback to demo follows an API error.
+Production builds require remote API data and reject mock or debug environment
+flags. Select `VITE_DATA_SOURCE=local` or `msw` with `npm run dev` for explicit
+development fixtures. Playwright uses a development fixture server alongside a
+separate remote production bundle; fixture traffic never uses the live API.
+Diagnostics and scenario controls are available only in development, including
+the fixture server. Production blocks direct Diagnostics navigation and excludes
+its module and the scenario panel from the bundle. API failures never use demo data.
+
+## B2 Tap integration
+
+Actual Tap v2 endpoint mapping, pinned backend source, durable recovery, legacy
+cutover, storage release lifecycle and operational rollout requirements are in
+[docs/B2_FRONTEND_REPORT.md](docs/B2_FRONTEND_REPORT.md). `npm run validate:contracts`
+checks the reviewed B2 source blobs. `npm run test:paired` runs real pinned Django /
+PostgreSQL integration plus the production browser game against isolated local
+services; provision a fresh test database as documented. It never uses the public API.

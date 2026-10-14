@@ -45,4 +45,11 @@ test.describe("Phase 2 game shell", () => {
     await openCompletedGame(page, "/earn");
     await expect(page.getByRole("heading", { name: "Grow your journey." })).toBeVisible();
   });
+
+  test("explicit development retains Season-badge Diagnostics and scenario fixtures", async ({ page }) => {
+    await openCompletedGame(page);
+    await page.getByRole("button", { name: "SEASON-1 Season One" }).click({ clickCount: 3 });
+    await expect(page.getByRole("heading", { name: "System diagnostics" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Role choice · L5" })).toBeVisible();
+  });
 });

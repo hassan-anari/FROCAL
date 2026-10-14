@@ -12,17 +12,17 @@ export default defineConfig({
     screenshot: "only-on-failure",
     launchOptions: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE } : {},
   },
-  // Separate bundles ensure demo and authenticated production paths both get exercised.
-  // These previews never proxy to production; B1 requests are intercepted by fixtures.
+  // Developer fixtures use Vite dev; authenticated tests use an actual release build.
+  // Neither server proxies test traffic to the shared API.
   webServer: [
     {
-      command: "npx vite build --outDir dist-demo && npx vite preview --outDir dist-demo --host 127.0.0.1 --port 4173",
-      env: { VITE_DATA_SOURCE: "local" },
+      command: "npx vite --mode test-fixtures --host 127.0.0.1 --port 4173 --strictPort",
+      env: { VITE_DATA_SOURCE: "local", VITE_ENABLE_DEV_PANEL: "false" },
       url: "http://127.0.0.1:4173", reuseExistingServer: false, timeout: 120_000,
     },
     {
       command: "npx vite build --outDir dist-contract && npx vite preview --outDir dist-contract --host 127.0.0.1 --port 4174",
-      env: { VITE_DATA_SOURCE: "remote" },
+      env: { VITE_DATA_SOURCE: "remote", VITE_ENABLE_DEV_PANEL: "false", VITE_ENABLE_ARENA_DEBUG: "false" },
       url: "http://127.0.0.1:4174", reuseExistingServer: false, timeout: 120_000,
     },
   ],

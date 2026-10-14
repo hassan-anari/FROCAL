@@ -36,6 +36,7 @@ interface ApiRequestOptions extends RequestInit {
   initData?: string | null;
   auth?: boolean;
   timeoutMs?: number;
+  returnErrorResponse?: boolean;
 }
 function safeRequestId(value: unknown): string | null {
   return typeof value === "string" && /^[A-Za-z0-9._-]{1,64}$/.test(value) ? value : null;
@@ -62,7 +63,7 @@ async function responseError(response: Response): Promise<ApiError> {
 
 export async function apiRequest(path: string, options: ApiRequestOptions = {}): Promise<Response> {
   if (!path.startsWith("/")) throw new Error("API paths must start with '/'");
-  const { initData, auth = true, timeoutMs = 12_000, headers: providedHeaders, signal, ...requestInit } = options;
+  const { initData, auth = true, timeoutMs = 12_000, returnErrorResponse = false, headers: providedHeaders, signal, ...requestInit } = options;
   const raw = (initData === undefined ? readLaunchContext().initData : initData)?.trim() ?? "";
   if (auth && !raw) throw new ApiError(0, "LAUNCH_DATA_MISSING");
   const headers = new Headers(providedHeaders);
@@ -76,7 +77,7 @@ export async function apiRequest(path: string, options: ApiRequestOptions = {}):
   const timer = window.setTimeout(() => { timedOut = true; controller.abort(); }, timeoutMs);
   try {
     const response = await fetch(`${apiBasePath}${path}`, { ...requestInit, headers, signal: controller.signal });
-    if (!response.ok) throw await responseError(response);
+    if (!response.ok && !returnErrorResponse) throw await responseError(response);
     // Include body delivery in the timeout; callers can still use json()/headers normally.
     const body = await response.arrayBuffer();
     return new Response([204, 205, 304].includes(response.status) ? null : body, { status: response.status, statusText: response.statusText, headers: response.headers });

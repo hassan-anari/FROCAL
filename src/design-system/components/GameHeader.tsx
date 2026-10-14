@@ -7,12 +7,7 @@ import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import {
-  BASE_TAP_STATE_EVENT,
-  displayedLifetime,
-  readBaseTapLocalState,
-} from "@/game/base/baseTapLocalState";
-import { progressionForLifetime } from "@/game/progression/s1Progression";
+import { useTapSession } from "@/game/base/tapV2/TapSessionProvider";
 import { isRemoteDataSource } from "@/integrations/api/bootstrap";
 import {
   loadNotifications,
@@ -21,6 +16,7 @@ import {
   type NotificationPage,
 } from "@/integrations/api/notifications";
 import { useProfileOverview } from "@/integrations/api/useProfileOverview";
+import { useAvatarSource } from "@/integrations/api/useAvatarSource";
 import { queryKeys } from "@/integrations/api/queryKeys";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
@@ -66,7 +62,7 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
   const initData = adapter.getInitData();
   const remoteData = isRemoteDataSource();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [, setTapStateVersion] = useState(0);
+  const tap = useTapSession();
   usePauseBackgroundMotion(notificationsOpen);
   const seasonTapCount = useRef(0);
   const seasonTapTimer = useRef<number | null>(null);
@@ -83,31 +79,6 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
   });
 
   const bootstrapPlayerId = bootstrap.data?.player.id ?? "pending-player";
-  const serverLifetime =
-    bootstrap.data?.player.lifetimeXp ?? profile.data?.progression.lifetime_points ?? 0;
-
-  useEffect(() => {
-    const refresh = (event?: Event) => {
-      if (event instanceof CustomEvent) {
-        const detail = event.detail as { playerId?: unknown } | null;
-        if (typeof detail?.playerId === "string" && detail.playerId !== bootstrapPlayerId) return;
-      }
-      setTapStateVersion((version) => version + 1);
-    };
-    const storage = (event: StorageEvent) => {
-      if (event.key?.includes("dalexio-base-tap-daily:")) refresh();
-    };
-    window.addEventListener(BASE_TAP_STATE_EVENT, refresh);
-    window.addEventListener("storage", storage);
-    return () => {
-      window.removeEventListener(BASE_TAP_STATE_EVENT, refresh);
-      window.removeEventListener("storage", storage);
-    };
-  }, [bootstrapPlayerId]);
-
-  const localTapState = readBaseTapLocalState(bootstrapPlayerId, serverLifetime);
-  const optimisticLifetime = displayedLifetime(serverLifetime, localTapState);
-  const optimisticProgression = progressionForLifetime(optimisticLifetime);
 
   const telegramUser = remoteData ? null : adapter.getUser();
   const identity = profile.data?.identity;
@@ -119,12 +90,13 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
   const avatar = bootstrap.data?.remote?.player.photo_url !== undefined
     ? bootstrap.data.player.avatarUrl
     : profilePhotoUrl(identity?.photo_url) ?? telegramUser?.photo_url ?? null;
+  const avatarSource = useAvatarSource(bootstrapPlayerId, avatar);
   const actualStage =
-    bootstrap.data?.dexo.stage ?? profile.data?.progression.dexo_stage ?? optimisticProgression.stage;
+    tap?.view.progression?.stage ?? bootstrap.data?.dexo.stage ?? profile.data?.progression.dexo_stage ?? "newborn";
   const stageLabel = actualStage ? actualStage.toUpperCase() : "—";
   const level = remoteData
-    ? (optimisticLifetime > serverLifetime ? optimisticProgression.level : bootstrap.data?.player.level ?? profile.data?.progression.level ?? 1)
-    : bootstrap.data?.player.level ?? optimisticProgression.level;
+    ? (tap?.view.progression?.level ?? bootstrap.data?.player.level ?? profile.data?.progression.level ?? 1)
+    : bootstrap.data?.player.level ?? 1;
   const initials = displayName.trim().slice(0, 1).toUpperCase() || "D";
   const season = bootstrap.data?.season;
   const seasonCode = season ? seasonBadge(season.id) : "S—";
@@ -149,6 +121,7 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
   };
 
   const handleSeasonTap = () => {
+    if (!import.meta.env.DEV) return;
     seasonTapCount.current += 1;
     if (seasonTapTimer.current !== null) window.clearTimeout(seasonTapTimer.current);
 
@@ -209,7 +182,7 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
     <>
       <header className={`${styles.header} ${compact ? styles.compact : ""}`}>
         <div className={styles.identity}>
-          {avatar ? <img src={avatar} alt="" /> : <span className={styles.avatarFallback}>{initials}</span>}
+          {avatarSource.src ? <img src={avatarSource.src} onError={avatarSource.onError} referrerPolicy="no-referrer" alt="" /> : <span className={styles.avatarFallback}>{initials}</span>}
           <div>
             <span>{stageLabel}</span>
             <strong>{displayName}</strong>
@@ -219,7 +192,7 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
         <button
           type="button"
           className={styles.seasonControl}
-          onClick={handleSeasonTap}
+          onClick={import.meta.env.DEV ? handleSeasonTap : undefined}
           aria-label={`${seasonCode} ${seasonTitle}`}
         >
           <span>{seasonCode}</span>

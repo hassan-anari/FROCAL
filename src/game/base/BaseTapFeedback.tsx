@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import styles from "./BaseTapFeedback.module.css";
 
 interface BaseTapFeedbackProps {
@@ -18,9 +18,9 @@ function xOffset(id: number): number {
 export function BaseTapFeedback({ tapCount }: BaseTapFeedbackProps) {
   const [bursts, setBursts] = useState<TapBurst[]>([]);
   const previousCountRef = useRef(0);
-  const timersRef = useRef<number[]>([]);
+  const timersRef = useRef(new Map<number, number>());
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const previous = previousCountRef.current;
     previousCountRef.current = tapCount;
     if (tapCount <= previous) return;
@@ -33,16 +33,17 @@ export function BaseTapFeedback({ tapCount }: BaseTapFeedbackProps) {
 
     additions.forEach((burst) => {
       const timer = window.setTimeout(() => {
+        timersRef.current.delete(burst.id);
         setBursts((current) => current.filter((item) => item.id !== burst.id));
       }, 900);
-      timersRef.current.push(timer);
+      timersRef.current.set(burst.id, timer);
     });
   }, [tapCount]);
 
   useEffect(
     () => () => {
       timersRef.current.forEach((timer) => window.clearTimeout(timer));
-      timersRef.current = [];
+      timersRef.current.clear();
     },
     [],
   );

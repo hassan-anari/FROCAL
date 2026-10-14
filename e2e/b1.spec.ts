@@ -169,6 +169,37 @@ test("reviewed Arena availability retains the approved locked S2 preview", async
   await expect(page.getByRole("button", { name: /Deploy attack|Find target/i })).toHaveCount(0);
 });
 
+test("production Season badge cannot open Diagnostics or enable public debug controls", async ({ page }) => {
+  await mockApi(page);
+  await page.goto(launch("/profile?arenaDebug=1&VITE_ENABLE_DEV_PANEL=true&VITE_DATA_SOURCE=local"));
+  await expect(page.getByRole("heading", { name: "Verified" })).toBeVisible();
+  const badge = page.getByRole("button", { name: "SEASON-1 Season One" });
+  await expect(badge).toBeVisible();
+  await badge.click({ clickCount: 3 });
+  await expect(page).toHaveURL(/\/profile\?/);
+  await expect(page.getByRole("heading", { name: "System diagnostics" })).toHaveCount(0);
+  await expect(page.getByRole("complementary", { name: "Development scenario controls" })).toHaveCount(0);
+  await expect(page.getByRole("complementary", { name: "Arena debug controls" })).toHaveCount(0);
+  expect(await page.evaluate(() => sessionStorage.getItem("dalexio-diagnostics-return-path"))).toBeNull();
+});
+
+test("production rejects direct Diagnostics navigation with and without Telegram context", async ({ page }) => {
+  const requests: string[] = [];
+  page.on("request", (request) => requests.push(request.url()));
+  await mockApi(page);
+  await page.goto(launch("/diagnostics?arenaDebug=1"));
+  await expect.poll(() => new URL(page.url()).pathname).toBe("/");
+  await expect(page.getByRole("button", { name: "Enter Dexo Land" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "System diagnostics" })).toHaveCount(0);
+  const browser = await page.context().newPage();
+  await mockApi(browser);
+  await browser.goto("/diagnostics");
+  await expect(browser).toHaveURL(/\/$/);
+  await expect(browser.locator('[data-initial-state="NO_TELEGRAM_CONTEXT"]')).toBeVisible();
+  await browser.close();
+  expect(requests.some((url) => /DiagnosticsPage|DevScenarioPanel|mocks\/browser/.test(url))).toBe(false);
+});
+
 for (const code of ["AUTH_UNAVAILABLE", "INITIALIZATION_UNAVAILABLE"]) {
   test(`reviewed ${code} is retryable service failure without credential renewal or raw details`, async ({ page }) => {
     let recover = false;

@@ -32,5 +32,5 @@ export const scenarioOptions: Array<{ id: ScenarioId; label: string }> = [
 
 export const useScenarioStore = create<ScenarioState>((set) => ({
   activeScenario: "new-user",
-  setScenario: (activeScenario) => set({ activeScenario }),
+  setScenario: (activeScenario) => { if (import.meta.env.DEV) set({ activeScenario }); },
 }));

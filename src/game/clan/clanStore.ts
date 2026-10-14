@@ -103,6 +103,7 @@ export const useClanStore = create<ClanState>()(
       },
 
       rejectCurrentJoinForDiagnostics: () => {
+        if (!import.meta.env.DEV) return;
         if (get().joinRequestState !== "pending") return;
         set({
           membership: "none",
@@ -111,6 +112,7 @@ export const useClanStore = create<ClanState>()(
       },
 
       acceptCurrentJoinForDiagnostics: () => {
+        if (!import.meta.env.DEV) return;
         const state = get();
         if (state.role !== "soldier") return;
         const clanId = state.joinRequestClanId ?? "nova-vanguard";
@@ -165,12 +167,12 @@ export const useClanStore = create<ClanState>()(
         applicants: state.applicants.map((applicant) => applicant.id === id ? { ...applicant, status: "rejected" } : applicant),
       })),
 
-      setSoldierDiscoveryForDiagnostics: () => set({
+      setSoldierDiscoveryForDiagnostics: () => import.meta.env.DEV && set({
         ...initialState,
         role: "soldier",
       }),
 
-      setSoldierPendingForDiagnostics: () => set({
+      setSoldierPendingForDiagnostics: () => import.meta.env.DEV && set({
         ...initialState,
         role: "soldier",
         membership: "pending",
@@ -178,14 +180,14 @@ export const useClanStore = create<ClanState>()(
         joinRequestState: "pending",
       }),
 
-      setSoldierMemberForDiagnostics: () => set({
+      setSoldierMemberForDiagnostics: () => import.meta.env.DEV && set({
         ...initialState,
         role: "soldier",
         membership: "member",
         activeClanId: "nova-vanguard",
       }),
 
-      setCaptainHeadquartersForDiagnostics: () => set({
+      setCaptainHeadquartersForDiagnostics: () => import.meta.env.DEV && set({
         ...initialState,
         role: "captain",
         membership: "member",

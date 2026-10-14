@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "motion/react";
-import { type CSSProperties, useRef } from "react";
+import { type CSSProperties, useEffect, useRef } from "react";
+import { PhysicalPointers } from "@/game/base/physicalPointers";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
 import { AssetImage } from "./AssetImage";
 import type { AssetKey } from "@/assets/registry";
@@ -16,6 +17,8 @@ interface DexoStageProps {
   characterScale?: number;
   showParticles?: boolean;
   showPlatform?: boolean;
+  baseCharacter?: AssetKey;
+  baseCharacterScale?: number;
 }
 
 const sparks = Array.from({ length: 7 }, (_, index) => index);
@@ -31,17 +34,31 @@ export function DexoStage({
   characterScale = 1,
   showParticles,
   showPlatform = true,
+  baseCharacter,
+  baseCharacterScale,
 }: DexoStageProps) {
   const shouldShowParticles = showParticles ?? effect === "acquired";
+  const pointers = useRef(new PhysicalPointers());
+  useEffect(() => {
+    const reset = () => pointers.current.reset();
+    const hidden = () => { if (document.hidden) reset(); };
+    window.addEventListener("blur", reset);
+    document.addEventListener("visibilitychange", hidden);
+    return () => {
+      window.removeEventListener("blur", reset);
+      document.removeEventListener("visibilitychange", hidden);
+      reset();
+    };
+  }, []);
   const stableBaseCharacter = useRef(character);
   const stableBaseScale = useRef(characterScale);
   const personalitySwap = character.startsWith("dexo.personality");
 
   // Keep the reaction system/assets intact, but suppress personality swaps on Base for now.
   // Real level/stage asset changes are still allowed through immediately.
-  if (effect !== "base" || !personalitySwap) {
-    stableBaseCharacter.current = character;
-    stableBaseScale.current = characterScale;
+  if (baseCharacter || effect !== "base" || !personalitySwap) {
+    stableBaseCharacter.current = baseCharacter ?? character;
+    stableBaseScale.current = baseCharacterScale ?? characterScale;
   }
 
   const renderedCharacter =
@@ -81,8 +98,13 @@ export function DexoStage({
             onPointerDown={
               multiTouch
                 ? (event) => {
-                    if (event.pointerType === "mouse" && event.button !== 0) return;
                     event.preventDefault();
+                    const native = event.nativeEvent as PointerEvent & { sourceCapabilities?: { firesTouchEvents?: boolean } };
+                    if (!pointers.current.down({
+                      pointerId: event.pointerId, pointerType: event.pointerType, button: event.button,
+                      isTrusted: native.isTrusted, emulatedMouse: native.sourceCapabilities?.firesTouchEvents,
+                    })) return;
+                    event.currentTarget.setPointerCapture(event.pointerId);
                     onPress?.();
                   }
                 : undefined
@@ -90,12 +112,14 @@ export function DexoStage({
             onClick={
               multiTouch
                 ? (event) => {
-                    // Keyboard activation has detail=0. Pointer input is handled on pointerdown so
-                    // touch/mouse clicks do not double-count.
-                    if (event.detail === 0) onPress?.();
+                    // Economic interaction accepts physical pointerdowns only.
+                    event.preventDefault();
                   }
                 : onPress
             }
+            onPointerUp={multiTouch ? (event) => pointers.current.up(event.pointerId) : undefined}
+            onPointerCancel={multiTouch ? (event) => pointers.current.up(event.pointerId) : undefined}
+            onLostPointerCapture={multiTouch ? (event) => pointers.current.up(event.pointerId) : undefined}
             aria-label={ariaLabel}
           >
             {characterLayer}

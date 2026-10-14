@@ -5,12 +5,14 @@ interface BaseTapCooldownIndicatorProps {
   cooldownCycle: number;
   cooldownMs: number;
   isCoolingDown: boolean;
+  remainingMs?: number;
 }
 
 export function BaseTapCooldownIndicator({
   cooldownCycle,
   cooldownMs,
   isCoolingDown,
+  remainingMs,
 }: BaseTapCooldownIndicatorProps) {
   return (
     <span
@@ -28,9 +30,9 @@ export function BaseTapCooldownIndicator({
             cy="12"
             r="9"
             pathLength="1"
-            initial={{ pathLength: 0 }}
+            initial={{ pathLength: remainingMs === undefined || cooldownMs <= 0 ? 0 : Math.max(0, 1 - remainingMs / cooldownMs) }}
             animate={{ pathLength: 1 }}
-            transition={{ duration: cooldownMs / 1000, ease: "linear" }}
+            transition={{ duration: (remainingMs ?? cooldownMs) / 1000, ease: "linear" }}
           />
         ) : (
           <circle className={styles.progress} cx="12" cy="12" r="9" pathLength="1" />

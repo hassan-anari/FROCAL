@@ -32,7 +32,8 @@
   ],
   "git": {
     "deploymentEnabled": {
-      "ai/b1-frontend-foundation": false
+      "ai/b1-frontend-foundation": false,
+      "ai/b2-frontend-instant-tap": false
     }
   }
 }
