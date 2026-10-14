@@ -42,7 +42,7 @@ import { clanCatalog, clanShopItems, getClanById } from "@/game/clan/clanCatalog
 import { useClanStore } from "@/game/clan/clanStore";
 import type { ClanInventoryItem, ClanSummary, CreatedClan } from "@/game/clan/types";
 import { getIdentityHue, getIdentityInitials } from "@/game/clan/clanVisuals";
-import { useEarnStore } from "@/game/earn/earnStore";
+import { usePlayerProgression } from "@/integrations/api/usePlayerProgression";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import styles from "./ArenaPage.module.css";
 
@@ -518,7 +518,7 @@ function Rankings({ mode, onMode, rankedClans, ownClan, level, currentName, curr
 export function ArenaPage() {
   const arena = useArenaWarStore();
   const clan = useClanStore();
-  const level = useEarnStore((state) => state.level);
+  const { level: level } = usePlayerProgression();
   const { adapter } = useTelegram();
   const [rankingMode, setRankingMode] = useState<ArenaRankingMode>("players");
   const [seasonOneSection, setSeasonOneSection] = useState<SeasonOneSection>("warfront");

@@ -1,3 +1,4 @@
+import { usePlayerProgression } from "@/integrations/api/usePlayerProgression";
 import {
   ArrowRight01Icon,
   InformationCircleIcon,
@@ -114,6 +115,7 @@ function initials(name: string): string {
 }
 
 export function EarnPage() {
+  const playerProgression = usePlayerProgression();
   const navigate = useNavigate();
   const { adapter } = useTelegram();
   const earn = useEarnStore();
@@ -130,7 +132,7 @@ export function EarnPage() {
   const claimedMissions = Object.values(earn.missions).filter((mission) => mission.status === "claimed").length;
   const activeMissions = Object.values(earn.missions).filter((mission) => mission.status !== "claimed");
   const completedMissions = Object.values(earn.missions).filter((mission) => mission.status === "claimed");
-  const levelProgress = Math.min(100, Math.round((earn.levelXp / earn.xpToNextLevel) * 100));
+  const levelProgress = Math.min(100, Math.round((playerProgression.levelXp / playerProgression.xpToNextLevel) * 100));
   const typingToday = getTypingAttemptsToday(earn.typingAttemptDate, earn.typingAttempts);
   const typingRemaining = getTypingAttemptsRemaining(earn.typingAttemptDate, earn.typingAttempts);
   const telegramUser = adapter.getUser();
@@ -350,7 +352,7 @@ export function EarnPage() {
                   </header>
                   <div className={styles.pathMeta}><span>Complete all starter missions</span><strong>{pathProgress}%</strong></div>
                   <div className={styles.pathTrack}><motion.i animate={{ scaleX: pathProgress / 100 }} initial={false} style={{ transformOrigin: "0 50%" }} transition={mobileMotion.reveal} /></div>
-                  <div className={styles.levelMeta}><span>Level {earn.level} progress</span><strong>{earn.levelXp} / {earn.xpToNextLevel} XP</strong></div>
+                  <div className={styles.levelMeta}><span>Level {playerProgression.level} progress</span><strong>{playerProgression.levelXp} / {playerProgression.xpToNextLevel} XP</strong></div>
                   <div className={styles.levelTrack}><motion.i animate={{ scaleX: levelProgress / 100 }} initial={false} style={{ transformOrigin: "0 50%" }} transition={mobileMotion.reveal} /></div>
                 </section>
 
@@ -539,7 +541,7 @@ export function EarnPage() {
         <DeferredMount minHeight={90}>
           <section className={styles.sharedStats} aria-label="Earn summary">
             <div><span>Daily streak</span><strong>{earn.streak || 0}d</strong></div>
-            <div><span>Lifetime XP</span><strong>{formatNumber(earn.lifetimeXp)}</strong></div>
+            <div><span>Lifetime XP</span><strong>{formatNumber(playerProgression.lifetimeXp)}</strong></div>
             <div><span>Referrals</span><strong>{earn.referralCount}</strong></div>
             <div><span>Active groups</span><strong>{earn.activeGroups}</strong></div>
           </section>

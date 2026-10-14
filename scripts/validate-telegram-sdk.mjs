@@ -1,0 +1,10 @@
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
+const path = "public/vendor/telegram/telegram-web-app-124bdff7.js";
+const bytes = readFileSync(path);
+const hash = createHash("sha256").update(bytes).digest("hex");
+if (hash !== "124bdff7ba3fe86c8ba5143467afec21e020405e74abdb92cfdda6c0ee3b5908") throw new Error("Official SDK snapshot changed; review and repin it");
+const integrity = `sha256-${createHash("sha256").update(bytes).digest("base64")}`;
+const html = readFileSync("index.html", "utf8");
+if (!html.includes(integrity) || html.includes('src="https://telegram.org')) throw new Error("SDK source/SRI pin drifted");
+console.log(`Official SDK hash/SRI verified: ${hash}`);

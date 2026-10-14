@@ -58,6 +58,9 @@ function OverlayFrame({ eyebrow, title, onClose, children, footer }: OverlayFram
   closeRef.current = onClose;
 
   useEffect(() => {
+    const appRoot = document.getElementById("root");
+    const previousInert = appRoot?.inert ?? false;
+    if (appRoot) appRoot.inert = true;
     const scrollRoot = document.querySelector<HTMLElement>("[data-game-scroll]");
     const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const scrollTop = scrollRoot?.scrollTop ?? 0;
@@ -108,6 +111,7 @@ function OverlayFrame({ eyebrow, title, onClose, children, footer }: OverlayFram
       window.clearTimeout(lockTimer);
       window.clearTimeout(focusTimer);
       document.removeEventListener("keydown", handleKeyDown);
+      if (appRoot) appRoot.inert = previousInert;
       if (scrollRoot) {
         scrollRoot.style.overflow = previousOverflow;
         scrollRoot.style.touchAction = previousTouchAction;

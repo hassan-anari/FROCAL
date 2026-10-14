@@ -1,10 +1,12 @@
+import { useProfileOverview } from "@/integrations/api/useProfileOverview";
+import { isRemoteDataSource } from "@/integrations/api/bootstrap";
+import { useBootstrap } from "@/integrations/api/BootstrapProvider";
 import {
   ArrowRight01Icon,
   UserCircleIcon,
   Wallet01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 import { preloadAssets } from "@/assets/preload";
@@ -41,9 +43,6 @@ import type {
   ProfileTab,
   TitleId,
 } from "@/game/profile/types";
-import { useScenarioStore } from "@/game/scenarios/scenarioStore";
-import { loadBootstrap } from "@/integrations/api/bootstrap";
-import { queryKeys } from "@/integrations/api/queryKeys";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import styles from "./ProfilePage.module.css";
 
@@ -74,17 +73,15 @@ function clampRatio(current: number, target: number): number {
 }
 
 export function ProfilePage() {
-  const scenario = useScenarioStore((state) => state.activeScenario);
   const { adapter } = useTelegram();
-  const bootstrap = useQuery({
-    queryKey: queryKeys.bootstrap(scenario),
-    queryFn: () => loadBootstrap(scenario, adapter.platform),
-  });
+  const { bootstrap } = useBootstrap();
   const player = bootstrap.data?.player;
-  const telegramUser = adapter.getUser();
+  const overview = useProfileOverview();
+  const remoteData = isRemoteDataSource();
+  const telegramUser = remoteData ? null : adapter.getUser();
   const firstName = telegramUser?.first_name ?? player?.firstName ?? "Explorer";
   const username = telegramUser?.username ?? player?.telegramUsername ?? null;
-  const photoUrl = telegramUser?.photo_url ?? player?.avatarUrl ?? null;
+  const photoUrl = remoteData ? overview.data?.identity.photo_url || player?.avatarUrl || null : telegramUser?.photo_url ?? player?.avatarUrl ?? null;
 
   const earn = useEarnStore();
   const profile = useProfileStore();
@@ -99,15 +96,17 @@ export function ProfilePage() {
   const [detailItem, setDetailItem] = useState<ProfileDetailItem | null>(null);
   usePauseBackgroundMotion(customizeOpen || shareOpen || detailItem !== null);
 
-  const level = Math.max(earn.level, player?.level ?? 1);
-  const lifetimeXp = Math.max(earn.lifetimeXp, player?.xp ?? 0);
-  const levelRatio = clampRatio(earn.levelXp, earn.xpToNextLevel);
-  const completedMissions = Math.max(
+  const level = remoteData ? player?.level ?? 1 : Math.max(earn.level, player?.level ?? 1);
+  const lifetimeXp = remoteData ? player?.lifetimeXp ?? 0 : Math.max(earn.lifetimeXp, player?.lifetimeXp ?? 0);
+  const levelXp = remoteData ? player?.xp ?? 0 : earn.levelXp;
+  const levelTarget = remoteData ? player?.xpToNextLevel ?? 1 : earn.xpToNextLevel;
+  const levelRatio = clampRatio(levelXp, levelTarget);
+  const completedMissions = remoteData ? overview.data?.journey.claimed_missions ?? 0 : Math.max(
     1,
     Object.values(earn.missions).filter((mission) => mission.status === "completed" || mission.status === "claimed").length,
   );
-  const displayStreak = Math.max(earn.streak, profile.achievementProgress["seven-day-streak"].current);
-  const verifiedReferrals = Math.max(earn.verifiedReferrals, profile.achievementProgress["first-referral"].current);
+  const displayStreak = remoteData ? overview.data?.journey.current_daily_streak ?? bootstrap.data?.remote?.daily?.streak ?? 0 : Math.max(earn.streak, profile.achievementProgress["seven-day-streak"].current);
+  const verifiedReferrals = remoteData ? overview.data?.journey.verified_referrals ?? bootstrap.data?.remote?.referral?.verified_invites ?? 0 : Math.max(earn.verifiedReferrals, profile.achievementProgress["first-referral"].current);
   const activeFrame = frameById[profile.activeFrameId];
   const activeTitle = titleById[profile.activeTitleId];
   const featuredMedal = profile.featuredMedalId ? medalById[profile.featuredMedalId] : null;
@@ -122,7 +121,7 @@ export function ProfilePage() {
   }, [activeFrame.asset]);
 
   useEffect(() => {
-    if (earn.missions["complete-profile"].status !== "in-progress") return;
+    if (remoteData || earn.missions["complete-profile"].status !== "in-progress") return;
     let timer: number | null = null;
     let idleHandle: number | null = null;
     const complete = () => earn.completeMission("complete-profile");
@@ -132,7 +131,7 @@ export function ProfilePage() {
       if (idleHandle !== null && typeof window.cancelIdleCallback === "function") window.cancelIdleCallback(idleHandle);
       if (timer !== null) window.clearTimeout(timer);
     };
-  }, [earn.completeMission, earn.missions]);
+  }, [earn.completeMission, earn.missions, remoteData]);
 
   const filteredAchievements = useMemo(
     () => achievementDefinitions.filter((achievement) => achievementFilter === "all" || achievement.category === achievementFilter),
@@ -270,7 +269,7 @@ export function ProfilePage() {
                   </div>
 
                   <div className={styles.levelRow}>
-                    <div><span>LEVEL {level}</span><strong>{earn.levelXp.toLocaleString()} / {earn.xpToNextLevel.toLocaleString()} XP</strong></div>
+                    <div><span>LEVEL {level}</span><strong>{levelXp.toLocaleString()} / {levelTarget.toLocaleString()} XP</strong></div>
                     <div className={styles.levelTrack}><i style={{ transform: `scaleX(${levelRatio})` }} /></div>
                   </div>
 

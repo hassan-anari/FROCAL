@@ -1,3 +1,4 @@
+import { useBootstrap } from "@/integrations/api/BootstrapProvider";
 import { ArrowRight01Icon, Notification03Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -11,15 +12,14 @@ import {
   readBaseTapLocalState,
 } from "@/game/base/baseTapLocalState";
 import { progressionForLifetime } from "@/game/progression/s1Progression";
-import { useScenarioStore } from "@/game/scenarios/scenarioStore";
-import { isRemoteDataSource, loadBootstrap } from "@/integrations/api/bootstrap";
+import { isRemoteDataSource } from "@/integrations/api/bootstrap";
 import {
   loadNotifications,
   markNotificationRead,
   type LiveNotification,
   type NotificationPage,
 } from "@/integrations/api/notifications";
-import { loadProfileOverview } from "@/integrations/api/profile";
+import { useProfileOverview } from "@/integrations/api/useProfileOverview";
 import { queryKeys } from "@/integrations/api/queryKeys";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
@@ -61,7 +61,6 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
-  const scenario = useScenarioStore((state) => state.activeScenario);
   const { adapter } = useTelegram();
   const initData = adapter.getInitData();
   const remoteData = isRemoteDataSource();
@@ -71,29 +70,20 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
   const seasonTapCount = useRef(0);
   const seasonTapTimer = useRef<number | null>(null);
 
-  const bootstrap = useQuery({
-    queryKey: queryKeys.bootstrap(scenario),
-    queryFn: () => loadBootstrap(scenario, adapter.platform, initData),
-    enabled: !remoteData || Boolean(initData),
-  });
+  const { bootstrap, scope } = useBootstrap();
 
-  const profile = useQuery({
-    queryKey: queryKeys.profileOverview,
-    queryFn: () => loadProfileOverview(initData),
-    enabled: remoteData && adapter.isTelegram && Boolean(initData),
-    staleTime: 30_000,
-  });
+  const profile = useProfileOverview();
 
   const notifications = useQuery({
-    queryKey: queryKeys.notifications,
+    queryKey: queryKeys.notifications(scope),
     queryFn: () => loadNotifications(initData),
-    enabled: remoteData && adapter.isTelegram && Boolean(initData),
+    enabled: remoteData && adapter.isTelegram && Boolean(initData) && scope.player !== "unverified",
     staleTime: 15_000,
   });
 
   const bootstrapPlayerId = bootstrap.data?.player.id ?? "pending-player";
   const serverLifetime =
-    profile.data?.progression.lifetime_points ?? bootstrap.data?.player.lifetimeXp ?? 0;
+    bootstrap.data?.player.lifetimeXp ?? profile.data?.progression.lifetime_points ?? 0;
 
   useEffect(() => {
     const refresh = (event?: Event) => {
@@ -118,7 +108,7 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
   const optimisticLifetime = displayedLifetime(serverLifetime, localTapState);
   const optimisticProgression = progressionForLifetime(optimisticLifetime);
 
-  const telegramUser = adapter.getUser();
+  const telegramUser = remoteData ? null : adapter.getUser();
   const identity = profile.data?.identity;
   const displayName =
     [identity?.first_name, identity?.last_name].filter(Boolean).join(" ").trim() ||
@@ -127,10 +117,10 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
     "—";
   const avatar = identity?.photo_url || telegramUser?.photo_url || null;
   const actualStage =
-    profile.data?.progression.dexo_stage ?? bootstrap.data?.dexo.stage ?? optimisticProgression.stage;
+    bootstrap.data?.dexo.stage ?? profile.data?.progression.dexo_stage ?? optimisticProgression.stage;
   const stageLabel = actualStage ? actualStage.toUpperCase() : "—";
   const level = remoteData
-    ? optimisticProgression.level
+    ? (optimisticLifetime > serverLifetime ? optimisticProgression.level : bootstrap.data?.player.level ?? profile.data?.progression.level ?? 1)
     : bootstrap.data?.player.level ?? optimisticProgression.level;
   const initials = displayName.trim().slice(0, 1).toUpperCase() || "D";
   const season = bootstrap.data?.season;
@@ -178,13 +168,13 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
   };
 
   const updateNotificationCache = (updater: (item: LiveNotification) => LiveNotification) => {
-    queryClient.setQueryData<NotificationPage>(queryKeys.notifications, (current) =>
+    queryClient.setQueryData<NotificationPage>(queryKeys.notifications(scope), (current) =>
       current ? { ...current, items: current.items.map(updater) } : current,
     );
   };
 
   const markRead = async (id: string) => {
-    const previous = queryClient.getQueryData<NotificationPage>(queryKeys.notifications);
+    const previous = queryClient.getQueryData<NotificationPage>(queryKeys.notifications(scope));
     updateNotificationCache((item) =>
       item.id === id ? { ...item, unread: false, read_at: item.read_at ?? new Date().toISOString() } : item,
     );
@@ -192,14 +182,14 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
     try {
       await markNotificationRead(initData, id);
     } catch {
-      if (previous) queryClient.setQueryData(queryKeys.notifications, previous);
+      if (previous) queryClient.setQueryData(queryKeys.notifications(scope), previous);
     }
   };
 
   const markAllRead = async () => {
     const unread = notificationItems.filter((item) => item.unread);
     if (unread.length === 0) return;
-    const previous = queryClient.getQueryData<NotificationPage>(queryKeys.notifications);
+    const previous = queryClient.getQueryData<NotificationPage>(queryKeys.notifications(scope));
     updateNotificationCache((item) =>
       item.unread ? { ...item, unread: false, read_at: item.read_at ?? new Date().toISOString() } : item,
     );
@@ -208,7 +198,7 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
       unread.map((item) => markNotificationRead(initData, item.id)),
     );
     if (results.some((result) => result.status === "rejected") && previous) {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.notifications });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.notifications(scope) });
     }
   };
 

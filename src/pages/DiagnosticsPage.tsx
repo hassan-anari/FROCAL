@@ -1,6 +1,6 @@
+import { useBootstrap } from "@/integrations/api/BootstrapProvider";
 import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
 import { StatusChip } from "@/design-system/primitives/StatusChip";
 import { Button } from "@/design-system/primitives/Button";
 import {
@@ -19,8 +19,6 @@ import { useProfileStore } from "@/game/profile/profileStore";
 import { useClanStore } from "@/game/clan/clanStore";
 import { useArenaWarStore } from "@/game/arena/arenaStore";
 import type { ArenaHubSection, ArenaWarResult, ArenaWarStatus } from "@/game/arena/types";
-import { loadBootstrap } from "@/integrations/api/bootstrap";
-import { queryKeys } from "@/integrations/api/queryKeys";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import styles from "./DiagnosticsPage.module.css";
 
@@ -40,12 +38,9 @@ export function DiagnosticsPage() {
   const profile = useProfileStore();
   const clan = useClanStore();
   const arena = useArenaWarStore();
-  const { adapter, colorScheme, stableHeight, insets, isFullscreen, isMobileClient } = useTelegram();
+  const { adapter, colorScheme, stableHeight, insets, isFullscreen, isMobileClient, launchState } = useTelegram();
   const [perfSnapshot, setPerfSnapshot] = useState<MobilePerfSnapshot>(() => getMobilePerformanceSnapshot());
-  const bootstrap = useQuery({
-    queryKey: queryKeys.bootstrap(scenario),
-    queryFn: () => loadBootstrap(scenario, adapter.platform),
-  });
+  const { bootstrap } = useBootstrap();
 
   useEffect(() => {
     const returnPath = (sessionStorage.getItem(returnPathKey) ?? "/base") as ReturnPath;
@@ -392,8 +387,10 @@ export function DiagnosticsPage() {
             <div><dt>Stable height</dt><dd>{Math.round(stableHeight)}px</dd></div>
             <div><dt>Fullscreen</dt><dd>{isFullscreen ? "yes" : "no"}</dd></div>
             <div><dt>Layout policy</dt><dd>{isMobileClient ? "mobile fullscreen" : "desktop native fullsize"}</dd></div>
-            <div><dt>User</dt><dd>{adapter.getUser()?.first_name ?? "browser"}</dd></div>
-            <div><dt>Start param</dt><dd>{adapter.getStartParam() ?? "—"}</dd></div>
+            <div><dt>Launch state</dt><dd>{launchState}</dd></div>
+            <div><dt>SDK asset</dt><dd>{document.documentElement.dataset.telegramSdk ?? "unknown"}</dd></div>
+            <div><dt>Signed credentials</dt><dd>{adapter.getInitData() ? "present (server verification required)" : "missing"}</dd></div>
+            <div><dt>Start param</dt><dd>{adapter.getStartParam() ? "present" : "absent"}</dd></div>
           </dl>
         </article>
 

@@ -44,3 +44,20 @@ Phase 4 closure: Profile & Identity is approved. Next major module: Inventory.
 Next module clarification: **Clan** is next. Inventory is embedded inside Clan Headquarters. Level 5 unlocks a permanent Captain/Soldier choice; Soldier uses Leaderboard/Search/Suggestions + one join request, Captain creates/manages the clan, and accepted members move into Headquarters. Group Tasks and Individual Tasks are separate UI categories. Backend/economy logic remains mocked for frontend development.
 
 Build correction: Phase 5.0.1 fixes the Clan applicant readonly/mutable TypeScript assignment reported by Vercel. No UI changes.
+
+## B1 integration validation
+
+B1 implementation and compatibility/device gates are documented in
+[docs/B1_FRONTEND_REPORT.md](docs/B1_FRONTEND_REPORT.md).
+
+- `npm test`: unit tests only.
+- `npm run test:e2e`: independent Playwright suites, including local demo and fully
+  intercepted authenticated API fixtures; no production API/reward calls.
+- `npm run validate:telegram-sdk`: verify official SDK snapshot and SRI pin.
+- `npm run check`: validators, full TypeScript, unit tests and production build.
+
+For sandbox environments with a preinstalled Chromium, use
+`PLAYWRIGHT_CHROMIUM_EXECUTABLE=/usr/bin/chromium npm run test:e2e` with permission
+for the local browser/server processes. CI uses Playwright's pinned installed browser.
+Production defaults to remote API data; select `VITE_DATA_SOURCE=local` or `msw`
+explicitly for demo development. No fallback to demo follows an API error.

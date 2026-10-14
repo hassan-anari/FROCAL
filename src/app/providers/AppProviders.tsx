@@ -2,6 +2,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { MotionConfig } from "motion/react";
 import { useEffect, useState, type ReactNode } from "react";
 import { TelegramProvider } from "@/integrations/telegram/TelegramProvider";
+import { BootstrapProvider } from "@/integrations/api/BootstrapProvider";
 import { createAppQueryClient } from "./queryClient";
 
 export function AppProviders({ children }: { children: ReactNode }) {
@@ -19,7 +20,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <MotionConfig reducedMotion="user" transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}>
       <QueryClientProvider client={queryClient}>
-        <TelegramProvider>{children}</TelegramProvider>
+        <TelegramProvider><BootstrapProvider>{children}</BootstrapProvider></TelegramProvider>
       </QueryClientProvider>
     </MotionConfig>
   );

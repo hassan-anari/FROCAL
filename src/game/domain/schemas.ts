@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { remoteBootstrapSchema } from "@/integrations/api/bootstrapContract";
 
 export const userProfileSchema = z.object({
   id: z.string(),
@@ -22,6 +23,7 @@ export const dexoProgressionSchema = z.object({
 });
 
 export const bootstrapPayloadSchema = z.object({
+  remote: remoteBootstrapSchema.optional(),
   requestId: z.string(),
   serverTime: z.string().datetime(),
   environment: z.enum(["browser", "telegram"]),

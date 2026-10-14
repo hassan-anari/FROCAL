@@ -44,7 +44,7 @@ import type {
   TaskFilter,
 } from "@/game/clan/types";
 import { clanRoleArt, getClanEmblemAssetKey, getClanHqStateAssetKey, getClanRoomAssetKey, getIdentityHue, getIdentityInitials } from "@/game/clan/clanVisuals";
-import { useEarnStore } from "@/game/earn/earnStore";
+import { usePlayerProgression } from "@/integrations/api/usePlayerProgression";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import styles from "./ClanPage.module.css";
 
@@ -872,7 +872,7 @@ function Headquarters({
 }
 
 export function ClanPage() {
-  const earnLevel = useEarnStore((state) => state.level);
+  const { level: earnLevel } = usePlayerProgression();
   const clan = useClanStore();
   const { adapter } = useTelegram();
   const [overlay, setOverlay] = useState<OverlayState>(null);

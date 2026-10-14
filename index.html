@@ -8,7 +8,9 @@
     <meta name="description" content="Dexo Land — Dalexio Telegram Mini App" />
     <link rel="icon" href="/assets/brand/dalexio-logo.svg" />
     <title>Dexo Land</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="/vendor/telegram/telegram-web-app-124bdff7.js" integrity="sha256-Ekvf97o/6GyLpRQ0Z6/sIeAgQF50q9uSz92mwO47WQg=" crossorigin="anonymous"
+      onload="document.documentElement.dataset.telegramSdk='loaded'"
+      onerror="document.documentElement.dataset.telegramSdk='failed'"></script>
     <script>
       // Seed Telegram layout data before React/CSS modules paint. This avoids
       // a one-frame desktop stretch and keeps mobile safe-area sizing stable.
@@ -18,8 +20,7 @@
 
         const hasLaunchContext = Boolean(
           app.initData?.trim()
-          || app.initDataUnsafe?.user
-          || app.initDataUnsafe?.start_param
+          || (app.platform && app.platform !== "unknown")
         );
         if (!hasLaunchContext) return;
 

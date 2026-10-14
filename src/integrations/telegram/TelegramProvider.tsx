@@ -1,9 +1,12 @@
-import { createContext, useContext, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createTelegramAdapter, type TelegramAdapter, type TelegramInsets } from "./adapter";
+import { launchStatus, readLaunchContext, type LaunchStatus } from "./launch";
 import type { TelegramThemeParams } from "./types";
 
 interface TelegramContextValue {
   adapter: TelegramAdapter;
+  launchState: LaunchStatus;
+  recoverLaunch: () => void;
   theme: TelegramThemeParams;
   colorScheme: "light" | "dark";
   stableHeight: number;
@@ -60,14 +63,64 @@ function applyTelegramEnvironment(
 }
 
 export function TelegramProvider({ children }: { children: ReactNode }) {
-  const adapter = useMemo(() => createTelegramAdapter(), []);
+  const [revision, setRevision] = useState(0);
+  const [settled, setSettled] = useState(false);
+  const [recovery, setRecovery] = useState(0);
+  const adapter = useMemo(() => createTelegramAdapter(), [revision]);
+  const launchState = launchStatus(readLaunchContext(), settled);
+  const recoverLaunch = () => {
+    setRevision((value) => value + 1);
+    setSettled(false);
+    setRecovery((value) => value + 1);
+    if (document.documentElement.dataset.telegramSdk === "failed" && !window.Telegram?.WebApp) {
+      const original = document.querySelector<HTMLScriptElement>("script[src^='/vendor/telegram/']");
+      if (original) {
+        const retry = document.createElement("script");
+        retry.src = original.src; retry.integrity = original.integrity; retry.crossOrigin = original.crossOrigin;
+        document.documentElement.dataset.telegramSdk = "loading";
+        retry.onload = () => { document.documentElement.dataset.telegramSdk = "loaded"; setRevision((value) => value + 1); };
+        retry.onerror = () => { document.documentElement.dataset.telegramSdk = "failed"; setRevision((value) => value + 1); };
+        document.head.appendChild(retry);
+      }
+    }
+  };
+
+  useEffect(() => {
+    let previous = readLaunchContext();
+    let previousApp = window.Telegram?.WebApp;
+    const refresh = () => {
+      const next = readLaunchContext();
+      const nextApp = window.Telegram?.WebApp;
+      if (next.initData !== previous.initData || next.hasContext !== previous.hasContext
+        || next.platform !== previous.platform || next.sdkAvailable !== previous.sdkAvailable
+        || next.sdkFailed !== previous.sdkFailed || nextApp !== previousApp) {
+        previous = next;
+        previousApp = nextApp;
+        setRevision((value) => value + 1);
+      }
+    };
+    // Bound startup polling; resume/focus/manual recovery handles later native injection.
+    const interval = window.setInterval(refresh, 100);
+    const settle = window.setTimeout(() => { refresh(); setSettled(true); }, 1_500);
+    const stop = window.setTimeout(() => window.clearInterval(interval), 6_000);
+    const resume = () => { refresh(); };
+    window.addEventListener("focus", resume);
+    window.addEventListener("pageshow", resume);
+    window.addEventListener("hashchange", resume);
+    document.addEventListener("visibilitychange", resume);
+    return () => {
+      window.clearInterval(interval); window.clearTimeout(settle); window.clearTimeout(stop);
+      window.removeEventListener("focus", resume); window.removeEventListener("pageshow", resume);
+      window.removeEventListener("hashchange", resume); document.removeEventListener("visibilitychange", resume);
+    };
+  }, [recovery]);
   const [theme, setTheme] = useState(() => adapter.getTheme());
   const [colorScheme, setColorScheme] = useState(() => adapter.getColorScheme());
   const [stableHeight, setStableHeight] = useState(() => adapter.getStableHeight());
   const [insets, setInsets] = useState(() => adapter.getInsets());
   const [isFullscreen, setIsFullscreen] = useState(() => adapter.getIsFullscreen());
   const isMobileClient = adapter.isMobileClient();
-  const bootstrappedRef = useRef(false);
+  const bootstrappedRef = useRef<TelegramAdapter | null>(null);
 
   // Subscribe before requesting fullscreen so a very fast fullscreenChanged
   // event cannot race the React state. Boot commands run in a layout effect,
@@ -85,6 +138,8 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
       setInsets(adapter.getInsets());
     };
 
+    updateTheme(); updateViewport(); updateInsets(); updateFullscreen();
+
     const unsubscribers = [
       adapter.subscribe("themeChanged", updateTheme),
       adapter.subscribe("viewportChanged", updateViewport),
@@ -99,8 +154,8 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
     };
     window.addEventListener("resize", onBrowserResize, { passive: true });
 
-    if (!bootstrappedRef.current) {
-      bootstrappedRef.current = true;
+    if (bootstrappedRef.current !== adapter) {
+      bootstrappedRef.current = adapter;
       adapter.expand();
 
       // Main Mini Apps can be launched natively in fullscreen. Menu Button
@@ -112,6 +167,7 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
       if (
         adapter.isTelegram
         && isMobileClient
+        && typeof window.Telegram?.WebApp?.requestFullscreen === "function"
         && !adapter.getIsFullscreen()
         && document.documentElement.dataset.telegramFullscreenRequested !== "true"
       ) {
@@ -145,7 +201,7 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
   }, [adapter, theme, colorScheme, stableHeight, insets, isFullscreen, isMobileClient]);
 
   return (
-    <TelegramContext.Provider value={{ adapter, theme, colorScheme, stableHeight, insets, isFullscreen, isMobileClient }}>
+    <TelegramContext.Provider value={{ adapter, launchState, recoverLaunch, theme, colorScheme, stableHeight, insets, isFullscreen, isMobileClient }}>
       {children}
     </TelegramContext.Provider>
   );
