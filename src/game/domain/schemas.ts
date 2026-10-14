@@ -1,10 +1,12 @@
 import { z } from "zod";
+import { remoteBootstrapSchema } from "@/integrations/api/bootstrapContract";
 
 export const userProfileSchema = z.object({
   id: z.string(),
   firstName: z.string().min(1),
   displayName: z.string().min(1),
   telegramUsername: z.string().nullable(),
+  languageCode: z.string().optional(),
   avatarUrl: z.string().url().nullable(),
   level: z.number().int().nonnegative(),
   xp: z.number().int().nonnegative(),
@@ -22,6 +24,7 @@ export const dexoProgressionSchema = z.object({
 });
 
 export const bootstrapPayloadSchema = z.object({
+  remote: remoteBootstrapSchema.optional(),
   requestId: z.string(),
   serverTime: z.string().datetime(),
   environment: z.enum(["browser", "telegram"]),

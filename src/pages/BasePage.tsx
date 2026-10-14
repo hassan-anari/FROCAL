@@ -1,3 +1,5 @@
+import { useGameplayAvailability } from "@/integrations/api/useGameplayAvailability";
+import { useBootstrap } from "@/integrations/api/BootstrapProvider";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
@@ -16,12 +18,11 @@ import { BaseTapFeedback } from "@/game/base/BaseTapFeedback";
 import { useBaseTapExperience } from "@/game/base/useBaseTapExperience";
 import { useOnboardingStore } from "@/game/onboarding/onboardingStore";
 import { progressionForLifetime } from "@/game/progression/s1Progression";
-import { useScenarioStore } from "@/game/scenarios/scenarioStore";
 import { useEarnStore } from "@/game/earn/earnStore";
 import { useBaseUiStore } from "@/game/ui/baseUiStore";
-import { isRemoteDataSource, loadBootstrap } from "@/integrations/api/bootstrap";
+import { isRemoteDataSource } from "@/integrations/api/bootstrap";
 import { loadDlxBalance } from "@/integrations/api/dlx";
-import { loadProfileOverview } from "@/integrations/api/profile";
+import { useProfileOverview } from "@/integrations/api/useProfileOverview";
 import { queryKeys } from "@/integrations/api/queryKeys";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
@@ -89,7 +90,6 @@ const baseReactionAssets = [
 
 export function BasePage() {
   const navigate = useNavigate();
-  const scenario = useScenarioStore((state) => state.activeScenario);
   const onboarding = useOnboardingStore();
   const criticalActionVisible = useBaseUiStore((state) => state.criticalActionVisible);
   const promoBannerVisible = useBaseUiStore((state) => state.promoBannerVisible);
@@ -102,24 +102,17 @@ export function BasePage() {
   const { adapter } = useTelegram();
   const initData = adapter.getInitData();
   const remoteData = isRemoteDataSource();
+  const { canEarn } = useGameplayAvailability();
+  const tapAvailable = canEarn("base_tap");
 
-  const bootstrap = useQuery({
-    queryKey: queryKeys.bootstrap(scenario),
-    queryFn: () => loadBootstrap(scenario, adapter.platform, initData),
-    enabled: !remoteData || Boolean(initData),
-  });
+  const { bootstrap, scope } = useBootstrap();
 
-  const profile = useQuery({
-    queryKey: queryKeys.profileOverview,
-    queryFn: () => loadProfileOverview(initData),
-    enabled: remoteData && adapter.isTelegram && Boolean(initData),
-    staleTime: 30_000,
-  });
+  const profile = useProfileOverview();
 
   const dlxBalance = useQuery({
-    queryKey: queryKeys.dlxBalance,
+    queryKey: queryKeys.dlxBalance(scope),
     queryFn: () => loadDlxBalance(initData),
-    enabled: remoteData && adapter.isTelegram && Boolean(initData),
+    enabled: remoteData && adapter.isTelegram && Boolean(initData) && scope.player !== "unverified",
     staleTime: 30_000,
   });
 
@@ -161,10 +154,10 @@ export function BasePage() {
   };
   const playerId = bootstrapPlayer?.id ?? "pending-player";
   const serverLifetime =
-    profile.data?.progression.lifetime_points ?? bootstrapPlayer?.lifetimeXp ?? null;
+    bootstrapPlayer?.lifetimeXp ?? profile.data?.progression.lifetime_points ?? null;
 
   const baseTap = useBaseTapExperience({
-    enabled: remoteData && adapter.isTelegram && serverLifetime !== null,
+    enabled: remoteData && adapter.isTelegram && serverLifetime !== null && tapAvailable,
     initData,
     playerId,
     serverLifetime: serverLifetime ?? 0,
@@ -176,19 +169,19 @@ export function BasePage() {
       : baseTap.visualLifetime
     : lifetimeXp;
   const liveProgression =
-    remoteData && displayedLifetimeXp !== null
+    remoteData && displayedLifetimeXp !== null && displayedLifetimeXp !== serverLifetime
       ? progressionForLifetime(displayedLifetimeXp)
       : null;
   const currentLevel = remoteData
-    ? liveProgression?.level ?? profile.data?.progression.level ?? bootstrapPlayer?.level ?? 1
+    ? liveProgression?.level ?? bootstrapPlayer?.level ?? profile.data?.progression.level ?? 1
     : Math.max(phase2Player.level, earnLevel);
   const currentLevelXp = remoteData
-    ? liveProgression?.pointsIntoLevel ?? null
+    ? liveProgression?.pointsIntoLevel ?? bootstrapPlayer?.xp ?? null
     : currentLevel === earnLevel
       ? earnLevelXp
       : phase2Player.xp;
   const currentLevelTarget = remoteData
-    ? liveProgression?.levelSpan ?? null
+    ? liveProgression?.levelSpan ?? bootstrapPlayer?.xpToNextLevel ?? null
     : currentLevel === earnLevel
       ? earnLevelTarget
       : phase2Player.xpToNextLevel;
@@ -200,7 +193,10 @@ export function BasePage() {
     }
     return Math.min(100, Math.round(((currentLevelXp ?? 0) / Math.max(currentLevelTarget ?? 1, 1)) * 100));
   }, [currentLevelTarget, currentLevelXp, liveProgression, remoteData]);
-  const levelAsset = getLevelAsset(currentLevel);
+  const stageAssets: Record<string, AssetKey> = { newborn: "dexo.level01", explorer: "dexo.level05", connector: "dexo.level10", specialist: "dexo.level15", vanguard: "dexo.level20", legend: "dexo.level30" };
+  const levelAsset = remoteData && !liveProgression && bootstrap.data
+    ? stageAssets[bootstrap.data.dexo.stage] ?? getLevelAsset(currentLevel)
+    : getLevelAsset(currentLevel);
   const displayedCharacter = activeReaction ? reactionLibrary[activeReaction].asset : levelAsset;
   const displayedScale = activeReaction
     ? reactionLibrary[activeReaction].scale
@@ -229,14 +225,14 @@ export function BasePage() {
   };
 
   const triggerReaction = () => {
-    if (remoteData && adapter.isTelegram && !baseTap.tap()) return;
+    if (remoteData && adapter.isTelegram && tapAvailable && !baseTap.tap()) return;
 
     const reaction = reactionOrder[reactionCursor.current % reactionOrder.length];
     reactionCursor.current += 1;
     setActiveReaction(reaction);
     scheduleReturn();
 
-    if (remoteData && adapter.isTelegram) {
+    if (remoteData && adapter.isTelegram && tapAvailable) {
       setTapCount((count) => count + 1);
     }
 

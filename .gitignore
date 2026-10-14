@@ -7,3 +7,7 @@ test-results
 .env.local
 .DS_Store
 *.tsbuildinfo
+
+work/
+dist-contract
+dist-demo

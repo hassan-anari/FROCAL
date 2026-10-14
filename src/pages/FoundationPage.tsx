@@ -1,6 +1,6 @@
+import { useBootstrap } from "@/integrations/api/BootstrapProvider";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { startTransition, useEffect, useState } from "react";
@@ -8,10 +8,7 @@ import { preloadAssets } from "@/assets/preload";
 import { AssetImage } from "@/design-system/components/AssetImage";
 import { AppLoader } from "@/design-system/components/AppLoader";
 import { Button } from "@/design-system/primitives/Button";
-import { useScenarioStore } from "@/game/scenarios/scenarioStore";
 import { useOnboardingStore } from "@/game/onboarding/onboardingStore";
-import { loadBootstrap } from "@/integrations/api/bootstrap";
-import { queryKeys } from "@/integrations/api/queryKeys";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import { content } from "@/content/en";
 import { mobileEase, mobileMotion } from "@/design-system/motion/mobileMotion";
@@ -39,15 +36,11 @@ const phaseOneAssets = [
 
 export function FoundationPage() {
   const navigate = useNavigate();
-  const activeScenario = useScenarioStore((state) => state.activeScenario);
   const onboardingStatus = useOnboardingStore((state) => state.status);
   const { adapter } = useTelegram();
   const [isEntering, setIsEntering] = useState(false);
 
-  const bootstrap = useQuery({
-    queryKey: queryKeys.bootstrap(activeScenario),
-    queryFn: () => loadBootstrap(activeScenario, adapter.platform, adapter.getInitData()),
-  });
+  const { bootstrap } = useBootstrap();
 
   useEffect(() => {
     adapter.disableVerticalSwipes();

@@ -1,3 +1,4 @@
+import { readLaunchContext } from "./launch";
 import type {
   TelegramEvent,
   TelegramSafeAreaInset,
@@ -43,6 +44,11 @@ export interface TelegramAdapter {
   subscribe(event: TelegramEvent, handler: () => void): () => void;
 }
 
+// Older clients may expose newer SDK methods that throw when invoked.
+function nativeCommand(callback: (() => void) | undefined): void {
+  try { callback?.(); } catch { /* capability unavailable; preserve the native layout */ }
+}
+
 const zeroInset = Object.freeze({ top: 0, right: 0, bottom: 0, left: 0 });
 
 function normalizeInset(value?: TelegramSafeAreaInset): Required<TelegramSafeAreaInset> {
@@ -72,32 +78,23 @@ function getTelegramWebApp(): TelegramWebAppLike | null {
   return window.Telegram?.WebApp ?? null;
 }
 
-function hasTelegramLaunchContext(app: TelegramWebAppLike | null): app is TelegramWebAppLike {
-  if (!app) return false;
-  return Boolean(
-    app.initData?.trim()
-    || app.initDataUnsafe?.user
-    || app.initDataUnsafe?.start_param,
-  );
-}
-
 export function createTelegramAdapter(): TelegramAdapter {
-  const rawApp = getTelegramWebApp();
-  const app = hasTelegramLaunchContext(rawApp) ? rawApp : null;
-  const isTelegram = app !== null;
+  const launch = readLaunchContext();
+  const app = getTelegramWebApp();
+  const isTelegram = launch.hasContext;
 
   return {
     isTelegram,
     platform: isTelegram ? "telegram" : "browser",
-    getClientPlatform: () => (isTelegram ? app?.platform ?? "unknown" : "browser"),
-    isMobileClient: () => isTelegram && isMobileTelegramPlatform(app?.platform),
+    getClientPlatform: () => (isTelegram ? launch.platform : "browser"),
+    isMobileClient: () => isTelegram && isMobileTelegramPlatform(launch.platform),
     getIsFullscreen: () => Boolean(isTelegram && app?.isFullscreen),
     getInitData: () => {
-      const initData = isTelegram ? app?.initData?.trim() : "";
+      const initData = isTelegram ? launch.initData : "";
       return initData || null;
     },
     getUser: () => (isTelegram ? app?.initDataUnsafe?.user ?? null : null),
-    getStartParam: () => (isTelegram ? app?.initDataUnsafe?.start_param ?? null : null),
+    getStartParam: () => (isTelegram ? launch.startParam : null),
     getTheme: () => (isTelegram ? app?.themeParams ?? {} : {}),
     getColorScheme: () => (isTelegram ? app?.colorScheme ?? "dark" : "dark"),
     getStableHeight: () => {
@@ -110,31 +107,31 @@ export function createTelegramAdapter(): TelegramAdapter {
       contentSafeArea: isTelegram ? normalizeInset(app?.contentSafeAreaInset) : { ...zeroInset },
     }),
     ready: () => {
-      if (isTelegram) app?.ready?.();
+      if (isTelegram) nativeCommand(() => app?.ready?.());
     },
     expand: () => {
-      if (isTelegram) app?.expand?.();
+      if (isTelegram) nativeCommand(() => app?.expand?.());
     },
     requestFullscreen: () => {
-      if (isTelegram) app?.requestFullscreen?.();
+      if (isTelegram) nativeCommand(() => app?.requestFullscreen?.());
     },
     exitFullscreen: () => {
-      if (isTelegram) app?.exitFullscreen?.();
+      if (isTelegram) nativeCommand(() => app?.exitFullscreen?.());
     },
     disableVerticalSwipes: () => {
-      if (isTelegram) app?.disableVerticalSwipes?.();
+      if (isTelegram) nativeCommand(() => app?.disableVerticalSwipes?.());
     },
     enableVerticalSwipes: () => {
-      if (isTelegram) app?.enableVerticalSwipes?.();
+      if (isTelegram) nativeCommand(() => app?.enableVerticalSwipes?.());
     },
     hapticImpact: (style = "light") => {
-      if (isTelegram) scheduleNativeFeedback(() => app?.HapticFeedback?.impactOccurred(style));
+      if (isTelegram) scheduleNativeFeedback(() => nativeCommand(() => app?.HapticFeedback?.impactOccurred(style)));
     },
     hapticNotice: (type) => {
-      if (isTelegram) scheduleNativeFeedback(() => app?.HapticFeedback?.notificationOccurred(type));
+      if (isTelegram) scheduleNativeFeedback(() => nativeCommand(() => app?.HapticFeedback?.notificationOccurred(type)));
     },
     selectionChanged: () => {
-      if (isTelegram) scheduleNativeFeedback(() => app?.HapticFeedback?.selectionChanged());
+      if (isTelegram) scheduleNativeFeedback(() => nativeCommand(() => app?.HapticFeedback?.selectionChanged()));
     },
     openTelegramLink: (url) => {
       if (isTelegram && app?.openTelegramLink) app.openTelegramLink(url);
@@ -146,9 +143,9 @@ export function createTelegramAdapter(): TelegramAdapter {
     },
     setChromeColors: (background, header = background, bottomBar = background) => {
       if (!isTelegram) return;
-      app?.setBackgroundColor?.(background);
-      app?.setHeaderColor?.(header);
-      app?.setBottomBarColor?.(bottomBar);
+      nativeCommand(() => app?.setBackgroundColor?.(background));
+      nativeCommand(() => app?.setHeaderColor?.(header));
+      nativeCommand(() => app?.setBottomBarColor?.(bottomBar));
     },
     showBackButton: (handler) => {
       if (!isTelegram || !app?.BackButton) return () => undefined;

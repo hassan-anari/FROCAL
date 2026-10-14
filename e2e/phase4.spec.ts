@@ -27,7 +27,7 @@ test("profile detail modal is viewport fixed and owns its scrolling", async ({ p
   await page.getByText("First Referral", { exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "First Referral" });
   await expect(dialog).toBeVisible();
-  await expect(dialog.getByRole("button", { name: "Got it" })).toBeVisible();
+  await expect(dialog.getByRole("button", { name: "Feature achievement" })).toBeVisible();
   await expect(page.locator("#root")).toHaveAttribute("inert", "");
 
   const box = await dialog.boundingBox();
@@ -36,7 +36,19 @@ test("profile detail modal is viewport fixed and owns its scrolling", async ({ p
   expect(viewport).not.toBeNull();
   expect((box?.y ?? 0) + (box?.height ?? 0)).toBeLessThanOrEqual(viewport?.height ?? 0);
 
-  await dialog.getByRole("button", { name: "Got it" }).click();
+  await dialog.getByRole("button", { name: "Feature achievement" }).click();
+  await expect(dialog).toBeHidden();
+  await expect(page.locator("#root")).not.toHaveAttribute("inert", "");
+});
+
+test("locked informational achievements retain Got it and keyboard dismissal", async ({ page }) => {
+  await page.goto("/profile");
+  await page.getByRole("button", { name: "Achievements", exact: true }).click();
+  await page.getByText("First Contribution", { exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "First Contribution", exact: true });
+  await expect(dialog.getByRole("button", { name: "Got it", exact: true })).toBeVisible();
+  await expect(page.locator("#root")).toHaveAttribute("inert", "");
+  await page.keyboard.press("Escape");
   await expect(dialog).toBeHidden();
   await expect(page.locator("#root")).not.toHaveAttribute("inert", "");
 });

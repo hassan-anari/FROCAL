@@ -1,0 +1,4 @@
+# Exact schema dependencies from WEDCAL@cadc257 uv.lock. Test harness only.
+Django==5.2.17
+django-ninja==1.6.3
+pydantic==2.13.4

@@ -31,13 +31,13 @@ test.describe("Phase 3.1 Earn Center", () => {
     await openEarn(page);
     await page.getByRole("button", { name: "Network" }).click();
     await expect(page.getByRole("heading", { name: /Grow with people and groups/i })).toBeVisible();
-    await page.getByRole("button", { name: "Typing" }).click();
-    await expect(page.getByRole("heading", { name: "Typing Arena" })).toBeVisible();
+    await page.getByRole("navigation", { name: "Earn sections" }).getByRole("button", { name: "Typing", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "Typing Arena", exact: true })).toBeVisible();
   });
 
   test("opens the permanent Typing Arena", async ({ page }) => {
     await openEarn(page);
-    await page.getByRole("button", { name: "Typing" }).click();
+    await page.getByRole("navigation", { name: "Earn sections" }).getByRole("button", { name: "Typing", exact: true }).click();
     await page.getByRole("button", { name: /Enter Typing Arena/i }).click();
     await expect(page.getByRole("heading", { name: /Type with intent/i })).toBeVisible();
     await expect(page.getByRole("textbox", { name: /Typing challenge input/i })).toBeVisible();

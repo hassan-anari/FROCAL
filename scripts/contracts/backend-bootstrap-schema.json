@@ -1,0 +1,563 @@
+{
+  "$defs": {
+    "BootstrapConfig": {
+      "properties": {
+        "version": {
+          "title": "Version",
+          "type": "string"
+        },
+        "effective_at": {
+          "format": "date-time",
+          "title": "Effective At",
+          "type": "string"
+        },
+        "schema_version": {
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "payload_checksum": {
+          "title": "Payload Checksum",
+          "type": "string"
+        },
+        "progression": {
+          "$ref": "#/$defs/BootstrapProgressionPolicy"
+        }
+      },
+      "required": [
+        "version",
+        "effective_at",
+        "schema_version",
+        "payload_checksum",
+        "progression"
+      ],
+      "title": "BootstrapConfig",
+      "type": "object"
+    },
+    "BootstrapDaily": {
+      "properties": {
+        "claimable": {
+          "title": "Claimable",
+          "type": "boolean"
+        },
+        "streak": {
+          "title": "Streak",
+          "type": "integer"
+        },
+        "cycle_day": {
+          "title": "Cycle Day",
+          "type": "integer"
+        },
+        "reward_amount": {
+          "title": "Reward Amount",
+          "type": "integer"
+        },
+        "next_reset": {
+          "format": "date-time",
+          "title": "Next Reset",
+          "type": "string"
+        }
+      },
+      "required": [
+        "claimable",
+        "streak",
+        "cycle_day",
+        "reward_amount",
+        "next_reset"
+      ],
+      "title": "BootstrapDaily",
+      "type": "object"
+    },
+    "BootstrapFeatures": {
+      "properties": {
+        "season": {
+          "title": "Season",
+          "type": "boolean"
+        },
+        "daily": {
+          "title": "Daily",
+          "type": "boolean"
+        },
+        "typing": {
+          "title": "Typing",
+          "type": "boolean"
+        },
+        "missions": {
+          "title": "Missions",
+          "type": "boolean"
+        },
+        "referral": {
+          "title": "Referral",
+          "type": "boolean"
+        },
+        "network": {
+          "title": "Network",
+          "type": "boolean"
+        },
+        "base_tap": {
+          "title": "Base Tap",
+          "type": "boolean"
+        },
+        "clan": {
+          "title": "Clan",
+          "type": "boolean"
+        },
+        "profile": {
+          "title": "Profile",
+          "type": "boolean"
+        },
+        "arena": {
+          "title": "Arena",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "season",
+        "daily",
+        "typing",
+        "missions",
+        "referral",
+        "network",
+        "base_tap",
+        "clan",
+        "profile",
+        "arena"
+      ],
+      "title": "BootstrapFeatures",
+      "type": "object"
+    },
+    "BootstrapGameplay": {
+      "properties": {
+        "moderation_state": {
+          "enum": [
+            "ACTIVE",
+            "FLAGGED",
+            "SUSPENDED",
+            "BANNED"
+          ],
+          "title": "Moderation State",
+          "type": "string"
+        },
+        "reward_earning_allowed": {
+          "title": "Reward Earning Allowed",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "moderation_state",
+        "reward_earning_allowed"
+      ],
+      "title": "BootstrapGameplay",
+      "type": "object"
+    },
+    "BootstrapMissions": {
+      "properties": {
+        "available_count": {
+          "title": "Available Count",
+          "type": "integer"
+        },
+        "reward_ready_count": {
+          "title": "Reward Ready Count",
+          "type": "integer"
+        },
+        "unclaimed_count": {
+          "title": "Unclaimed Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "available_count",
+        "reward_ready_count",
+        "unclaimed_count"
+      ],
+      "title": "BootstrapMissions",
+      "type": "object"
+    },
+    "BootstrapNetwork": {
+      "properties": {
+        "group_count": {
+          "title": "Group Count",
+          "type": "integer"
+        },
+        "active_group_count": {
+          "title": "Active Group Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "group_count",
+        "active_group_count"
+      ],
+      "title": "BootstrapNetwork",
+      "type": "object"
+    },
+    "BootstrapPlayer": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "telegram_user_id": {
+          "title": "Telegram User Id",
+          "type": "integer"
+        },
+        "first_name": {
+          "title": "First Name",
+          "type": "string"
+        },
+        "last_name": {
+          "title": "Last Name",
+          "type": "string"
+        },
+        "username": {
+          "title": "Username",
+          "type": "string"
+        },
+        "language_code": {
+          "title": "Language Code",
+          "type": "string"
+        },
+        "photo_url": {
+          "title": "Photo Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "telegram_user_id",
+        "first_name",
+        "last_name",
+        "username",
+        "language_code",
+        "photo_url"
+      ],
+      "title": "BootstrapPlayer",
+      "type": "object"
+    },
+    "BootstrapProgression": {
+      "properties": {
+        "lifetime_points": {
+          "title": "Lifetime Points",
+          "type": "integer"
+        },
+        "level": {
+          "title": "Level",
+          "type": "integer"
+        },
+        "current_threshold": {
+          "title": "Current Threshold",
+          "type": "integer"
+        },
+        "next_threshold": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Threshold"
+        },
+        "points_into_level": {
+          "title": "Points Into Level",
+          "type": "integer"
+        },
+        "points_remaining": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Points Remaining"
+        },
+        "dexo_stage": {
+          "title": "Dexo Stage",
+          "type": "string"
+        }
+      },
+      "required": [
+        "lifetime_points",
+        "level",
+        "current_threshold",
+        "next_threshold",
+        "points_into_level",
+        "points_remaining",
+        "dexo_stage"
+      ],
+      "title": "BootstrapProgression",
+      "type": "object"
+    },
+    "BootstrapProgressionPolicy": {
+      "properties": {
+        "levels": {
+          "items": {
+            "$ref": "#/$defs/LevelRuleOutput"
+          },
+          "title": "Levels",
+          "type": "array"
+        },
+        "dexo_stages": {
+          "items": {
+            "$ref": "#/$defs/DexoStageOutput"
+          },
+          "title": "Dexo Stages",
+          "type": "array"
+        },
+        "clan_min_level": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Clan Min Level"
+        }
+      },
+      "required": [
+        "levels",
+        "dexo_stages",
+        "clan_min_level"
+      ],
+      "title": "BootstrapProgressionPolicy",
+      "type": "object"
+    },
+    "BootstrapReferral": {
+      "properties": {
+        "status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Status"
+        },
+        "verified_invites": {
+          "title": "Verified Invites",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "status",
+        "verified_invites"
+      ],
+      "title": "BootstrapReferral",
+      "type": "object"
+    },
+    "BootstrapSeason": {
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "starts_at": {
+          "format": "date-time",
+          "title": "Starts At",
+          "type": "string"
+        },
+        "ends_at": {
+          "format": "date-time",
+          "title": "Ends At",
+          "type": "string"
+        },
+        "season_points": {
+          "title": "Season Points",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "code",
+        "title",
+        "status",
+        "starts_at",
+        "ends_at",
+        "season_points"
+      ],
+      "title": "BootstrapSeason",
+      "type": "object"
+    },
+    "BootstrapTyping": {
+      "properties": {
+        "attempts_used": {
+          "title": "Attempts Used",
+          "type": "integer"
+        },
+        "attempts_remaining": {
+          "title": "Attempts Remaining",
+          "type": "integer"
+        },
+        "claimable_balance": {
+          "title": "Claimable Balance",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "attempts_used",
+        "attempts_remaining",
+        "claimable_balance"
+      ],
+      "title": "BootstrapTyping",
+      "type": "object"
+    },
+    "DexoStageOutput": {
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "min_level": {
+          "title": "Min Level",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "key",
+        "min_level"
+      ],
+      "title": "DexoStageOutput",
+      "type": "object"
+    },
+    "LevelRuleOutput": {
+      "properties": {
+        "level": {
+          "title": "Level",
+          "type": "integer"
+        },
+        "min_lifetime_points": {
+          "title": "Min Lifetime Points",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "level",
+        "min_lifetime_points"
+      ],
+      "title": "LevelRuleOutput",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "contract_version": {
+      "const": "1.1",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "request_id": {
+      "title": "Request Id",
+      "type": "string"
+    },
+    "server_time": {
+      "format": "date-time",
+      "title": "Server Time",
+      "type": "string"
+    },
+    "player": {
+      "$ref": "#/$defs/BootstrapPlayer"
+    },
+    "progression": {
+      "$ref": "#/$defs/BootstrapProgression"
+    },
+    "season": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BootstrapSeason"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "config": {
+      "$ref": "#/$defs/BootstrapConfig"
+    },
+    "features": {
+      "$ref": "#/$defs/BootstrapFeatures"
+    },
+    "gameplay": {
+      "$ref": "#/$defs/BootstrapGameplay"
+    },
+    "daily": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BootstrapDaily"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "typing": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BootstrapTyping"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "missions": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BootstrapMissions"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "referral": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BootstrapReferral"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "network": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BootstrapNetwork"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "contract_version",
+    "request_id",
+    "server_time",
+    "player",
+    "progression",
+    "season",
+    "config",
+    "features",
+    "gameplay",
+    "daily",
+    "typing",
+    "missions",
+    "referral",
+    "network"
+  ],
+  "title": "BootstrapOutput",
+  "type": "object"
+}

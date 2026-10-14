@@ -16,14 +16,14 @@ test.describe("Phase 2 game shell", () => {
     await page.setViewportSize({ width: 390, height: 844 });
   });
 
-  test("bottom navigation is icon-only but remains accessible", async ({ page }) => {
+  test("bottom navigation has approved labels and remains accessible", async ({ page }) => {
     await openCompletedGame(page);
     const nav = page.getByRole("navigation", { name: "Primary game navigation" });
     await expect(nav).toBeVisible();
     for (const label of ["Base", "Earn", "Clan", "Arena", "Profile"]) {
       await expect(nav.getByRole("button", { name: label })).toBeVisible();
     }
-    await expect(nav.getByText("Base", { exact: true })).toHaveCount(0);
+    await expect(nav.getByText("Base", { exact: true })).toBeVisible();
   });
 
   test("notification drawer opens and closes", async ({ page }) => {
@@ -36,13 +36,13 @@ test.describe("Phase 2 game shell", () => {
 
   test("Base contains action, objective and activity systems", async ({ page }) => {
     await openCompletedGame(page);
-    await expect(page.getByRole("heading", { name: "Defend your clan signal" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Defend your clan outpost" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Next Objective" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Since Your Last Visit" })).toBeVisible();
   });
 
-  test("Earn route renders Mission Control", async ({ page }) => {
+  test("Earn route renders the approved journey", async ({ page }) => {
     await openCompletedGame(page, "/earn");
-    await expect(page.getByRole("heading", { name: "Build your signal." })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Grow your journey." })).toBeVisible();
   });
 });

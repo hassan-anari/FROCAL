@@ -1,9 +1,9 @@
+import { useBootstrap } from "@/integrations/api/BootstrapProvider";
 import {
   ArrowLeft01Icon,
   ArrowRight01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo } from "react";
@@ -12,9 +12,6 @@ import { AssetImage } from "@/design-system/components/AssetImage";
 import { DexoStage } from "@/design-system/components/DexoStage";
 import { Button } from "@/design-system/primitives/Button";
 import { useOnboardingStore, onboardingStepOrder } from "@/game/onboarding/onboardingStore";
-import { useScenarioStore } from "@/game/scenarios/scenarioStore";
-import { loadBootstrap } from "@/integrations/api/bootstrap";
-import { queryKeys } from "@/integrations/api/queryKeys";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import type { AssetKey } from "@/assets/registry";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
@@ -102,15 +99,11 @@ const onboardingAssets = [
 
 export function OnboardingPage() {
   const navigate = useNavigate();
-  const scenario = useScenarioStore((state) => state.activeScenario);
   const { adapter } = useTelegram();
   const onboarding = useOnboardingStore();
-  const bootstrap = useQuery({
-    queryKey: queryKeys.bootstrap(scenario),
-    queryFn: () => loadBootstrap(scenario, adapter.platform),
-  });
+  const { bootstrap } = useBootstrap();
 
-  const firstName = adapter.getUser()?.first_name ?? bootstrap.data?.player.firstName ?? "Explorer";
+  const firstName = bootstrap.data?.player.firstName ?? "Explorer";
   const stepIndex = onboardingStepOrder.indexOf(onboarding.step);
   const currentGuide = guideScenes[onboarding.guideIndex];
   const sceneContent = onboarding.step === "guide" ? currentGuide : stepContent[onboarding.step];

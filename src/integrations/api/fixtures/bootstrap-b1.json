@@ -1,0 +1,85 @@
+{
+  "contract_version": "1.1",
+  "request_id": "synthetic-b1-contract",
+  "server_time": "2026-10-14T12:00:00Z",
+  "player": {
+    "id": "42",
+    "telegram_user_id": 42,
+    "first_name": "Verified",
+    "last_name": "Player",
+    "username": "verified",
+    "language_code": "en",
+    "photo_url": "https://example.test/verified-player.png"
+  },
+  "progression": {
+    "lifetime_points": 321,
+    "level": 7,
+    "current_threshold": 300,
+    "next_threshold": 500,
+    "points_into_level": 21,
+    "points_remaining": 179,
+    "dexo_stage": "specialist"
+  },
+  "season": {
+    "code": "season-1",
+    "title": "Season One",
+    "status": "ACTIVE",
+    "starts_at": "2026-10-01T00:00:00Z",
+    "ends_at": "2026-11-15T00:00:00Z",
+    "season_points": 21
+  },
+  "config": {
+    "version": "synthetic-b1-v1",
+    "effective_at": "2026-10-01T00:00:00Z",
+    "schema_version": 1,
+    "payload_checksum": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "progression": {
+      "levels": [
+        {
+          "level": 1,
+          "min_lifetime_points": 0
+        },
+        {
+          "level": 7,
+          "min_lifetime_points": 300
+        },
+        {
+          "level": 8,
+          "min_lifetime_points": 500
+        }
+      ],
+      "dexo_stages": [
+        {
+          "key": "newborn",
+          "min_level": 1
+        },
+        {
+          "key": "specialist",
+          "min_level": 7
+        }
+      ],
+      "clan_min_level": 5
+    }
+  },
+  "features": {
+    "season": true,
+    "daily": false,
+    "typing": false,
+    "missions": false,
+    "referral": false,
+    "network": false,
+    "base_tap": true,
+    "clan": false,
+    "profile": true,
+    "arena": true
+  },
+  "gameplay": {
+    "moderation_state": "ACTIVE",
+    "reward_earning_allowed": true
+  },
+  "daily": null,
+  "typing": null,
+  "missions": null,
+  "referral": null,
+  "network": null
+}

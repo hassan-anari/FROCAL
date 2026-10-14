@@ -1,3 +1,5 @@
+import { useGameplayAvailability } from "@/integrations/api/useGameplayAvailability";
+import { usePlayerProgression } from "@/integrations/api/usePlayerProgression";
 import {
   ArrowRight01Icon,
   InformationCircleIcon,
@@ -114,9 +116,11 @@ function initials(name: string): string {
 }
 
 export function EarnPage() {
+  const playerProgression = usePlayerProgression();
   const navigate = useNavigate();
   const { adapter } = useTelegram();
   const earn = useEarnStore();
+  const { canEarn } = useGameplayAvailability();
   const [activeTab, setActiveTab] = useState<EarnTab>(() => {
     const stored = sessionStorage.getItem(earnTabStorageKey);
     return stored === "network" || stored === "typing" ? stored : "earn";
@@ -130,7 +134,7 @@ export function EarnPage() {
   const claimedMissions = Object.values(earn.missions).filter((mission) => mission.status === "claimed").length;
   const activeMissions = Object.values(earn.missions).filter((mission) => mission.status !== "claimed");
   const completedMissions = Object.values(earn.missions).filter((mission) => mission.status === "claimed");
-  const levelProgress = Math.min(100, Math.round((earn.levelXp / earn.xpToNextLevel) * 100));
+  const levelProgress = Math.min(100, Math.round((playerProgression.levelXp / playerProgression.xpToNextLevel) * 100));
   const typingToday = getTypingAttemptsToday(earn.typingAttemptDate, earn.typingAttempts);
   const typingRemaining = getTypingAttemptsRemaining(earn.typingAttemptDate, earn.typingAttempts);
   const telegramUser = adapter.getUser();
@@ -173,11 +177,13 @@ export function EarnPage() {
   };
 
   const openTypingArena = () => {
+    if (!canEarn("typing")) return;
     sessionStorage.setItem(earnTabStorageKey, "typing");
     startTransition(() => { void navigate({ to: "/earn/typing" }); });
   };
 
   const handleMissionAction = (mission: EarnMission) => {
+    if (!canEarn("missions")) return;
     adapter.selectionChanged();
     if (mission.status === "claimed") return;
     if (mission.status === "completed") {
@@ -206,12 +212,13 @@ export function EarnPage() {
   };
 
   const claimDailyCore = () => {
-    if (!dailyAvailable) return;
+    if (!dailyAvailable || !canEarn("daily")) return;
     adapter.hapticImpact("medium");
     earn.claimDaily();
   };
 
   const handleTypingMissionAction = () => {
+    if (!canEarn("typing") || !canEarn("missions")) return;
     const mission = earn.missions["typing-session"];
     if (mission.status === "claimed") return;
     if (mission.status === "completed") {
@@ -264,7 +271,7 @@ export function EarnPage() {
         <button
           type="button"
           className={styles.missionAction}
-          disabled={mission.status === "claimed"}
+          disabled={mission.status === "claimed" || !canEarn("missions")}
           onClick={() => handleMissionAction(mission)}
         >
           <span>{missionActionLabel(mission)}</span>
@@ -335,7 +342,7 @@ export function EarnPage() {
 
                   <Button
                     size="lg"
-                    disabled={!dailyAvailable}
+                    disabled={!dailyAvailable || !canEarn("daily")}
                     trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={18} strokeWidth={1.8} />}
                     onClick={claimDailyCore}
                   >
@@ -350,7 +357,7 @@ export function EarnPage() {
                   </header>
                   <div className={styles.pathMeta}><span>Complete all starter missions</span><strong>{pathProgress}%</strong></div>
                   <div className={styles.pathTrack}><motion.i animate={{ scaleX: pathProgress / 100 }} initial={false} style={{ transformOrigin: "0 50%" }} transition={mobileMotion.reveal} /></div>
-                  <div className={styles.levelMeta}><span>Level {earn.level} progress</span><strong>{earn.levelXp} / {earn.xpToNextLevel} XP</strong></div>
+                  <div className={styles.levelMeta}><span>Level {playerProgression.level} progress</span><strong>{playerProgression.levelXp} / {playerProgression.xpToNextLevel} XP</strong></div>
                   <div className={styles.levelTrack}><motion.i animate={{ scaleX: levelProgress / 100 }} initial={false} style={{ transformOrigin: "0 50%" }} transition={mobileMotion.reveal} /></div>
                 </section>
 
@@ -503,7 +510,7 @@ export function EarnPage() {
                   <div className={styles.attemptPips}>
                     {Array.from({ length: TYPING_DAILY_LIMIT }, (_, index) => <i key={index} className={index < typingToday.length ? styles.attemptUsed : ""} />)}
                   </div>
-                  <Button size="lg" disabled={typingRemaining === 0} trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={18} strokeWidth={1.8} />} onClick={openTypingArena}>
+                  <Button size="lg" disabled={typingRemaining === 0 || !canEarn("typing")} trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={18} strokeWidth={1.8} />} onClick={openTypingArena}>
                     {typingRemaining ? "Enter Typing Arena" : "Come back tomorrow"}
                   </Button>
                 </section>
@@ -516,7 +523,7 @@ export function EarnPage() {
 
                 <section className={styles.typingMissionCard}>
                   <div><span>ARENA MISSION</span><h2>{earn.missions["typing-session"].title}</h2><p>{earn.missions["typing-session"].description}</p></div>
-                  <button type="button" disabled={earn.missions["typing-session"].status === "claimed"} onClick={handleTypingMissionAction}>
+                  <button type="button" disabled={earn.missions["typing-session"].status === "claimed" || !canEarn("typing") || !canEarn("missions")} onClick={handleTypingMissionAction}>
                     {missionActionLabel(earn.missions["typing-session"])}
                     <HugeiconsIcon icon={ArrowRight01Icon} size={15} strokeWidth={1.8} />
                   </button>
@@ -539,7 +546,7 @@ export function EarnPage() {
         <DeferredMount minHeight={90}>
           <section className={styles.sharedStats} aria-label="Earn summary">
             <div><span>Daily streak</span><strong>{earn.streak || 0}d</strong></div>
-            <div><span>Lifetime XP</span><strong>{formatNumber(earn.lifetimeXp)}</strong></div>
+            <div><span>Lifetime XP</span><strong>{formatNumber(playerProgression.lifetimeXp)}</strong></div>
             <div><span>Referrals</span><strong>{earn.referralCount}</strong></div>
             <div><span>Active groups</span><strong>{earn.activeGroups}</strong></div>
           </section>

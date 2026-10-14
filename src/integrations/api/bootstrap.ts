@@ -1,58 +1,12 @@
-import { z } from "zod";
 import { bootstrapPayloadSchema, type BootstrapPayload } from "@/game/domain/schemas";
 import type { ScenarioId } from "@/game/scenarios/scenarioStore";
 import { createBootstrapFixture } from "@/mocks/fixtures/bootstrap";
-import { apiRequest } from "./client";
+import { apiRequest, ApiError } from "./client";
 
 const sleep = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
 
-const dexoStageSchema = z.enum([
-  "newborn",
-  "explorer",
-  "connector",
-  "specialist",
-  "vanguard",
-  "legend",
-]);
-
-const remoteBootstrapSchema = z.object({
-  player: z.object({
-    telegram_user_id: z.number().int(),
-    first_name: z.string(),
-    last_name: z.string(),
-    username: z.string(),
-  }),
-  progression: z.object({
-    lifetime_points: z.number().int().nonnegative(),
-    level: z.number().int().positive(),
-    current_threshold: z.number().int().nonnegative(),
-    next_threshold: z.number().int().positive().nullable(),
-    points_into_level: z.number().int().nonnegative(),
-    points_remaining: z.number().int().nonnegative().nullable(),
-    dexo_stage: dexoStageSchema,
-  }),
-  season: z
-    .object({
-      code: z.string(),
-      title: z.string(),
-      status: z.string(),
-      starts_at: z.string(),
-      ends_at: z.string(),
-      season_points: z.number().int().nonnegative(),
-    })
-    .nullable(),
-  config: z.object({
-    version: z.string(),
-    effective_at: z.string(),
-  }),
-  daily: z.unknown().nullable(),
-  typing: z.unknown().nullable(),
-  missions: z.unknown().nullable(),
-  referral: z.unknown().nullable(),
-  network: z.unknown().nullable(),
-});
-
-type RemoteBootstrap = z.infer<typeof remoteBootstrapSchema>;
+export { remoteBootstrapSchema, type RemoteBootstrap } from "./bootstrapContract";
+import { remoteBootstrapSchema, profilePhotoUrl, type RemoteBootstrap } from "./bootstrapContract";
 
 function mapSeasonStatus(status: string): "prelaunch" | "live" | "ended" | "maintenance" {
   if (status === "ACTIVE") return "live";
@@ -67,7 +21,7 @@ function mapMood(level: number): "curious" | "happy" | "focused" | "victory" {
   return "curious";
 }
 
-function mapRemoteBootstrap(
+export function mapRemoteBootstrap(
   payload: RemoteBootstrap,
   environment: "browser" | "telegram",
   requestId: string | null,
@@ -80,15 +34,16 @@ function mapRemoteBootstrap(
     payload.progression.points_remaining === null
       ? Math.max(levelProgress, 1)
       : Math.max(levelProgress + payload.progression.points_remaining, 1);
-  const parsedServerDate = serverDate ? new Date(serverDate) : new Date();
+  const parsedServerDate = new Date(payload.server_time ?? serverDate ?? Date.now());
   const serverTime = Number.isNaN(parsedServerDate.getTime())
     ? new Date().toISOString()
     : parsedServerDate.toISOString();
 
   return bootstrapPayloadSchema.parse({
-    requestId: requestId || `remote-bootstrap-${Date.now()}`,
+    requestId: payload.request_id ?? requestId ?? `remote-bootstrap-${Date.now()}`,
     serverTime,
     environment,
+    remote: payload,
     season: season
       ? {
           id: season.code,
@@ -101,11 +56,12 @@ function mapRemoteBootstrap(
           status: "prelaunch",
         },
     player: {
-      id: String(payload.player.telegram_user_id),
+      id: payload.player.id ?? String(payload.player.telegram_user_id),
+      languageCode: payload.player.language_code,
       firstName: payload.player.first_name || payload.player.username || "Explorer",
       displayName: displayName || payload.player.username || "Dexo Explorer",
       telegramUsername: payload.player.username || null,
-      avatarUrl: null,
+      avatarUrl: profilePhotoUrl(payload.player.photo_url),
       level: payload.progression.level,
       xp: levelProgress,
       xpToNextLevel: levelTarget,
@@ -126,16 +82,24 @@ function mapRemoteBootstrap(
       typing: payload.typing !== null,
       referral: payload.referral !== null,
       network: payload.network !== null,
-      clan: payload.progression.level >= 5,
-      arena: false,
+      // Legacy-only fallbacks; explicit server false must always survive.
+      clan: payload.config.progression?.clan_min_level === null ? false
+        : payload.progression.level >= (payload.config.progression?.clan_min_level ?? 5),
+      arena: season !== null,
+      base_tap: season !== null,
+      profile: true,
       season: season !== null,
+      ...payload.features,
       diagnostics: import.meta.env.VITE_ENABLE_DEV_PANEL === "true",
     },
   });
 }
 
-function dataSource(): "local" | "msw" | "remote" {
-  return import.meta.env.VITE_DATA_SOURCE ?? (import.meta.env.PROD ? "remote" : "local");
+export function dataSource(): "local" | "msw" | "remote" {
+  const configured = import.meta.env.VITE_DATA_SOURCE;
+  if (configured === "local" || configured === "msw") return configured;
+  return configured === undefined && import.meta.env.DEV ? "local" : "remote";
+
 }
 
 export function isRemoteDataSource(): boolean {
@@ -145,13 +109,16 @@ export function isRemoteDataSource(): boolean {
 export async function loadBootstrap(
   scenario: ScenarioId,
   environment: "browser" | "telegram",
-  initData: string | null = null,
+  initData?: string | null,
+  signal?: AbortSignal,
 ): Promise<BootstrapPayload> {
   const source = dataSource();
 
   if (source === "remote") {
-    const response = await apiRequest("/bootstrap", { initData });
-    const payload = remoteBootstrapSchema.parse(await response.json());
+    const response = await apiRequest("/bootstrap", { initData, signal });
+    let payload: RemoteBootstrap;
+    try { payload = remoteBootstrapSchema.parse(await response.json()); }
+    catch { throw new ApiError(response.status, "RESPONSE_INVALID", response.headers.get("X-Request-ID")); }
     return mapRemoteBootstrap(
       payload,
       environment,

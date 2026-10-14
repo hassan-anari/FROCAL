@@ -19,7 +19,7 @@ test.beforeEach(async ({ page }) => {
 
 test("runs the new-player journey into Base", async ({ page }) => {
   await page.getByRole("button", { name: /Enter Dexo Land/i }).click();
-  await expect(page.getByText(/First contact/i)).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Your journey is about to begin." })).toBeVisible();
 
   await page.getByRole("button", { name: /^Begin$/i }).click();
   await expect(page.getByText(/Meet Dexo/i)).toBeVisible();
@@ -53,7 +53,11 @@ test("keeps Dexo visible through Base reactions", async ({ page }) => {
 
   const dexoButton = page.getByRole("button", { name: /Interact with Dexo/i });
   await expect(dexoButton).toBeVisible();
-  await dexoButton.click();
-  await expect(page.getByText("DEXO", { exact: true })).toBeVisible();
+  // The approved artwork/button continuously floats. Exercise a physical pointer
+  // at its current center instead of requiring the animated target to be stationary.
+  const box = await dexoButton.boundingBox();
+  expect(box).not.toBeNull();
+  await page.mouse.click(box!.x + box!.width / 2, box!.y + box!.height / 2);
+  await expect(dexoButton.getByRole("img", { name: "Dexo level one newborn", exact: true })).toBeVisible();
   await expect(dexoButton).toBeVisible();
 });
