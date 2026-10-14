@@ -294,6 +294,10 @@ export class TapController {
     if (stale) return;
     this.snapshot = next;
     this.grant = next.grant;
+    const displayedPending = next.grant ? journal.events.filter((event) => scopeId(event.scope) === scopeId(next.grant!.scope)
+      && event.sequence > next.grant!.sequenceCursor).length * next.grant.pointsPerTouch : 0;
+    const confirmedDisplay = authorizedProgression(next.lifetime + displayedPending, next.progression);
+    if (this.levelChange && (this.levelChange.newLevel > confirmedDisplay.level || this.levelChange.stage !== confirmedDisplay.stage)) this.levelChange = null;
     const stillExhaustedLocally = next.grant && journal.events.filter((event) =>
       scopeId(event.scope) === scopeId(next.grant!.scope) && event.sequence > next.grant!.sequenceCursor).length >= next.grant.remaining;
     // Once accepted, the absolute server deadline replaces the provisional one.

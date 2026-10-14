@@ -1,5 +1,5 @@
-/** Internal delivery abstraction. The B2 adapter supplies verified cache metadata
- * or a credential-in-memory loader after its exact backend contract is pinned. */
+/** Internal verified delivery model. Actual cache URLs come from Bootstrap/Profile;
+ * authenticated loaders, when used, retain credentials only in memory. */
 export type AvatarDelivery =
   | { kind: "url"; url: string }
   | { kind: "authenticated"; load: (signal: AbortSignal) => Promise<Blob> };

@@ -121,6 +121,24 @@ it("restores unsent individual sequences into a stable microbatch before recover
   expect((await inspect(identity)).ledger_rows).toBe(2);
 });
 
+it("checkpoints a restored multi-request journal before draining the remaining exact bodies", async () => {
+  const identity = await player(); const { snapshot, journal } = await fresh(identity);
+  const first = batch(snapshot, 1, 1); const second = batch(snapshot, 1, 2);
+  const storage = new MemoryStorage();
+  storage.setItem(`dalexio-tap-v2:${identity.player}`, JSON.stringify(journalSchema.parse({ ...journal,
+    leases: [{ scope: first.scope, batchLimit: 50, minBatchInterval: 50 }],
+    events: [1, 2].map((sequence) => ({ scope: first.scope, sequence })),
+    batches: [first, second].map((request) => ({ ...request, attempts: 1, blocked: false })),
+  })));
+  const restored = make(identity, undefined, storage); await restored.controller.start();
+  expect(restored.controller.getSnapshot()).toMatchObject({ lifetime: 152, authorizedUnsent: 1, committed: { lifetime: 151 } });
+  const checkpoint = JSON.parse([...storage.data.values()][0]);
+  expect(checkpoint.batches.map((request: any) => request.key)).toEqual([second.key]);
+  await restored.controller.flush();
+  expect(restored.controller.getSnapshot()).toMatchObject({ lifetime: 152, authorizedUnsent: 0 });
+  expect((await inspect(identity)).ledger_rows).toBe(3);
+});
+
 it("uses immutable receipts for partial prefixes, duplicate replay, and rejects mismatched keys", async () => {
   const identity = await player(); const { port, snapshot } = await fresh(identity);
   const first = await port.submit(batch(snapshot, 25), signal());

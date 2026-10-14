@@ -69,6 +69,22 @@ it("keeps provisional cooldown through partial in-flight acknowledgements and re
   harness.controller.close();
 });
 
+it("a partial rejection cannot leave an unearned evolution reveal visible", async () => {
+  const harness = internalHarness({ submit: async (batch) => {
+    const snapshot = internalSnapshot(); snapshot.revision = 2; snapshot.receiptCursor = 2;
+    snapshot.lifetime = 151; snapshot.seasonPoints = 21;
+    snapshot.grant!.remaining = 0; snapshot.grant!.sequenceCursor = 1; snapshot.cooldownUntil = 20_000;
+    snapshot.receipts = [{ scope: batch.scope, key: batch.key, receiptId: 2, through: 1, accepted: 1, rejected: 1 }];
+    return snapshot;
+  } });
+  await harness.controller.start(); harness.controller.touch(); harness.controller.touch();
+  expect(harness.controller.getSnapshot().levelChange).not.toBeNull();
+  await harness.controller.flush();
+  expect(harness.controller.getSnapshot()).toMatchObject({ lifetime: 151, progression: { level: 1, stage: "newborn" }, levelChange: null });
+  expect(harness.controller.touch()).toBe(false);
+  harness.controller.close();
+});
+
 it("one in-flight batch permits new durable input without response rollback", async () => {
   let resolve!: (value: ReturnType<typeof internalSnapshot>) => void;
   const harness = internalHarness({ submit: () => new Promise((done) => { resolve = done; }) });

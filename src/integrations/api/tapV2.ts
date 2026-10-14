@@ -101,8 +101,10 @@ export function createTapPort(player: string, initData: string | null, verifiedA
     const receipts: TapSnapshot["receipts"] = [];
     const rejections: TapSnapshot["rejections"] = [];
     // Exact replay precedes fresh authorization. State sequence cursors never erase request evidence.
-    for (const batch of journal.batches) {
-      if (batch.blocked) continue;
+    // Checkpoint one exact replay per reconciliation. The controller persists its
+    // evidence before draining the rest, so a slow network cannot repeatedly time
+    // out an entire restored journal without ever making durable progress.
+    for (const batch of journal.batches.filter((item) => !item.blocked).slice(0, 1)) {
       try { const result = await submit(batch, signal); receipts.push(...result.receipts); }
       catch (error) {
         if (!(error instanceof TapTransportError) || error.kind !== "terminal" || !definitive.has(error.code)) throw error;
