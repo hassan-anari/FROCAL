@@ -1,0 +1,32 @@
+[
+  {
+    "detail": "synthetic server detail never displayed",
+    "code": "AUTH_MISSING",
+    "request_id": "synthetic-b1-error"
+  },
+  {
+    "detail": "synthetic server detail never displayed",
+    "code": "AUTH_INVALID",
+    "request_id": "synthetic-b1-error"
+  },
+  {
+    "detail": "synthetic server detail never displayed",
+    "code": "AUTH_EXPIRED",
+    "request_id": "synthetic-b1-error"
+  },
+  {
+    "detail": "synthetic server detail never displayed",
+    "code": "AUTH_UNAVAILABLE",
+    "request_id": "synthetic-b1-error"
+  },
+  {
+    "detail": "synthetic server detail never displayed",
+    "code": "INITIALIZATION_UNAVAILABLE",
+    "request_id": "synthetic-b1-error"
+  },
+  {
+    "detail": "synthetic server detail never displayed",
+    "code": "REQUEST_INVALID",
+    "request_id": "synthetic-b1-error"
+  }
+]

@@ -1,3 +1,4 @@
+import { useGameplayAvailability } from "@/integrations/api/useGameplayAvailability";
 import { useBootstrap } from "@/integrations/api/BootstrapProvider";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -101,6 +102,8 @@ export function BasePage() {
   const { adapter } = useTelegram();
   const initData = adapter.getInitData();
   const remoteData = isRemoteDataSource();
+  const { canEarn } = useGameplayAvailability();
+  const tapAvailable = canEarn("base_tap");
 
   const { bootstrap, scope } = useBootstrap();
 
@@ -154,7 +157,7 @@ export function BasePage() {
     bootstrapPlayer?.lifetimeXp ?? profile.data?.progression.lifetime_points ?? null;
 
   const baseTap = useBaseTapExperience({
-    enabled: remoteData && adapter.isTelegram && serverLifetime !== null,
+    enabled: remoteData && adapter.isTelegram && serverLifetime !== null && tapAvailable,
     initData,
     playerId,
     serverLifetime: serverLifetime ?? 0,
@@ -222,14 +225,14 @@ export function BasePage() {
   };
 
   const triggerReaction = () => {
-    if (remoteData && adapter.isTelegram && !baseTap.tap()) return;
+    if (remoteData && adapter.isTelegram && tapAvailable && !baseTap.tap()) return;
 
     const reaction = reactionOrder[reactionCursor.current % reactionOrder.length];
     reactionCursor.current += 1;
     setActiveReaction(reaction);
     scheduleReturn();
 
-    if (remoteData && adapter.isTelegram) {
+    if (remoteData && adapter.isTelegram && tapAvailable) {
       setTapCount((count) => count + 1);
     }
 

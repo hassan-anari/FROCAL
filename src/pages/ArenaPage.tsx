@@ -1,3 +1,5 @@
+import { useBootstrap } from "@/integrations/api/BootstrapProvider";
+import { isRemoteDataSource } from "@/integrations/api/bootstrap";
 import {
   ArrowRight01Icon,
   ChampionIcon,
@@ -522,9 +524,12 @@ export function ArenaPage() {
   const { adapter } = useTelegram();
   const [rankingMode, setRankingMode] = useState<ArenaRankingMode>("players");
   const [seasonOneSection, setSeasonOneSection] = useState<SeasonOneSection>("warfront");
-  const telegramUser = adapter.getUser();
-  const currentName = telegramUser?.first_name ?? "Explorer";
-  const currentPhotoUrl = telegramUser?.photo_url ?? null;
+  const { bootstrap } = useBootstrap();
+  const remote = isRemoteDataSource();
+  const experienceMode = remote ? "season1" : arena.experienceMode;
+  const telegramUser = remote ? null : adapter.getUser();
+  const currentName = remote ? bootstrap.data?.player.firstName ?? "Explorer" : telegramUser?.first_name ?? "Explorer";
+  const currentPhotoUrl = remote ? bootstrap.data?.player.avatarUrl ?? null : telegramUser?.photo_url ?? null;
 
   const ownClan = useMemo(() => {
     if (clan.membership !== "member") return null;
@@ -538,13 +543,13 @@ export function ArenaPage() {
   const rankedClans = useMemo(() => [...clanCatalog].sort((a, b) => a.rank - b.rank), []);
 
   useEffect(() => {
-    if (arena.experienceMode === "season1") {
+    if (experienceMode === "season1") {
       void preloadAssets(seasonOneSection === "warfront" ? arenaWarfrontPreloadAssets : arenaRankingPreloadAssets);
       return;
     }
     const assets = arena.hubSection === "overview" ? arenaOverviewPreloadAssets : arena.hubSection === "war" ? arenaWarPreloadAssets : arena.hubSection === "history" ? arenaHistoryPreloadAssets : arenaRankingPreloadAssets;
     void preloadAssets(assets);
-  }, [arena.experienceMode, arena.hubSection, seasonOneSection]);
+  }, [experienceMode, arena.hubSection, seasonOneSection]);
 
   const selectSection = (section: ArenaHubSection) => {
     if (section === arena.hubSection) return;
@@ -578,7 +583,7 @@ export function ArenaPage() {
   return (
     <>
       <main className={styles.page}>
-        {arena.experienceMode === "season1" ? (
+        {experienceMode === "season1" ? (
           <>
             <header className={styles.pageHeader}>
               <span>ARENA · COMPETITION HUB</span>

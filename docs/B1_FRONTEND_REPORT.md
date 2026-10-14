@@ -1,3 +1,6 @@
+> Final paired-contract correction: [B1_FRONTEND_CONTRACT_CORRECTIONS.md](B1_FRONTEND_CONTRACT_CORRECTIONS.md)
+> pins backend PR #26 and supersedes the original additive-field/error/eligibility handoff below.
+
 # B1 Frontend — Foundation & Telegram Authentication
 
 Batch: B1 / workstreams P-01, P-04 and frontend QA baseline.

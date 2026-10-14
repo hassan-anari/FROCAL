@@ -5,12 +5,14 @@ import { useScenarioStore } from "@/game/scenarios/scenarioStore";
 import { useOnboardingStore } from "@/game/onboarding/onboardingStore";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import { dataSource, loadBootstrap } from "./bootstrap";
+import { configCacheScope, type BootstrapProgressionPolicy } from "./bootstrapContract";
 import { queryKeys, type PlayerScope } from "./queryKeys";
 
 interface BootstrapContextValue {
   bootstrap: UseQueryResult<BootstrapPayload, Error>;
   scope: PlayerScope;
   refresh: () => void;
+  progressionPolicy: BootstrapProgressionPolicy | null;
 }
 const Context = createContext<BootstrapContextValue | null>(null);
 
@@ -38,7 +40,7 @@ export function BootstrapProvider({ children }: { children: ReactNode }) {
     session,
     player: bootstrap.data?.player.id ?? "unverified",
     season: bootstrap.data?.season.id ?? "unavailable",
-    config: bootstrap.data?.remote?.config.version ?? source,
+    config: bootstrap.data?.remote ? configCacheScope(bootstrap.data.remote.config) : source,
   };
   const scopeKey = JSON.stringify(scope);
   const [prepared, setPrepared] = useState("");
@@ -71,7 +73,7 @@ export function BootstrapProvider({ children }: { children: ReactNode }) {
   }, [scopeKey, source]);
 
   const refresh = () => { void bootstrap.refetch(); };
-  return <Context.Provider value={{ bootstrap, scope, refresh }}>
+  return <Context.Provider value={{ bootstrap, scope, refresh, progressionPolicy: bootstrap.data?.remote?.config.progression ?? null }}>
     {prepared === scopeKey ? <div key={scopeKey} style={{ display: "contents" }}>{children}</div> : null}
   </Context.Provider>;
 }

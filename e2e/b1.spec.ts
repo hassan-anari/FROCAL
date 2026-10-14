@@ -1,5 +1,7 @@
+import { readFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
 import { legacyBootstrap } from "../src/integrations/api/bootstrapFixture.test-data";
+const b1Fixture = JSON.parse(readFileSync(new URL("../src/integrations/api/fixtures/bootstrap-b1.json", import.meta.url), "utf8"));
 
 // Signed-shaped, intentionally NON-production credentials. The API is fully intercepted.
 const credentials = (id = 42) => `user=${encodeURIComponent(JSON.stringify({ id, first_name: "Unsigned impostor" }))}&auth_date=123&hash=test-fixture-${id}`;
@@ -142,4 +144,59 @@ test("authenticated cold onboarding retains progress on refresh and reaches Base
   await page.getByRole("button", { name: "Enter Base", exact: true }).click();
   await expect(page.getByRole("button", { name: "Interact with Dexo" })).toBeVisible();
   expect(api.authorizations.every((auth) => auth === `tma ${credentials()}`)).toBe(true);
+});
+
+test("reviewed B1 fixture blocks disabled Clan above its level gate and displays server photo metadata", async ({ page }) => {
+  const fixture = b1Fixture;
+  await mockApi(page, () => ({ body: fixture }));
+  await page.route("https://example.test/**", (route) => route.fulfill({ contentType: "image/svg+xml", body: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><rect width="20" height="20" fill="gray"/></svg>' }));
+  await page.goto(launch("/profile"));
+  await expect(page.getByRole("heading", { name: "Verified" })).toBeVisible();
+  await expect(page.locator('img[src="https://example.test/verified-player.png"]').first()).toBeVisible();
+  await page.getByRole("navigation", { name: "Primary game navigation" }).getByRole("button", { name: "Clan", exact: true }).click();
+  await expect(page.locator('[data-initial-state="FEATURE_UNAVAILABLE"]')).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Clan is unavailable" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Choose your place in the season." })).toHaveCount(0);
+});
+
+test("reviewed Arena availability retains the approved locked S2 preview", async ({ page }) => {
+  const fixture = b1Fixture;
+  await mockApi(page, () => ({ body: fixture }));
+  await page.goto(launch("/arena"));
+  await expect(page.getByRole("navigation", { name: "Arena Season 1 sections" })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Arena Season 2 sections" })).toHaveCount(0);
+  await expect(page.getByText("Warfront", { exact: true }).first()).toBeVisible();
+  await expect(page.getByRole("button", { name: /Deploy attack|Find target/i })).toHaveCount(0);
+});
+
+for (const code of ["AUTH_UNAVAILABLE", "INITIALIZATION_UNAVAILABLE"]) {
+  test(`reviewed ${code} is retryable service failure without credential renewal or raw details`, async ({ page }) => {
+    let recover = false;
+    const fixture = b1Fixture;
+    const api = await mockApi(page, () => recover ? { body: fixture } : { status: 503, body: { code, detail: "raw-sensitive-server-detail", request_id: "synthetic-error-trace" } });
+    await page.goto(launch("/profile"));
+    await expect(page.locator(`[data-initial-state="${code}"]`)).toBeVisible();
+    await expect(page.getByRole("button", { name: "Open Telegram" })).toHaveCount(0);
+    await expect(page.getByText("raw-sensitive-server-detail", { exact: true })).toHaveCount(0);
+    expect(api.attempts()).toBe(3);
+    recover = true;
+    await page.getByRole("button", { name: "Retry", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "Verified" })).toBeVisible();
+  });
+}
+
+test("server earning eligibility disables reward actions while Profile and Arena reads remain available", async ({ page }) => {
+  const fixture = b1Fixture;
+  await mockApi(page, () => ({ body: { ...fixture, features: { ...fixture.features, daily: true }, gameplay: { moderation_state: "SUSPENDED", reward_earning_allowed: false } } }));
+  await page.addInitScript(() => localStorage.setItem("dalexio-onboarding-v1:player:42", JSON.stringify({ state: { status: "completed", step: "ready", guideIndex: 3, completedAt: "2026-10-14T00:00:00Z" }, version: 1 })));
+  await page.goto(launch("/base"));
+  const target = page.getByRole("button", { name: "Interact with Dexo" });
+  await expect(target).toBeVisible();
+  const box = await target.boundingBox(); expect(box).not.toBeNull();
+  await page.mouse.click(box!.x + box!.width / 2, box!.y + box!.height / 2);
+  expect(await page.evaluate(() => localStorage.getItem("dalexio-base-tap-queue:42"))).toBeNull();
+  await page.getByRole("navigation", { name: "Primary game navigation" }).getByRole("button", { name: "Earn", exact: true }).click();
+  await expect(page.getByRole("button", { name: /Claim daily core/i })).toBeDisabled();
+  await page.getByRole("navigation", { name: "Primary game navigation" }).getByRole("button", { name: "Profile", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Verified" })).toBeVisible();
 });

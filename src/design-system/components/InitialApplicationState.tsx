@@ -34,13 +34,26 @@ export function InitialApplicationState({ children }: { children: ReactNode }) {
   } else if (bootstrap.isError) {
     code = bootstrap.error instanceof ApiError ? bootstrap.error.code : "BOOTSTRAP_FAILED";
     message = bootstrap.error instanceof ApiError ? bootstrap.error.message : "The initial game data could not load. Please retry.";
-    reopen = code.startsWith("AUTH_");
+    reopen = ["AUTH_MISSING", "AUTH_INVALID", "AUTH_EXPIRED", "AUTH_REJECTED"].includes(code);
     if (reopen) title = "Telegram authorization needs renewal";
   } else if (remote && bootstrap.data && path !== "/" && path !== "/onboarding" && path !== "/profile"
-    && (bootstrap.data.season.id === "no-active-season" || bootstrap.data.season.status !== "live")) {
+    && (!bootstrap.data.featureFlags.season || bootstrap.data.season.id === "no-active-season" || bootstrap.data.season.status !== "live")) {
     code = "SEASON_UNAVAILABLE";
     title = bootstrap.data.season.id === "no-active-season" ? "Season unavailable" : bootstrap.data.season.name;
     message = "This Season is not available for play. Your player profile and Lifetime XP are preserved. Retry for the latest Season state.";
+  }
+  if (!code && remote && bootstrap.data) {
+    const feature = path === "/arena" ? "arena" : path === "/profile" ? "profile" : path === "/clan" ? "clan" : null;
+    const clanMinLevel = bootstrap.data.remote?.config.progression?.clan_min_level;
+    // Retain the approved below-threshold Clan screen; a disabled policy at/above
+    // its gate must not expose role selection or pretend the player needs Level 5.
+    const clanLevelLocked = feature === "clan" && clanMinLevel !== null
+      && bootstrap.data.player.level < (clanMinLevel ?? 5);
+    if (feature && !bootstrap.data.featureFlags[feature] && !clanLevelLocked) {
+      code = "FEATURE_UNAVAILABLE";
+      title = `${feature === "clan" ? "Clan" : feature === "arena" ? "Arena" : "Profile"} is unavailable`;
+      message = "This feature is not available in the current game configuration. Retry for the latest availability.";
+    }
   }
   if (!code) return children;
   return <main className={styles.errorState} role="alert" data-initial-state={code}>

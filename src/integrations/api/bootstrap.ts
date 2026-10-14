@@ -6,7 +6,7 @@ import { apiRequest, ApiError } from "./client";
 const sleep = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
 
 export { remoteBootstrapSchema, type RemoteBootstrap } from "./bootstrapContract";
-import { remoteBootstrapSchema, type RemoteBootstrap } from "./bootstrapContract";
+import { remoteBootstrapSchema, profilePhotoUrl, type RemoteBootstrap } from "./bootstrapContract";
 
 function mapSeasonStatus(status: string): "prelaunch" | "live" | "ended" | "maintenance" {
   if (status === "ACTIVE") return "live";
@@ -34,13 +34,13 @@ export function mapRemoteBootstrap(
     payload.progression.points_remaining === null
       ? Math.max(levelProgress, 1)
       : Math.max(levelProgress + payload.progression.points_remaining, 1);
-  const parsedServerDate = serverDate ? new Date(serverDate) : new Date();
+  const parsedServerDate = new Date(payload.server_time ?? serverDate ?? Date.now());
   const serverTime = Number.isNaN(parsedServerDate.getTime())
     ? new Date().toISOString()
     : parsedServerDate.toISOString();
 
   return bootstrapPayloadSchema.parse({
-    requestId: requestId || `remote-bootstrap-${Date.now()}`,
+    requestId: payload.request_id ?? requestId ?? `remote-bootstrap-${Date.now()}`,
     serverTime,
     environment,
     remote: payload,
@@ -56,11 +56,12 @@ export function mapRemoteBootstrap(
           status: "prelaunch",
         },
     player: {
-      id: String(payload.player.telegram_user_id),
+      id: payload.player.id ?? String(payload.player.telegram_user_id),
+      languageCode: payload.player.language_code,
       firstName: payload.player.first_name || payload.player.username || "Explorer",
       displayName: displayName || payload.player.username || "Dexo Explorer",
       telegramUsername: payload.player.username || null,
-      avatarUrl: null,
+      avatarUrl: profilePhotoUrl(payload.player.photo_url),
       level: payload.progression.level,
       xp: levelProgress,
       xpToNextLevel: levelTarget,
@@ -81,9 +82,14 @@ export function mapRemoteBootstrap(
       typing: payload.typing !== null,
       referral: payload.referral !== null,
       network: payload.network !== null,
-      clan: payload.progression.level >= 5,
-      arena: false,
+      // Legacy-only fallbacks; explicit server false must always survive.
+      clan: payload.config.progression?.clan_min_level === null ? false
+        : payload.progression.level >= (payload.config.progression?.clan_min_level ?? 5),
+      arena: season !== null,
+      base_tap: season !== null,
+      profile: true,
       season: season !== null,
+      ...payload.features,
       diagnostics: import.meta.env.VITE_ENABLE_DEV_PANEL === "true",
     },
   });

@@ -1,3 +1,4 @@
+import { profilePhotoUrl } from "@/integrations/api/bootstrapContract";
 import { useBootstrap } from "@/integrations/api/BootstrapProvider";
 import { ArrowRight01Icon, Notification03Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -111,11 +112,13 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
   const telegramUser = remoteData ? null : adapter.getUser();
   const identity = profile.data?.identity;
   const displayName =
-    [identity?.first_name, identity?.last_name].filter(Boolean).join(" ").trim() ||
     bootstrap.data?.player.displayName ||
+    [identity?.first_name, identity?.last_name].filter(Boolean).join(" ").trim() ||
     telegramUser?.first_name ||
     "—";
-  const avatar = identity?.photo_url || telegramUser?.photo_url || null;
+  const avatar = bootstrap.data?.remote?.player.photo_url !== undefined
+    ? bootstrap.data.player.avatarUrl
+    : profilePhotoUrl(identity?.photo_url) ?? telegramUser?.photo_url ?? null;
   const actualStage =
     bootstrap.data?.dexo.stage ?? profile.data?.progression.dexo_stage ?? optimisticProgression.stage;
   const stageLabel = actualStage ? actualStage.toUpperCase() : "—";

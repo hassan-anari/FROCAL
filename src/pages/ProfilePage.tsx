@@ -1,3 +1,4 @@
+import { profilePhotoUrl } from "@/integrations/api/bootstrapContract";
 import { useProfileOverview } from "@/integrations/api/useProfileOverview";
 import { isRemoteDataSource } from "@/integrations/api/bootstrap";
 import { useBootstrap } from "@/integrations/api/BootstrapProvider";
@@ -81,7 +82,11 @@ export function ProfilePage() {
   const telegramUser = remoteData ? null : adapter.getUser();
   const firstName = telegramUser?.first_name ?? player?.firstName ?? "Explorer";
   const username = telegramUser?.username ?? player?.telegramUsername ?? null;
-  const photoUrl = remoteData ? overview.data?.identity.photo_url || player?.avatarUrl || null : telegramUser?.photo_url ?? player?.avatarUrl ?? null;
+  const photoUrl = remoteData
+    ? bootstrap.data?.remote?.player.photo_url !== undefined
+      ? player?.avatarUrl ?? null
+      : profilePhotoUrl(overview.data?.identity.photo_url) ?? player?.avatarUrl ?? null
+    : telegramUser?.photo_url ?? player?.avatarUrl ?? null;
 
   const earn = useEarnStore();
   const profile = useProfileStore();

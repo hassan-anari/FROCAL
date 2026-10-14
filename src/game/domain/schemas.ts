@@ -6,6 +6,7 @@ export const userProfileSchema = z.object({
   firstName: z.string().min(1),
   displayName: z.string().min(1),
   telegramUsername: z.string().nullable(),
+  languageCode: z.string().optional(),
   avatarUrl: z.string().url().nullable(),
   level: z.number().int().nonnegative(),
   xp: z.number().int().nonnegative(),

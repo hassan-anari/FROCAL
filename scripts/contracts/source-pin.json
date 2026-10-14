@@ -1,0 +1,10 @@
+{
+  "repository": "hassan-anari/WEDCAL",
+  "pr": 26,
+  "commit": "cadc257fbed5c6bf36e31c767e70f4cd430e350d",
+  "git_blobs": {
+    "backend-bootstrap-schemas.py": "78075564dcecad58f1815fee067d0f7aa474ce88",
+    "backend-api-errors.py": "a1aa7d1fa5ba1988ad0d5c9c291a8bb6ed8a455f"
+  },
+  "fixture_note": "Synthetic schema-valid values only; not an economy config, signed authentication fixture or production player."
+}

@@ -1,3 +1,4 @@
+import { useGameplayAvailability } from "@/integrations/api/useGameplayAvailability";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useNavigate } from "@tanstack/react-router";
@@ -60,6 +61,7 @@ function calculateStats(input: string, target: string, elapsedSeconds: number) {
 }
 
 export function TypingChallengePage() {
+  const { canEarn } = useGameplayAvailability();
   const navigate = useNavigate();
   const { adapter } = useTelegram();
   const recordTypingResult = useEarnStore((state) => state.recordTypingResult);
@@ -84,6 +86,7 @@ export function TypingChallengePage() {
   }, [navigate]);
 
   const finish = useCallback(() => {
+    if (!canEarn("typing")) return;
     if (result || !started || attemptsRemaining <= 0) return;
     const finalStats = calculateStats(input, target, Math.max(1, CHALLENGE_SECONDS - timeLeft));
     const passed = finalStats.accuracy >= PASS_ACCURACY && finalStats.wpm >= PASS_WPM && input.length >= target.length;
@@ -97,7 +100,7 @@ export function TypingChallengePage() {
       completedAt: new Date().toISOString(),
     });
     adapter.hapticNotice(passed ? "success" : "warning");
-  }, [adapter, attemptsRemaining, input, recordTypingResult, result, started, target, timeLeft]);
+  }, [adapter, attemptsRemaining, canEarn, input, recordTypingResult, result, started, target, timeLeft]);
 
   useEffect(() => {
     void preloadAssets(["dexo.personalityFocused"]);
@@ -135,14 +138,14 @@ export function TypingChallengePage() {
   }, [finish, input.length, result, started, target.length]);
 
   const begin = () => {
-    if (attemptsRemaining <= 0) return;
+    if (attemptsRemaining <= 0 || !canEarn("typing")) return;
     setStarted(true);
     adapter.hapticImpact("light");
     window.setTimeout(() => inputRef.current?.focus(), 70);
   };
 
   const retry = () => {
-    if (attemptsRemaining <= 0) return;
+    if (attemptsRemaining <= 0 || !canEarn("typing")) return;
     attempt.current += 1;
     setTarget(phrases[attempt.current % phrases.length]);
     setInput("");

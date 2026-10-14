@@ -1,3 +1,5 @@
+import { useBootstrap } from "@/integrations/api/BootstrapProvider";
+import { isRemoteDataSource } from "@/integrations/api/bootstrap";
 import {
   ArrowRight01Icon,
   InformationCircleIcon,
@@ -184,20 +186,20 @@ function ActiveEffectsStrip({ effects }: { effects: ClanActiveEffect[] }) {
   );
 }
 
-function LockedClan({ level }: { level: number }) {
-  const ratio = Math.min(1, level / 5);
+function LockedClan({ level, minLevel = 5 }: { level: number; minLevel?: number }) {
+  const ratio = Math.min(1, level / minLevel);
   return (
     <div className={styles.stack}>
       <section className={styles.lockedScene}>
         <div className={styles.sceneGlow} />
         <AssetImage assetKey="clan.hq.stateLocked" className={styles.lockedArt} />
         <div className={styles.lockedCopy}>
-          <span className={styles.eyebrow}>CLAN SYSTEM · LEVEL 5</span>
+          <span className={styles.eyebrow}>CLAN SYSTEM · LEVEL {minLevel}</span>
           <h2>Headquarters access locked</h2>
-          <p>Grow your Dexo to Level 5, then choose one seasonal path: lead a clan or fight for one.</p>
+          <p>Grow your Dexo to Level {minLevel}, then choose one seasonal path: lead a clan or fight for one.</p>
         </div>
         <div className={styles.unlockProgress}>
-          <div><span>Access progress</span><strong>LVL {level} / 5</strong></div>
+          <div><span>Access progress</span><strong>LVL {level} / {minLevel}</strong></div>
           <div className={styles.progressTrack}><i style={{ transform: `scaleX(${ratio})` }} /></div>
         </div>
       </section>
@@ -873,6 +875,9 @@ function Headquarters({
 
 export function ClanPage() {
   const { level: earnLevel } = usePlayerProgression();
+  const { bootstrap } = useBootstrap();
+  const minLevel = isRemoteDataSource() ? bootstrap.data?.remote?.config.progression?.clan_min_level ?? 5 : 5;
+  const clanAvailable = isRemoteDataSource() ? Boolean(bootstrap.data?.featureFlags.clan) : earnLevel >= 5;
   const clan = useClanStore();
   const { adapter } = useTelegram();
   const [overlay, setOverlay] = useState<OverlayState>(null);
@@ -882,8 +887,8 @@ export function ClanPage() {
     return getClanById(clan.activeClanId);
   }, [clan.activeClanId, clan.createdClan]);
 
-  const pageCopy = earnLevel < 5
-    ? { eyebrow: "CLAN NETWORK", title: "Your clan path waits ahead.", subtitle: "Reach Level 5 to unlock the social game layer." }
+  const pageCopy = !clanAvailable
+    ? { eyebrow: "CLAN NETWORK", title: "Your clan path waits ahead.", subtitle: `Reach Level ${minLevel} to unlock the social game layer.` }
     : clan.role === null
       ? { eyebrow: "CLAN NETWORK", title: "Choose your place in the season.", subtitle: "Lead one headquarters or earn your place inside one." }
       : clan.membership === "member" && activeClan
@@ -929,20 +934,20 @@ export function ClanPage() {
   return (
     <>
       <main className={styles.page}>
-        <header className={`${styles.pageHeader} ${clan.membership === "member" ? styles.pageHeaderCompact : ""} ${earnLevel >= 5 && clan.role === null ? styles.pageHeaderWrap : ""}`}>
+        <header className={`${styles.pageHeader} ${clan.membership === "member" ? styles.pageHeaderCompact : ""} ${clanAvailable && clan.role === null ? styles.pageHeaderWrap : ""}`}>
           <span>{pageCopy.eyebrow}</span>
           <h1>{pageCopy.title}</h1>
           <p>{pageCopy.subtitle}</p>
         </header>
 
-        {earnLevel < 5 ? <LockedClan level={earnLevel} /> : null}
-        {earnLevel >= 5 && clan.role === null ? <RoleChoice onChoose={chooseRole} /> : null}
+        {!clanAvailable ? <LockedClan level={earnLevel} minLevel={minLevel} /> : null}
+        {clanAvailable && clan.role === null ? <RoleChoice onChoose={chooseRole} /> : null}
 
-        {earnLevel >= 5 && clan.role === "soldier" && clan.membership !== "member" ? (
+        {clanAvailable && clan.role === "soldier" && clan.membership !== "member" ? (
           <SoldierNetwork pendingClanId={clan.joinRequestClanId} requestState={clan.joinRequestState} onOpenClan={openClan} />
         ) : null}
 
-        {earnLevel >= 5 && clan.role === "captain" && clan.membership !== "member" ? (
+        {clanAvailable && clan.role === "captain" && clan.membership !== "member" ? (
           <CaptainFounding
             onCreate={(input) => {
               clan.createClan(input);
@@ -952,7 +957,7 @@ export function ClanPage() {
           />
         ) : null}
 
-        {earnLevel >= 5 && clan.membership === "member" && activeClan ? (
+        {clanAvailable && clan.membership === "member" && activeClan ? (
           <Headquarters
             clan={activeClan}
             captain={clan.role === "captain"}
@@ -967,11 +972,11 @@ export function ClanPage() {
         ) : null}
 
         <AnimatePresence>
-          {overlay?.type === "role" ? (
+          {clanAvailable && overlay?.type === "role" ? (
             <RoleConfirmSheet role={overlay.role} onClose={() => setOverlay(null)} onConfirm={() => confirmRole(overlay.role)} />
           ) : null}
 
-          {overlay?.type === "clan" ? (() => {
+          {clanAvailable && overlay?.type === "clan" ? (() => {
             const preview = getClanById(overlay.clanId);
             if (!preview) return null;
             return (
@@ -984,7 +989,7 @@ export function ClanPage() {
             );
           })() : null}
 
-          {overlay?.type === "item" ? (() => {
+          {clanAvailable && overlay?.type === "item" ? (() => {
             const item = getClanItemById(overlay.itemId);
             if (!item) return null;
             return (
@@ -1002,11 +1007,11 @@ export function ClanPage() {
             );
           })() : null}
 
-          {overlay?.type === "trophies" ? (
+          {clanAvailable && overlay?.type === "trophies" ? (
             <ClanAchievementsSheet achievements={clanAchievements} onClose={() => setOverlay(null)} />
           ) : null}
 
-          {overlay?.type === "requests" ? (
+          {clanAvailable && overlay?.type === "requests" ? (
             <JoinRequestsSheet
               applicants={clan.applicants}
               onClose={() => setOverlay(null)}

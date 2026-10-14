@@ -3,12 +3,14 @@ import { act, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { BootstrapProvider, useBootstrap } from "./BootstrapProvider";
 import { TelegramProvider, useTelegram } from "@/integrations/telegram/TelegramProvider";
+import { useGameplayAvailability } from "./useGameplayAvailability";
 import { legacyBootstrap } from "./bootstrapFixture.test-data";
 import { useOnboardingStore } from "@/game/onboarding/onboardingStore";
 
 function Probe() {
-  const { bootstrap, scope } = useBootstrap(); const { launchState } = useTelegram();
-  return <div><span>{launchState}</span><span>{bootstrap.data?.player.firstName ?? "waiting"}</span><span>{scope.season}</span><span>{useOnboardingStore((state) => state.status)}</span></div>;
+  const { bootstrap, scope, progressionPolicy } = useBootstrap(); const { launchState } = useTelegram();
+  const { featureAvailable, canEarn } = useGameplayAvailability();
+  return <div><span>{launchState}</span><span>{bootstrap.data?.player.firstName ?? "waiting"}</span><span>{scope.season}</span><span>{useOnboardingStore((state) => state.status)}</span><span data-testid="policy">{progressionPolicy?.levels.length ?? "legacy-policy"}</span><span data-testid="arena-readable">{String(featureAvailable("arena"))}</span><span data-testid="tap-eligible">{String(canEarn("base_tap"))}</span></div>;
 }
 function mount() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -71,4 +73,35 @@ it("does not consume fullscreen initialization before a delayed SDK provides the
   act(() => { window.Telegram = { WebApp: { initData: "launch-signed", platform: "android", requestFullscreen: fullscreen } }; });
   await waitFor(() => expect(fullscreen).toHaveBeenCalledTimes(1));
   delete document.documentElement.dataset.telegramFullscreenRequested;
+});
+
+it("clears prior config caches on checksum turnover and exposes typed policy", async () => {
+  const fixture = (await import("./fixtures/bootstrap-b1.json")).default;
+  vi.stubEnv("VITE_DATA_SOURCE", "remote");
+  window.Telegram = { WebApp: { initData: "checksum-session", platform: "tdesktop" } };
+  let changed = false;
+  vi.stubGlobal("fetch", vi.fn().mockImplementation(() => Promise.resolve(new Response(JSON.stringify({ ...fixture, config: { ...fixture.config, payload_checksum: changed ? "b".repeat(64) : fixture.config.payload_checksum } })))));
+  const client = mount(); await screen.findByText("Verified");
+  expect(screen.getByTestId("policy")).toHaveTextContent(String(fixture.config.progression.levels.length));
+  const configScope = JSON.stringify([fixture.config.version, fixture.config.schema_version, fixture.config.payload_checksum]);
+  const oldKey = ["player", 1, "42", "season-1", configScope, "profile", "overview"];
+  client.setQueryData(oldKey, { level: 90 });
+  changed = true;
+  await act(async () => { await client.invalidateQueries({ queryKey: ["bootstrap"] }); });
+  await waitFor(() => expect(client.getQueryData(oldKey)).toBeUndefined());
+});
+
+
+it("separates read availability from server reward eligibility without treating FLAGGED as banned", async () => {
+  const fixture = (await import("./fixtures/bootstrap-b1.json")).default;
+  vi.stubEnv("VITE_DATA_SOURCE", "remote");
+  window.Telegram = { WebApp: { initData: "eligibility-session", platform: "android" } };
+  let allowed = false;
+  vi.stubGlobal("fetch", vi.fn().mockImplementation(() => Promise.resolve(new Response(JSON.stringify({ ...fixture, gameplay: { moderation_state: "FLAGGED", reward_earning_allowed: allowed } })))));
+  const client = mount(); await screen.findByText("Verified");
+  expect(screen.getByTestId("arena-readable")).toHaveTextContent("true");
+  expect(screen.getByTestId("tap-eligible")).toHaveTextContent("false");
+  allowed = true;
+  await act(async () => { await client.invalidateQueries({ queryKey: ["bootstrap"] }); });
+  await waitFor(() => expect(screen.getByTestId("tap-eligible")).toHaveTextContent("true"));
 });
