@@ -190,7 +190,9 @@ Known limits / rollout:
   B1 does not claim B3–B6 delivery or production launch readiness.
 - Existing bundle-size warning remains; no speculative redesign/performance rewrite.
 - Frontend branch protection and backend PH-037/PH-043 require owner follow-up.
-- No merge, deployment, migration, reward change or next-batch start is authorized here.
+- No merge, production deployment, migration, reward change or next-batch start occurred.
+  The pre-existing Vercel integration automatically published a branch preview; see
+  the explicit exception and prevention below.
 
 Rollout: keep this PR Draft pending review, hosted CI and device evidence. Use a
 non-production authenticated staging pairing for API/native verification. Frontend
@@ -235,3 +237,39 @@ prove VPN-off reachability on users' devices.
 - `git diff --check`: passed. No CSS file changed; no screenshot assertions updated.
 - Required actual-device VPN/native, staging paired-backend and independent owner
   review are outstanding. Hosted CI evidence is linked in the Draft PR.
+
+
+## Hosted CI and automatic preview exception
+
+Implementation head: `8e5391e8c07bb5665b9b683d9f6a99dcb19ef1b1`.
+[Draft PR #2](https://github.com/hassan-anari/Dalexio-Game/pull/2) targets main.
+
+[PR Actions run 38557885461](https://github.com/hassan-anari/Dalexio-Game/actions/runs/38557885461)
+and [push run 38557882614](https://github.com/hassan-anari/Dalexio-Game/actions/runs/38557882614)
+both failed before executing steps. Browser and unit-build jobs have no steps or
+available log archive (log retrieval returned BlobNotFound). GitHub reports failure;
+this is **not passing CI or a failing application assertion**. The public job annotation states: “The job was not started because recent account
+payments have failed or your spending limit needs to be increased. Please check the
+Billing & plans section in your settings.” The owner must resolve this GitHub account
+billing/spending restriction and rerun the existing workflow. The API connector did
+not expose annotations; the reason was verified on the public Actions job page. No
+required checks were removed, disabled or marked successful. B1 acceptance is blocked
+on hosted execution. Do not merge or start B2 while this remains unresolved.
+
+The existing Vercel Git integration automatically created a **branch preview** when
+this requested PR branch was published. Its status reports Deployment has completed:
+https://vercel.com/forgers/dalexio-game/3vhzJ4Z8hz5Fs4M1qNoQdDEiYMv3 .
+No manual deploy command was issued and production main was not changed, but the
+preview is an exception to the requested no-deployment scope and is disclosed, not
+concealed. The branch-specific `git.deploymentEnabled` setting now disables further
+Vercel deployments for `ai/b1-frontend-foundation`; it does not change main's policy.
+No Vercel management credential/tool is available to cancel/remove that already
+completed preview. The owner can remove it in Vercel. No authenticated preview or
+production gameplay was exercised. Vercel success is **not** Playwright/CI evidence.
+
+
+Repository identity note: during final handoff GitHub began redirecting the original
+Dalexio-Game name to `hassan-anari/FROCAL`. Both names resolve to the same immutable
+repository ID `1312056109`, same PR #2, base and implementation head. No repository
+rename or visibility change was performed by this task, and the local remote remains
+unchanged. Follow-up publication uses the server-returned canonical repository name.
