@@ -21,6 +21,7 @@ import {
   type NotificationPage,
 } from "@/integrations/api/notifications";
 import { useProfileOverview } from "@/integrations/api/useProfileOverview";
+import { useAvatarSource } from "@/integrations/api/useAvatarSource";
 import { queryKeys } from "@/integrations/api/queryKeys";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
@@ -119,6 +120,7 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
   const avatar = bootstrap.data?.remote?.player.photo_url !== undefined
     ? bootstrap.data.player.avatarUrl
     : profilePhotoUrl(identity?.photo_url) ?? telegramUser?.photo_url ?? null;
+  const avatarSource = useAvatarSource(bootstrapPlayerId, avatar);
   const actualStage =
     bootstrap.data?.dexo.stage ?? profile.data?.progression.dexo_stage ?? optimisticProgression.stage;
   const stageLabel = actualStage ? actualStage.toUpperCase() : "—";
@@ -149,6 +151,7 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
   };
 
   const handleSeasonTap = () => {
+    if (!import.meta.env.DEV) return;
     seasonTapCount.current += 1;
     if (seasonTapTimer.current !== null) window.clearTimeout(seasonTapTimer.current);
 
@@ -209,7 +212,7 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
     <>
       <header className={`${styles.header} ${compact ? styles.compact : ""}`}>
         <div className={styles.identity}>
-          {avatar ? <img src={avatar} alt="" /> : <span className={styles.avatarFallback}>{initials}</span>}
+          {avatarSource.src ? <img src={avatarSource.src} onError={avatarSource.onError} alt="" /> : <span className={styles.avatarFallback}>{initials}</span>}
           <div>
             <span>{stageLabel}</span>
             <strong>{displayName}</strong>
@@ -219,7 +222,7 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
         <button
           type="button"
           className={styles.seasonControl}
-          onClick={handleSeasonTap}
+          onClick={import.meta.env.DEV ? handleSeasonTap : undefined}
           aria-label={`${seasonCode} ${seasonTitle}`}
         >
           <span>{seasonCode}</span>

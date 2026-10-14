@@ -495,7 +495,7 @@ export const useEarnStore = create<EarnState>()(
         levelUpEvent: null,
       }),
 
-      setNearEvolutionForDiagnostics: () => set({
+      setNearEvolutionForDiagnostics: () => import.meta.env.DEV && set({
         level: 4,
         levelXp: 490,
         xpToNextLevel: 500,
@@ -504,6 +504,7 @@ export const useEarnStore = create<EarnState>()(
       }),
 
       setLevelForDiagnostics: (level) => {
+        if (!import.meta.env.DEV) return;
         const normalized = Math.max(1, Math.floor(level));
         set({
           level: normalized,
@@ -515,6 +516,7 @@ export const useEarnStore = create<EarnState>()(
       },
 
       completeStarterPathForDiagnostics: () => {
+        if (!import.meta.env.DEV) return;
         const state = get();
         const completed = { ...state.missions };
         (Object.keys(completed) as MissionId[]).forEach((id) => {

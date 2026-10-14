@@ -1,14 +1,14 @@
-name: B1 frontend validation
+name: Frontend validation
 on:
   pull_request:
     branches: [main]
   push:
-    branches: ['ai/b1-frontend-*']
+    branches: ['ai/b1-frontend-*', 'ai/b2-frontend-*']
   workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: b1-frontend-${{ github.ref }}
+  group: frontend-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   unit-build:
@@ -41,7 +41,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b1-playwright-evidence
+          name: frontend-playwright-evidence
           path: |
             playwright-report/
             test-results/

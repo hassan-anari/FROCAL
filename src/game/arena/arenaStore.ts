@@ -72,19 +72,21 @@ const baseState = {
 export const useArenaWarStore = create<ArenaWarState>((set, get) => ({
   ...baseState,
 
-  setExperienceMode: (experienceMode) => set({ experienceMode }),
+  setExperienceMode: (experienceMode) => {
+    if (experienceMode === "season1" || import.meta.env.DEV) set({ experienceMode });
+  },
   openSeason1Public: () => set({ ...baseState, experienceMode: "season1", selectedItemIds: [] }),
-  openSeason2Diagnostics: () => set({ ...baseState, experienceMode: "season2", selectedItemIds: [] }),
+  openSeason2Diagnostics: () => import.meta.env.DEV && set({ ...baseState, experienceMode: "season2", selectedItemIds: [] }),
   setHubSection: (hubSection) => set({ hubSection }),
-  setScenario: (scenario) => set({ scenario, hubSection: scenario === "idle" ? "overview" : "war" }),
+  setScenario: (scenario) => import.meta.env.DEV && set({ scenario, hubSection: scenario === "idle" ? "overview" : "war" }),
   openTargeting: () => set({ scenario: "targeting", hubSection: "war", direction: "attack" }),
   selectOpponent: (selectedOpponentId) => set({ selectedOpponentId, scenario: "preview", hubSection: "war", direction: "attack" }),
   beginPreparation: () => set({ scenario: "preparation", hubSection: "war", direction: "attack" }),
   launchAttack: () => set({ scenario: "attacking", hubSection: "war", direction: "attack", battleProgress: 68, enemyProgress: 57 }),
-  showAttackForDiagnostics: () => set({ scenario: "attacking", hubSection: "war", direction: "attack", battleProgress: 68, enemyProgress: 57 }),
-  showDefenceForDiagnostics: () => set({ scenario: "defending", hubSection: "war", direction: "defence", battleProgress: 63, enemyProgress: 71 }),
-  showResultForDiagnostics: (result = "victory") => set({ scenario: "result", hubSection: "war", result }),
-  showStatusForDiagnostics: (status = "protection") => set({ scenario: "status", hubSection: "war", status }),
+  showAttackForDiagnostics: () => import.meta.env.DEV && set({ scenario: "attacking", hubSection: "war", direction: "attack", battleProgress: 68, enemyProgress: 57 }),
+  showDefenceForDiagnostics: () => import.meta.env.DEV && set({ scenario: "defending", hubSection: "war", direction: "defence", battleProgress: 63, enemyProgress: 71 }),
+  showResultForDiagnostics: (result = "victory") => import.meta.env.DEV && set({ scenario: "result", hubSection: "war", result }),
+  showStatusForDiagnostics: (status = "protection") => import.meta.env.DEV && set({ scenario: "status", hubSection: "war", status }),
   toggleItem: (itemId) => set((state) => {
     if (state.selectedItemIds.includes(itemId)) return { selectedItemIds: state.selectedItemIds.filter((id) => id !== itemId) };
     if (state.selectedItemIds.length >= 2) return state;
@@ -94,7 +96,7 @@ export const useArenaWarStore = create<ArenaWarState>((set, get) => ({
   setEnemyProgress: (enemyProgress) => set({ enemyProgress: Math.max(0, Math.min(100, enemyProgress)) }),
   resetArena: () => set({ ...baseState, selectedItemIds: [] }),
 
-  setDebugUnlocked: (debugUnlocked) => set({ debugUnlocked }),
+  setDebugUnlocked: (debugUnlocked) => import.meta.env.DEV && set({ debugUnlocked }),
   setStage: (stage) => set((state) => ({ stage, selectedItemIds: stage === "defence" ? [] : state.selectedItemIds })),
   nextStage: () => {
     const index = warStageOrder.indexOf(get().stage);

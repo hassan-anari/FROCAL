@@ -1,6 +1,5 @@
 import { bootstrapPayloadSchema, type BootstrapPayload } from "@/game/domain/schemas";
 import type { ScenarioId } from "@/game/scenarios/scenarioStore";
-import { createBootstrapFixture } from "@/mocks/fixtures/bootstrap";
 import { apiRequest, ApiError } from "./client";
 
 const sleep = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
@@ -90,12 +89,13 @@ export function mapRemoteBootstrap(
       profile: true,
       season: season !== null,
       ...payload.features,
-      diagnostics: import.meta.env.VITE_ENABLE_DEV_PANEL === "true",
+      diagnostics: import.meta.env.DEV && import.meta.env.VITE_ENABLE_DEV_PANEL === "true",
     },
   });
 }
 
 export function dataSource(): "local" | "msw" | "remote" {
+  if (!import.meta.env.DEV) return "remote";
   const configured = import.meta.env.VITE_DATA_SOURCE;
   if (configured === "local" || configured === "msw") return configured;
   return configured === undefined && import.meta.env.DEV ? "local" : "remote";
@@ -135,9 +135,13 @@ export async function loadBootstrap(
     return bootstrapPayloadSchema.parse(await response.json());
   }
 
-  await sleep(320);
-  if (scenario === "error-state") {
-    throw new Error("Simulated Phase 0 bootstrap failure");
+  if (import.meta.env.DEV) {
+    await sleep(320);
+    if (scenario === "error-state") {
+      throw new Error("Simulated Phase 0 bootstrap failure");
+    }
+    const { createBootstrapFixture } = await import("@/mocks/fixtures/bootstrap");
+    return bootstrapPayloadSchema.parse(createBootstrapFixture(scenario, environment));
   }
-  return bootstrapPayloadSchema.parse(createBootstrapFixture(scenario, environment));
+  throw new Error("Development fixtures are unavailable in production.");
 }

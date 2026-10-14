@@ -287,6 +287,8 @@ export function BasePage() {
           <DexoStage
             character={displayedCharacter}
             characterScale={displayedScale}
+            baseCharacter={levelAsset}
+            baseCharacterScale={getLevelScale(currentLevel)}
             effect="base"
             showParticles={false}
             interactive

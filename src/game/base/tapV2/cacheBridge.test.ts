@@ -1,0 +1,30 @@
+import { QueryClient } from "@tanstack/react-query";
+import { expect, it } from "vitest";
+import { mapRemoteBootstrap, remoteBootstrapSchema } from "@/integrations/api/bootstrap";
+import { legacyBootstrap } from "@/integrations/api/bootstrapFixture.test-data";
+import { queryKeys } from "@/integrations/api/queryKeys";
+import { createTapCacheBridge } from "./cacheBridge";
+import { internalSnapshot } from "./testing.fixture";
+
+it("propagates committed progression only to the current player/Season/config caches and ignores older receipts", () => {
+  const client = new QueryClient();
+  const value = mapRemoteBootstrap(remoteBootstrapSchema.parse(legacyBootstrap), "telegram", null, null);
+  const key = queryKeys.bootstrap(1, "remote", "new-user", "telegram");
+  client.setQueryData(key, value);
+  client.setQueryData(queryKeys.bootstrap(2, "remote", "new-user", "telegram"), { ...value, player: { ...value.player, id: "other" } });
+  const scope = { session: 1, player: "42", season: "season-1", config: "legacy-v1" };
+  const bridge = createTapCacheBridge(client, scope);
+  const snapshot = internalSnapshot(); snapshot.player = "42"; snapshot.season = "season-1"; snapshot.config = "legacy-v1";
+  snapshot.lifetime = 152; snapshot.seasonPoints = 22;
+  bridge(snapshot);
+  expect(client.getQueryData(key)).toMatchObject({ player: { lifetimeXp: 152, level: 5, seasonScore: 22 }, dexo: { stage: "explorer" } });
+  bridge({ ...snapshot, lifetime: 1, revision: 0 });
+  expect(client.getQueryData(key)).toMatchObject({ player: { lifetimeXp: 152 } });
+  bridge({ ...snapshot, player: "other", lifetime: 9999, revision: 10 });
+  expect(client.getQueryData(key)).toMatchObject({ player: { lifetimeXp: 152 } });
+  client.removeQueries({ queryKey: key });
+  bridge({ ...snapshot, lifetime: 999, revision: 20 });
+  expect(client.getQueryData(key)).toBeUndefined();
+  expect(client.getQueryData(queryKeys.profileOverview(scope))).toBeUndefined();
+  client.clear();
+});

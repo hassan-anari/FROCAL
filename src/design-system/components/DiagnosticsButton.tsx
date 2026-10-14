@@ -11,6 +11,7 @@ export function DiagnosticsButton() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const { adapter } = useTelegram();
   const isDiagnostics = pathname === "/diagnostics";
+  if (!import.meta.env.DEV) return null;
 
   const handleClick = () => {
     adapter.hapticImpact("light");

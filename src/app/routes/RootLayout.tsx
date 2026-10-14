@@ -1,8 +1,12 @@
 import { Outlet } from "@tanstack/react-router";
+import { lazy, Suspense } from "react";
 import { InitialApplicationState } from "@/design-system/components/InitialApplicationState";
 import { AppErrorBoundary } from "@/design-system/components/AppErrorBoundary";
-import { DevScenarioPanel } from "@/design-system/components/DevScenarioPanel";
 import styles from "./RootLayout.module.css";
+
+const DevScenarioPanel = import.meta.env.DEV
+  ? lazy(() => import("@/design-system/components/DevScenarioPanel").then((module) => ({ default: module.DevScenarioPanel })))
+  : null;
 
 export function RootLayout() {
   return (
@@ -10,7 +14,7 @@ export function RootLayout() {
       <div className={`dalexio-app-host ${styles.host}`}>
         <div className={`dalexio-app-viewport ${styles.viewport}`}>
           <InitialApplicationState><Outlet /></InitialApplicationState>
-          <DevScenarioPanel />
+          {DevScenarioPanel ? <Suspense fallback={null}><DevScenarioPanel /></Suspense> : null}
         </div>
       </div>
     </AppErrorBoundary>

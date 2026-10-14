@@ -14,7 +14,9 @@
     "mock:init": "msw init public --save",
     "validate:assets": "node scripts/validate-assets.mjs",
     "validate:structure": "node scripts/validate-structure.mjs",
-    "check": "npm run validate:structure && npm run validate:assets && npm run validate:imports && npm run validate:motion && npm run typecheck && npm run test && npm run build",
+    "check": "npm run validate:structure && npm run validate:assets && npm run validate:imports && npm run validate:motion && npm run validate:production && npm run typecheck && npm run test && npm run build && npm run validate:production-bundle",
+    "validate:production": "node --test scripts/production-policy.test.mjs",
+    "validate:production-bundle": "node scripts/validate-production-bundle.mjs",
     "validate:imports": "node scripts/validate-imports.mjs",
     "validate:motion": "node scripts/validate-motion.mjs",
     "validate:telegram-sdk": "node scripts/validate-telegram-sdk.mjs"

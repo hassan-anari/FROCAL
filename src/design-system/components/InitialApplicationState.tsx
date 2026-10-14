@@ -14,7 +14,7 @@ export function InitialApplicationState({ children }: { children: ReactNode }) {
   const { bootstrap, refresh } = useBootstrap();
   const path = useRouterState({ select: (state) => state.location.pathname });
   const remote = isRemoteDataSource();
-  if (path === "/diagnostics") return children;
+  if (import.meta.env.DEV && path === "/diagnostics") return children;
   if (remote && launchState === "initializing") return <AppLoader label="Initializing Telegram launch" />;
   let code: string | null = null;
   let title = "Connection interrupted";

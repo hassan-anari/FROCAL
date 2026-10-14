@@ -5,10 +5,7 @@ import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import styles from "./ArenaDebugPanel.module.css";
 
 export function isArenaDebugVisible(): boolean {
-  if (import.meta.env.DEV) return true;
-  if (import.meta.env.VITE_ENABLE_ARENA_DEBUG === "true") return true;
-  if (typeof window === "undefined") return false;
-  return new URLSearchParams(window.location.search).get("arenaDebug") === "1";
+  return import.meta.env.DEV;
 }
 
 const stageLabels: Record<ArenaWarStage, string> = {
@@ -81,7 +78,7 @@ export function ArenaDebugPanel() {
           </div>
 
           <button type="button" className={styles.reset} onClick={() => { resetWar(); adapter.hapticImpact("light"); }}>Reset war flow</button>
-          <p>Add <code>?arenaDebug=1</code> to a Vercel URL to expose this lab outside local development.</p>
+          <p>This lab is available only in local development and CI fixtures.</p>
         </div>
       ) : null}
     </aside>

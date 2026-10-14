@@ -1,4 +1,5 @@
-import { createRootRoute, createRoute, createRouter } from "@tanstack/react-router";
+import { createRootRoute, createRoute, createRouter, redirect } from "@tanstack/react-router";
+import { lazy, Suspense } from "react";
 import { RootLayout } from "./routes/RootLayout";
 import { GameRouteLayout } from "./routes/GameRouteLayout";
 import { FoundationPage } from "@/pages/FoundationPage";
@@ -9,7 +10,10 @@ import { TypingChallengePage } from "@/pages/TypingChallengePage";
 import { ClanPage } from "@/pages/ClanPage";
 import { ArenaPage } from "@/pages/ArenaPage";
 import { ProfilePage } from "@/pages/ProfilePage";
-import { DiagnosticsPage } from "@/pages/DiagnosticsPage";
+
+const DiagnosticsPage = import.meta.env.DEV
+  ? lazy(() => import("@/pages/DiagnosticsPage").then((module) => ({ default: module.DiagnosticsPage })))
+  : null;
 
 const rootRoute = createRootRoute({ component: RootLayout });
 
@@ -70,7 +74,10 @@ const profileRoute = createRoute({
 const diagnosticsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/diagnostics",
-  component: DiagnosticsPage,
+  beforeLoad: ({ location }) => {
+    if (!import.meta.env.DEV) throw redirect({ to: "/", hash: location.hash, replace: true });
+  },
+  component: () => DiagnosticsPage ? <Suspense fallback={null}><DiagnosticsPage /></Suspense> : null,
 });
 
 const routeTree = rootRoute.addChildren([
