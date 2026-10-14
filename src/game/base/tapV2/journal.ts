@@ -15,7 +15,7 @@ export class TapJournalStore {
   }
 
   read(): TapJournal {
-    if (this.expected === null) return { version: 1, player: this.player, events: [], batches: [] };
+    if (this.expected === null) return journalSchema.parse({ version: 1, player: this.player, events: [], batches: [] });
     if (this.expected.length > 256_000) throw new Error("Journal exceeds bound");
     const journal = journalSchema.parse(JSON.parse(this.expected));
     if (journal.player !== this.player) throw new Error("Journal player mismatch");

@@ -3,23 +3,23 @@ import type { BootstrapPayload } from "@/game/domain/schemas";
 import { configCacheScope } from "@/integrations/api/bootstrapContract";
 import { queryKeys, type PlayerScope } from "@/integrations/api/queryKeys";
 import type { ProfileOverview } from "@/integrations/api/profile";
-import type { TapSnapshot } from "./model";
+import { compareSnapshots, type TapSnapshot } from "./model";
 import { authorizedProgression } from "./progression";
 
 /** Scoped commit observer. Call once per accepted receipt/snapshot, never per touch. */
 export function createTapCacheBridge(client: QueryClient, scope: PlayerScope) {
-  let revision = -1;
+  let previous: TapSnapshot | null = null;
   return (snapshot: TapSnapshot) => {
-    if (snapshot.player !== scope.player || snapshot.season !== scope.season || snapshot.config !== scope.config || snapshot.revision <= revision) return;
+    if (snapshot.player !== scope.player || snapshot.season !== scope.season || (previous && compareSnapshots(snapshot, previous) < 0)) return;
     const matches = client.getQueryCache().findAll({ predicate: (query) => {
       const value = query.state.data as BootstrapPayload | undefined;
       return query.queryKey[0] === "bootstrap" && query.queryKey[1] === scope.session
         && value?.player.id === scope.player && value?.season.id === scope.season
-        && Boolean(value.remote && configCacheScope(value.remote.config) === scope.config);
+        && Boolean(value.remote && value.remote.config.version === snapshot.config && configCacheScope(value.remote.config) === scope.config);
     } });
     // If auth/Season has changed, the old observer must not repopulate any removed caches.
     if (!matches.length) return;
-    revision = snapshot.revision;
+    previous = snapshot;
     const progression = authorizedProgression(snapshot.lifetime, snapshot.progression);
     const remoteProgression = {
       lifetime_points: snapshot.lifetime, level: progression.level,

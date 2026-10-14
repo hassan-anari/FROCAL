@@ -17,7 +17,6 @@ import { BaseTapCooldownIndicator } from "@/game/base/BaseTapCooldownIndicator";
 import { BaseTapFeedback } from "@/game/base/BaseTapFeedback";
 import { useBaseTapExperience } from "@/game/base/useBaseTapExperience";
 import { useOnboardingStore } from "@/game/onboarding/onboardingStore";
-import { progressionForLifetime } from "@/game/progression/s1Progression";
 import { useEarnStore } from "@/game/earn/earnStore";
 import { useBaseUiStore } from "@/game/ui/baseUiStore";
 import { isRemoteDataSource } from "@/integrations/api/bootstrap";
@@ -168,10 +167,7 @@ export function BasePage() {
       ? null
       : baseTap.visualLifetime
     : lifetimeXp;
-  const liveProgression =
-    remoteData && displayedLifetimeXp !== null && displayedLifetimeXp !== serverLifetime
-      ? progressionForLifetime(displayedLifetimeXp)
-      : null;
+  const liveProgression = remoteData ? baseTap.progression : null;
   const currentLevel = remoteData
     ? liveProgression?.level ?? bootstrapPlayer?.level ?? profile.data?.progression.level ?? 1
     : Math.max(phase2Player.level, earnLevel);
@@ -194,13 +190,16 @@ export function BasePage() {
     return Math.min(100, Math.round(((currentLevelXp ?? 0) / Math.max(currentLevelTarget ?? 1, 1)) * 100));
   }, [currentLevelTarget, currentLevelXp, liveProgression, remoteData]);
   const stageAssets: Record<string, AssetKey> = { newborn: "dexo.level01", explorer: "dexo.level05", connector: "dexo.level10", specialist: "dexo.level15", vanguard: "dexo.level20", legend: "dexo.level30" };
-  const levelAsset = remoteData && !liveProgression && bootstrap.data
-    ? stageAssets[bootstrap.data.dexo.stage] ?? getLevelAsset(currentLevel)
+  // Artwork sizing/titles are approved presentation, selected by the authorized stage.
+  const stagePresentation: Record<string, number> = { newborn: 1, explorer: 5, connector: 10, specialist: 15, vanguard: 20, legend: 30 };
+  const presentationLevel = remoteData ? stagePresentation[liveProgression?.stage ?? bootstrap.data?.dexo.stage ?? "newborn"] : currentLevel;
+  const levelAsset = remoteData
+    ? stageAssets[liveProgression?.stage ?? bootstrap.data?.dexo.stage ?? "newborn"] ?? getLevelAsset(currentLevel)
     : getLevelAsset(currentLevel);
   const displayedCharacter = activeReaction ? reactionLibrary[activeReaction].asset : levelAsset;
   const displayedScale = activeReaction
     ? reactionLibrary[activeReaction].scale
-    : getLevelScale(currentLevel);
+    : getLevelScale(presentationLevel);
   const missionList = Object.values(missions);
   const claimedMissionCount = missionList.filter((mission) => mission.status === "claimed").length;
   const starterProgress = Math.round((claimedMissionCount / missionList.length) * 100);
@@ -276,7 +275,7 @@ export function BasePage() {
           <div className={styles.dexoMeta}>
             <div>
               <span>YOUR DEXO</span>
-              <strong>{getDexoTitle(currentLevel)}</strong>
+              <strong>{getDexoTitle(presentationLevel)}</strong>
             </div>
             <BaseHeroStats
               lifetimeXp={displayedLifetimeXp}
@@ -288,7 +287,7 @@ export function BasePage() {
             character={displayedCharacter}
             characterScale={displayedScale}
             baseCharacter={levelAsset}
-            baseCharacterScale={getLevelScale(currentLevel)}
+            baseCharacterScale={getLevelScale(presentationLevel)}
             effect="base"
             showParticles={false}
             interactive
@@ -308,6 +307,7 @@ export function BasePage() {
                   <BaseTapCooldownIndicator
                     cooldownCycle={baseTap.cooldownCycle}
                     cooldownMs={baseTap.cooldownMs}
+                    remainingMs={baseTap.cooldownRemainingMs}
                     isCoolingDown={baseTap.isCoolingDown}
                   />
                 ) : null}
@@ -447,7 +447,7 @@ export function BasePage() {
             </div>
             <div>
               <span>Season score</span>
-              <strong>{phase2Player.seasonScore}</strong>
+              <strong>{remoteData ? baseTap.seasonPoints ?? phase2Player.seasonScore : phase2Player.seasonScore}</strong>
             </div>
             <div>
               <span>Clan status</span>

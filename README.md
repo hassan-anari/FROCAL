@@ -66,3 +66,12 @@ separate remote production bundle; fixture traffic never uses the live API.
 Diagnostics and scenario controls are available only in development, including
 the fixture server. Production blocks direct Diagnostics navigation and excludes
 its module and the scenario panel from the bundle. API failures never use demo data.
+
+## B2 Tap integration
+
+Actual Tap v2 endpoint mapping, pinned backend source, durable recovery, legacy
+cutover, storage release lifecycle and operational rollout requirements are in
+[docs/B2_FRONTEND_REPORT.md](docs/B2_FRONTEND_REPORT.md). `npm run validate:contracts`
+checks the reviewed B2 source blobs. `npm run test:paired` runs real pinned Django /
+PostgreSQL integration plus the production browser game against isolated local
+services; provision a fresh test database as documented. It never uses the public API.

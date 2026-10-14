@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { inspectLegacyQueues } from "./legacyRecovery";
+import { inspectLegacyQueues, recoverLegacyQueues } from "./legacyRecovery";
 import { internalHarness, internalSnapshot, MemoryStorage } from "./testing.fixture";
 import { TapTransportError, snapshotSchema } from "./model";
 
@@ -19,6 +19,21 @@ it("inventories legacy queues under verified aliases without replay, repricing o
     { key: "dalexio-base-tap-queue:42", status: "invalid-preserved", pending: null, unassignedTouches: null },
   ]);
   expect([...storage.data]).toEqual(original);
+});
+
+it("replays only exact keyed legacy requests, retains raw evidence and never converts an unkeyed buffer", async () => {
+  const storage = new MemoryStorage();
+  const key = "dalexio-base-tap-queue:42";
+  const raw = JSON.stringify({ buffer: 3, pending: { tapCount: 7, idempotencyKey: "original-key", retries: 2 } });
+  storage.setItem(key, raw);
+  const replay = vi.fn(async () => "confirmed" as const);
+  expect(await recoverLegacyQueues(storage, ["42"], replay)).toMatchObject([{ status: "receipt-confirmed", unassignedTouches: 3 }]);
+  await recoverLegacyQueues(storage, ["42"], replay);
+  expect(replay).toHaveBeenCalledExactlyOnceWith({ tapCount: 7, idempotencyKey: "original-key" });
+  expect(storage.getItem(key)).toBe(raw);
+  storage.setItem(key, JSON.stringify({ buffer: 2, pending: null }));
+  expect(await recoverLegacyQueues(storage, ["42"], replay)).toMatchObject([{ status: "unkeyed-preserved" }]);
+  expect(replay).toHaveBeenCalledTimes(1);
 });
 
 it("empty v1 queue never claims a reward from a daily state/floor", () => {

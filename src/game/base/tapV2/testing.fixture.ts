@@ -6,13 +6,14 @@ import type { DurableStorage } from "./journal";
 export function internalSnapshot(): TapSnapshot {
   const progression = { levels: [{ level: 1, minimum: 0 }, { level: 5, minimum: 152 }], stages: [{ key: "newborn" as const, minimumLevel: 1 }, { key: "explorer" as const, minimumLevel: 5 }] };
   return {
-    player: "verified-player", season: "test-season", config: "test-config", revision: 1, serverTime: 10_000,
+    player: "verified-player", season: "test-season", config: "test-config", revision: 1, receiptCursor: 1, serverTime: 10_000,
+    receipts: [], rejections: [], issuanceEnabled: true,
     lifetime: 150, seasonPoints: 20, earningAllowed: true, progression,
-    cooldownUntil: null, acknowledgements: [],
+    cooldownUntil: null,
     grant: {
       scope: { player: "verified-player", season: "test-season", config: "test-config", session: "session-a", lease: "lease-a" },
       expiresAt: 1_000_000, remaining: 50, sequenceCursor: 0,
-      pointsPerTouch: 1, cooldownDuration: 10_000, batchLimit: 8, progression,
+      pointsPerTouch: 1, cooldownDuration: 10_000, batchLimit: 8, minBatchInterval: 0, progression,
     },
   };
 }
@@ -37,17 +38,18 @@ export function internalHarness(options: {
     if (receipts.has(batch.key)) return structuredClone(receipts.get(batch.key)!);
     const last = batch.sequences[batch.sequences.length - 1];
     const count = batch.sequences.length;
-    snapshot = { ...snapshot, revision: snapshot.revision + 1, serverTime: 10_000 + now,
+    snapshot = { ...snapshot, revision: snapshot.revision + 1, receiptCursor: snapshot.receiptCursor + 1, serverTime: 10_000 + now,
       lifetime: snapshot.lifetime + count, seasonPoints: snapshot.seasonPoints + count,
       grant: { ...snapshot.grant!, remaining: snapshot.grant!.remaining - count, sequenceCursor: last },
-      acknowledgements: [{ scope: batch.scope, through: last }],
+      receipts: [{ scope: batch.scope, key: batch.key, through: last, receiptId: snapshot.receiptCursor + 1, accepted: count, rejected: 0 }],
     };
-    if (snapshot.grant!.remaining === 0) snapshot.cooldownUntil = snapshot.serverTime + snapshot.grant!.cooldownDuration;
+    if (snapshot.grant!.remaining === 0) snapshot.cooldownUntil = snapshot.serverTime + snapshot.grant!.cooldownDuration!;
     receipts.set(batch.key, structuredClone(snapshot));
     return structuredClone(snapshot);
   };
   let key = 0;
   const controller = new TapController({
+    retryJitterMs: () => 0,
     player: snapshot.player, port: { submit: options.submit ?? settle, synchronize: options.synchronize ?? (async (_journal: Readonly<TapJournal>) => structuredClone(snapshot)) },
     storage: () => storage, ownership: { acquire: async () => true, release: () => undefined },
     monotonicNow: () => now, wallNow: () => wall,

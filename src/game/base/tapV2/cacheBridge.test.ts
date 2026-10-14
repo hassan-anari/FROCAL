@@ -20,8 +20,12 @@ it("propagates committed progression only to the current player/Season/config ca
   expect(client.getQueryData(key)).toMatchObject({ player: { lifetimeXp: 152, level: 5, seasonScore: 22 }, dexo: { stage: "explorer" } });
   bridge({ ...snapshot, lifetime: 1, revision: 0 });
   expect(client.getQueryData(key)).toMatchObject({ player: { lifetimeXp: 152 } });
+  bridge({ ...snapshot, lifetime: 159, receiptCursor: snapshot.receiptCursor + 1, revision: 0 });
+  expect(client.getQueryData(key)).toMatchObject({ player: { lifetimeXp: 159 } });
+  bridge({ ...snapshot, lifetime: 152, revision: 100 });
+  expect(client.getQueryData(key)).toMatchObject({ player: { lifetimeXp: 159 } });
   bridge({ ...snapshot, player: "other", lifetime: 9999, revision: 10 });
-  expect(client.getQueryData(key)).toMatchObject({ player: { lifetimeXp: 152 } });
+  expect(client.getQueryData(key)).toMatchObject({ player: { lifetimeXp: 159 } });
   client.removeQueries({ queryKey: key });
   bridge({ ...snapshot, lifetime: 999, revision: 20 });
   expect(client.getQueryData(key)).toBeUndefined();

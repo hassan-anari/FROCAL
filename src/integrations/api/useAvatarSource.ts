@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { chooseAvatarDelivery, safeAvatarUrl, type VerifiedAvatar } from "./avatarSource";
+import { chooseAvatarDelivery, safeAvatarUrl, serverCachedAvatar, type VerifiedAvatar } from "./avatarSource";
 
 // Memory-only failure suppression; bounded so browsing profiles cannot grow it forever.
 const failures = new Set<string>();
@@ -9,6 +9,7 @@ function rememberFailure(key: string) {
 }
 
 export function useAvatarSource(owner: string, legacyUrl?: string | null, cached?: VerifiedAvatar) {
+  cached ??= serverCachedAvatar(owner, legacyUrl);
   const delivery = chooseAvatarDelivery(owner, cached, legacyUrl);
   const url = delivery?.kind === "url" ? safeAvatarUrl(delivery.url) : null;
   const loader = delivery?.kind === "authenticated" ? delivery.load : undefined;

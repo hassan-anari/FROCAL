@@ -196,9 +196,11 @@ function levelAsset(level: number): AssetKey {
 interface LevelUpRevealProps {
   event: LevelUpEvent | null;
   onClose: () => void;
+  character?: AssetKey;
+  returnLabel?: string;
 }
 
-export function LevelUpReveal({ event, onClose }: LevelUpRevealProps) {
+export function LevelUpReveal({ event, onClose, character, returnLabel = "Return to Earn" }: LevelUpRevealProps) {
   const title = useMemo(() => event?.evolution ? `${event.evolutionTitle} Evolution` : `Level ${event?.newLevel ?? ""}`, [event]);
   return (
     <OverlayShell open={event !== null} onClose={() => undefined} placement="center" ariaLabel="Dexo level up">
@@ -206,9 +208,9 @@ export function LevelUpReveal({ event, onClose }: LevelUpRevealProps) {
         <div className={styles.levelReveal}>
           <span>{event.evolution ? "DEXO EVOLUTION" : "LEVEL UP"}</span>
           <h2>{title}</h2>
-          <DexoStage character={levelAsset(event.newLevel)} characterScale={event.evolution ? 1.02 : .96} effect="reveal" showParticles className={styles.levelDexo} />
+          <DexoStage character={character ?? levelAsset(event.newLevel)} characterScale={event.evolution ? 1.02 : .96} effect="reveal" showParticles className={styles.levelDexo} />
           <p>{event.evolution ? `Dexo has entered the ${event.evolutionTitle} stage.` : `Your companion advanced from Level ${event.previousLevel} to Level ${event.newLevel}.`}</p>
-          <Button size="lg" trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={18} strokeWidth={1.8} />} onClick={onClose}>Return to Earn</Button>
+          <Button size="lg" trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={18} strokeWidth={1.8} />} onClick={onClose}>{returnLabel}</Button>
         </div>
       ) : null}
     </OverlayShell>

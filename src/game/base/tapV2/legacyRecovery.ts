@@ -37,3 +37,30 @@ export function inspectLegacyQueues(storage: DurableStorage, verifiedPlayerIds: 
     } catch { return [{ key, status: "invalid-preserved" as const, pending: null, unassignedTouches: null }]; }
   });
 }
+
+export interface LegacyResolution { key: string; requestKey: string | null; status: "receipt-confirmed" | "receipt-unavailable" | "unkeyed-preserved"; unassignedTouches: number }
+/** The caller must first verify a v2 issuance_enabled snapshot: backend's controlled
+ * cutover has paused legacy ingress and selected protocol 2. No unkeyed buffer is sent.
+ * Original queues are retained byte-for-byte; receipts are a separate recovery record. */
+export async function recoverLegacyQueues(storage: DurableStorage, verifiedIds: readonly string[],
+  replay: (pending: { tapCount: number; idempotencyKey: string }) => Promise<"confirmed" | "unavailable">) {
+  const outcomes: LegacyResolution[] = [];
+  for (const item of inspectLegacyQueues(storage, verifiedIds)) {
+    if (item.status === "invalid-preserved" || item.status === "empty") continue;
+    const resolutionKey = `${item.key}:v2-recovery`;
+    const marker = JSON.stringify([item.pending?.idempotencyKey ?? null, item.pending?.tapCount ?? null, item.unassignedTouches]);
+    const saved = storage.getItem(resolutionKey);
+    if (saved) {
+      try { const prior = JSON.parse(saved); if (prior.marker === marker) { outcomes.push(prior.resolution); continue; } } catch { /* preserve original evidence; replace reconstructible recovery marker only */ }
+    }
+    const status = item.pending ? await replay(item.pending) : null;
+    const resolution: LegacyResolution = { key: item.key, requestKey: item.pending?.idempotencyKey ?? null,
+      status: status === "confirmed" ? "receipt-confirmed" : status === "unavailable" ? "receipt-unavailable" : "unkeyed-preserved",
+      unassignedTouches: item.unassignedTouches ?? 0 };
+    const encoded = JSON.stringify({ marker, resolution });
+    storage.setItem(resolutionKey, encoded);
+    if (storage.getItem(resolutionKey) !== encoded) throw new Error("Legacy recovery evidence is not durable");
+    outcomes.push(resolution);
+  }
+  return outcomes;
+}

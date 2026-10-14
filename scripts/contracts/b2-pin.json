@@ -1,0 +1,19 @@
+{
+  "repository": "hassan-anari/WEDCAL",
+  "pr": 27,
+  "commit": "34328c76ba3377396660b1549bf8e370ac514a71",
+  "files": {
+    "src/integrations/api/fixtures/tap-v2.json": {
+      "path": "docs/fixtures/tap-v2.json",
+      "blob": "3fb137ac1c9798958186ae479b3fa208e7117bf9"
+    },
+    "scripts/contracts/b2/openapi.json": {
+      "path": "docs/fixtures/tap-v2-openapi.json",
+      "blob": "41cdb213f22250a7490a90faf79d3f94c0b71188"
+    },
+    "scripts/contracts/b2/schemas.py": {
+      "path": "apps/base_tap/schemas.py",
+      "blob": "ce97fed857a3603a7b96afdd5585d00e9b1dd66d"
+    }
+  }
+}

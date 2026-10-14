@@ -1,15 +1,14 @@
 import { z } from "zod";
 
-// INTERNAL normalized domain objects, never API DTOs. No route/wire mapping exists
-// until the backend B2 contract is reviewed and pinned. An adapter must establish
-// these guarantees from that contract; it may not synthesize authorization.
+// Internal read/delivery model, normalized only from the pinned wire contract.
 const integer = z.number().int().nonnegative().safe();
 export const tapScopeSchema = z.object({
   player: z.string().min(1), season: z.string().min(1), config: z.string().min(1),
   session: z.string().min(1), lease: z.string().min(1),
+  generation: integer.positive().optional(),
 }).strict();
 export type TapScope = z.infer<typeof tapScopeSchema>;
-export const scopeId = (scope: TapScope) => JSON.stringify([scope.player, scope.season, scope.config, scope.session, scope.lease]);
+export const scopeId = (scope: TapScope) => JSON.stringify([scope.player, scope.season, scope.config, scope.session, scope.lease, scope.generation ?? 1]);
 
 export const progressionPolicySchema = z.object({
   levels: z.array(z.object({ level: integer.positive(), minimum: integer }).strict()).min(1),
@@ -28,32 +27,32 @@ export type ProgressionPolicy = z.infer<typeof progressionPolicySchema>;
 export const grantSchema = z.object({
   scope: tapScopeSchema,
   expiresAt: integer, remaining: integer, sequenceCursor: integer,
-  pointsPerTouch: integer.positive(), cooldownDuration: integer,
+  pointsPerTouch: integer.positive(), cooldownDuration: integer.nullable(),
   batchLimit: integer.positive(), progression: progressionPolicySchema,
+  minBatchInterval: integer.default(0),
 }).strict();
 export type TapGrant = z.infer<typeof grantSchema>;
 
-const acknowledgementSchema = z.object({ scope: tapScopeSchema, through: integer }).strict();
+const receiptSchema = z.object({ scope: tapScopeSchema, key: z.string(), receiptId: integer.positive(), through: integer,
+  accepted: integer, rejected: integer }).strict();
+const rejectionSchema = z.object({ scope: tapScopeSchema, key: z.string(), code: z.string() }).strict();
 export const snapshotSchema = z.object({
   player: z.string().min(1), season: z.string().min(1), config: z.string().min(1),
-  // Adapter must prove player-wide ordering, including changes on another device.
-  // If B2 uses a different ordering contract, revise this internal interface first.
-  revision: integer, serverTime: integer,
+  // Authoritative lexicographic (receipt_cursor, revision) from WEDCAL.
+  revision: integer, receiptCursor: integer.default(0), serverTime: integer,
   lifetime: integer, seasonPoints: integer,
   progression: progressionPolicySchema,
   grant: grantSchema.nullable(), cooldownUntil: integer.nullable(),
-  acknowledgements: z.array(acknowledgementSchema),
+  receipts: z.array(receiptSchema).default([]), rejections: z.array(rejectionSchema).default([]),
+  issuanceEnabled: z.boolean().default(true),
   earningAllowed: z.boolean(),
 }).strict().superRefine((snapshot, context) => {
   if (snapshot.grant && (snapshot.grant.scope.player !== snapshot.player
-    || snapshot.grant.scope.season !== snapshot.season || snapshot.grant.scope.config !== snapshot.config)) {
+    || snapshot.grant.scope.season !== snapshot.season)) {
     context.addIssue({ code: "custom", message: "Grant and snapshot identity must match" });
   }
   if (snapshot.grant && JSON.stringify(snapshot.grant.progression) !== JSON.stringify(snapshot.progression)) {
     context.addIssue({ code: "custom", message: "Grant must use the current authorized progression policy" });
-  }
-  if (snapshot.acknowledgements.some((ack) => ack.scope.player !== snapshot.player)) {
-    context.addIssue({ code: "custom", message: "Acknowledgements must belong to the verified player" });
   }
 });
 export type TapSnapshot = z.infer<typeof snapshotSchema>;
@@ -68,6 +67,9 @@ export type TapBatch = z.infer<typeof batchSchema>;
 export type TapSubmission = Pick<TapBatch, "scope" | "key" | "sequences">;
 export const journalSchema = z.object({
   version: z.literal(1), player: z.string().min(1),
+  session: z.string().nullable().default(null),
+  leases: z.array(grantSchema.pick({ scope: true, batchLimit: true, minBatchInterval: true })).max(32).default([]),
+  resolved: z.array(z.object({ scope: tapScopeSchema, key: z.string(), code: z.string(), sequences: z.array(integer.positive()) })).max(64).default([]),
   events: z.array(eventSchema).max(1024), batches: z.array(batchSchema).max(1024),
 }).strict().superRefine((journal, context) => {
   const events = new Set<string>();
@@ -103,7 +105,13 @@ export interface TapPort {
 }
 // Error mapping is a backend-adapter responsibility; raw HTTP errors never enter UI.
 export class TapTransportError extends Error {
-  constructor(public readonly kind: "retry" | "rate-limit" | "reauthorize" | "terminal", public readonly retryAfterMs = 0) {
+  snapshot?: TapSnapshot;
+  definitive = false;
+  constructor(public readonly kind: "retry" | "rate-limit" | "reauthorize" | "terminal", public readonly retryAfterMs = 0, public readonly code = "TEMPORARY_UNAVAILABLE") {
     super(kind);
   }
+}
+
+export function compareSnapshots(a: Pick<TapSnapshot, "receiptCursor" | "revision">, b: Pick<TapSnapshot, "receiptCursor" | "revision">) {
+  return a.receiptCursor - b.receiptCursor || a.revision - b.revision;
 }

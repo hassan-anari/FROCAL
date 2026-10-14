@@ -26,10 +26,10 @@ export async function mountB2Harness() {
       submit: async (batch) => {
         requests.push(structuredClone(batch));
         await new Promise<void>((resolve) => { respond = resolve; });
-        snapshot = { ...snapshot, revision: snapshot.revision + 1,
+        snapshot = { ...snapshot, revision: snapshot.revision + 1, receiptCursor: snapshot.receiptCursor + 1,
           lifetime: snapshot.lifetime + batch.sequences.length, seasonPoints: snapshot.seasonPoints + batch.sequences.length,
           grant: { ...snapshot.grant!, remaining: snapshot.grant!.remaining - batch.sequences.length, sequenceCursor: batch.sequences[batch.sequences.length - 1] },
-          acknowledgements: [{ scope: batch.scope, through: batch.sequences[batch.sequences.length - 1] }],
+          receipts: [{ scope: batch.scope, key: batch.key, receiptId: snapshot.receiptCursor + 1, through: batch.sequences[batch.sequences.length - 1], accepted: batch.sequences.length, rejected: 0 }],
         };
         return structuredClone(snapshot);
       },

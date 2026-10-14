@@ -57,6 +57,18 @@ it("resends an identical request after a lost committed response without duplica
   harness.controller.close();
 });
 
+it("keeps provisional cooldown through partial in-flight acknowledgements and replaces it with the server deadline", async () => {
+  const harness = internalHarness(); await harness.controller.start();
+  for (let i = 0; i < 50; i++) harness.controller.touch();
+  expect(harness.controller.getSnapshot().isCoolingDown).toBe(true);
+  await harness.controller.flush();
+  expect(harness.controller.getSnapshot()).toMatchObject({ lifetime: 200, authorizedUnsent: 42, isCoolingDown: true });
+  harness.advance(100);
+  for (let i = 0; i < 6; i++) await harness.controller.flush();
+  expect(harness.controller.getSnapshot()).toMatchObject({ lifetime: 200, authorizedUnsent: 0, cooldownUntil: 20_100 });
+  harness.controller.close();
+});
+
 it("one in-flight batch permits new durable input without response rollback", async () => {
   let resolve!: (value: ReturnType<typeof internalSnapshot>) => void;
   const harness = internalHarness({ submit: () => new Promise((done) => { resolve = done; }) });
@@ -67,7 +79,8 @@ it("one in-flight batch permits new durable input without response rollback", as
   const next = internalSnapshot();
   next.lifetime = 151; next.seasonPoints = 21; next.revision = 2;
   next.grant!.remaining = 49; next.grant!.sequenceCursor = 1;
-  next.acknowledgements = [{ scope: next.grant!.scope, through: 1 }];
+  next.receiptCursor = 2;
+  next.receipts = [{ scope: next.grant!.scope, key: "internal-request-1", through: 1, receiptId: 2, accepted: 1, rejected: 0 }];
   resolve(next); await first;
   expect(harness.controller.getSnapshot()).toMatchObject({ lifetime: 152, authorizedUnsent: 1 });
   harness.controller.close();
@@ -114,6 +127,26 @@ it("stale acknowledgements cannot overwrite a newer different-device snapshot", 
   expect(harness.controller.getSnapshot().lifetime).toBe(181);
   expect(harness.controller.getSnapshot().committed!.revision).toBe(10);
   expect(harness.controller.getSnapshot().status).toBe("paused");
+  harness.controller.close();
+});
+
+it("orders Daily/Mission rewards by ledger cursor, and retires a delayed receipt independently of its old balance", async () => {
+  const harness = internalHarness({ submit: async (batch) => {
+    const old = internalSnapshot(); old.lifetime = 151; old.receiptCursor = 2; old.revision = 2;
+    old.grant!.sequenceCursor = 1; old.grant!.remaining = 49;
+    old.receipts = [{ scope: batch.scope, key: batch.key, receiptId: 2, through: 1, accepted: 1, rejected: 0 }];
+    return old;
+  } });
+  await harness.controller.start(); harness.controller.touch();
+  const daily = internalSnapshot(); daily.lifetime = 180; daily.receiptCursor = 3; daily.revision = 1;
+  // Fresh state already includes the Tap ledger plus the independent reward, but
+  // the cursor is never used to retire the still-pending exact request.
+  daily.grant!.sequenceCursor = 1; daily.grant!.remaining = 49;
+  harness.replace(daily); await harness.controller.resume();
+  expect(harness.controller.getSnapshot()).toMatchObject({ lifetime: 180, authorizedUnsent: 0 });
+  await harness.controller.flush();
+  expect(harness.controller.getSnapshot()).toMatchObject({ lifetime: 180, committed: { receiptCursor: 3, revision: 1 } });
+  expect(JSON.parse([...((harness.storage as MemoryStorage).data.values())][0]).events).toEqual([]);
   harness.controller.close();
 });
 

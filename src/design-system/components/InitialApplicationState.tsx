@@ -5,6 +5,7 @@ import { isRemoteDataSource } from "@/integrations/api/bootstrap";
 import { ApiError } from "@/integrations/api/client";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import { AppLoader } from "./AppLoader";
+import { useTapSession } from "@/game/base/tapV2/TapSessionProvider";
 import { AssetImage } from "./AssetImage";
 import { Button } from "@/design-system/primitives/Button";
 import styles from "@/pages/FoundationPage.module.css";
@@ -14,12 +15,14 @@ export function InitialApplicationState({ children }: { children: ReactNode }) {
   const { bootstrap, refresh } = useBootstrap();
   const path = useRouterState({ select: (state) => state.location.pathname });
   const remote = isRemoteDataSource();
+  const tap = useTapSession();
   if (import.meta.env.DEV && path === "/diagnostics") return children;
   if (remote && launchState === "initializing") return <AppLoader label="Initializing Telegram launch" />;
   let code: string | null = null;
   let title = "Connection interrupted";
   let message = "";
   let reopen = false;
+  let tapRecovery = false;
   if (remote && launchState !== "ready") {
     code = launchState === "browser" ? "NO_TELEGRAM_CONTEXT" : launchState === "sdk-failed" ? "SDK_LOAD_FAILED" : "LAUNCH_DATA_MISSING";
     title = launchState === "browser" ? "Launch from Telegram" : "Telegram launch needs recovery";
@@ -55,13 +58,23 @@ export function InitialApplicationState({ children }: { children: ReactNode }) {
       message = "This feature is not available in the current game configuration. Retry for the latest availability.";
     }
   }
+  if (!code && remote && path === "/base" && tap && (
+    ["storage-blocked", "session-busy", "terminal"].includes(tap.view.status)
+    || (tap.view.status === "paused" && tap.view.committed && tap.view.error
+      && !["COOLDOWN", "RATE_LIMITED"].includes(tap.view.error))
+  )) {
+    code = tap.view.error ?? (tap.view.status === "storage-blocked" ? "STORAGE_UNAVAILABLE" : "SESSION_UNAVAILABLE");
+    message = "Tap authorization or reliable delivery needs recovery. Your server-owned progress is preserved. Retry, or close and reopen the Mini App.";
+    reopen = ["AUTH_MISSING", "AUTH_INVALID", "AUTH_EXPIRED"].includes(code);
+    tapRecovery = true;
+  }
   if (!code) return children;
   return <main className={styles.errorState} role="alert" data-initial-state={code}>
     <AssetImage assetKey="world.foundationBackdrop" className={styles.backdrop} />
     <div className={styles.scrim} aria-hidden="true" />
     <section>
       <span>{code.replaceAll("_", " ")}</span><h1>{title}</h1><p>{message}</p>
-      <Button onClick={() => { recoverLaunch(); if (launchState === "ready" || !remote) refresh(); }}>Retry</Button>
+      <Button onClick={() => { recoverLaunch(); if (tapRecovery) tap?.retry(); else if (launchState === "ready" || !remote) refresh(); }}>Retry</Button>
       {reopen ? <Button tone="secondary" onClick={() => adapter.openTelegramLink(import.meta.env.VITE_TELEGRAM_BOT_URL ?? "https://t.me/DalexioBot?start=dexoairdrop")}>Open Telegram</Button> : null}
       <details><summary>Launch diagnostics</summary>
         <p>Bridge: {document.documentElement.dataset.telegramSdk ?? "unknown"} · Context: {adapter.isTelegram ? "present" : "absent"} · Credentials: {adapter.getInitData() ? "present" : "missing"} · Client: {adapter.getClientPlatform()}</p>

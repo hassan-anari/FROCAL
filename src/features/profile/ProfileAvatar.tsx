@@ -23,7 +23,7 @@ export function ProfileAvatar({ firstName, photoUrl, frameId, size = "md", class
   return (
     <div className={`${styles.avatar} ${styles[size]} ${className}`}>
       <div className={styles.photoWell}>
-        {avatar.src ? <img src={avatar.src} onError={avatar.onError} alt="" className={styles.photo} /> : <span className={styles.fallback}>{initial}</span>}
+        {avatar.src ? <img src={avatar.src} onError={avatar.onError} referrerPolicy="no-referrer" alt="" className={styles.photo} /> : <span className={styles.fallback}>{initial}</span>}
       </div>
       <AssetImage assetKey={frame.asset} className={styles.frame} loading="eager" draggable={false} />
     </div>

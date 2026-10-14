@@ -1,3 +1,4 @@
+import { useAvatarSource } from "@/integrations/api/useAvatarSource";
 import { useBootstrap } from "@/integrations/api/BootstrapProvider";
 import { isRemoteDataSource } from "@/integrations/api/bootstrap";
 import {
@@ -88,7 +89,8 @@ function PlayerAvatar({ player, large = false }: { player: ArenaPlayerRank; larg
 
 function CurrentPlayerAvatar({ name, photoUrl }: { name: string; photoUrl?: string | null }) {
   const initial = name.trim().slice(0, 1).toUpperCase() || "D";
-  return <div className={styles.currentPlayerAvatar}>{photoUrl ? <img src={photoUrl} alt="" /> : <span>{initial}</span>}</div>;
+  const avatar = useAvatarSource(name, photoUrl);
+  return <div className={styles.currentPlayerAvatar}>{avatar.src ? <img src={avatar.src} onError={avatar.onError} referrerPolicy="no-referrer" alt="" /> : <span>{initial}</span>}</div>;
 }
 
 function SectionTitle({ eyebrow, title, action }: { eyebrow: string; title: string; action?: ReactNode }) {
