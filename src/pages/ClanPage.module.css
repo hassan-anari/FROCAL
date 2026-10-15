@@ -1019,6 +1019,7 @@
   letter-spacing: .03em;
 }
 .groupAvatar img { width: 100%; height: 100%; object-fit: cover; }
+.groupCard .groupAvatar { color: var(--avatar-fallback-foreground); background: var(--avatar-fallback-background); }
 .groupCard > div { display: grid; gap: .09rem; min-width: 0; }
 .groupCard strong { overflow: hidden; color: #f1f7ff; font-size: .76rem; text-overflow: ellipsis; white-space: nowrap; }
 .groupCard span { color: rgba(185,201,230,.55); font-size: .64rem; }

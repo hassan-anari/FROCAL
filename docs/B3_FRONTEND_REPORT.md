@@ -90,3 +90,22 @@ Complete and review the backend contracts and fixtures, pin the final reviewed S
 finish real data consumers and paired PostgreSQL/browser proof, obtain final-head
 CI, then stop for independent review. Backend-first compatible rollout and real
 Telegram Mobile/Desktop/VPN-off device verification remain owner-controlled gates.
+
+## Checkpoint follow-up
+
+Hosted initial-head validation at `38ec72b`:
+[run 38702419194](https://github.com/hassan-anari/FROCAL/actions/runs/38702419194).
+Unit/build, pinned B2 and pinned B3 jobs passed. Browser matrix had 110 passing
+scenarios and two identical bounded-retry fixture failures: the synthetic Tap
+snapshot used a different Season/config and correctly triggered a Bootstrap refresh.
+The fixture now matches its verified Bootstrap Season/config/progression policy;
+the original exact three-attempt assertion is retained. Focused mobile/desktop
+rerun passed all four affected/related cases. Final-head CI will supersede this run.
+
+Further fallback inspection found secondary Clan/applicant/group image containers
+without load-failure recovery. They now reuse the existing bounded avatar delivery
+hook, preserve the same elements/sizes/frames/cropping and use the same cyan tokens.
+Earn referral image fallback also uses that shared path. No replacement photo URL
+or extra fallback request is constructed. A shared navigation validator rejects
+unsafe URLs, keeps internal targets on existing game routes and dispatches exact
+Telegram hosts through the Telegram adapter. It does not define pending API fields.

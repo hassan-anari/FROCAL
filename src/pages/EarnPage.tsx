@@ -1,4 +1,6 @@
 import { useGameplayAvailability } from "@/integrations/api/useGameplayAvailability";
+import { AvatarContent } from "@/design-system/components/AvatarContent";
+import { navigateSafely } from "@/integrations/api/safeNavigation";
 import { usePlayerProgression } from "@/integrations/api/usePlayerProgression";
 import {
   ArrowRight01Icon,
@@ -206,8 +208,7 @@ export function EarnPage() {
       return;
     }
     if (mission.href) {
-      if (mission.href.includes("t.me/")) adapter.openTelegramLink(mission.href);
-      else adapter.openExternalLink(mission.href);
+      navigateSafely(mission.href, adapter, (to) => { void navigate({ to }); });
     }
   };
 
@@ -453,7 +454,7 @@ export function EarnPage() {
                         : person.name;
                       return (
                         <article key={person.id}>
-                          <span className={`${styles.avatar} ${styles[`avatar_${person.tone}`]}`}>{photo ? <img src={photo} alt="" /> : initials(displayName)}</span>
+                          <span className={`${styles.avatar} ${styles[`avatar_${person.tone}`]}`}><AvatarContent owner={`referral:${person.id}`} photoUrl={photo} fallback={initials(displayName)} /></span>
                           <div className={styles.rosterIdentity}><strong>{displayName}</strong><span>Level {person.level} · Invited {person.invitedAt}</span></div>
                           <div className={styles.rosterStatus}><em className={person.status === "Active" ? styles.statusActive : styles.statusPending}>{person.status}</em><small>{person.status === "Active" ? `+${person.earnedXp ?? 0} XP earned` : person.activation}</small></div>
                         </article>

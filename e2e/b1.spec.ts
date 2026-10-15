@@ -25,7 +25,7 @@ async function mockApi(page: Page, bootstrapResponse?: (attempt: number) => { st
     } else if (request.url().endsWith("/profile/overview")) {
       await route.fulfill({ json: { identity: { ...data.player, photo_url: "" }, progression: data.progression, journey: { claimed_missions: 0, current_daily_streak: 0, verified_referrals: 0 }, customization: { active_frame: "standard", active_title: "explorer", featured_medal: null, featured_achievement: null } } });
     } else if (new URL(request.url()).pathname.endsWith("/tap-state")) {
-      await route.fulfill({ json: { ...tapFixture.initial_state, player_id: String(id), lease: null, issuance_enabled: false, progression: data.progression, progression_policy: b1Fixture.config.progression, season_points: data.season?.season_points ?? 0 } });
+      await route.fulfill({ json: { ...tapFixture.initial_state, player_id: String(id), season_id: data.season?.code ?? null, config_version: data.config.version, lease: null, issuance_enabled: false, progression: data.progression, progression_policy: b1Fixture.config.progression, season_points: data.season?.season_points ?? 0 } });
     } else if (new URL(request.url()).pathname.endsWith("/notifications")) {
       await route.fulfill({ json: { items: [], next_cursor: null } });
     } else {
