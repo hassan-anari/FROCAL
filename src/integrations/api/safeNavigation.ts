@@ -10,7 +10,7 @@ export function safeDestination(value: string | null | undefined, origin = windo
   if (!/^https:\/\//i.test(value)) return null;
   try {
     const url = new URL(value);
-    if (url.protocol !== "https:" || url.username || url.password) return null;
+    if (url.protocol !== "https:" || url.username || url.password || (url.port && url.port !== "443")) return null;
     if (url.origin === origin) return routes.has(url.pathname as GameDestination) && !url.search && !url.hash ? { kind: "internal", path: url.pathname as GameDestination } : null;
     return { kind: ["t.me", "telegram.me"].includes(url.hostname) ? "telegram" : "external", url: url.href };
   } catch { return null; }

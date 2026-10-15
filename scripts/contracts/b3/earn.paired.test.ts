@@ -185,33 +185,98 @@ it("retains immutable referral attribution and real pending counters and creator
   expect(
     c.networkSchema.parse((await call("/network")).result).group_count,
   ).toBe(1);
-  await control({action:"b3-group-verify",player:identity.player,id:registered.id,admin:false});
-  expect(c.groupsSchema.parse((await call("/network/groups")).result).items[0].state).toBe("ADMIN_REQUIRED");
-  await control({action:"b3-group-verify",player:identity.player,id:registered.id,admin:true});
-  expect(c.groupsSchema.parse((await call("/network/groups")).result).items[0]).toMatchObject({state:"ACTIVE",bot_admin:true});
-  expect(c.networkSchema.parse((await call("/network")).result).active_groups).toBe(1);
+  await control({
+    action: "b3-group-verify",
+    player: identity.player,
+    id: registered.id,
+    admin: false,
+  });
+  expect(
+    c.groupsSchema.parse((await call("/network/groups")).result).items[0].state,
+  ).toBe("ADMIN_REQUIRED");
+  await control({
+    action: "b3-group-verify",
+    player: identity.player,
+    id: registered.id,
+    admin: true,
+  });
+  expect(
+    c.groupsSchema.parse((await call("/network/groups")).result).items[0],
+  ).toMatchObject({ state: "ACTIVE", bot_admin: true });
+  expect(
+    c.networkSchema.parse((await call("/network")).result).active_groups,
+  ).toBe(1);
 });
 
 it("enforces disabled-default CMS banner schedules and immutable versioned delivery through the real backend", async () => {
   for (const state of ["absent", "disabled", "future", "expired"]) {
     await control({ action: "b3-banner", state });
-    expect(c.bannerSchema.parse((await call("/content/banners/BASE")).result).banner).toBeNull();
+    expect(
+      c.bannerSchema.parse((await call("/content/banners/BASE")).result).banner,
+    ).toBeNull();
   }
-  await control({action:"b3-banner",state:"active"});
-  const active = c.bannerSchema.parse((await call("/content/banners/BASE")).result).banner!;
-  expect(active).toMatchObject({width:1200,height:260});
+  await control({ action: "b3-banner", state: "active" });
+  const active = c.bannerSchema.parse(
+    (await call("/content/banners/BASE")).result,
+  ).banner!;
+  expect(active).toMatchObject({ width: 1200, height: 260 });
   const image = await fetch(api + new URL(active.image_url).pathname);
-  expect(image.status).toBe(200);expect(image.headers.get("Content-Type")).toContain("image/webp");expect(image.headers.get("Cache-Control")).toContain("immutable");
-  await control({action:"b3-banner",state:"absent"});
+  expect(image.status).toBe(200);
+  expect(image.headers.get("Content-Type")).toContain("image/webp");
+  expect(image.headers.get("Cache-Control")).toContain("immutable");
+  await control({ action: "b3-banner", state: "absent" });
 });
 it("returns expired and ineligible Typing results without minting XP and keeps the attempt limit server-owned", async () => {
-  const run = c.attemptSchema.parse((await call("/typing/attempts/start",{},"expired-run")).result);
-  await control({action:"advance",seconds:31});
-  const expired = c.submitSchema.parse((await call(`/typing/attempts/${run.attempt_id}/submit`,{typed_text:run.phrase_text})).result);
-  expect(expired.status).toBe("EXPIRED");expect(expired.reward_amount).toBe(0);
-  const next = c.attemptSchema.parse((await call("/typing/attempts/start",{},"invalid-run")).result);
-  await control({action:"b3-attempt-time",player:identity.player,seconds:8});
-  const invalid = c.submitSchema.parse((await call(`/typing/attempts/${next.attempt_id}/submit`,{typed_text:"wrong"})).result);
-  expect(invalid.status).not.toBe("VALID");expect(invalid.reward_amount).toBe(0);expect(invalid.typing.claimable_balance).toBe(0);
-  expect((await control({action:"inspect",player:identity.player})).lifetime).toBe(150);
+  const run = c.attemptSchema.parse(
+    (await call("/typing/attempts/start", {}, "expired-run")).result,
+  );
+  await control({ action: "advance", seconds: 31 });
+  const expired = c.submitSchema.parse(
+    (
+      await call(`/typing/attempts/${run.attempt_id}/submit`, {
+        typed_text: run.phrase_text,
+      })
+    ).result,
+  );
+  // A submitted late run is REJECTED; EXPIRED is reserved for abandoned runs.
+  expect(expired.status).toBe("REJECTED");
+  expect(expired.reward_amount).toBe(0);
+  const abandoned = c.attemptSchema.parse(
+    (await call("/typing/attempts/start", {}, "abandoned-run")).result,
+  );
+  await control({ action: "advance", seconds: 31 });
+  const replacement = c.attemptSchema.parse(
+    (await call("/typing/attempts/start", {}, "replacement-run")).result,
+  );
+  expect(replacement.attempt_id).not.toBe(abandoned.attempt_id);
+  const old = c.submitSchema.parse(
+    (
+      await call(`/typing/attempts/${abandoned.attempt_id}/submit`, {
+        typed_text: abandoned.phrase_text,
+      })
+    ).result,
+  );
+  expect(old.status).toBe("EXPIRED");
+  expect(old.typing.attempts_used).toBe(1);
+  const next = c.attemptSchema.parse(
+    (await call("/typing/attempts/start", {}, "invalid-run")).result,
+  );
+  await control({
+    action: "b3-attempt-time",
+    player: identity.player,
+    seconds: 8,
+  });
+  const invalid = c.submitSchema.parse(
+    (
+      await call(`/typing/attempts/${next.attempt_id}/submit`, {
+        typed_text: "wrong",
+      })
+    ).result,
+  );
+  expect(invalid.status).not.toBe("VALID");
+  expect(invalid.reward_amount).toBe(0);
+  expect(invalid.typing.claimable_balance).toBe(0);
+  expect(
+    (await control({ action: "inspect", player: identity.player })).lifetime,
+  ).toBe(150);
 });

@@ -3,7 +3,7 @@ import { canonicalSchema } from "./b3Contracts";
 import { apiRequest } from "./client";
 
 const profileOverviewSchema = z.object({
-  canonical: canonicalSchema.optional(),
+  canonical: canonicalSchema.nullish(),
   identity: z.object({
     first_name: z.string(),
     last_name: z.string(),

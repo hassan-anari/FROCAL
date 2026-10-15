@@ -1,0 +1,10 @@
+{
+  "backend_commit": "88b26bea8e61f68adea4d2652b531f26cb5171d7",
+  "environment": "isolated PostgreSQL 17 and Chromium; synthetic identities; no public endpoint",
+  "measurements": {
+    "environment": "isolated PostgreSQL and Chromium device contexts; not physical Telegram or WAN",
+    "switchMilliseconds": 505,
+    "detectionMilliseconds": 2429,
+    "reopenMilliseconds": 1068
+  }
+}

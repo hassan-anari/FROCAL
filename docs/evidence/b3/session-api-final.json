@@ -1,0 +1,14 @@
+{
+  "backend_commit": "88b26bea8e61f68adea4d2652b531f26cb5171d7",
+  "environment": "isolated PostgreSQL 17 and Chromium; synthetic identities; no public endpoint",
+  "measurements": [
+    {
+      "action": "explicit-device-switch",
+      "milliseconds": 263.68152699999996
+    },
+    {
+      "action": "close-both-and-reopen-after-acknowledged-release",
+      "milliseconds": 143.00830600000018
+    }
+  ]
+}

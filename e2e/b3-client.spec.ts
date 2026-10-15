@@ -5,7 +5,7 @@ const tap = JSON.parse(readFileSync("src/integrations/api/fixtures/tap-v2.json",
 const auth = `user=${encodeURIComponent(JSON.stringify({ id: 42, first_name: "Verified" }))}&auth_date=123&hash=isolated-b3-client`;
 const launch = (path: string) => `${path}#tgWebAppData=${encodeURIComponent(auth)}&tgWebAppPlatform=android&tgWebAppVersion=8.0`;
 
-async function api(page: Page, options: { photo?: string; sessionError?: string; bootstrapError?: string } = {}) {
+async function api(page: Page, options: { photo?: string; sessionError?: string; bootstrapError?: string; clanEnabled?: boolean } = {}) {
   const calls: string[] = [];
   await page.route("**/api/v1/**", async route => {
     if (new URL(route.request().url()).hostname !== "127.0.0.1") return route.fallback();
@@ -15,7 +15,7 @@ async function api(page: Page, options: { photo?: string; sessionError?: string;
     const player = { ...bootstrap.player, photo_url: options.photo ?? "" };
     if (path.endsWith("/bootstrap")) {
       if (options.bootstrapError) return route.fulfill({ status: 401, json: { code: options.bootstrapError, detail: "private implementation detail" } });
-      return route.fulfill({ json: { ...bootstrap, player, features: { ...bootstrap.features, base_tap: Boolean(options.sessionError) } } });
+      return route.fulfill({ json: { ...bootstrap, player, features: { ...bootstrap.features, base_tap: Boolean(options.sessionError), clan: Boolean(options.clanEnabled) } } });
     }
     if (path.endsWith("/profile/overview")) return route.fulfill({ json: { identity: player, progression: bootstrap.progression, journey: { claimed_missions: 0, current_daily_streak: 0, verified_referrals: 0 }, customization: { active_frame: "standard", active_title: "explorer", featured_medal: null, featured_achievement: null } } });
     if (path.endsWith("/notifications")) return route.fulfill({ json: { items: [], next_cursor: null } });
@@ -60,7 +60,7 @@ for (const code of ["ACTIVE_SESSION", "GENERATION_STALE", "LEASE_REVOKED", "LEAS
     await expect(page.locator("details, summary")).toHaveCount(0);
     const text = await page.locator("main").innerText();
     expect(text).not.toMatch(/Launch diagnostics|private.*detail|ACTIVE_SESSION|GENERATION_STALE|LEASE_REVOKED|LEASE_EXPIRED|AUTH_EXPIRED|Recovery code|Bridge:|Credentials:/);
-    await expect(page.getByRole("button", { name: "Switch to This Device" })).toHaveCount(0); // finalized B3 operation still pending
+    await expect(page.getByRole("button", { name: "Switch to This Device" })).toHaveCount(0); // This legacy-compatible fixture has no explicit-switch capability.
   });
 }
 
@@ -139,7 +139,7 @@ test("banner version changes replace the image and disabled server policy remove
 });
 
 test("all five navigation icons retain their station indicators without a background glow", async ({ page }) => {
-  await api(page); await prepare(page); await page.goto(launch("/base"));
+  await api(page, { clanEnabled: true }); await prepare(page); await page.goto(launch("/base"));
   const nav = page.getByRole("navigation", { name: "Primary game navigation" });
   for (const name of ["Base", "Earn", "Clan", "Arena", "Profile"]) {
     const button = nav.getByRole("button", { name, exact: true }); await button.click();

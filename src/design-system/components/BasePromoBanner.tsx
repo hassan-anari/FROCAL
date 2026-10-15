@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { useNavigate } from "@tanstack/react-router";
 import { bannerSchema } from "@/integrations/api/b3Contracts";
 import { b3Request } from "@/integrations/api/b3";
@@ -16,9 +16,20 @@ export function validBanner(
   value: ReturnType<typeof bannerSchema.parse>["banner"],
 ) {
   if (!value) return null;
-  const image = safeDestination(value.image_url);
-  if (!image || image.kind !== "external") return null;
-  const url = new URL(value.image_url);
+  // An approved asset may share the Mini App origin. Image delivery is not a
+  // navigable game route; validate its exact HTTPS asset path independently.
+  if (
+    !/^https:\/\//i.test(value.image_url) ||
+    /[\u0000-\u0020\u007f\\]/.test(value.image_url)
+  )
+    return null;
+  let url: URL;
+  try {
+    url = new URL(value.image_url);
+  } catch {
+    return null;
+  }
+  if (url.username || url.password || url.protocol !== "https:") return null;
   if (
     !new RegExp(
       `^/api/v1/content/banner-assets/[a-f0-9-]{36}/${value.version}\\.webp$`,
@@ -36,7 +47,7 @@ export function validBanner(
     (!destination ||
       (value.destination_type === "TELEGRAM" &&
         destination.kind !== "telegram") ||
-      (value.destination_type === "HTTPS" && destination.kind !== "external"))
+      (value.destination_type === "HTTPS" && destination.kind === "telegram"))
   )
     return null;
   if (Boolean(value.destination) !== Boolean(value.destination_type))
@@ -58,68 +69,71 @@ export function BasePromoBanner() {
     retry: false,
   });
   const banner = query.isError ? null : validBanner(query.data?.banner ?? null);
-  if (!banner) return null;
-  const key = `${banner.id}:${banner.version}`;
-  if (failed === key) return null;
+  const key = banner ? `${banner.id}:${banner.version}` : "";
   return (
-    <motion.aside
-      key={key}
-      className={styles.promoSlot}
-      style={ready === key ? undefined : { display: "none" }}
-      initial={{ opacity: 0, y: -7 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={mobileMotion.reveal}
-      aria-label="Promotional banner placement"
-    >
-      <div className={styles.promoBanner}>
-        {banner.destination ? (
-          <a
-            href={banner.destination}
-            onClick={(event) => {
-              event.preventDefault();
-              navigateSafely(banner.destination, adapter, (to) => {
-                void navigate({ to });
-              });
-            }}
-          >
-            <img
-              className={`${styles.promoImage} ${styles.promoImageReady}`}
-              src={banner.image_url}
-              alt={banner.alt_text}
-              width={1200}
-              height={260}
-              onLoad={(event) => {
-                if (
-                  event.currentTarget.naturalWidth /
-                    event.currentTarget.naturalHeight ===
-                  60 / 13
-                )
-                  setReady(key);
-                else setFailed(key);
-              }}
-              onError={() => setFailed(key)}
-            />
-          </a>
-        ) : (
-          <img
-            className={`${styles.promoImage} ${styles.promoImageReady}`}
-            src={banner.image_url}
-            alt={banner.alt_text}
-            width={1200}
-            height={260}
-            onLoad={(event) => {
-              if (
-                event.currentTarget.naturalWidth /
-                  event.currentTarget.naturalHeight ===
-                60 / 13
-              )
-                setReady(key);
-              else setFailed(key);
-            }}
-            onError={() => setFailed(key)}
-          />
-        )}
-      </div>
-    </motion.aside>
+    <AnimatePresence initial={false}>
+      {banner && failed !== key ? (
+        <motion.aside
+          key={key}
+          className={styles.promoSlot}
+          style={ready === key ? undefined : { display: "none" }}
+          initial={{ opacity: 0, y: -7 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -5 }}
+          transition={mobileMotion.reveal}
+          aria-label="Promotional banner placement"
+        >
+          <div className={styles.promoBanner}>
+            {banner.destination ? (
+              <a
+                href={banner.destination}
+                onClick={(event) => {
+                  event.preventDefault();
+                  navigateSafely(banner.destination, adapter, (to) => {
+                    void navigate({ to });
+                  });
+                }}
+              >
+                <img
+                  className={`${styles.promoImage} ${styles.promoImageReady}`}
+                  src={banner.image_url}
+                  alt={banner.alt_text}
+                  width={1200}
+                  height={260}
+                  onLoad={(event) => {
+                    if (
+                      event.currentTarget.naturalWidth /
+                        event.currentTarget.naturalHeight ===
+                      60 / 13
+                    )
+                      setReady(key);
+                    else setFailed(key);
+                  }}
+                  onError={() => setFailed(key)}
+                />
+              </a>
+            ) : (
+              <img
+                className={`${styles.promoImage} ${styles.promoImageReady}`}
+                src={banner.image_url}
+                alt={banner.alt_text}
+                width={1200}
+                height={260}
+                onLoad={(event) => {
+                  if (
+                    event.currentTarget.naturalWidth /
+                      event.currentTarget.naturalHeight ===
+                    60 / 13
+                  )
+                    setReady(key);
+                  else setFailed(key);
+                }}
+                onError={() => setFailed(key)}
+              />
+            )}
+          </div>
+        </motion.aside>
+      ) : null}
+    </AnimatePresence>
   );
 }

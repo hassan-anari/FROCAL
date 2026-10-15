@@ -1,4 +1,7 @@
-import { expect, it } from "vitest";
+import { remoteBootstrapSchema } from "./bootstrapContract";
+import { tapStateSchema } from "./tapV2Contract";
+import session from "./fixtures/b3/session-switch.json";
+import { expect, it, vi } from "vitest";
 import * as c from "./b3Contracts";
 import fixture from "./fixtures/b3/earn-network.json";
 import banners from "./fixtures/b3/banners.json";
@@ -86,4 +89,43 @@ it("maps unavailable published missions without claiming or inventing progress",
     progress: 0,
     rewardXp: mission.reward_amount,
   });
+});
+
+it("accepts an approved same-origin HTTPS image without treating its asset path as a navigation route", () => {
+  const b = c.bannerSchema.parse(banners.active).banner!;
+  const image_url = new URL(b.image_url).pathname;
+  vi.stubGlobal("window", {
+    location: { origin: "https://game.example.test" },
+  });
+  try {
+    expect(
+      validBanner({ ...b, image_url: `https://game.example.test${image_url}` }),
+    ).toBeTruthy();
+    expect(
+      validBanner({
+        ...b,
+        destination_type: "HTTPS",
+        destination: "https://game.example.test/earn",
+      }),
+    ).toBeTruthy();
+    expect(
+      validBanner({
+        ...b,
+        destination_type: "HTTPS",
+        destination: "https://unsafe.example.test:444/path",
+      }),
+    ).toBeNull();
+  } finally {
+    vi.unstubAllGlobals();
+  }
+});
+
+it("accepts the published nullable additive Bootstrap and ownership fields for compatible deployed clients", () => {
+  expect(
+    remoteBootstrapSchema.parse({ ...fixture.bootstrap, canonical: null })
+      .canonical,
+  ).toBeNull();
+  expect(
+    tapStateSchema.parse({ ...session.initial, ownership: null }).ownership,
+  ).toBeNull();
 });
