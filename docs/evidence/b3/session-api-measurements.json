@@ -1,0 +1,10 @@
+[
+  {
+    "action": "explicit-device-switch",
+    "milliseconds": 110.62408699999992
+  },
+  {
+    "action": "close-both-and-reopen-after-acknowledged-release",
+    "milliseconds": 114.60322699999983
+  }
+]
