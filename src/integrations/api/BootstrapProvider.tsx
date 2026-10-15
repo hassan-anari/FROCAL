@@ -1,3 +1,4 @@
+import { readPlayerOnboarding } from "@/app/storageRelease";
 import { canonicalKey } from "./canonical";
 import type { CanonicalState } from "./b3Contracts";
 import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
@@ -69,9 +70,9 @@ export function BootstrapProvider({ children }: { children: ReactNode }) {
       const key = `dalexio-onboarding-v1:player:${bootstrap.data.player.id}`;
       if (useOnboardingStore.persist.getOptions().name !== key) {
         let saved: string | null = null;
-        try { saved = localStorage.getItem(key); } catch { /* storage is optional */ }
+        try { saved = readPlayerOnboarding(localStorage, bootstrap.data.player.id); } catch { /* storage is optional */ }
         useOnboardingStore.persist.setOptions({ name: key });
-        useOnboardingStore.getState().reset();
+        try { useOnboardingStore.getState().reset(); } catch { /* Optional preference persistence must not prevent session diagnosis. */ }
         if (saved) {
           try { localStorage.setItem(key, saved); void useOnboardingStore.persist.rehydrate(); } catch { /* keep fresh onboarding */ }
         }

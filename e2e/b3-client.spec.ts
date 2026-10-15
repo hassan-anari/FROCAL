@@ -149,3 +149,18 @@ test("all five navigation icons retain their station indicators without a backgr
     await expect(button.locator('[class*="stationNode"]')).toHaveCSS("width", "21px");
   }
 });
+
+test("B1 completed device onboarding survives the account-scoped B3 upgrade without deleting old Tap evidence", async ({ page }) => {
+  await api(page);
+  await page.addInitScript(() => {
+    localStorage.setItem("dalexio-client-storage-release", "b2-1");
+    localStorage.setItem("dalexio-onboarding-v1", JSON.stringify({ version: 1, state: { status: "completed", step: "ready", guideIndex: 3, completedAt: "2026-01-01T00:00:00Z" } }));
+    localStorage.setItem("dalexio-base-tap-queue:42", "unresolved original economic evidence");
+  });
+  await page.goto(launch("/base"));
+  await expect(page.getByRole("button", { name: "Interact with Dexo" })).toBeVisible();
+  expect(await page.evaluate(() => localStorage.getItem("dalexio-onboarding-v1:legacy-owner"))).toBe("42");
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem("dalexio-onboarding-v1:player:42")!).state.status)).toBe("completed");
+  expect(await page.evaluate(() => localStorage.getItem("dalexio-base-tap-queue:42"))).toBe("unresolved original economic evidence");
+  await page.reload(); await expect(page.getByRole("button", { name: "Interact with Dexo" })).toBeVisible();
+});

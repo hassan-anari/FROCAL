@@ -47,3 +47,25 @@ export function hasPendingTapEvidence(storage: Pick<Storage, "length" | "key" | 
 
 export function readSessionPreference(key: string) { try { return sessionStorage.getItem(key); } catch { return null; } }
 export function writeSessionPreference(key: string, value: string) { try { sessionStorage.setItem(key, value); } catch { /* optional presentation preference */ } }
+
+/** Adopt a completed pre-account onboarding preference once, after server identity verification. */
+export function readPlayerOnboarding(storage: Pick<Storage, "getItem" | "setItem">, player: string): string | null {
+  try {
+    const key = `dalexio-onboarding-v1:player:${player}`;
+    const saved = storage.getItem(key);
+    const ownerKey = "dalexio-onboarding-v1:legacy-owner";
+    const owner = storage.getItem(ownerKey);
+    if (saved) {
+      // Existing B2 completion also identifies the owner of any leftover B1 key.
+      try { if (!owner && storage.getItem("dalexio-onboarding-v1")) storage.setItem(ownerKey, player); } catch { /* retain the saved preference */ }
+      return saved;
+    }
+    if (owner && owner !== player) return null;
+    const raw = storage.getItem("dalexio-onboarding-v1");
+    const legacy = JSON.parse(raw ?? "null");
+    if (legacy?.version !== 1 || legacy.state?.status !== "completed" || legacy.state?.step !== "ready") return null;
+    storage.setItem(ownerKey, player);
+    storage.setItem(key, raw!);
+    return raw;
+  } catch { return null; }
+}

@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from "vitest";
-import { CLIENT_STORAGE_RELEASE, migrateClientRelease } from "./storageRelease";
+import { CLIENT_STORAGE_RELEASE, migrateClientRelease, readPlayerOnboarding } from "./storageRelease";
 afterEach(() => localStorage.clear());
 it("invalidates reconstructible old demo reads once while preserving onboarding and all economic evidence", () => {
   const preserved = {
@@ -49,4 +49,26 @@ it("still initializes when a WebView denies access to the Storage object itself"
     vi.resetModules();
     await expect(import("./storageRelease")).resolves.toHaveProperty("CLIENT_STORAGE_RELEASE", "b3-1");
   } finally { denied.mockRestore(); }
+});
+
+it("adopts completed B1 onboarding for the first verified account once without sharing it with another account", () => {
+  localStorage.clear();
+  const completed = JSON.stringify({version:1,state:{status:"completed",step:"ready",guideIndex:3,completedAt:"2026-01-01T00:00:00Z"}});
+  localStorage.setItem("dalexio-onboarding-v1",completed);
+  expect(readPlayerOnboarding(localStorage,"42")).toBe(completed);
+  expect(readPlayerOnboarding(localStorage,"99")).toBeNull();
+  expect(readPlayerOnboarding(localStorage,"42")).toBe(completed);
+  expect(localStorage.getItem("dalexio-onboarding-v1")).toBe(completed);
+  localStorage.clear();
+});
+it("never promotes incomplete or malformed legacy onboarding or overwrites a scoped preference", () => {
+  localStorage.clear();
+  localStorage.setItem("dalexio-onboarding-v1",JSON.stringify({version:1,state:{status:"in-progress"}}));
+  expect(readPlayerOnboarding(localStorage,"42")).toBeNull();
+  localStorage.setItem("dalexio-onboarding-v1","malformed");
+  expect(readPlayerOnboarding(localStorage,"42")).toBeNull();
+  localStorage.setItem("dalexio-onboarding-v1:player:42","existing preference");
+  expect(readPlayerOnboarding(localStorage,"42")).toBe("existing preference");
+  expect(readPlayerOnboarding(localStorage,"99")).toBeNull();
+  localStorage.clear();
 });
