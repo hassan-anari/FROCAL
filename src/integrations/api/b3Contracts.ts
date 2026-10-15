@@ -206,6 +206,10 @@ export const groupsSchema = z.object({
   ),
   next_offset: count.nullable(),
 });
+export const broadcastConsentSchema = z.object({
+  enabled: z.boolean(),
+  revision: count,
+});
 export const intentSchema = z.object({
   startgroup_url: z.string(),
   expires_at: date,

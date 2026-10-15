@@ -20,6 +20,7 @@ import { preloadAssets } from "@/assets/preload";
 import { Button } from "@/design-system/primitives/Button";
 import { DeferredMount } from "@/design-system/performance/DeferredMount";
 import { HistorySheet, LevelUpReveal, NetworkGuideSheet, RewardReveal, type NetworkGuideKind } from "@/features/earn/EarnOverlays";
+import { OverlayFrame } from "@/features/profile/ProfileOverlays";
 import {
   TYPING_DAILY_LIMIT,
   getStarterPathProgress,
@@ -148,6 +149,8 @@ export function EarnPage() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [guideOpen, setGuideOpen] = useState<NetworkGuideKind | null>(null);
   const [copied, setCopied] = useState(false);
+  const [broadcastGroupId, setBroadcastGroupId] = useState<string | null>(null);
+  const broadcastGroup = live.groups.data?.items.find((group) => group.public_id === broadcastGroupId);
 
   const dailyAvailable = live.remote ? live.daily.data?.claimable === true : isDailyClaimAvailable(earn.lastClaimDate);
   const pathProgress = Object.keys(earn.missions).length ? Math.round(Object.values(earn.missions).filter(m => m.status === "claimed").length / Object.keys(earn.missions).length * 100) : 0;
@@ -515,9 +518,22 @@ export function EarnPage() {
                   <div className={styles.rosterList}>
                     {live.remote && !groupRows.length ? <div className={styles.emptyState}><strong>{live.groups.isPending ? "Loading communities…" : live.groups.isError ? "Communities unavailable." : "No connected communities yet."}</strong></div> : null}
                     {groupRows.map((group) => (
-                      <article key={group.id}>
+                      <article key={group.id} aria-label={group.name}>
                         <span className={`${styles.avatar} ${styles[`avatar_${group.tone}`]}`}>{initials(group.name)}</span>
-                        <div className={styles.rosterIdentity}><strong>{group.name}</strong><span>{formatNumber(group.members)} {live.remote ? "qualified speakers" : "members"} · {group.meta}</span></div>
+                        <div className={styles.rosterIdentity}><strong>{group.name}</strong><span>{formatNumber(group.members)} {live.remote ? "qualified speakers" : "members"} · {group.meta}</span>
+                          {live.remote ? <>
+                            <span>{live.groups.isError ? "Broadcast status unavailable" : live.groups.data?.items.find((item) => item.public_id === group.id)?.broadcast_opted_in ? "Broadcasts enabled" : "Broadcasts disabled"}</span>
+                            <button type="button" className={styles.missionAction} disabled={live.busy || live.groups.isError}
+                              onClick={() => {
+                                const current = live.groups.data?.items.find((item) => item.public_id === group.id);
+                                if (!current) return;
+                                if (current.broadcast_opted_in) void live.setGroupBroadcastConsent(group.id, false);
+                                else setBroadcastGroupId(group.id);
+                              }}>
+                              {live.groups.data?.items.find((item) => item.public_id === group.id)?.broadcast_opted_in ? "Revoke broadcast consent" : "Enable broadcasts"}
+                            </button>
+                          </> : null}
+                        </div>
                         <div className={styles.rosterStatus}><em className={group.admin ? styles.statusActive : styles.statusPending}>{group.admin ? "Bot admin" : "Admin required"}</em><small>{group.earnedXp ? `${formatNumber(group.earnedXp)} XP earned · ${group.status}` : group.status}</small>{live.remote && ["REVIEW", "ADMIN REQUIRED", "ACTIVE"].includes(group.status) ? <button type="button" disabled={live.busy} onClick={() => { void live.reverifyGroup(group.id); }}>Check status</button> : null}</div>
                       </article>
                     ))}
@@ -590,6 +606,15 @@ export function EarnPage() {
         </DeferredMount>
       </main>
 
+      {live.remote && broadcastGroup ? <OverlayFrame eyebrow="GROUP BROADCASTS" title="Enable group broadcasts?" onClose={() => setBroadcastGroupId(null)} footer={<>
+        <Button tone="secondary" onClick={() => setBroadcastGroupId(null)}>Cancel</Button>
+        <Button disabled={live.busy || live.groups.isError} onClick={() => {
+          setBroadcastGroupId(null);
+          void live.setGroupBroadcastConsent(broadcastGroup.public_id, true);
+        }}>Enable broadcasts</Button>
+      </>}>
+        <p>Allow Dexo Land to send announcements to {broadcastGroup.title}? You can revoke consent at any time.</p>
+      </OverlayFrame> : null}
       <HistorySheet open={historyOpen} onClose={() => setHistoryOpen(false)} history={earn.history} />
       <NetworkGuideSheet kind={guideOpen} onClose={() => setGuideOpen(null)} />
       <RewardReveal reward={earn.rewardEvent} onClose={earn.dismissReward} />

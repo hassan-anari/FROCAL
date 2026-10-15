@@ -13,12 +13,14 @@ export class B3Error extends Error {
           : code === "MISSION_NOT_READY"
             ? "This mission isn't ready yet. Complete the activity, then check again."
             : code === "GROUP_AUTHORIZATION_UNAVAILABLE"
-              ? "Please check that you and the bot are admins of this group, then try again."
-              : code === "PLAYER_RESTRICTED"
-                ? "Rewards are currently unavailable for your account."
-                : code === "AUTH_EXPIRED"
-                  ? "Please close and reopen Dexo Land in Telegram to continue."
-                  : "We couldn't complete that action right now. Please try again.",
+              ? "We couldn't verify your permission to change broadcasts. Make sure you're a group admin and the bot can send messages, then try again."
+              : code === "GROUP_NOT_FOUND"
+                ? "This group is no longer available to your account. Refresh your groups and try again."
+                : code === "PLAYER_RESTRICTED"
+                  ? "Rewards are currently unavailable for your account."
+                  : code === "AUTH_EXPIRED"
+                    ? "Please close and reopen Dexo Land in Telegram to continue."
+                    : "We couldn't complete that action right now. Please try again.",
     );
   }
 }

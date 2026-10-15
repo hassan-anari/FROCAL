@@ -211,6 +211,31 @@ export function useB3() {
       await groups.refetch();
       setMessage("Your group check is queued. Please check back shortly.");
     });
+  const setGroupBroadcastConsent = (id: string, enabled: boolean) =>
+    run(async () => {
+      if (!groups.data?.items.some((group) => group.public_id === id))
+        throw new B3Error("GROUP_NOT_FOUND", null);
+      try {
+        await b3Request(
+          `/network/groups/${encodeURIComponent(id)}/broadcast-consent`,
+          c.broadcastConsentSchema,
+          { body: { enabled } },
+        );
+      } catch (error) {
+        // Also reconcile a lost response or changed ownership/permissions.
+        await groups.refetch();
+        throw error;
+      }
+      const refreshed = await groups.refetch({ throwOnError: true });
+      const group = refreshed.data?.items.find((item) => item.public_id === id);
+      setMessage(
+        group?.broadcast_opted_in === enabled
+          ? enabled
+            ? "Broadcasts are enabled for this group."
+            : "Broadcast consent has been revoked."
+          : "Broadcast settings changed. Please review this group's current status.",
+      );
+    });
   const requestKey = (kind: string) => {
     const storageKey = `dexo-b3-request:${scope.player}:${scope.season}:${kind}`;
     let value: string | null = null;
@@ -303,6 +328,7 @@ export function useB3() {
     missionAction,
     registerGroup,
     reverifyGroup,
+    setGroupBroadcastConsent,
     startTyping,
     submitTyping,
     claimTyping,

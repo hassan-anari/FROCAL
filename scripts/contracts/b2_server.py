@@ -198,6 +198,13 @@ def control(data):
         network_services.get_chat_member = lambda chat, user: TelegramResult(ok=True, result={"status": "administrator" if data.get("admin", True) else "member", "user": {"id": user}})
         registration = CreatorGroupRegistration.objects.get(public_id=data["id"], creator=player)
         return {"state": network_services.verify_registration(registration.pk)}
+    if B3 and action == "b3-broadcast-verification":
+        from apps.telegram import bot_api
+        settings.TELEGRAM_BOT_ID = 123456
+        mode = data.get("mode", "allow")
+        # Controlled Telegram transport only; consent permissions/audit remain real.
+        bot_api.get_chat_member = lambda chat, user: TelegramResult(ok=False, category="unavailable") if mode == "unavailable" else TelegramResult(ok=True, result={"user": {"id": user}, "status": "member" if mode == "denied" and user != settings.TELEGRAM_BOT_ID else "administrator"})
+        return {"ok": True}
     if B3 and action == "b3-attempt-time":
         from apps.typing_game.models import TypingAttempt
         TypingAttempt.objects.filter(player=player, status="STARTED").update(started_at=now() - timedelta(seconds=float(data.get("seconds", 8))))
