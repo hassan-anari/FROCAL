@@ -71,7 +71,7 @@ export function BasePromoBanner() {
   const banner = query.isError ? null : validBanner(query.data?.banner ?? null);
   const key = banner ? `${banner.id}:${banner.version}` : "";
   return (
-    <AnimatePresence initial={false}>
+    <AnimatePresence initial={false} mode="wait">
       {banner && failed !== key ? (
         <motion.aside
           key={key}

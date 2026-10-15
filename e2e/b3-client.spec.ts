@@ -133,6 +133,7 @@ test("banner version changes replace the image and disabled server policy remove
   const version = "a".repeat(64); payload.banner.image_url = payload.banner.image_url.replace(payload.banner.version, version); payload.banner.version = version;
   await page.evaluate(() => { document.dispatchEvent(new Event("visibilitychange")); window.dispatchEvent(new Event("focus")); });
   await expect(page.getByLabel("Promotional banner placement").locator("img")).toHaveAttribute("src", payload.banner.image_url, { timeout: 15_000 });
+  await expect(page.locator('[class*="promoSlot"]')).toHaveCount(1);
   payload = bannerFixture.empty;
   await page.evaluate(() => { document.dispatchEvent(new Event("visibilitychange")); window.dispatchEvent(new Event("focus")); });
   await expect(page.locator('[class*="promoSlot"]')).toHaveCount(0, { timeout: 15_000 });
