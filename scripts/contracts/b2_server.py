@@ -15,8 +15,9 @@ from time import monotonic
 from urllib.parse import urlencode, urlsplit
 from uuid import uuid4
 
-ROOT = Path(os.environ["B2_BACKEND_ROOT"]).resolve()
-if not os.environ.get("POSTGRES_DB", "").startswith("frocal_b2_") or os.environ.get("POSTGRES_HOST") not in {"127.0.0.1", "localhost"}:
+B3 = bool(os.environ.get("B3_BACKEND_ROOT"))
+ROOT = Path(os.environ.get("B3_BACKEND_ROOT") or os.environ["B2_BACKEND_ROOT"]).resolve()
+if not os.environ.get("POSTGRES_DB", "").startswith("frocal_b3_" if B3 else "frocal_b2_") or os.environ.get("POSTGRES_HOST") not in {"127.0.0.1", "localhost"}:
     raise RuntimeError("Paired harness requires an isolated local frocal_b2_ database")
 sys.path.insert(0, str(ROOT))
 os.environ["DJANGO_SETTINGS_MODULE"] = "dexo_land.settings.test"
@@ -50,11 +51,16 @@ settings.AVATAR_S3_BUCKET = "isolated-test-cache"
 settings.AVATAR_PUBLIC_API_ORIGIN = "https://cached-avatar.test"
 logging.disable(logging.CRITICAL)
 from apps.base_tap.schemas import BatchOutput, BatchInput, TapStateOutput
-fixtures = json.loads(Path("src/integrations/api/fixtures/tap-v2.json").read_text())
-for key, value in fixtures.items():
-    if key.endswith("response"): BatchOutput.model_validate(value)
-    elif key in {"initial_state", "state_after_daily_reward"}: TapStateOutput.model_validate(value)
-    elif key in {"batch_request", "partial_request"}: BatchInput.model_validate(value)
+if B3:
+    fixtures = json.loads(Path("src/integrations/api/fixtures/b3/session-switch.json").read_text())
+    for key in ("initial", "another_device", "switch_response", "moved"):
+        TapStateOutput.model_validate(fixtures[key])
+else:
+    fixtures = json.loads(Path("src/integrations/api/fixtures/tap-v2.json").read_text())
+    for key, value in fixtures.items():
+        if key.endswith("response"): BatchOutput.model_validate(value)
+        elif key in {"initial_state", "state_after_daily_reward"}: TapStateOutput.model_validate(value)
+        elif key in {"batch_request", "partial_request"}: BatchInput.model_validate(value)
 call_command("migrate", interactive=False, verbosity=0)
 
 epoch = monotonic()

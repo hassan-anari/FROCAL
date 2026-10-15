@@ -90,7 +90,6 @@ const baseReactionAssets = [
 export function BasePage() {
   const navigate = useNavigate();
   const onboarding = useOnboardingStore();
-  const criticalActionVisible = useBaseUiStore((state) => state.criticalActionVisible);
   const promoBannerVisible = useBaseUiStore((state) => state.promoBannerVisible);
   const earnLevel = useEarnStore((state) => state.level);
   const earnLevelXp = useEarnStore((state) => state.levelXp);
@@ -242,7 +241,7 @@ export function BasePage() {
     <>
       <main className={styles.page}>
         <AnimatePresence initial={false}>
-          {promoBannerVisible ? (
+          {import.meta.env.DEV && promoBannerVisible ? (
             <motion.aside
               className={styles.promoSlot}
               initial={{ opacity: 0, y: -7 }}
@@ -325,41 +324,6 @@ export function BasePage() {
           </div>
         </section>
 
-        <AnimatePresence initial={false}>
-          {criticalActionVisible ? (
-            <motion.section
-              className={styles.criticalAction}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={mobileMotion.reveal}
-            >
-              <div className={styles.criticalHeader}>
-                <span>Next critical action</span>
-                <small>War in 42m</small>
-              </div>
-              <h2>Defend your clan outpost</h2>
-              <p>
-                KRYPT-9 is probing the eastern relay. Join the preparation phase before deployment
-                locks.
-              </p>
-              <Button
-                size="lg"
-                className={styles.criticalButton}
-                trailingIcon={
-                  <HugeiconsIcon icon={ArrowRight01Icon} size={18} strokeWidth={1.8} />
-                }
-                onClick={() =>
-                  startTransition(() => {
-                    void navigate({ to: "/arena" });
-                  })
-                }
-              >
-                Join clan defence
-              </Button>
-            </motion.section>
-          ) : null}
-        </AnimatePresence>
 
         <section className={styles.objectives} aria-label="Next objectives">
           <header className={styles.sectionHeader}>

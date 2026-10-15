@@ -4,7 +4,7 @@ import type { TapController } from "./controller";
  * or Season/config switch. Hidden time never extends an old grant locally. */
 export function bindTapLifecycle(controller: TapController) {
   const visibility = () => { if (document.hidden) controller.suspend(); else void controller.resume(); };
-  const suspend = () => controller.suspend();
+  const suspend = () => { void controller.releaseSession(); };
   const resume = () => { if (!document.hidden) void controller.resume(); };
   document.addEventListener("visibilitychange", visibility);
   window.addEventListener("pagehide", suspend);

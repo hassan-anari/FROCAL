@@ -2,6 +2,15 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "headers": [
     {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
       "source": "/assets/(.*)",
       "headers": [
         {
@@ -16,6 +25,15 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/client-release.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
         }
       ]
     }
@@ -33,7 +51,8 @@
   "git": {
     "deploymentEnabled": {
       "ai/b1-frontend-foundation": false,
-      "ai/b2-frontend-instant-tap": false
+      "ai/b2-frontend-instant-tap": false,
+      "ai/b3-frontend-integration": false
     }
   }
 }

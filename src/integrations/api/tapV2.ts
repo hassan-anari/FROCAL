@@ -7,10 +7,10 @@ import { recoverLegacyTapReceipt } from "./baseTap";
 const definitive = new Set(["LEASE_UNKNOWN", "LEASE_REVOKED", "LEASE_EXPIRED", "ALLOWANCE_EXHAUSTED", "SEQUENCE_REPLAY",
   "SEASON_CHANGED", "SEASON_UNAVAILABLE", "SEASON_FINALIZED", "EPOCH_FINALIZED", "PLAYER_RESTRICTED"]);
 
-async function call(path: string, initData: string | null, signal: AbortSignal, body?: unknown): Promise<unknown> {
+async function call(path: string, initData: string | null, signal: AbortSignal, body?: unknown, keepalive = false): Promise<unknown> {
   let response: Response;
   try {
-    response = await apiRequest(`/base/v2/${path}`, { initData, signal, returnErrorResponse: true,
+    response = await apiRequest(`/base/v2/${path}`, { initData, signal, keepalive, returnErrorResponse: true,
       ...(body === undefined ? {} : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }) });
   } catch (error) {
     if (error instanceof ApiError && ["LAUNCH_DATA_MISSING", "AUTH_INVALID", "AUTH_EXPIRED"].includes(error.code)) throw new TapTransportError("reauthorize", 0, error.code);
@@ -42,6 +42,9 @@ export function normalizeTapState(state: WireTapState): TapSnapshot {
     lifetime: state.progression.lifetime_points, seasonPoints: state.season_points, progression: policy,
     earningAllowed: state.reward_earning_allowed, issuanceEnabled: state.issuance_enabled,
     cooldownUntil: state.cooldown_until === null ? null : Date.parse(state.cooldown_until),
+    ...(state.ownership ? { ownership: { status: state.ownership.status, generation: state.generation,
+      activeUntil: state.ownership.active_until ? Date.parse(state.ownership.active_until) : null,
+      explicitSwitchRequired: state.ownership.explicit_switch_required } } : {}),
     grant: lease ? {
       scope: { player: state.player_id, season: lease.season_id, config: lease.config_version, session: lease.session_id, lease: lease.lease_id, generation: lease.generation },
       expiresAt: Date.parse(lease.expires_at), remaining: state.burst_remaining, sequenceCursor: lease.sequence_start - 1,
@@ -89,11 +92,13 @@ export function createTapPort(player: string, initData: string | null, verifiedA
     if (snapshot.player !== player) throw new TapTransportError("terminal", 0, "PLAYER_MISMATCH");
     return { ...snapshot, receipts: [receiptFor(batch, result)] };
   }
-  return { submit, async synchronize(journal: Readonly<TapJournal>, signal: AbortSignal) {
+  async function synchronize(journal: Readonly<TapJournal>, signal: AbortSignal, switchGeneration?: number) {
     if (!journal.session) throw new TapTransportError("reauthorize", 0, "SESSION_MISSING");
     let state = await read(journal.session, signal);
+    let recoveredLegacy = false;
     if (state.issuance_enabled && initData) {
       await recoverLegacyQueues(localStorage, verifiedAliases, async (pending) => {
+        recoveredLegacy = true;
         const result = await recoverLegacyTapReceipt({ ...pending, initData, signal });
         return result ? "confirmed" : "unavailable";
       });
@@ -111,7 +116,26 @@ export function createTapPort(player: string, initData: string | null, verifiedA
         rejections.push({ scope: batch.scope, key: batch.key, code: error.code });
       }
     }
-    if (journal.batches.length || (state.issuance_enabled && initData)) state = await read(journal.session, signal);
+    if (journal.batches.length || recoveredLegacy) state = await read(journal.session, signal);
+    const conflict = (code: string) => {
+      const error = new TapTransportError("reauthorize", 0, code);
+      error.snapshot = { ...normalizeTapState(state), receipts, rejections };
+      return error;
+    };
+    // A fenced client can read/replay receipts but must not acquire automatically.
+    if (switchGeneration === undefined && state.ownership?.explicit_switch_required) {
+      throw conflict(state.ownership.status === "SESSION_MOVED" ? "LEASE_REVOKED" : "ACTIVE_SESSION");
+    }
+    if (switchGeneration !== undefined && state.ownership?.status !== "OWNED") {
+      if (!state.ownership || state.generation !== switchGeneration) throw conflict("GENERATION_STALE");
+      try {
+        state = tapStateSchema.parse(await call("tap-leases", initData, signal,
+          { session_id: journal.session, takeover: true, expected_generation: switchGeneration }));
+      } catch (error) {
+        if (error instanceof TapTransportError) error.snapshot = { ...normalizeTapState(state), receipts, rejections };
+        throw error;
+      }
+    }
     if ((!state.lease || state.burst_remaining === 0) && state.issuance_enabled && state.reward_earning_allowed
       && (state.cooldown_until === null || Date.parse(state.cooldown_until) <= Date.parse(state.server_time))) {
       try {
@@ -122,5 +146,12 @@ export function createTapPort(player: string, initData: string | null, verifiedA
       }
     }
     return { ...normalizeTapState(state), receipts, rejections };
-  } };
+  }
+  return { submit, synchronize,
+    switchSession: (journal, generation, signal) => synchronize(journal, signal, generation),
+    releaseSession: async (grant, signal) => {
+      await call("tap-release", initData, signal, { lease_id: grant.scope.lease,
+        session_id: grant.scope.session, generation: grant.scope.generation ?? 1 }, true);
+    },
+  };
 }

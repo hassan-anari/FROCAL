@@ -13,13 +13,13 @@ interface BaseUiState {
 export const useBaseUiStore = create<BaseUiState>()(
   persist(
     (set) => ({
-      criticalActionVisible: true,
+      criticalActionVisible: false,
       promoBannerVisible: false,
-      setCriticalActionVisible: (criticalActionVisible) => set({ criticalActionVisible }),
-      toggleCriticalAction: () => set((state) => ({ criticalActionVisible: !state.criticalActionVisible })),
+      setCriticalActionVisible: () => set({ criticalActionVisible: false }),
+      toggleCriticalAction: () => set({ criticalActionVisible: false }),
       setPromoBannerVisible: (promoBannerVisible) => set({ promoBannerVisible }),
       togglePromoBanner: () => set((state) => ({ promoBannerVisible: !state.promoBannerVisible })),
     }),
-    { name: "dalexio-base-ui" },
+    { name: "dalexio-base-ui", merge: (persisted, current) => ({ ...current, ...(persisted as Partial<BaseUiState>), criticalActionVisible: false }) },
   ),
 );

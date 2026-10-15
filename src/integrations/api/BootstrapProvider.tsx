@@ -11,7 +11,7 @@ import { queryKeys, type PlayerScope } from "./queryKeys";
 interface BootstrapContextValue {
   bootstrap: UseQueryResult<BootstrapPayload, Error>;
   scope: PlayerScope;
-  refresh: () => void;
+  refresh: () => Promise<unknown>;
   progressionPolicy: BootstrapProgressionPolicy | null;
 }
 const Context = createContext<BootstrapContextValue | null>(null);
@@ -72,7 +72,7 @@ export function BootstrapProvider({ children }: { children: ReactNode }) {
     setPrepared(scopeKey);
   }, [scopeKey, source]);
 
-  const refresh = () => { void bootstrap.refetch(); };
+  const refresh = () => bootstrap.refetch();
   return <Context.Provider value={{ bootstrap, scope, refresh, progressionPolicy: bootstrap.data?.remote?.config.progression ?? null }}>
     {prepared === scopeKey ? <div key={scopeKey} style={{ display: "contents" }}>{children}</div> : null}
   </Context.Provider>;

@@ -1,5 +1,5 @@
 import { compareSnapshots, journalSchema, scopeId, snapshotSchema, TapTransportError, type TapBatch, type TapGrant, type TapJournal, type TapPort, type TapSnapshot } from "./model";
-import { TapJournalStore, type DurableStorage } from "./journal";
+import { JournalIntegrityError, TapJournalStore, type DurableStorage } from "./journal";
 import type { TapOwnership } from "./ownership";
 import { authorizedProgression } from "./progression";
 
@@ -16,6 +16,8 @@ export interface TapView {
   cooldownRemainingMs: number;
   isCoolingDown: boolean;
   error: string | null;
+  recovering: boolean;
+  canSwitchDevice: boolean;
   levelChange: { sequence: number; previousLevel: number; newLevel: number; stage: string; evolved: boolean } | null;
 }
 interface Dependencies {
@@ -47,6 +49,8 @@ export class TapController {
   private maintenance: ReturnType<typeof setTimeout> | null = null;
   private error: string | null = null;
   private starting = false;
+  private recovering = false;
+  private releaseWork: Promise<void> | null = null;
   private scheduledAt = Infinity;
   private inFlight = false;
   private roundTrip = 240;
@@ -89,6 +93,9 @@ export class TapController {
       cooldownUntil: deadline || null,
       cooldownMs: this.grant?.cooldownDuration ?? remaining,
       cooldownRemainingMs: remaining, isCoolingDown: remaining > 0, error: this.error,
+      recovering: this.recovering,
+      canSwitchDevice: Boolean(this.dependencies.port.switchSession && this.snapshot?.ownership?.explicitSwitchRequired
+        && this.snapshot.issuanceEnabled && this.snapshot.earningAllowed),
       levelChange: this.levelChange,
     };
   }
@@ -126,7 +133,11 @@ export class TapController {
     this.starting = true;
     const acquired = await this.dependencies.ownership.acquire();
     if (this.status !== "initializing") { this.dependencies.ownership.release(); return; }
-    if (!acquired) { this.status = "session-busy"; this.emit(); return; }
+    if (!acquired) {
+      this.status = "session-busy";
+      this.error = this.dependencies.ownership.unavailable ? "LOCAL_SESSION_UNAVAILABLE" : null;
+      this.emit(); return;
+    }
     this.owned = true;
     try {
       this.store = new TapJournalStore(this.dependencies.storage(), this.dependencies.player);
@@ -137,8 +148,9 @@ export class TapController {
         this.emit();
         return;
       }
-    } catch { this.status = "storage-blocked"; this.emit(); return; }
+    } catch (error) { this.storageFailure(error); return; }
     await this.resume();
+    this.starting = false;
   }
 
   /** Visibility loss invalidates local time confidence; unsent records remain durable. */
@@ -148,6 +160,7 @@ export class TapController {
     this.abort?.abort();
     this.abort = null;
     this.inFlight = false;
+    this.recovering = false;
     this.clearTimer();
     if (this.maintenance !== null) clearTimeout(this.maintenance);
     this.maintenance = null;
@@ -155,17 +168,27 @@ export class TapController {
     this.emit();
   }
 
-  async resume() {
+  async resume(switchGeneration?: number) {
+    // A rapid close/reopen must not reuse a lease while its release is in flight.
+    if (this.releaseWork) await this.releaseWork;
+    // Retry, resume and online events must not cancel a pending settlement/read.
+    if (this.inFlight) return;
     if (!this.owned || !this.store || ["closed", "storage-blocked", "terminal"].includes(this.status)) return;
     this.suspend();
     const generation = this.generation;
     const abort = new AbortController();
     this.abort = abort;
     this.inFlight = true;
+    this.recovering = true;
+    this.emit();
     const started = this.monotonic();
     try {
       if (!this.prepareRecovery()) return;
-      const snapshot = await this.request(this.dependencies.port.synchronize(structuredClone(this.journal), abort.signal), abort);
+      const journal = structuredClone(this.journal);
+      const operation = switchGeneration !== undefined && this.dependencies.port.switchSession
+        ? this.dependencies.port.switchSession(journal, switchGeneration, abort.signal)
+        : this.dependencies.port.synchronize(journal, abort.signal);
+      const snapshot = await this.request(operation, abort);
       if (generation !== this.generation) return;
       this.acceptSnapshot(snapshot, started);
       if (this.status !== "storage-blocked") {
@@ -180,7 +203,13 @@ export class TapController {
         this.status = error instanceof TapTransportError && error.kind === "terminal" ? "terminal" : "paused";
         const retry = error instanceof TapTransportError ? Math.max(1500, error.retryAfterMs) : 3000;
         const needsNewCredentials = ["AUTH_MISSING", "AUTH_INVALID", "AUTH_EXPIRED"].includes(this.error);
-        if (this.status === "paused" && !needsNewCredentials && Number.isFinite(retry) && retry <= 300_000) {
+        if (this.status === "paused" && !needsNewCredentials && switchGeneration === undefined
+          && !["LEASE_REVOKED", "GENERATION_STALE"].includes(this.error) && Number.isFinite(retry) && retry <= 300_000) {
+          this.nextAttemptAt = this.monotonic() + retry;
+          this.maintain(retry);
+        }
+        if (switchGeneration !== undefined && this.error === "COOLDOWN" && Number.isFinite(retry) && retry <= 300_000) {
+          // Re-read after the server window; never repeat deliberate takeover automatically.
           this.nextAttemptAt = this.monotonic() + retry;
           this.maintain(retry);
         }
@@ -188,11 +217,33 @@ export class TapController {
     } finally {
       if (generation === this.generation) {
         this.inFlight = false;
+        this.recovering = false;
         this.emit();
         if (this.status === "ready" && this.journal.events.length) this.schedule(0);
         if (this.status === "ready") this.maintain();
       }
     }
+  }
+
+  /** The caller must obtain a new deliberate confirmation for each invocation. */
+  async switchToThisDevice() {
+    const ownership = this.snapshot?.ownership;
+    if (!this.view.canSwitchDevice || !ownership || this.inFlight) return;
+    await this.resume(ownership.generation);
+  }
+
+  /** Release only a fully acknowledged lease; retain every uncertain request. */
+  async releaseSession() {
+    if (this.releaseWork) return this.releaseWork;
+    if (this.inFlight || this.journal.events.length || this.journal.batches.length || !this.grant
+      || !this.snapshot?.ownership || !this.dependencies.port.releaseSession) { this.suspend(); return; }
+    const grant = this.grant;
+    this.suspend();
+    const abort = new AbortController();
+    this.releaseWork = this.request(this.dependencies.port.releaseSession(grant, abort.signal), abort)
+      .catch(() => { /* Closure delivery is best effort; explicit switching remains available. */ });
+    await this.releaseWork;
+    this.releaseWork = null;
   }
 
   private prepareRecovery() {
@@ -217,12 +268,24 @@ export class TapController {
       this.store!.write(next);
       this.journal = next;
       return true;
-    } catch {
-      this.status = "storage-blocked";
-      this.clearTimer();
-      this.emit();
+    } catch (error) {
+      this.storageFailure(error);
       return false;
     }
+  }
+
+  private storageFailure(error: unknown) {
+    this.status = error instanceof JournalIntegrityError ? "terminal" : "storage-blocked";
+    this.error = error instanceof JournalIntegrityError ? error.code : "STORAGE_UNAVAILABLE";
+    this.clearTimer();
+    this.emit();
+  }
+
+  /** Freeze input before a deliberate compatible-release refresh. Never lose an outbox. */
+  prepareReload() {
+    if (this.starting || this.inFlight || this.journal.events.length || this.journal.batches.length) return false;
+    this.suspend();
+    return true;
   }
 
   /** Synchronous durable append precedes the immediate React notification. No HTTP wait. */

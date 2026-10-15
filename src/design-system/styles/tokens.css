@@ -22,6 +22,9 @@
   --color-warning: #ffca6a;
   --color-danger: #ff6f91;
 
+  --avatar-fallback-background: linear-gradient(145deg, var(--color-cyan-soft), var(--color-cyan));
+  --avatar-fallback-foreground: var(--color-bg-850);
+
   --gradient-brand: linear-gradient(135deg, var(--color-cyan) 0%, var(--color-violet) 55%, var(--color-magenta) 100%);
   --gradient-panel: linear-gradient(145deg, rgba(17, 31, 66, 0.86), rgba(5, 10, 24, 0.78));
 

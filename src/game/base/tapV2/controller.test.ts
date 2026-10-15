@@ -259,3 +259,101 @@ it("refuses a second local owner", async () => {
   expect(controller.getSnapshot().status).toBe("session-busy");
   expect(controller.touch()).toBe(false); controller.close();
 });
+
+it("coalesces repeated Retry/online/resume actions without cancelling an in-flight recovery", async () => {
+  let resolve!: (snapshot: ReturnType<typeof internalSnapshot>) => void;
+  let signal!: AbortSignal;
+  const synchronize = vi.fn((_journal, abort: AbortSignal) => {
+    signal = abort;
+    return new Promise<ReturnType<typeof internalSnapshot>>((done) => { resolve = done; });
+  });
+  const harness = internalHarness({ synchronize });
+  const start = harness.controller.start();
+  await Promise.resolve();
+  expect(harness.controller.getSnapshot().recovering).toBe(true);
+  await Promise.all(Array.from({ length: 20 }, () => harness.controller.resume()));
+  expect(synchronize).toHaveBeenCalledTimes(1);
+  expect(signal.aborted).toBe(false);
+  resolve(internalSnapshot());
+  await start;
+  expect(harness.controller.getSnapshot()).toMatchObject({ status: "ready", recovering: false });
+  harness.controller.close();
+});
+
+it("refuses a refresh during pending settlement and freezes input only after acknowledgement", async () => {
+  const harness = internalHarness();
+  await harness.controller.start();
+  harness.controller.touch();
+  expect(harness.controller.prepareReload()).toBe(false);
+  await harness.controller.flush();
+  expect(harness.controller.prepareReload()).toBe(true);
+  expect(harness.controller.touch()).toBe(false);
+  harness.controller.close();
+});
+
+it("never automatically switches a fenced client and requires a separate explicit operation", async () => {
+  const moved = internalSnapshot(); moved.grant = null;
+  moved.ownership = { status: "SESSION_MOVED", generation: 2, activeUntil: 20_000, explicitSwitchRequired: true };
+  const failure = new TapTransportError("reauthorize", 0, "LEASE_REVOKED"); failure.snapshot = moved;
+  const synchronize = vi.fn(async () => { throw failure; });
+  const switched = internalSnapshot(); switched.ownership = { ...moved.ownership, status: "OWNED", generation: 3, explicitSwitchRequired: false };
+  const switchSession = vi.fn(async () => switched);
+  const controller = new TapController({ player: moved.player, storage: () => new MemoryStorage(),
+    ownership: { acquire: async () => true, release: () => {} }, port: { synchronize, switchSession, submit: vi.fn() } });
+  await controller.start();
+  expect(controller.getSnapshot()).toMatchObject({ status: "paused", error: "LEASE_REVOKED", canSwitchDevice: true });
+  await vi.advanceTimersByTimeAsync(60_000);
+  expect(synchronize).toHaveBeenCalledTimes(1);
+  expect(switchSession).not.toHaveBeenCalled();
+  await controller.switchToThisDevice();
+  expect(switchSession).toHaveBeenCalledWith(expect.anything(), 2, expect.any(AbortSignal));
+  expect(controller.getSnapshot()).toMatchObject({ status: "ready", canSwitchDevice: false });
+  controller.close();
+});
+
+it("does not release a session with unacknowledged events", async () => {
+  const snapshot = internalSnapshot(); snapshot.ownership = { status: "OWNED", generation: 1, activeUntil: 20_000, explicitSwitchRequired: false };
+  const releaseSession = vi.fn(); const storage = new MemoryStorage();
+  const controller = new TapController({ player: snapshot.player, storage: () => storage,
+    ownership: { acquire: async () => true, release: () => {} },
+    port: { synchronize: async () => snapshot, releaseSession, submit: vi.fn() } });
+  await controller.start(); controller.touch();
+  await controller.releaseSession();
+  expect(releaseSession).not.toHaveBeenCalled();
+  expect(JSON.parse(storage.getItem("dalexio-tap-v2:verified-player")!).events).toHaveLength(1);
+  controller.close();
+});
+
+it("waits for best-effort release before resuming after a rapid reopen", async () => {
+  const snapshot = internalSnapshot(); snapshot.ownership = { status: "OWNED", generation: 1, activeUntil: 20_000, explicitSwitchRequired: false };
+  let released!: () => void;
+  const releaseSession = vi.fn(() => new Promise<void>((resolve) => { released = resolve; }));
+  const synchronize = vi.fn(async () => snapshot);
+  const controller = new TapController({ player: snapshot.player, storage: () => new MemoryStorage(),
+    ownership: { acquire: async () => true, release: () => {} }, port: { synchronize, releaseSession, submit: vi.fn() } });
+  await controller.start();
+  const leaving = controller.releaseSession();
+  const resume = controller.resume();
+  expect(synchronize).toHaveBeenCalledTimes(1);
+  released(); await leaving; await resume;
+  expect(synchronize).toHaveBeenCalledTimes(2);
+  controller.close();
+});
+
+it("waits out an explicit-switch cooldown with a read and never repeats takeover automatically", async () => {
+  const snapshot = internalSnapshot(); snapshot.grant = null;
+  snapshot.ownership = { status: "ANOTHER_DEVICE", generation: 1, activeUntil: 120_000, explicitSwitchRequired: true };
+  const conflict = new TapTransportError("reauthorize", 0, "ACTIVE_SESSION"); conflict.snapshot = snapshot;
+  const cooldown = new TapTransportError("rate-limit", 2000, "COOLDOWN"); cooldown.snapshot = snapshot;
+  const synchronize = vi.fn(async () => { throw conflict; });
+  const switchSession = vi.fn(async () => { throw cooldown; });
+  const controller = new TapController({ player: snapshot.player, storage: () => new MemoryStorage(),
+    ownership: { acquire: async () => true, release: () => {} }, port: { synchronize, switchSession, submit: vi.fn() } });
+  await controller.start(); await controller.switchToThisDevice();
+  expect(controller.getSnapshot()).toMatchObject({ status: "paused", error: "COOLDOWN" });
+  await vi.advanceTimersByTimeAsync(2000);
+  expect(synchronize).toHaveBeenCalledTimes(2);
+  expect(switchSession).toHaveBeenCalledTimes(1);
+  expect(controller.getSnapshot().error).toBe("ACTIVE_SESSION");
+  controller.close();
+});

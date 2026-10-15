@@ -1,0 +1,19 @@
+{
+  "repository": "hassan-anari/WEDCAL",
+  "commit": "b443eee0174ce495b8de02dbb065aaec19405094",
+  "status": "incremental-session-contract; final B3 contract pending",
+  "files": {
+    "src/integrations/api/fixtures/b3/session-switch.json": {
+      "path": "docs/fixtures/b3/session-switch.json",
+      "blob": "d2eaa8890ce0d7fd672e362efec4aa8f8fe4ce2a"
+    },
+    "scripts/contracts/b3/B3_BACKEND_CONTRACT.md": {
+      "path": "docs/B3_BACKEND_CONTRACT.md",
+      "blob": "c23c61d67c0f53c7757d4903ae0df293a57fe363"
+    },
+    "scripts/contracts/b3/tap-schemas.py": {
+      "path": "apps/base_tap/schemas.py",
+      "blob": "a090c2c07a24763f2effbe72f0453f42de58de1c"
+    }
+  }
+}

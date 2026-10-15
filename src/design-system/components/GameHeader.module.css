@@ -29,10 +29,10 @@
 .avatarFallback {
   display: grid;
   place-items: center;
-  color: white;
+  color: var(--avatar-fallback-foreground);
   font-size: .82rem;
   font-weight: 820;
-  background: linear-gradient(145deg, #48d9ff, #806cff 58%, #cf56ff);
+  background: var(--avatar-fallback-background);
 }
 
 .identity > div {
@@ -369,3 +369,5 @@
     box-shadow: 0 12px 28px rgba(0,0,0,.34), inset 0 -1px 0 rgba(255,255,255,.025);
   }
 }
+
+.identity .avatarFallback { color: var(--avatar-fallback-foreground); }

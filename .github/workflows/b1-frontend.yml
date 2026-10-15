@@ -3,7 +3,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: ['ai/b1-frontend-*', 'ai/b2-frontend-*']
+    branches: ['ai/b1-frontend-*', 'ai/b2-frontend-*', 'ai/b3-frontend-*']
   workflow_dispatch:
 permissions:
   contents: read
@@ -90,5 +90,52 @@ jobs:
         if: always()
         with:
           name: b2-paired-results
+          path: test-results-paired/results.json
+          retention-days: 14
+
+  paired-b3:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: frocal_b3_ci
+          POSTGRES_USER: b3_test
+          POSTGRES_PASSWORD: isolated-test-only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U b3_test -d frocal_b3_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      POSTGRES_DB: frocal_b3_ci
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: '5432'
+      POSTGRES_USER: b3_test
+      POSTGRES_PASSWORD: isolated-test-only
+      B3_BACKEND_ROOT: work/backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: hassan-anari/WEDCAL
+          ref: b443eee0174ce495b8de02dbb065aaec19405094
+          path: work/backend
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.8.22'
+      - run: uv sync --frozen --python 3.13
+        working-directory: work/backend
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:paired:b3
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: b3-paired-results
           path: test-results-paired/results.json
           retention-days: 14
