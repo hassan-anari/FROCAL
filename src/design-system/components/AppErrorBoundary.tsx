@@ -13,7 +13,8 @@ export class AppErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error("Dexo Land render failure", error, info);
+    if (import.meta.env.DEV) console.error("Dexo Land render failure", error, info);
+    else console.error("Dexo Land render failure");
   }
 
   render() {
@@ -24,8 +25,8 @@ export class AppErrorBoundary extends Component<Props, State> {
         <div className={styles.panel}>
           <span className={styles.eyebrow}>Recovery protocol</span>
           <h1>Dexo Land could not initialize.</h1>
-          <p>{this.state.error.message}</p>
-          <Button onClick={() => window.location.reload()}>Reload mini app</Button>
+          <p>Please close Dexo Land and open it again from Telegram.</p>
+          <Button onClick={() => this.setState({ error: null })}>Try Again</Button>
         </div>
       </main>
     );

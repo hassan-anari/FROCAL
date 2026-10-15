@@ -1,0 +1,55 @@
+{
+  "repository": "hassan-anari/WEDCAL",
+  "commit": "c3f8f27d18fda66b62e22c6cadd1480e1f0f4370",
+  "status": "reviewed published whole-B3 contract; isolated paired validation required",
+  "files": {
+    "scripts/contracts/b3/B3_BACKEND_CONTRACT.md": {
+      "path": "docs/B3_BACKEND_CONTRACT.md",
+      "blob": "64756afc4e03a79e1ee135dd012439383e340a1e"
+    },
+    "scripts/contracts/b3/B3_BACKEND_HANDOFF.md": {
+      "path": "docs/B3_BACKEND_HANDOFF.md",
+      "blob": "05d74b63f2e65a341d56842d33361bde00e412bf"
+    },
+    "scripts/contracts/b3/tap-schemas.py": {
+      "path": "apps/base_tap/schemas.py",
+      "blob": "676daea790b6bd545a5a2e111c5e75b02aaa648e"
+    },
+    "src/integrations/api/fixtures/b3/broadcast-audiences.json": {
+      "path": "docs/fixtures/b3/broadcast-audiences.json",
+      "blob": "4361b208d35403c20b9a5a11de44e07989d727a0"
+    },
+    "src/integrations/api/fixtures/b3/earn-network.json": {
+      "path": "docs/fixtures/b3/earn-network.json",
+      "blob": "76ef0646311aba2bd712d9c014302d43a9e94f3d"
+    },
+    "src/integrations/api/fixtures/b3/banners.json": {
+      "path": "docs/fixtures/b3/banners.json",
+      "blob": "45ef5d4ba77acb9d64a149f25dd0687a61674018"
+    },
+    "src/integrations/api/fixtures/b3/session-recovery-latency.json": {
+      "path": "docs/fixtures/b3/session-recovery-latency.json",
+      "blob": "f07b4c60c452913f780d26310b31cd0f5b9d714f"
+    },
+    "src/integrations/api/fixtures/b3/openapi.json": {
+      "path": "docs/fixtures/b3/openapi.json",
+      "blob": "b536ec713600bbe221c72f7113511d9dd81cd707"
+    },
+    "src/integrations/api/fixtures/b3/errors.json": {
+      "path": "docs/fixtures/b3/errors.json",
+      "blob": "4cd28b70243c3750f8f494b6c790531af66867d1"
+    },
+    "src/integrations/api/fixtures/b3/session-switch.json": {
+      "path": "docs/fixtures/b3/session-switch.json",
+      "blob": "4e2fffec4e8385597c251e8f3249dd00140f0369"
+    },
+    "src/integrations/api/fixtures/b3/start-welcome.json": {
+      "path": "docs/fixtures/b3/start-welcome.json",
+      "blob": "e81ec67e20332f825bc7c280340ca33ecaf27874"
+    },
+    "src/integrations/api/fixtures/b3/creator-network-active.json": {
+      "path": "docs/fixtures/b3/creator-network-active.json",
+      "blob": "8fe6cf660b049b33170771a0c7e56b113f7d4874"
+    }
+  }
+}

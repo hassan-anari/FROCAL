@@ -110,7 +110,7 @@ const guideContent = {
     description: "Your personal link connects every successful explorer to your network.",
     steps: [
       ["Share your personal link", "Send it directly or share it inside Telegram."],
-      ["Reach Level 5", "An invitation becomes successful after the new explorer reaches Level 5."],
+      ["Complete eligibility", "Invited explorers become verified after meeting the current level, account age and activity requirements."],
       ["Unlock shared rewards", "After verification, part of their eligible Earn activity is credited to you."],
       ["Raise your tier", "More successful invitations increase your referral percentage."],
     ],

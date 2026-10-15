@@ -1,3 +1,6 @@
+import { readPlayerOnboarding } from "@/app/storageRelease";
+import { canonicalKey } from "./canonical";
+import type { CanonicalState } from "./b3Contracts";
 import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { useQuery, useQueryClient, type UseQueryResult } from "@tanstack/react-query";
 import type { BootstrapPayload } from "@/game/domain/schemas";
@@ -11,7 +14,7 @@ import { queryKeys, type PlayerScope } from "./queryKeys";
 interface BootstrapContextValue {
   bootstrap: UseQueryResult<BootstrapPayload, Error>;
   scope: PlayerScope;
-  refresh: () => void;
+  refresh: () => Promise<unknown>;
   progressionPolicy: BootstrapProgressionPolicy | null;
 }
 const Context = createContext<BootstrapContextValue | null>(null);
@@ -31,7 +34,13 @@ export function BootstrapProvider({ children }: { children: ReactNode }) {
   const client = useQueryClient();
   const bootstrap = useQuery({
     queryKey: queryKeys.bootstrap(session, source, scenario, adapter.platform),
-    queryFn: ({ signal }) => loadBootstrap(scenario, adapter.platform, initData, signal),
+    queryFn: async ({ signal }) => {
+      const value = await loadBootstrap(scenario, adapter.platform, initData, signal);
+      const current = value.remote ? client.getQueryData<CanonicalState>(canonicalKey({ session, player: value.player.id, season: value.season.id, config: configCacheScope(value.remote.config) })) : undefined;
+      if (!current || !value.remote || current.receipt_cursor <= (value.remote.canonical?.receipt_cursor ?? -1)) return value;
+      const p = current.progression;
+      return { ...value, player: { ...value.player, lifetimeXp: p.lifetime_points, seasonScore: current.season_points, level: p.level, xp: p.points_into_level, xpToNextLevel: p.next_threshold === null ? Math.max(1,p.points_into_level) : p.next_threshold - p.current_threshold }, dexo: { ...value.dexo, level: p.level, stage: p.dexo_stage }, remote: { ...value.remote, canonical: current, progression: p, season: value.remote.season ? { ...value.remote.season, season_points: current.season_points } : null } };
+    },
     enabled: source !== "remote" || launchState === "ready",
     refetchOnWindowFocus: source === "remote",
     refetchInterval: source === "remote" ? 60_000 : false,
@@ -61,9 +70,9 @@ export function BootstrapProvider({ children }: { children: ReactNode }) {
       const key = `dalexio-onboarding-v1:player:${bootstrap.data.player.id}`;
       if (useOnboardingStore.persist.getOptions().name !== key) {
         let saved: string | null = null;
-        try { saved = localStorage.getItem(key); } catch { /* storage is optional */ }
+        try { saved = readPlayerOnboarding(localStorage, bootstrap.data.player.id); } catch { /* storage is optional */ }
         useOnboardingStore.persist.setOptions({ name: key });
-        useOnboardingStore.getState().reset();
+        try { useOnboardingStore.getState().reset(); } catch { /* Optional preference persistence must not prevent session diagnosis. */ }
         if (saved) {
           try { localStorage.setItem(key, saved); void useOnboardingStore.persist.rehydrate(); } catch { /* keep fresh onboarding */ }
         }
@@ -72,7 +81,7 @@ export function BootstrapProvider({ children }: { children: ReactNode }) {
     setPrepared(scopeKey);
   }, [scopeKey, source]);
 
-  const refresh = () => { void bootstrap.refetch(); };
+  const refresh = () => bootstrap.refetch();
   return <Context.Provider value={{ bootstrap, scope, refresh, progressionPolicy: bootstrap.data?.remote?.config.progression ?? null }}>
     {prepared === scopeKey ? <div key={scopeKey} style={{ display: "contents" }}>{children}</div> : null}
   </Context.Provider>;

@@ -15,8 +15,9 @@ from time import monotonic
 from urllib.parse import urlencode, urlsplit
 from uuid import uuid4
 
-ROOT = Path(os.environ["B2_BACKEND_ROOT"]).resolve()
-if not os.environ.get("POSTGRES_DB", "").startswith("frocal_b2_") or os.environ.get("POSTGRES_HOST") not in {"127.0.0.1", "localhost"}:
+B3 = bool(os.environ.get("B3_BACKEND_ROOT"))
+ROOT = Path(os.environ.get("B3_BACKEND_ROOT") or os.environ["B2_BACKEND_ROOT"]).resolve()
+if not os.environ.get("POSTGRES_DB", "").startswith("frocal_b3_" if B3 else "frocal_b2_") or os.environ.get("POSTGRES_HOST") not in {"127.0.0.1", "localhost"}:
     raise RuntimeError("Paired harness requires an isolated local frocal_b2_ database")
 sys.path.insert(0, str(ROOT))
 os.environ["DJANGO_SETTINGS_MODULE"] = "dexo_land.settings.test"
@@ -50,11 +51,16 @@ settings.AVATAR_S3_BUCKET = "isolated-test-cache"
 settings.AVATAR_PUBLIC_API_ORIGIN = "https://cached-avatar.test"
 logging.disable(logging.CRITICAL)
 from apps.base_tap.schemas import BatchOutput, BatchInput, TapStateOutput
-fixtures = json.loads(Path("src/integrations/api/fixtures/tap-v2.json").read_text())
-for key, value in fixtures.items():
-    if key.endswith("response"): BatchOutput.model_validate(value)
-    elif key in {"initial_state", "state_after_daily_reward"}: TapStateOutput.model_validate(value)
-    elif key in {"batch_request", "partial_request"}: BatchInput.model_validate(value)
+if B3:
+    fixtures = json.loads(Path("src/integrations/api/fixtures/b3/session-switch.json").read_text())
+    for key in ("initial", "another_device", "switch_response", "moved"):
+        TapStateOutput.model_validate(fixtures[key])
+else:
+    fixtures = json.loads(Path("src/integrations/api/fixtures/tap-v2.json").read_text())
+    for key, value in fixtures.items():
+        if key.endswith("response"): BatchOutput.model_validate(value)
+        elif key in {"initial_state", "state_after_daily_reward"}: TapStateOutput.model_validate(value)
+        elif key in {"batch_request", "partial_request"}: BatchInput.model_validate(value)
 call_command("migrate", interactive=False, verbosity=0)
 
 epoch = monotonic()
@@ -76,6 +82,19 @@ season = Season.objects.filter(status=Season.Status.ACTIVE).first()
 if not season:
     season = Season.objects.create(code=f"paired-{uuid4().hex[:8]}", title="Season One", starts_at=BASE - timedelta(days=1), ends_at=BASE + timedelta(days=44), baseline_config=config)
     season = activate_season(season)
+
+if B3:
+    settings.TELEGRAM_BOT_USERNAME = "DexoPairedFixtureBot"
+    from apps.missions.models import MissionDefinition
+    from apps.typing_game.models import TypingPhrase
+    for definition in sample["missions"]["initial_definitions"]:
+        parameters = {"destination_url": "https://dalexio.com/"} if definition["verification"] == "TIMED_EXTERNAL" else {"telegram_chat_id": -100123} if definition["verification"] == "TELEGRAM" else {}
+        MissionDefinition.objects.get_or_create(key=definition["id"], version=1, defaults={"enabled": True, "title": definition["id"].replace("-", " ").title(), "description": "Isolated paired integration objective", "verification_family": definition["verification"], "repeat_policy": definition["repeat"], "verification_parameters": parameters})
+    TypingPhrase.objects.get_or_create(key="b3-paired", version=1, defaults={"text": "Dexo explorers share adventures", "enabled": True})
+    # Controlled Telegram boundary: no actual Telegram membership calls or sends.
+    from apps.telegram.bot_api import TelegramResult
+    import apps.missions.services as mission_services
+    mission_services.get_chat_member = lambda chat, user: TelegramResult(ok=True, result={"user": {"id": user}, "status": "member"})
 
 image = io.BytesIO()
 Image.new("RGB", (32, 32), (40, 80, 100)).save(image, "JPEG")
@@ -113,6 +132,28 @@ def control(data):
     if action == "advance":
         offset += float(data["seconds"])
         return {"server_time": now().isoformat()}
+    if B3 and action == "b3-banner":
+        from django.contrib.auth.models import User
+        from apps.content.models import PromotionalBanner
+        from apps.content.services import upload_asset
+        import apps.content.storage as banner_storage
+        settings.BANNER_S3_BUCKET = "isolated-banners"
+        settings.BANNER_ASSET_ORIGIN = "https://assets.example.test"
+        global banner_objects
+        if "banner_objects" not in globals():
+            banner_objects = {}
+        banner_storage.put = lambda key, content: banner_objects.update({key: content})
+        banner_storage.get = lambda key: banner_objects[key]
+        PromotionalBanner.objects.all().update(enabled=False)
+        state = data.get("state", "absent")
+        if state != "absent":
+            actor, _ = User.objects.get_or_create(username="paired-banner-operator", defaults={"is_superuser": True, "is_staff": True})
+            stream = io.BytesIO()
+            Image.new("RGB", (1200, 260), (69, 221, 255)).save(stream, format="PNG")
+            stream.seek(0)
+            asset = upload_asset(stream, actor)
+            PromotionalBanner.objects.create(operator=actor, asset=asset, enabled=state != "disabled", alt_text="Paired promotional banner", starts_at=now() + timedelta(hours=1) if state == "future" else now() - timedelta(hours=2), ends_at=now() - timedelta(hours=1) if state == "expired" else now() + timedelta(hours=1))
+        return {"ok": True}
     if action == "flags":
         settings.TAP_V2_ISSUANCE_ENABLED = data.get("issuance", True)
         settings.BASE_TAP_LEGACY_INGRESS_ENABLED = data.get("legacy", False)
@@ -145,6 +186,42 @@ def control(data):
             PlayerAvatar.objects.create(player=player, source_fingerprint=avatars.fingerprint(player), object_key="avatars/isolated.jpg", expires_at=now() + timedelta(days=1), refresh_after=now() + timedelta(days=1))
         return {"player": str(identifier), "initData": credentials(player)}
     player = Player.objects.get(telegram_user_id=int(data["player"]))
+    if B3 and action == "b3-purge-leases":
+        from apps.base_tap.models import TapLease
+        from apps.base_tap.v2 import purge_expired_leases
+        TapLease.objects.filter(player=player).update(delete_after=now() - timedelta(seconds=1))
+        return {"deleted": purge_expired_leases(at=now())}
+    if B3 and action == "b3-group-verify":
+        from apps.network.models import CreatorGroupRegistration
+        import apps.network.services as network_services
+        settings.TELEGRAM_BOT_ID = 123456
+        network_services.get_chat_member = lambda chat, user: TelegramResult(ok=True, result={"status": "administrator" if data.get("admin", True) else "member", "user": {"id": user}})
+        registration = CreatorGroupRegistration.objects.get(public_id=data["id"], creator=player)
+        return {"state": network_services.verify_registration(registration.pk)}
+    if B3 and action == "b3-broadcast-verification":
+        from apps.telegram import bot_api
+        settings.TELEGRAM_BOT_ID = 123456
+        mode = data.get("mode", "allow")
+        # Controlled Telegram transport only; consent permissions/audit remain real.
+        bot_api.get_chat_member = lambda chat, user: TelegramResult(ok=False, category="unavailable") if mode == "unavailable" else TelegramResult(ok=True, result={"user": {"id": user}, "status": "member" if mode == "denied" and user != settings.TELEGRAM_BOT_ID else "administrator"})
+        return {"ok": True}
+    if B3 and action == "b3-attempt-time":
+        from apps.typing_game.models import TypingAttempt
+        TypingAttempt.objects.filter(player=player, status="STARTED").update(started_at=now() - timedelta(seconds=float(data.get("seconds", 8))))
+        return {"ok": True}
+    if B3 and action == "b3-membership":
+        mission_services.get_chat_member = (lambda chat, user: TelegramResult(ok=False, category="unavailable")) if data.get("unavailable") else (lambda chat, user: TelegramResult(ok=True, result={"user": {"id": user}, "status": "member"}))
+        return {"ok": True}
+    if B3 and action == "b3-attribution":
+        from apps.referrals.services import attribute_start
+        relation = attribute_start(player, data["code"], at=now())
+        return {"status": relation.status if relation else None}
+    if B3 and action == "b3-group":
+        from apps.telegram.models import TelegramGroup
+        from apps.network.services import consume_registration_token
+        group = TelegramGroup.objects.create(telegram_chat_id=-int(uuid4().hex[:10], 16), chat_type="supergroup", title="Paired real community", bot_membership_status="administrator", bot_is_admin=True, is_monitored=True, first_seen_at=now(), last_seen_at=now())
+        registration = consume_registration_token(data["token"], player, group, observed_at=now())
+        return {"id": str(registration.public_id) if registration else None}
     if action == "legacy":
         from apps.base_tap.services import submit_tap_batch, finalize_tap_accumulator
         legacy = json.loads((ROOT / "config/examples/season1.game-config.v1.json").read_text())

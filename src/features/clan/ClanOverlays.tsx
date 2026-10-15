@@ -5,6 +5,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { motion } from "motion/react";
 import { AssetImage } from "@/design-system/components/AssetImage";
+import { AvatarContent } from "@/design-system/components/AvatarContent";
 import { useEffect, useId, useRef, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
@@ -389,7 +390,7 @@ export function JoinRequestsSheet({
         {applicants.map((applicant) => (
           <article key={applicant.id} className={styles.request}>
             <div className={styles.avatar} style={{ "--identity-hue": getIdentityHue(applicant.name) } as CSSProperties}>
-              <span>{applicant.avatarUrl ? <img src={applicant.avatarUrl} alt="" /> : getIdentityInitials(applicant.name)}</span>
+              <span><AvatarContent owner={`clan-applicant:${applicant.id}`} photoUrl={applicant.avatarUrl} fallback={getIdentityInitials(applicant.name)} /></span>
               <AssetImage assetKey="profile.frame.clan" className={styles.avatarFrame} />
             </div>
             <div className={styles.requestCopy}>

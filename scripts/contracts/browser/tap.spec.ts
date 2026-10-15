@@ -73,10 +73,10 @@ test("uncertain local durability stops XP and reuses the approved recovery scree
     };
   });
   await fingers(page, 1);
-  await expect(page.getByRole("heading", { name: "Connection interrupted" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "We couldn't save your game session" })).toBeVisible();
   expect((await control({ action: "inspect", player: identity.player })).lifetime).toBe(150);
   await page.evaluate(() => (window as any).restorePairedStorage());
-  await page.getByRole("button", { name: "Retry", exact: true }).click();
+  await page.getByRole("button", { name: "Try Again", exact: true }).click();
   await expect(page.getByRole("button", { name: "Interact with Dexo" })).toBeVisible();
   await expect(xp(page, 150)).toBeVisible();
 });

@@ -1,4 +1,5 @@
 import { useBootstrap } from "@/integrations/api/BootstrapProvider";
+import { AvatarContent } from "@/design-system/components/AvatarContent";
 import { isRemoteDataSource } from "@/integrations/api/bootstrap";
 import {
   ArrowRight01Icon,
@@ -85,7 +86,7 @@ function MemberAvatar({ name, avatarUrl, captain = false }: { name: string; avat
   const hue = getIdentityHue(name);
   return (
     <div className={styles.memberAvatar} style={{ "--identity-hue": hue } as CSSProperties}>
-      <span>{avatarUrl ? <img src={avatarUrl} alt="" /> : getIdentityInitials(name)}</span>
+      <span><AvatarContent owner={`clan-member:${name}`} photoUrl={avatarUrl} fallback={getIdentityInitials(name)} /></span>
       <AssetImage assetKey={captain ? "profile.frame.captain" : "profile.frame.clan"} className={styles.memberFrame} />
     </div>
   );
@@ -473,7 +474,7 @@ function CaptainFounding({
               return (
                 <button type="button" key={group.id} className={styles.groupCard} onClick={() => selectGroup(group)}>
                   <span className={styles.groupAvatar} style={{ "--identity-hue": hue } as CSSProperties}>
-                    {group.photoUrl ? <img src={group.photoUrl} alt="" /> : getIdentityInitials(group.title)}
+                    <AvatarContent owner={`clan-group:${group.id}`} photoUrl={group.photoUrl} fallback={getIdentityInitials(group.title)} />
                   </span>
                   <div>
                     <strong>{group.title}</strong>

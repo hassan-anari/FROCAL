@@ -1,3 +1,5 @@
+import { BasePromoBanner } from "@/design-system/components/BasePromoBanner";
+import { useB3, missionView } from "@/integrations/api/useB3";
 import { useGameplayAvailability } from "@/integrations/api/useGameplayAvailability";
 import { useBootstrap } from "@/integrations/api/BootstrapProvider";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
@@ -90,14 +92,16 @@ const baseReactionAssets = [
 export function BasePage() {
   const navigate = useNavigate();
   const onboarding = useOnboardingStore();
-  const criticalActionVisible = useBaseUiStore((state) => state.criticalActionVisible);
   const promoBannerVisible = useBaseUiStore((state) => state.promoBannerVisible);
   const earnLevel = useEarnStore((state) => state.level);
   const earnLevelXp = useEarnStore((state) => state.levelXp);
   const earnLevelTarget = useEarnStore((state) => state.xpToNextLevel);
   const lifetimeXp = useEarnStore((state) => state.lifetimeXp);
-  const streak = useEarnStore((state) => state.streak);
-  const missions = useEarnStore((state) => state.missions);
+  const localStreak = useEarnStore((state) => state.streak);
+  const live = useB3();
+  const streak = live.remote ? live.daily.data?.current_streak ?? 0 : localStreak;
+  const localMissions = useEarnStore((state) => state.missions);
+  const missions = live.remote ? Object.fromEntries((live.missions.data ?? []).map(m => [m.key, missionView(m)])) : localMissions;
   const { adapter } = useTelegram();
   const initData = adapter.getInitData();
   const remoteData = isRemoteDataSource();
@@ -202,10 +206,10 @@ export function BasePage() {
     : getLevelScale(presentationLevel);
   const missionList = Object.values(missions);
   const claimedMissionCount = missionList.filter((mission) => mission.status === "claimed").length;
-  const starterProgress = Math.round((claimedMissionCount / missionList.length) * 100);
+  const starterProgress = (missionList.length ? Math.round((claimedMissionCount / missionList.length) * 100) : 0);
   const currentMission = missionList.find((mission) => mission.status !== "claimed");
   const currentMissionProgress =
-    currentMission?.status === "completed" ? 90 : currentMission?.status === "in-progress" ? 45 : 0;
+    live.remote ? (currentMission?.status === "completed" ? 100 : 0) : currentMission?.status === "completed" ? 90 : currentMission?.status === "in-progress" ? 45 : 0;
 
   const growthLabel = remoteData
     ? liveProgression?.nextThreshold === null && liveProgression
@@ -241,8 +245,9 @@ export function BasePage() {
   return (
     <>
       <main className={styles.page}>
+        {remoteData ? <BasePromoBanner /> : null}
         <AnimatePresence initial={false}>
-          {promoBannerVisible ? (
+          {import.meta.env.DEV && !remoteData && promoBannerVisible ? (
             <motion.aside
               className={styles.promoSlot}
               initial={{ opacity: 0, y: -7 }}
@@ -325,41 +330,6 @@ export function BasePage() {
           </div>
         </section>
 
-        <AnimatePresence initial={false}>
-          {criticalActionVisible ? (
-            <motion.section
-              className={styles.criticalAction}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={mobileMotion.reveal}
-            >
-              <div className={styles.criticalHeader}>
-                <span>Next critical action</span>
-                <small>War in 42m</small>
-              </div>
-              <h2>Defend your clan outpost</h2>
-              <p>
-                KRYPT-9 is probing the eastern relay. Join the preparation phase before deployment
-                locks.
-              </p>
-              <Button
-                size="lg"
-                className={styles.criticalButton}
-                trailingIcon={
-                  <HugeiconsIcon icon={ArrowRight01Icon} size={18} strokeWidth={1.8} />
-                }
-                onClick={() =>
-                  startTransition(() => {
-                    void navigate({ to: "/arena" });
-                  })
-                }
-              >
-                Join clan defence
-              </Button>
-            </motion.section>
-          ) : null}
-        </AnimatePresence>
 
         <section className={styles.objectives} aria-label="Next objectives">
           <header className={styles.sectionHeader}>

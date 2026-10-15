@@ -51,7 +51,7 @@ const focusableSelector = [
   '[tabindex]:not([tabindex="-1"])',
 ].join(",");
 
-function OverlayFrame({ eyebrow, title, onClose, children, footer }: OverlayFrameProps) {
+export function OverlayFrame({ eyebrow, title, onClose, children, footer }: OverlayFrameProps) {
   const titleId = useId();
   const sheetRef = useRef<HTMLElement | null>(null);
   const closeRef = useRef(onClose);

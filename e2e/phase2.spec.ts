@@ -36,7 +36,7 @@ test.describe("Phase 2 game shell", () => {
 
   test("Base contains action, objective and activity systems", async ({ page }) => {
     await openCompletedGame(page);
-    await expect(page.getByRole("heading", { name: "Defend your clan outpost" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Defend your clan outpost" })).toHaveCount(0);
     await expect(page.getByRole("heading", { name: "Next Objective" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Since Your Last Visit" })).toBeVisible();
   });

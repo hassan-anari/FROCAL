@@ -90,7 +90,7 @@ it("external journal mutation fails closed before adding visual XP", async () =>
   const storage = new MemoryStorage(); const harness = internalHarness({ storage }); await harness.controller.start();
   storage.setItem("dalexio-tap-v2:verified-player", "tampered");
   expect(harness.controller.touch()).toBe(false);
-  expect(harness.controller.getSnapshot()).toMatchObject({ status: "storage-blocked", lifetime: 150 });
+  expect(harness.controller.getSnapshot()).toMatchObject({ status: "terminal", error: "JOURNAL_CHANGED", lifetime: 150 });
   expect(storage.getItem("dalexio-tap-v2:verified-player")).toBe("tampered");
   harness.controller.close();
 });

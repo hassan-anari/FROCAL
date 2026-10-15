@@ -36,7 +36,8 @@
 .fallback {
   display: grid;
   place-items: center;
-  color: #effcff;
+  color: var(--avatar-fallback-foreground);
+  background: var(--avatar-fallback-background);
   font-size: clamp(1rem, 8vw, 2rem);
   font-weight: 850;
   letter-spacing: -.05em;

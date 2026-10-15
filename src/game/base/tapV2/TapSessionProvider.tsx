@@ -13,7 +13,7 @@ import { LevelUpReveal } from "@/features/earn/EarnOverlays";
 import type { LevelUpEvent } from "@/game/earn/types";
 import type { AssetKey } from "@/assets/registry";
 
-const Context = createContext<{ view: TapView; touch: () => boolean; retry: () => void } | null>(null);
+const Context = createContext<{ view: TapView; touch: () => boolean; retry: () => Promise<void>; prepareReload: () => boolean; switchDevice: () => Promise<void> } | null>(null);
 export const useTapSession = () => useContext(Context);
 const assets: Record<string, AssetKey> = { newborn: "dexo.level01", explorer: "dexo.level05", connector: "dexo.level10", specialist: "dexo.level15", vanguard: "dexo.level20", legend: "dexo.level30" };
 
@@ -25,7 +25,7 @@ function Session({ controller, children, restart }: { controller: TapController;
     // An independent Daily/Mission refresh has no Tap cursor. Read a coherent v2
     // snapshot rather than injecting a balance or inventing ordering evidence.
     const committed = controller.getSnapshot().committed;
-    if (committed && observedLifetime !== undefined && observedLifetime !== committed.lifetime) void controller.resume();
+    if (committed && observedLifetime !== undefined && observedLifetime !== committed.lifetime) controller.requestCanonicalRefresh();
   }, [controller, observedLifetime]);
   const event = useMemo<LevelUpEvent | null>(() => view.levelChange ? {
     id: `tap-level:${view.levelChange.sequence}`, previousLevel: view.levelChange.previousLevel,
@@ -33,9 +33,10 @@ function Session({ controller, children, restart }: { controller: TapController;
     evolutionTitle: view.levelChange.evolved ? view.levelChange.stage[0].toUpperCase() + view.levelChange.stage.slice(1) : null,
     createdAt: new Date().toISOString(),
   } : null, [view.levelChange]);
-  return <Context.Provider value={{ view, touch: () => controller.touch(), retry: () => {
+  return <Context.Provider value={{ view, touch: () => controller.touch(), prepareReload: () => controller.prepareReload(),
+    switchDevice: () => controller.switchToThisDevice(), retry: async () => {
     if (["storage-blocked", "session-busy", "terminal"].includes(view.status)) restart();
-    else void controller.resume();
+    else await controller.resume();
   } }}>
     {children}
     <LevelUpReveal event={event} onClose={() => controller.dismissLevelChange()} character={view.progression ? assets[view.progression.stage] : undefined} returnLabel="Continue" />
@@ -51,7 +52,7 @@ export function TapSessionProvider({ children }: { children: ReactNode }) {
   const key = JSON.stringify([scope, auth, attempt]); // Memory only; never serialized to storage/logs/query keys.
   const [session, setSession] = useState<{ key: string; controller: TapController } | null>(null);
   const enabled = isRemoteDataSource() && launchState === "ready" && Boolean(auth) && scope.player !== "unverified"
-    && Boolean(bootstrap.data?.featureFlags.base_tap);
+    && Boolean(bootstrap.data?.featureFlags.base_tap) && bootstrap.data?.remote?.gameplay?.reward_earning_allowed !== false;
   const configVersion = bootstrap.data?.remote?.config.version;
   useEffect(() => {
     if (!enabled) { setSession(null); return; }

@@ -173,7 +173,7 @@ it("fences parallel devices and resolves rejected old events without reminting",
   const abandoned = batch(old.snapshot, 2);
   await expect(old.port.submit(abandoned, signal())).rejects.toMatchObject({ code: "LEASE_REVOKED", definitive: true });
   const recovery = old.port.synchronize({ ...old.journal, events: abandoned.sequences.map((sequence) => ({ scope: abandoned.scope, sequence })), batches: [{ ...abandoned, attempts: 1, blocked: false }] }, signal());
-  await expect(recovery).rejects.toMatchObject({ code: "ACTIVE_SESSION", snapshot: { rejections: [{ key: abandoned.key, code: "LEASE_REVOKED" }] } });
+  await expect(recovery).rejects.toMatchObject({ code: process.env.B3_BACKEND_ROOT ? "LEASE_REVOKED" : "ACTIVE_SESSION", snapshot: { rejections: [{ key: abandoned.key, code: "LEASE_REVOKED" }] } });
   expect((await inspect(identity)).lifetime).toBe(150);
 });
 

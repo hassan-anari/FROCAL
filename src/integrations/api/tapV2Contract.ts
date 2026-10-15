@@ -23,6 +23,9 @@ export const tapStateSchema = z.object({
   revision: count, generation: count, receipt_cursor: count, burst_remaining: count,
   cooldown_until: z.iso.datetime({ offset: true }).nullable(), lease: tapLeaseSchema.nullable(),
   progression: tapProgressionSchema, season_points: count, progression_policy: bootstrapProgressionPolicySchema,
+  // B3 additive ownership contract; omission keeps deployed B2 clients compatible.
+  ownership: z.object({ status: z.enum(["AVAILABLE", "OWNED", "ANOTHER_DEVICE", "SESSION_MOVED"]),
+    active_until: z.iso.datetime({ offset: true }).nullable(), explicit_switch_required: z.boolean() }).nullish(),
 });
 export const tapBatchInputSchema = z.object({
   lease_id: z.uuid(), session_id: z.uuid(), generation: count.positive(),

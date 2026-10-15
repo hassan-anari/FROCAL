@@ -46,6 +46,8 @@ export const snapshotSchema = z.object({
   receipts: z.array(receiptSchema).default([]), rejections: z.array(rejectionSchema).default([]),
   issuanceEnabled: z.boolean().default(true),
   earningAllowed: z.boolean(),
+  ownership: z.object({ status: z.enum(["AVAILABLE", "OWNED", "ANOTHER_DEVICE", "SESSION_MOVED"]),
+    generation: integer, activeUntil: integer.nullable(), explicitSwitchRequired: z.boolean() }).optional(),
 }).strict().superRefine((snapshot, context) => {
   if (snapshot.grant && (snapshot.grant.scope.player !== snapshot.player
     || snapshot.grant.scope.season !== snapshot.season)) {
@@ -102,6 +104,8 @@ export type TapJournal = z.infer<typeof journalSchema>;
 export interface TapPort {
   synchronize(journal: Readonly<TapJournal>, signal: AbortSignal): Promise<TapSnapshot>;
   submit(batch: Readonly<TapSubmission>, signal: AbortSignal): Promise<TapSnapshot>;
+  switchSession?(journal: Readonly<TapJournal>, generation: number, signal: AbortSignal): Promise<TapSnapshot>;
+  releaseSession?(grant: Readonly<TapGrant>, signal: AbortSignal): Promise<void>;
 }
 // Error mapping is a backend-adapter responsibility; raw HTTP errors never enter UI.
 export class TapTransportError extends Error {

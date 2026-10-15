@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
 import { legacyBootstrap } from "../src/integrations/api/bootstrapFixture.test-data";
+const tapFixture = JSON.parse(readFileSync(new URL("../src/integrations/api/fixtures/tap-v2.json", import.meta.url), "utf8"));
 const b1Fixture = JSON.parse(readFileSync(new URL("../src/integrations/api/fixtures/bootstrap-b1.json", import.meta.url), "utf8"));
 
 // Signed-shaped, intentionally NON-production credentials. The API is fully intercepted.
@@ -12,6 +13,10 @@ async function mockApi(page: Page, bootstrapResponse?: (attempt: number) => { st
   await page.route("**/api/v1/**", async (route) => {
     const request = route.request();
     // Guard every test: no mutation or live API escape is permitted.
+    if (new URL(request.url()).pathname === "/api/v1/profile/review") {
+      expect(request.method()).toBe("POST");
+      return route.fulfill({ json: { active_frame: "standard", active_title: "explorer", featured_medal: null, featured_achievement: null } });
+    }
     expect(request.method()).toBe("GET");
     const auth = request.headers().authorization;
     expect(auth).toMatch(/^tma /); authorizations.push(auth);
@@ -23,6 +28,8 @@ async function mockApi(page: Page, bootstrapResponse?: (attempt: number) => { st
       await route.fulfill({ status: response?.status ?? 200, json: response?.body ?? data });
     } else if (request.url().endsWith("/profile/overview")) {
       await route.fulfill({ json: { identity: { ...data.player, photo_url: "" }, progression: data.progression, journey: { claimed_missions: 0, current_daily_streak: 0, verified_referrals: 0 }, customization: { active_frame: "standard", active_title: "explorer", featured_medal: null, featured_achievement: null } } });
+    } else if (new URL(request.url()).pathname.endsWith("/tap-state")) {
+      await route.fulfill({ json: { ...tapFixture.initial_state, player_id: String(id), season_id: data.season?.code ?? null, config_version: data.config.version, lease: null, issuance_enabled: false, progression: data.progression, progression_policy: b1Fixture.config.progression, season_points: data.season?.season_points ?? 0 } });
     } else if (new URL(request.url()).pathname.endsWith("/notifications")) {
       await route.fulfill({ json: { items: [], next_cursor: null } });
     } else {
@@ -104,7 +111,7 @@ test("classifies API network failure and recovers on manual retry", async ({ pag
   await page.goto(launch("/"));
   await expect(page.locator('[data-initial-state="API_UNREACHABLE"]')).toBeVisible();
   expect(attempts).toBe(3); online = true;
-  await page.getByRole("button", { name: "Retry", exact: true }).click();
+  await page.getByRole("button", { name: "Try Again", exact: true }).click();
   await expect(page.getByRole("button", { name: "Enter Dexo Land" })).toBeVisible();
 });
 
@@ -211,7 +218,7 @@ for (const code of ["AUTH_UNAVAILABLE", "INITIALIZATION_UNAVAILABLE"]) {
     await expect(page.getByText("raw-sensitive-server-detail", { exact: true })).toHaveCount(0);
     expect(api.attempts()).toBe(3);
     recover = true;
-    await page.getByRole("button", { name: "Retry", exact: true }).click();
+    await page.getByRole("button", { name: "Try Again", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Verified" })).toBeVisible();
   });
 }
@@ -227,7 +234,7 @@ test("server earning eligibility disables reward actions while Profile and Arena
   await page.mouse.click(box!.x + box!.width / 2, box!.y + box!.height / 2);
   expect(await page.evaluate(() => localStorage.getItem("dalexio-base-tap-queue:42"))).toBeNull();
   await page.getByRole("navigation", { name: "Primary game navigation" }).getByRole("button", { name: "Earn", exact: true }).click();
-  await expect(page.getByRole("button", { name: /Claim daily core/i })).toBeDisabled();
+  await expect(page.getByLabel("Daily claim").getByRole("button")).toBeDisabled();
   await page.getByRole("navigation", { name: "Primary game navigation" }).getByRole("button", { name: "Profile", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Verified" })).toBeVisible();
 });

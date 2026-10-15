@@ -4,6 +4,12 @@ const root = process.argv[2] ?? "dist";
 const forbidden = ["DiagnosticsPage", "DevScenarioPanel", "ArenaDebugPanel", "b2BrowserHarness", "testing.fixture", "/mocks/"];
 let maps = 0;
 for (const file of await readdir(`${root}/assets`)) {
+  if (file.endsWith(".js")) {
+    const source = await readFile(`${root}/assets/${file}`, "utf8");
+    for (const text of ["Launch diagnostics", "Recovery code:", "Defend your clan outpost", "Join clan defence", "Next critical action"]) {
+      assert(!source.includes(text), `Public recovery/Season 2 interface shipped: ${text}`);
+    }
+  }
   if (!file.endsWith(".js.map")) continue;
   maps++;
   const map = JSON.parse(await readFile(`${root}/assets/${file}`, "utf8"));
