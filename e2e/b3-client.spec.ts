@@ -108,3 +108,44 @@ test("new incompatible client release prompts safely and never reloads over anot
   expect(await page.evaluate(() => localStorage.getItem("dalexio-tap-v2:99"))).toContain("preserve-original-input");
   expect(await page.evaluate(() => localStorage.getItem("dalexio-onboarding-v1:player:42"))).toContain("completed");
 });
+
+const bannerFixture = JSON.parse(readFileSync("src/integrations/api/fixtures/b3/banners.json", "utf8"));
+for (const state of ["absent", "disabled", "future", "expired", "api-failed", "invalid-image", "unsafe-destination", "active"]) {
+  test(`server-managed banner ${state} has no local visibility override or empty slot`, async ({ page }) => {
+    await api(page); await prepare(page);
+    const payload = state === "unsafe-destination" ? { ...bannerFixture.active, banner: { ...bannerFixture.active.banner, destination: "javascript:alert(1)" } } : ["active", "invalid-image"].includes(state) ? bannerFixture.active : bannerFixture.empty;
+    await page.route("**/api/v1/content/banners/BASE", route => route.fulfill({ status: state === "api-failed" ? 503 : 200, json: payload }));
+    await page.route("https://assets.example.test/**", route => state === "invalid-image" ? route.fulfill({ status: 404, body: "missing image" }) : route.fulfill({ contentType: "image/webp", body: readFileSync("e2e/fixtures/banner.webp") }));
+    await page.goto(launch("/base")); await expect(page.getByRole("button", { name: "Interact with Dexo" })).toBeVisible();
+    const banner = page.getByLabel("Promotional banner placement");
+    if (state === "active") { await expect(banner).toBeVisible(); await expect(banner.locator("a")).toHaveAttribute("href", bannerFixture.active.banner.destination); }
+    else await expect(banner).toBeHidden();
+    await expect(page.getByText("BASE PROMO BANNER", { exact: true })).toHaveCount(0);
+  });
+}
+
+test("banner version changes replace the image and disabled server policy removes the slot", async ({ page }) => {
+  await api(page); await prepare(page);
+  let payload = structuredClone(bannerFixture.active);
+  await page.route("**/api/v1/content/banners/BASE", route => route.fulfill({ json: payload }));
+  await page.route("https://assets.example.test/**", route => route.fulfill({ contentType: "image/webp", body: readFileSync("e2e/fixtures/banner.webp") }));
+  await page.goto(launch("/base")); await expect(page.getByLabel("Promotional banner placement")).toBeVisible();
+  const version = "a".repeat(64); payload.banner.image_url = payload.banner.image_url.replace(payload.banner.version, version); payload.banner.version = version;
+  await page.evaluate(() => { document.dispatchEvent(new Event("visibilitychange")); window.dispatchEvent(new Event("focus")); });
+  await expect(page.getByLabel("Promotional banner placement").locator("img")).toHaveAttribute("src", payload.banner.image_url, { timeout: 15_000 });
+  payload = bannerFixture.empty;
+  await page.evaluate(() => { document.dispatchEvent(new Event("visibilitychange")); window.dispatchEvent(new Event("focus")); });
+  await expect(page.locator('[class*="promoSlot"]')).toHaveCount(0, { timeout: 15_000 });
+});
+
+test("all five navigation icons retain their station indicators without a background glow", async ({ page }) => {
+  await api(page); await prepare(page); await page.goto(launch("/base"));
+  const nav = page.getByRole("navigation", { name: "Primary game navigation" });
+  for (const name of ["Base", "Earn", "Clan", "Arena", "Profile"]) {
+    const button = nav.getByRole("button", { name, exact: true }); await button.click();
+    await expect(button).toHaveAttribute("aria-current", "page");
+    const glyph = button.locator('[class*="navGlyph"]');
+    expect(await glyph.evaluate(element => { const after = getComputedStyle(element, "::after"); return { content: after.content, background: after.backgroundImage, shadow: after.boxShadow }; })).toEqual({ content: "none", background: "none", shadow: "none" });
+    await expect(button.locator('[class*="stationNode"]')).toHaveCSS("width", "21px");
+  }
+});

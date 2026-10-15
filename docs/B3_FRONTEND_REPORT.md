@@ -1,125 +1,78 @@
-# B3 frontend integration — work in progress
+# B3 frontend implementation and review evidence
 
-One dedicated frontend branch: `ai/b3-frontend-integration`, based on merged B2
-`ba2cdabcf30fe3d99fd8f43159c1422f2c0175d4`. **B3 is not complete or rollout-ready.**
-Partner [WEDCAL Draft #28](https://github.com/hassan-anari/WEDCAL/pull/28) is publishing
-incremental contracts. The initial session slice is pinned to
-`b443eee0174ce495b8de02dbb065aaec19405094`; the final whole-B3 pin remains pending.
+Delivery: [FROCAL Draft PR #4](https://github.com/hassan-anari/FROCAL/pull/4), branch `ai/b3-frontend-integration`, targeting `main`. The PR records the final frontend SHA and exact-head CI jobs/results. No merge, deployment, public reward calls or live data reset is authorized or performed.
 
-## Completed independent client changes
+Backend: [WEDCAL Draft PR #28](https://github.com/hassan-anari/WEDCAL/pull/28), pinned **88b26bea8e61f68adea4d2652b531f26cb5171d7**. Exact source and fixture Git blobs are checked by `scripts/contracts/check-b2-contract.mjs` and before paired execution. Pinned [contract](../scripts/contracts/b3/B3_BACKEND_CONTRACT.md), [handoff](../scripts/contracts/b3/B3_BACKEND_HANDOFF.md), [OpenAPI](../src/integrations/api/fixtures/b3/openapi.json). B2 remains independently pinned at `34328c76ba3377396660b1549bf8e370ac514a71`.
 
-- Reuse the approved recovery screen/background/buttons with natural ownership,
-  moved-session, connection, storage, local-tab and Telegram-renewal states.
-  Transport details/codes are not rendered as player copy. No Launch Diagnostics.
-- Coalesce repeated retries/online/resume calls, show calm busy status and prevent
-  accidental duplicate submissions. Durable journals/keys are preserved.
-- Integrate real additive B3 ownership, explicit generation-checked takeover after
-  a separate confirmation, and exact-generation best-effort release only for an
-  acknowledged session. No automatic takeover; a fenced client stays recoverable.
-- Apply shared existing cyan/cyan-soft/navy tokens to avatar initials. Preserve
-  dimensions, shape, frames, cropping, typography and actual photo rendering.
-- Remove Critical Action from the Season 1 route, and reject old persisted true
-  flags in the store. Retain future artwork/style assets and unrelated Clan features.
-- Public promo placement ignores legacy local flags and renders nothing until the
-  real managed banner contract is published. The existing development preview is
-  compile-time isolated from production; no public placeholder or reserved slot.
-- Extend the existing storage compatibility lifecycle to `b3-1`; preserve onboarding,
-  scoped Tap/legacy evidence and safe preferences. Revalidate HTML/client metadata;
-  prompt on an incompatible release and refuse refresh over pending Tap evidence.
-  Immutable versioned asset/SDK caching is retained.
-- Disable automatic Vercel deployment for this branch. No deployment is requested.
+## Route and endpoint integration matrix
 
-## Endpoint / route matrix
+All economic/user reads and writes use existing signed Telegram authentication and B2 account/Season/config query scoping. Raw credentials never enter query keys, telemetry, reports or economic local storage.
 
-| Frontend surface | Exact backend contract | Current status |
-| --- | --- | --- |
-| Base / recovery | GET `/api/v1/base/v2/tap-state?session_id=UUID` | Integrated B2 + B3 ownership |
-| Explicit switch | POST `/api/v1/base/v2/tap-leases`, `takeover:true`, observed `expected_generation` | Integrated, separate user confirmation |
-| Ordinary retry | State/replay + `tap-leases` with `takeover:false` | Integrated; never deliberate takeover |
-| Close/reopen | POST `/api/v1/base/v2/tap-release` with exact lease/session/generation | Best effort; never release uncertain pending data |
-| Tap settlement | POST `/api/v1/base/v2/tap-batches` | B2 exact-body receipt/idempotency preserved |
-| Daily | Existing `/daily`, `/daily/claim` | B3 typed settlement contract/fixtures pending |
-| Missions | Existing `/missions` and key start/verify/claim | B3 availability/verification/settlement contract pending |
-| Typing | Existing `/typing`, attempt start/submit, claim | B3 resume/expiration/settlement contract pending |
-| Referral | Existing `/referrals` | B3 invitee/eligibility/earnings contract pending |
-| Creator / Network | Existing `/network/groups`, intents, reverify | B3 metrics/eligibility/read model pending |
-| Promo banner | No published endpoint | Entire API/fixtures pending; public banner safely absent |
-| Base/Header/Profile canonical data | Bootstrap + B2 Tap cache bridge | Existing receipt tuple ordering retained; B3 non-Tap binding pending |
+| Screen / consumer | Endpoint | Behavior |
+|---|---|---|
+| Bootstrap, Header, all progression consumers | GET `/api/v1/bootstrap` | Identity, feature/earning flags, config, complete canonical progression and summaries |
+| Base Tap | GET `/base/v2/tap-state`, POST `/base/v2/tap-leases`, POST `/base/v2/tap-batches`, POST `/base/v2/tap-release` | Existing authenticated v2 economy; exact journals/receipts, bounded ownership reads, explicit switch and acknowledged-only release |
+| Shared rewards | GET `/rewards/state` | Complete server-owned projection and receipt cursor; independent reward refresh |
+| Base banner | GET `/content/banners/BASE`, GET approved immutable `/content/banner-assets/{uuid}/{digest}.webp` | Server eligibility/scheduling; validated content, safe links, no public placeholder/local override |
+| Base summary, Earn Daily | GET `/daily`, POST `/daily/claim` | Actual UTC period/reset, reward cycle, claim status and streak; duplicate-safe settlement |
+| Base objective, Earn mission list | GET `/missions`, POST `/missions/{key}/start`, `/verify`, `/claim` | Published definitions, genuine verification token/state, unavailable/ready/claimed states, confirmed rewards |
+| Profile mission evidence | POST `/profile/review` | Records actual Profile visit; mission verifier remains server-owned |
+| Earn Typing summary and challenge | GET `/typing`, POST `/typing/attempts/start`, `/typing/attempts/{uuid}/submit`, `/typing/claim` | Issued/resumable phrase, server timing/scoring/quota/wallet, durable claim/start keys and exact submission retry |
+| Earn Referral | GET `/referrals`, `/referrals/invitees?offset=0&limit=30` | Canonical code/link, eligibility, actual tiers/shares, pending/verified counts and latest five real invitees |
+| Earn Creator / Network | GET `/network`, `/network/groups?offset=0&limit=30`, POST `/network/groups/intents`, `/network/groups/{uuid}/reverify` | Registration CTA, actual verification/admin states, qualified-speaker/activity metrics and settled earnings; no invented member counts or Creator wallet |
+| Profile / Base identity | GET `/profile/overview`, approved cached avatar delivery | Actual journey facts, identity and canonical progression; failed photos use shared fallback |
+| Existing notifications / Arena balance | Existing `/notifications` and DLX balance reads | Retained separately; B3 does not merge DLX with XP/Season Points |
 
-Pending adapters are deliberately not implemented from invented fields. Existing
-production demo Earn/Network consumers still require replacement before completion;
-this branch must not be merged/deployed in its intermediate state.
+Paths after the first row use the same `/api/v1` prefix. Group broadcast consent and private bot Admin/welcome/broadcast operations belong to the backend; no duplicate Mini App Admin was introduced.
 
-## Evidence so far (not a final acceptance claim)
+## Real versus previously mocked data
 
-- TypeScript passed; initial full check passed before the session adapter additions.
-  165 unit tests passed at that intermediate state; 35 focused controller/session
-  tests passed after integration. Full final-head validation will supersede counts.
-- Production B1/client browser matrix: 60 passed initially, four fixture failures
-  corrected. Focused rerun: 10 passed, including no-photo, blocked origin, expired
-  cache fallback and incompatible-release/pending-journal protection on mobile/desktop.
-- Initial actual PostgreSQL B3 session slice: three new scenarios passed, plus
-  all 15 existing B2 paired regressions (18 total). The initial midnight/cooldown
-  timeout under concurrent browser load passed on an isolated rerun with the
-  unchanged 5-second deadline. All seven production paired-browser scenarios passed,
-  including real Mobile/Desktop switching/repeated Retry/close-both/reopen.
-  No assertions/timeouts were weakened.
-- Initial synthetic isolated API measurements: switch 116.98 ms; close/reopen after
-  acknowledged release 109.44 ms. These are local API measurements, not production
-  Telegram guarantees. Passive expiry remains the backend's configured 120 seconds
-  if closure release cannot be delivered; explicit switching provides immediate
-  user-directed recovery when supported and reachable.
-- Real backend/browser full B3 Daily/Missions/Typing/Referral/Creator/banner tests,
-  final CI links and complete final backend pin remain pending.
+Production Daily no longer uses the local 40-XP constant or client calendar to authorize a reward. Missions no longer mark themselves complete or credit local XP. Typing's local WPM/accuracy animation is presentation only; the server result and confirmed wallet settlement determine rewards. Server-configured limits replace the displayed permanent five-attempt assumption.
 
-Focused visual evidence uses only synthetic identities and existing approved assets:
+Referral code/link construction from Telegram ID, demo invitees/groups, fixed tier thresholds/percentages, local share counts and fabricated Creator earnings are excluded from authenticated views. Qualified speakers are labelled as speakers, never Telegram members. The local scenario store remains only for explicitly selected development scenarios and existing visual regression fixtures.
 
-![Profile/Header fallback on mobile](evidence/b3/avatar-profile-mobile.png)
-![Base/Header fallback on mobile](evidence/b3/avatar-base-mobile.png)
-![Expired cached photo fallback on desktop](evidence/b3/avatar-expired-cache-desktop.png)
+The contract supplies no per-run Typing history, generic reward history or Network event feed. Production renders an accurate unavailable state (History button disabled) rather than fabricating events. Confirmed aggregate totals remain live. PH-043 Season brief remains explicitly unavailable; there is no fake completion verifier.
 
-## Visual preservation / operational dependencies
+## Session recovery and behavioral proof
 
-No layout, spacing, artwork, navigation, motion timing, Dexo effects, haptics, input
-experience or unrelated UI redesign. Only the authorized fallback colors, recovery
-copy/actions, diagnostics removal and Season 1 visibility changes are included.
-No visual baseline is regenerated. No public reward requests, merge, deployment,
-live reset, bot Admin duplicate or public rollout has occurred.
+The approved error-screen background, composition, typography and button styles remain. Player text distinguishes another device, a moved session, a local tab, actual storage failure, network loss and expired Telegram launch credentials. Raw codes and implementation details are absent. A real Retry coalesces repeated submissions, visibly waits and executes reconciliation. Storage/corruption failures preserve evidence.
 
-Complete and review the backend contracts and fixtures, pin the final reviewed SHA,
-finish real data consumers and paired PostgreSQL/browser proof, obtain final-head
-CI, then stop for independent review. Backend-first compatible rollout and real
-Telegram Mobile/Desktop/VPN-off device verification remain owner-controlled gates.
+`Switch to This Device` appears only with the finalized ownership capability and requires a separate confirmation. It uses the observed generation. A race requires another deliberate choice; retries and online/visibility events never automatically take over. An idle visible owner reads ownership about every five seconds, without a heartbeat or touch-produced request stream. Hidden clients stop maintenance. Page hide releases only the current exact acknowledged lease; pending input prevents release. Lost release can recover through deliberate switching before 120 seconds.
 
-## Checkpoint follow-up
+Paired tests cover separate Mobile/Desktop identities, repeated Retry, stale generations, cooldown, expiration, a fenced client after lease-retention cleanup, same-device multiple tabs, both clients closing, lost switch/receipt responses, and immutable unconfirmed journals/onboarding. Assertions bound healthy isolated switch to 15 seconds and reopen to 20 seconds. Runtime measurements are uploaded as `session-measurements.json` and `session-browser-measurements.json`; final values are recorded in the PR. Earlier initial-slice isolated API measurements are retained in [session-api-measurements.json](evidence/b3/session-api-measurements.json).
 
-Hosted initial-head validation at `38ec72b`:
-[run 38702419194](https://github.com/hassan-anari/FROCAL/actions/runs/38702419194).
-Unit/build, pinned B2 and pinned B3 jobs passed. Browser matrix had 110 passing
-scenarios and two identical bounded-retry fixture failures: the synthetic Tap
-snapshot used a different Season/config and correctly triggered a Bootstrap refresh.
-The fixture now matches its verified Bootstrap Season/config/progression policy;
-the original exact three-attempt assertion is retained. Focused mobile/desktop
-rerun passed all four affected/related cases. Final-head CI will supersede this run.
+These are Chromium device contexts and local PostgreSQL measurements. They do not certify physical Telegram Android/iOS/Desktop, WAN performance, offline revocation visibility or delivery of pagehide. Passive lease expiry remains 120 seconds; explicit switching is the fast recovery path. No timing guarantee is claimed to players.
 
-Further fallback inspection found secondary Clan/applicant/group image containers
-without load-failure recovery. They now reuse the existing bounded avatar delivery
-hook, preserve the same elements/sizes/frames/cropping and use the same cyan tokens.
-Earn referral image fallback also uses that shared path. No replacement photo URL
-or extra fallback request is constructed. A shared navigation validator rejects
-unsafe URLs, keeps internal targets on existing game routes and dispatches exact
-Telegram hosts through the Telegram adapter. It does not define pending API fields.
+## Progression ordering and durability
 
-A final client concurrency regression now queues an independent Bootstrap reward
-refresh behind any in-flight Tap receipt, coalesces multiple requests and honors
-existing backoff. Previously that refresh could be dropped by the in-flight guard
-and wait until lease maintenance. No receipt is aborted/re-keyed and no second
-progression model is introduced.
+`canonical.ts` adopts complete validated player/Season/config projections in receipt-cursor order. The existing Tap cache bridge publishes its confirmed projection into the same shared cache and rejects lower-cursor snapshots. Background Bootstrap/Profile reads retain a newer already-confirmed projection, while refreshing other actual summary fields. Independent claims invalidate scoped Earn, Profile and Bootstrap queries; a queued Tap reconciliation waits for in-flight receipt processing. No client addition, XP floor, forged Tap revision, journal deletion, navigation or page reload settles a reward. Lifetime XP and Season Points retain distinct values; unrelated DLX data is untouched.
 
-Additional backend discovery at the incremental B3 pin: isolated domain suites
-reported 93 passed, two failing old Tap tests, and one pre-existing skipped benchmark.
-The failures are the old automatic post-takeover renewal expectation and old fixtures
-missing newly required ownership. They were reported to the backend agent in
-[Draft #28](https://github.com/hassan-anari/WEDCAL/pull/28#issuecomment-6187536250).
-They do not invalidate the separately passing actual paired session scenarios,
-but must be resolved upstream before final whole-B3 acceptance.
+Storage extends `storageRelease.ts` to deliberate compatibility `b3-1`, removing only the named reconstructible B1/B2 demo keys. It preserves per-player onboarding, all scoped pending Tap journals, unresolved legacy evidence, safe preferences and unknown keys. A denied Storage getter cannot crash startup. Optional session preferences fail softly. Typing request keys and pending exact submissions are player/Season scoped and preserved across uncertain delivery.
+
+HTML revalidates; hashed static assets retain immutable caching. `client-release.json` is fetched with no-store on entry, visibility and a bounded interval. A truly different compatibility marker offers a manual refresh using the existing modal. In-flight/unacknowledged Tap or unresolved old evidence, including another account's outbox, blocks refresh. Build hashes do not clear storage or force reload.
+
+## Visual preservation
+
+Changes to artwork, layout, spacing, dock geometry, navigation behavior, cropping, frames, avatar sizes/fonts, tap particles/haptics or animation timing were not introduced. Existing JSX/classes and overlays are reused for real data and narrowly required status/disabled/claim states.
+
+- Shared fallback uses approved `cyan-soft`/`cyan` and dark existing text tokens. Photos are unchanged; no extra remote request is made to obtain a fallback. Contrast is approximately 11.79:1–14.29:1. [Profile mobile](evidence/b3/avatar-profile-mobile.png), [Base/Header mobile](evidence/b3/avatar-base-mobile.png), [expired cached avatar desktop](evidence/b3/avatar-expired-cache-desktop.png). The browser suite also captures fresh focused snapshots.
+- Season 1 Critical Action rendering was removed, with persisted-state rejection in the existing store. Fresh, B2 upgrade and persisted-true cases are tested. Future CSS/artwork and unrelated Clan features remain.
+- Launch Diagnostics was removed from recovery screens. DEV diagnostics remain isolated behind compile-time DEV checks. The production bundle/module scan and browser error-screen/direct-route tests assert exclusion.
+- The Base promotional slot remains below Header and above the Dexo card, at 1200×260 / 60:13. An unready, invalid, absent or failed image occupies no layout. Server revalidation removes disabled/expired content; the backend contract does not expose schedule timestamps, so removal follows the next effective-content read (10-second interval/focus), not an invented client deadline.
+- The sole dock CSS change removes `.active .navGlyph::after` entirely. Active colors, labels, small station node, positions, dimensions and interactions remain; all five items are checked in production browser tests.
+
+## Validation and evidence
+
+`npm run check` runs structural/asset/import/motion policies, fail-closed production policy, pinned contract blob checks, TypeScript, units, the actual production build and diagnostic/Season-2 bundle exclusion. The expanded unit suite includes all published Earn/Network/banners schemas, unsafe destinations, unavailable missions, coalesced claims, lost Typing claim keys, Telegram verification recovery and ordered cross-currency/cache isolation.
+
+`npm run test:e2e` retains the original mobile/Desktop visual/interaction suites and adds production storage upgrades, diagnostics exclusion, avatars, banner absent/disabled/future/active/expired/failure/image/URL/version cases and all-five-icon glow checks. Test-only banners and identities are synthetic and never enter public fallback content.
+
+`npm run test:paired` independently runs B2's 15 actual PostgreSQL API/controller regressions and 6 production browser scenarios. `npm run test:paired:b3` checks the exact pinned backend source bytes, migrates an isolated PostgreSQL 17 database, then runs original Tap regressions plus B3 recovery/Earn/Network/banner tests and production browser flows. Telegram/storage transports are controlled locally; all reward logic, HMAC verification, PostgreSQL locks, projections, idempotency and receipts run in WEDCAL. Database names and localhost are required by the harness. No public deployed reward tests are used.
+
+Successful pre-final full pairing at `cb9142d`: **22 API/controller + 12 production browser tests**. Final-pin expanded results, exact frontend SHA and complete four-job CI URLs are recorded in the PR rather than asserting a future result in this document. Final pairing additionally checks durable fencing after retention cleanup, actual CMS scheduling/immutable bytes, expired/ineligible Typing, and actual Creator admin verification transitions. CI artifacts contain machine-readable results, session timings and focused visual snapshots.
+
+## Operational dependencies and independent review
+
+Before any separately authorized rollout: review WEDCAL #28, all four additive migrations (including durable Tap session markers), API/workers, configured mission definitions/phrases, Telegram membership permissions/bot identity, genuine Creator workers, dedicated banner storage/HTTPS origin/trusted destinations and approved content. Banners and backend bot rollout switches remain disabled by default. No frontend setting overrides server availability.
+
+Owner/independent review must inspect exact-head CI, the pinned backend contract and physical Telegram device behavior. PH-043 and existing branch-protection/rollout decisions remain owner gates. No merge, deploy, activation, public test mutation, backend schema rollback or next-batch work is included.

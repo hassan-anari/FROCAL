@@ -118,7 +118,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: hassan-anari/WEDCAL
-          ref: b443eee0174ce495b8de02dbb065aaec19405094
+          ref: 88b26bea8e61f68adea4d2652b531f26cb5171d7
           path: work/backend
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -137,5 +137,8 @@ jobs:
         if: always()
         with:
           name: b3-paired-results
-          path: test-results-paired/results.json
+          path: |
+            test-results-paired/results.json
+            test-results-paired/session-measurements.json
+            test-results-paired/session-browser-measurements.json
           retention-days: 14

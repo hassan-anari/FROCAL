@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { canonicalSchema } from "./b3Contracts";
 
 const dexoStageSchema = z.enum([
   "newborn", "explorer", "connector", "specialist", "vanguard", "legend",
@@ -27,6 +28,7 @@ export const bootstrapGameplaySchema = z.object({
 // PR #26 / cadc257: additions are optional only to support the deployed legacy API.
 // When an additive object is present, validate all of its reviewed schema fields.
 export const remoteBootstrapSchema = z.object({
+  canonical: canonicalSchema.optional(),
   contract_version: z.literal("1.1").optional(),
   request_id: z.string().regex(/^[A-Za-z0-9._-]{1,64}$/).optional(),
   server_time: z.string().datetime({ offset: true }).optional(),

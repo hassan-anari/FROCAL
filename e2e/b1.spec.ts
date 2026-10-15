@@ -13,6 +13,10 @@ async function mockApi(page: Page, bootstrapResponse?: (attempt: number) => { st
   await page.route("**/api/v1/**", async (route) => {
     const request = route.request();
     // Guard every test: no mutation or live API escape is permitted.
+    if (new URL(request.url()).pathname === "/api/v1/profile/review") {
+      expect(request.method()).toBe("POST");
+      return route.fulfill({ json: { active_frame: "standard", active_title: "explorer", featured_medal: null, featured_achievement: null } });
+    }
     expect(request.method()).toBe("GET");
     const auth = request.headers().authorization;
     expect(auth).toMatch(/^tma /); authorizations.push(auth);
@@ -230,7 +234,7 @@ test("server earning eligibility disables reward actions while Profile and Arena
   await page.mouse.click(box!.x + box!.width / 2, box!.y + box!.height / 2);
   expect(await page.evaluate(() => localStorage.getItem("dalexio-base-tap-queue:42"))).toBeNull();
   await page.getByRole("navigation", { name: "Primary game navigation" }).getByRole("button", { name: "Earn", exact: true }).click();
-  await expect(page.getByRole("button", { name: /Claim daily core/i })).toBeDisabled();
+  await expect(page.getByLabel("Daily claim").getByRole("button")).toBeDisabled();
   await page.getByRole("navigation", { name: "Primary game navigation" }).getByRole("button", { name: "Profile", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Verified" })).toBeVisible();
 });

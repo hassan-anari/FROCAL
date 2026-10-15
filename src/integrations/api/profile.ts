@@ -1,7 +1,9 @@
 import { z } from "zod";
+import { canonicalSchema } from "./b3Contracts";
 import { apiRequest } from "./client";
 
 const profileOverviewSchema = z.object({
+  canonical: canonicalSchema.optional(),
   identity: z.object({
     first_name: z.string(),
     last_name: z.string(),
@@ -42,4 +44,9 @@ export type ProfileOverview = z.infer<typeof profileOverviewSchema>;
 export async function loadProfileOverview(initData: string | null): Promise<ProfileOverview> {
   const response = await apiRequest("/profile/overview", { initData });
   return profileOverviewSchema.parse(await response.json());
+}
+
+export async function reviewProfile() {
+  const response = await apiRequest("/profile/review", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+  return profileOverviewSchema.shape.customization.parse(await response.json());
 }

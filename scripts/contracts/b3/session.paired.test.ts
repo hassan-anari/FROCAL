@@ -99,3 +99,16 @@ it("recovers an explicit switch whose response was lost without a second takeove
   expect(desktop.controller.getSnapshot()).toMatchObject({ status: "ready", lifetime: 150 });
   expect(switchSession).toHaveBeenCalledTimes(1);
 });
+
+it("retains device fencing after backend lease-retention cleanup and requires a new deliberate choice", async () => {
+  const player = await identity();
+  const phone = device(player); await phone.controller.start();
+  const desktop = device(player); await desktop.controller.start(); await desktop.controller.switchToThisDevice();
+  await control({ action: "advance", seconds: 121 });
+  await control({ action: "b3-purge-leases", player: player.player });
+  await phone.controller.resume();
+  expect(phone.controller.getSnapshot()).toMatchObject({status:"paused",error:"LEASE_REVOKED",canSwitchDevice:true});
+  expect(phone.controller.touch()).toBe(false);
+  await phone.controller.switchToThisDevice();
+  expect(phone.controller.getSnapshot()).toMatchObject({status:"ready",lifetime:150});
+});

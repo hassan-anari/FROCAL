@@ -1,3 +1,5 @@
+import { BasePromoBanner } from "@/design-system/components/BasePromoBanner";
+import { useB3, missionView } from "@/integrations/api/useB3";
 import { useGameplayAvailability } from "@/integrations/api/useGameplayAvailability";
 import { useBootstrap } from "@/integrations/api/BootstrapProvider";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
@@ -95,8 +97,11 @@ export function BasePage() {
   const earnLevelXp = useEarnStore((state) => state.levelXp);
   const earnLevelTarget = useEarnStore((state) => state.xpToNextLevel);
   const lifetimeXp = useEarnStore((state) => state.lifetimeXp);
-  const streak = useEarnStore((state) => state.streak);
-  const missions = useEarnStore((state) => state.missions);
+  const localStreak = useEarnStore((state) => state.streak);
+  const live = useB3();
+  const streak = live.remote ? live.daily.data?.current_streak ?? 0 : localStreak;
+  const localMissions = useEarnStore((state) => state.missions);
+  const missions = live.remote ? Object.fromEntries((live.missions.data ?? []).map(m => [m.key, missionView(m)])) : localMissions;
   const { adapter } = useTelegram();
   const initData = adapter.getInitData();
   const remoteData = isRemoteDataSource();
@@ -201,10 +206,10 @@ export function BasePage() {
     : getLevelScale(presentationLevel);
   const missionList = Object.values(missions);
   const claimedMissionCount = missionList.filter((mission) => mission.status === "claimed").length;
-  const starterProgress = Math.round((claimedMissionCount / missionList.length) * 100);
+  const starterProgress = (missionList.length ? Math.round((claimedMissionCount / missionList.length) * 100) : 0);
   const currentMission = missionList.find((mission) => mission.status !== "claimed");
   const currentMissionProgress =
-    currentMission?.status === "completed" ? 90 : currentMission?.status === "in-progress" ? 45 : 0;
+    live.remote ? (currentMission?.status === "completed" ? 100 : 0) : currentMission?.status === "completed" ? 90 : currentMission?.status === "in-progress" ? 45 : 0;
 
   const growthLabel = remoteData
     ? liveProgression?.nextThreshold === null && liveProgression
@@ -240,8 +245,9 @@ export function BasePage() {
   return (
     <>
       <main className={styles.page}>
+        {remoteData ? <BasePromoBanner /> : null}
         <AnimatePresence initial={false}>
-          {import.meta.env.DEV && promoBannerVisible ? (
+          {import.meta.env.DEV && !remoteData && promoBannerVisible ? (
             <motion.aside
               className={styles.promoSlot}
               initial={{ opacity: 0, y: -7 }}

@@ -1,3 +1,4 @@
+import { mkdirSync, writeFileSync } from "node:fs";
 import { devices, expect, test, type Page } from "@playwright/test";
 const api = "http://127.0.0.1:8792";
 async function control(data: object): Promise<any> {
@@ -33,10 +34,12 @@ test("actual Mobile/Desktop switching, repeated Retry, moved-session fencing, cl
   const switching = Date.now();
   await confirmation.getByRole("button", { name: "Switch to This Device" }).click();
   await expect(desktop.getByLabel("150 lifetime XP", { exact: true })).toBeVisible();
-  expect(Date.now() - switching).toBeLessThan(15_000);
+  const switchMilliseconds = Date.now() - switching;
+  expect(switchMilliseconds).toBeLessThan(15_000);
   expect(takeovers).toHaveLength(1);
-  await phone.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
-  await expect(phone.getByRole("heading", { name: "Your game is open on another device" })).toBeVisible();
+  const detecting = Date.now();
+  await expect(phone.getByRole("heading", { name: "Your game is open on another device" })).toBeVisible({ timeout: 15_000 });
+  const detectionMilliseconds = Date.now() - detecting;
   let release!: () => void;
   const gate = new Promise<void>(resolve => { release = resolve; });
   let reads = 0;
@@ -64,7 +67,10 @@ test("actual Mobile/Desktop switching, repeated Retry, moved-session fencing, cl
   const reopening = Date.now();
   await enter(page, identity, "tdesktop");
   await expect(page.getByLabel("150 lifetime XP", { exact: true })).toBeVisible();
-  expect(Date.now() - reopening).toBeLessThan(20_000);
+  const reopenMilliseconds = Date.now() - reopening;
+  expect(reopenMilliseconds).toBeLessThan(20_000);
+  mkdirSync("test-results-paired", { recursive: true });
+  writeFileSync("test-results-paired/session-browser-measurements.json", JSON.stringify({ environment: "isolated PostgreSQL and Chromium device contexts; not physical Telegram or WAN", switchMilliseconds, detectionMilliseconds, reopenMilliseconds }, null, 2));
   expect(await page.evaluate(id => JSON.parse(localStorage.getItem(`dalexio-onboarding-v1:player:${id}`)!).state.status, identity.player)).toBe("completed");
   await reopened.close();
 });

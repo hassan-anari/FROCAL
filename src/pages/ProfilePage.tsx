@@ -1,3 +1,5 @@
+import { reviewProfile } from "@/integrations/api/profile";
+import { readSessionPreference, writeSessionPreference } from "@/app/storageRelease";
 import { usePlayerProgression } from "@/integrations/api/usePlayerProgression";
 import { profilePhotoUrl } from "@/integrations/api/bootstrapContract";
 import { useProfileOverview } from "@/integrations/api/useProfileOverview";
@@ -80,6 +82,7 @@ export function ProfilePage() {
   const player = bootstrap.data?.player;
   const overview = useProfileOverview();
   const remoteData = isRemoteDataSource();
+  useEffect(() => { if (remoteData && player) void reviewProfile().catch(() => { /* Mission verification remains unavailable until a successful review. */ }); }, [remoteData, player?.id]);
   const telegramUser = remoteData ? null : adapter.getUser();
   const firstName = telegramUser?.first_name ?? player?.firstName ?? "Explorer";
   const username = telegramUser?.username ?? player?.telegramUsername ?? null;
@@ -92,7 +95,7 @@ export function ProfilePage() {
   const earn = useEarnStore();
   const profile = useProfileStore();
   const [activeTab, setActiveTab] = useState<ProfileTab>(() => {
-    const stored = sessionStorage.getItem(profileTabKey);
+    const stored = readSessionPreference(profileTabKey);
     return stored === "achievements" || stored === "collection" ? stored : "overview";
   });
   const [achievementFilter, setAchievementFilter] = useState<"all" | AchievementCategory>("all");
@@ -149,7 +152,7 @@ export function ProfilePage() {
     if (tab === activeTab) return;
     adapter.selectionChanged();
     setActiveTab(tab);
-    sessionStorage.setItem(profileTabKey, tab);
+    writeSessionPreference(profileTabKey, tab);
   };
 
   const shareProfile = () => {

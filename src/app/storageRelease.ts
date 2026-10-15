@@ -11,7 +11,10 @@ export function migrateClientRelease(storage: Pick<Storage, "getItem" | "setItem
     return true;
   } catch { return false; } // Tap's own durability checks fail closed independently.
 }
-if (typeof localStorage !== "undefined") migrateClientRelease(localStorage);
+// Some WebViews throw even when obtaining the Storage object. Startup must still
+// reach the diagnosed Tap recovery state instead of crashing during module load.
+try { if (typeof localStorage !== "undefined") migrateClientRelease(localStorage); }
+catch { /* Optional client cache migration; Tap diagnoses its own durability. */ }
 
 /** Conservative refresh guard, including other accounts and unresolved v1 evidence. */
 export function hasPendingTapEvidence(storage: Pick<Storage, "length" | "key" | "getItem">) {
@@ -41,3 +44,6 @@ export function hasPendingTapEvidence(storage: Pick<Storage, "length" | "key" | 
     return false;
   } catch { return true; }
 }
+
+export function readSessionPreference(key: string) { try { return sessionStorage.getItem(key); } catch { return null; } }
+export function writeSessionPreference(key: string, value: string) { try { sessionStorage.setItem(key, value); } catch { /* optional presentation preference */ } }

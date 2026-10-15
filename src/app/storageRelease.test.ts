@@ -1,4 +1,4 @@
-import { afterEach, expect, it } from "vitest";
+import { afterEach, expect, it, vi } from "vitest";
 import { CLIENT_STORAGE_RELEASE, migrateClientRelease } from "./storageRelease";
 afterEach(() => localStorage.clear());
 it("invalidates reconstructible old demo reads once while preserving onboarding and all economic evidence", () => {
@@ -40,4 +40,13 @@ it.each(["b1", "b2-1", "b3-1", null])("preserves both accounts, completed onboar
 it("leaves an offline/storage-denied device unchanged without claiming a migration succeeded", () => {
   const storage = { getItem() { throw new Error("denied"); }, setItem() { throw new Error("denied"); }, removeItem() { throw new Error("denied"); } };
   expect(migrateClientRelease(storage)).toBe(false);
+});
+
+
+it("still initializes when a WebView denies access to the Storage object itself", async () => {
+  const denied = vi.spyOn(window, "localStorage", "get").mockImplementation(() => { throw new DOMException("Blocked", "SecurityError"); });
+  try {
+    vi.resetModules();
+    await expect(import("./storageRelease")).resolves.toHaveProperty("CLIENT_STORAGE_RELEASE", "b3-1");
+  } finally { denied.mockRestore(); }
 });

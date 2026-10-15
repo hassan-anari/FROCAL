@@ -1,3 +1,7 @@
+import { readSessionPreference, writeSessionPreference } from "@/app/storageRelease";
+import { useB3 } from "@/integrations/api/useB3";
+import { useBootstrap } from "@/integrations/api/BootstrapProvider";
+import type { Attempt } from "@/integrations/api/b3Contracts";
 import { useGameplayAvailability } from "@/integrations/api/useGameplayAvailability";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -62,6 +66,14 @@ function calculateStats(input: string, target: string, elapsedSeconds: number) {
 
 export function TypingChallengePage() {
   const { canEarn } = useGameplayAvailability();
+  const live = useB3();
+  const { scope } = useBootstrap();
+  const [issued, setIssued] = useState<Attempt | null>(null);
+  const submitted = useRef(false);
+  const submissionKey = `dexo-b3-typing-submit:${scope.player}:${scope.season}`;
+  const [pending, setPending] = useState<{ id: string; text: string } | null>(() => {
+    try { const value = JSON.parse(localStorage.getItem(submissionKey) ?? "null"); return value && typeof value.id === "string" && typeof value.text === "string" && value.text.length <= 4096 ? value : null; } catch { return null; }
+  });
   const navigate = useNavigate();
   const { adapter } = useTelegram();
   const recordTypingResult = useEarnStore((state) => state.recordTypingResult);
@@ -70,22 +82,39 @@ export function TypingChallengePage() {
   const typingAttempts = useEarnStore((state) => state.typingAttempts);
   const attempt = useRef(0);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
-  const [target, setTarget] = useState(() => phrases[Math.floor(Math.random() * phrases.length)]);
+  const [target, setTarget] = useState(() => live.remote ? "" : phrases[Math.floor(Math.random() * phrases.length)]);
   const [input, setInput] = useState("");
   const [timeLeft, setTimeLeft] = useState(CHALLENGE_SECONDS);
   const [started, setStarted] = useState(false);
   const [result, setResult] = useState<ChallengeResult | null>(null);
 
-  const attemptsRemaining = getTypingAttemptsRemaining(typingAttemptDate, typingAttempts);
-  const elapsed = CHALLENGE_SECONDS - timeLeft;
+  const attemptsRemaining = live.remote ? live.typing.data?.attempts_remaining ?? 0 : getTypingAttemptsRemaining(typingAttemptDate, typingAttempts);
+  const attemptLimit = live.remote ? live.typing.data?.attempt_limit ?? 0 : TYPING_DAILY_LIMIT;
+  const challengeSeconds = issued?.challenge_seconds ?? CHALLENGE_SECONDS;
+  const elapsed = challengeSeconds - timeLeft;
   const stats = useMemo(() => calculateStats(input, target, Math.max(1, elapsed)), [elapsed, input, target]);
 
   const returnToTypingTab = useCallback(() => {
-    sessionStorage.setItem(earnTabStorageKey, "typing");
+    writeSessionPreference(earnTabStorageKey, "typing");
     startTransition(() => { void navigate({ to: "/earn" }); });
   }, [navigate]);
 
-  const finish = useCallback(() => {
+  const finish = useCallback(async () => {
+    if (live.remote) {
+      if (live.busy || submitted.current || (!issued && !pending) || (!started && !pending) || !canEarn("typing")) return;
+      submitted.current = true;
+      const body = pending ?? { id: issued!.attempt_id, text: input };
+      setPending(body); setStarted(false);
+      try { localStorage.setItem(submissionKey, JSON.stringify(body)); } catch { /* mounted retry retains exact text */ }
+      const response = await live.submitTyping(body.id, body.text);
+      if (response) {
+        setResult({ accuracy: (response.accuracy_bps ?? 0) / 100, wpm: response.wpm ?? 0, score: response.reward_amount, passed: response.status === "VALID" });
+        setPending(null); try { localStorage.removeItem(submissionKey); } catch { /* server idempotency handles a retained submission */ }
+        adapter.hapticNotice(response.status === "VALID" ? "success" : "warning");
+      }
+      submitted.current = false;
+      return;
+    }
     if (!canEarn("typing")) return;
     if (result || !started || attemptsRemaining <= 0) return;
     const finalStats = calculateStats(input, target, Math.max(1, CHALLENGE_SECONDS - timeLeft));
@@ -100,7 +129,14 @@ export function TypingChallengePage() {
       completedAt: new Date().toISOString(),
     });
     adapter.hapticNotice(passed ? "success" : "warning");
-  }, [adapter, attemptsRemaining, canEarn, input, recordTypingResult, result, started, target, timeLeft]);
+  }, [adapter, attemptsRemaining, canEarn, input, recordTypingResult, result, started, target, timeLeft, live, issued, pending, submissionKey]);
+
+  useEffect(() => {
+    const active = live.typing.data?.active_attempt_detail;
+    if (live.remote && active && !issued && !result && !pending) {
+      setIssued(active); setTarget(active.phrase_text); setTimeLeft(Math.max(0, Math.ceil((Date.parse(active.expires_at) - live.serverNow()) / 1000))); setStarted(true);
+    }
+  }, [live.remote, live.typing.data?.active_attempt_detail, issued, result, pending]);
 
   useEffect(() => {
     void preloadAssets(["dexo.personalityFocused"]);
@@ -123,11 +159,11 @@ export function TypingChallengePage() {
           window.clearInterval(timer);
           return 0;
         }
-        return current - 1;
+        return live.remote && issued ? Math.max(0, Math.ceil((Date.parse(issued.expires_at) - live.serverNow()) / 1000)) : current - 1;
       });
     }, 1_000);
     return () => window.clearInterval(timer);
-  }, [result, started]);
+  }, [result, started, live.remote, issued]);
 
   useEffect(() => {
     if (timeLeft === 0 && started && !result) finish();
@@ -137,7 +173,14 @@ export function TypingChallengePage() {
     if (input.length >= target.length && started && !result) finish();
   }, [finish, input.length, result, started, target.length]);
 
-  const begin = () => {
+  const begin = async () => {
+    if (live.remote) {
+      if (live.busy || attemptsRemaining <= 0 || !canEarn("typing")) return;
+      const response = await live.startTyping();
+      if (!response) return;
+      setIssued(response); setTarget(response.phrase_text); setTimeLeft(Math.max(0, Math.ceil((Date.parse(response.expires_at) - live.serverNow()) / 1000))); setInput(""); setResult(null); setStarted(true);
+      adapter.hapticImpact("light"); window.setTimeout(() => inputRef.current?.focus(), 70); return;
+    }
     if (attemptsRemaining <= 0 || !canEarn("typing")) return;
     setStarted(true);
     adapter.hapticImpact("light");
@@ -145,6 +188,7 @@ export function TypingChallengePage() {
   };
 
   const retry = () => {
+    if (live.remote) { setIssued(null); setTarget(""); setInput(""); setTimeLeft(CHALLENGE_SECONDS); setStarted(false); setResult(null); return; }
     if (attemptsRemaining <= 0 || !canEarn("typing")) return;
     attempt.current += 1;
     setTarget(phrases[attempt.current % phrases.length]);
@@ -158,6 +202,8 @@ export function TypingChallengePage() {
   return (
     <>
       <main className={styles.page}>
+        {live.remote && (live.busy || live.message || live.typing.isError) ? <p role="status" aria-live="polite">{live.busy ? "Please wait…" : live.message ?? "Typing Arena couldn't load. Please try again."}</p> : null}
+        {live.remote && live.typing.isError ? <Button onClick={() => { void live.typing.refetch(); }}>Try Again</Button> : null}
         <header className={styles.header}>
           <button type="button" onClick={returnToTypingTab} aria-label="Back to Typing tab">
             <HugeiconsIcon icon={ArrowRight01Icon} size={18} strokeWidth={1.8} />
@@ -170,7 +216,7 @@ export function TypingChallengePage() {
           <div>
             <span>DAILY PRACTICE</span>
             <h1>Type with intent.</h1>
-            <p>Finish the full phrase with at least {PASS_ACCURACY}% accuracy and {PASS_WPM} WPM.</p>
+            <p>{live.remote ? "Finish the full phrase before time runs out. Your result will be checked when you submit." : `Finish the full phrase with at least ${PASS_ACCURACY}% accuracy and ${PASS_WPM} WPM.`}</p>
           </div>
           <DexoStage character="dexo.personalityFocused" characterScale={1.08} effect="idle" showParticles={false} showPlatform={false} className={styles.challengeDexo} />
         </section>
@@ -178,7 +224,7 @@ export function TypingChallengePage() {
         <section className={styles.liveStats} aria-label="Live typing statistics">
           <div><span>Accuracy</span><strong>{Math.round(stats.accuracy)}%</strong></div>
           <div><span>WPM</span><strong>{Math.round(stats.wpm)}</strong></div>
-          <div><span>Plays left</span><strong>{attemptsRemaining}/{TYPING_DAILY_LIMIT}</strong></div>
+          <div><span>Plays left</span><strong>{attemptsRemaining}/{attemptLimit}</strong></div>
         </section>
 
         <section className={styles.typingCard}>
@@ -219,7 +265,7 @@ export function TypingChallengePage() {
           />
 
           <div className={styles.challengeProgress}>
-            <motion.i animate={{ scaleX: Math.min(1, input.length / target.length) }} initial={false} style={{ transformOrigin: "0 50%" }} transition={mobileMotion.micro} />
+            <motion.i animate={{ scaleX: (target.length ? Math.min(1, input.length / target.length) : 0) }} initial={false} style={{ transformOrigin: "0 50%" }} transition={mobileMotion.micro} />
           </div>
         </section>
 
@@ -229,24 +275,26 @@ export function TypingChallengePage() {
               <span>{result.passed ? "ARENA CLEARED" : "RUN COMPLETE"}</span>
               <h2>{result.passed ? "Strong performance." : "Recalibrate and retry."}</h2>
               <div><strong>{Math.round(result.accuracy)}%</strong><small>accuracy</small><strong>{Math.round(result.wpm)}</strong><small>WPM</small></div>
-              <p>{attemptsRemaining > 0 ? `${attemptsRemaining} of ${TYPING_DAILY_LIMIT} daily plays remain.` : "You have used all five plays for today. Return tomorrow for a fresh set."}</p>
+              <p>{attemptsRemaining > 0 ? `${attemptsRemaining} of ${attemptLimit} daily plays remain.` : "You have used today’s plays. Return after the reset for a fresh set."}</p>
               <div className={styles.resultActions}>
-                <Button tone="secondary" disabled={attemptsRemaining <= 0} onClick={retry}>Try again</Button>
+                <Button tone="secondary" disabled={attemptsRemaining <= 0 || live.busy || (live.remote && !canEarn("typing"))} onClick={retry}>Try again</Button>
                 <Button trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={18} strokeWidth={1.8} />} onClick={returnToTypingTab}>Back to Typing</Button>
               </div>
             </motion.section>
           ) : (
             <motion.div key="controls" className={styles.controls} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={mobileMotion.tab}>
-              {!started ? (
-                <Button size="lg" disabled={attemptsRemaining <= 0} trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={18} strokeWidth={1.8} />} onClick={begin}>
+              {pending && live.remote ? <Button size="lg" disabled={live.busy} onClick={() => { void finish(); }}>Try Again</Button> : !started ? (
+                <Button size="lg" disabled={attemptsRemaining <= 0 || live.busy || (live.remote && !canEarn("typing"))} trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={18} strokeWidth={1.8} />} onClick={begin}>
                   {attemptsRemaining > 0 ? "Start arena run" : "Daily limit reached"}
                 </Button>
               ) : (
-                <Button tone="secondary" size="lg" onClick={finish}>Finish now</Button>
+                <Button tone="secondary" size="lg" disabled={live.busy} onClick={finish}>Finish now</Button>
               )}
             </motion.div>
           )}
         </AnimatePresence>
+        {live.remote && (live.typing.data?.claimable_balance ?? 0) > 0 ? <Button disabled={live.busy || !canEarn("typing")} onClick={() => { void live.claimTyping(); }}>Claim {live.typing.data?.claimable_balance} XP</Button> : null}
+        {live.remote && live.typing.data ? <small>Resets {new Date(live.typing.data.next_reset).toLocaleString()}</small> : null}
       </main>
     </>
   );

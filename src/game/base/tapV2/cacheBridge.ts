@@ -1,3 +1,5 @@
+import { commitCanonical, canonicalKey } from "@/integrations/api/canonical";
+import type { CanonicalState } from "@/integrations/api/b3Contracts";
 import type { QueryClient } from "@tanstack/react-query";
 import type { BootstrapPayload } from "@/game/domain/schemas";
 import { configCacheScope } from "@/integrations/api/bootstrapContract";
@@ -19,6 +21,8 @@ export function createTapCacheBridge(client: QueryClient, scope: PlayerScope) {
     } });
     // If auth/Season has changed, the old observer must not repopulate any removed caches.
     if (!matches.length) return;
+    const canonical = client.getQueryData<CanonicalState>(canonicalKey(scope));
+    if (canonical && canonical.receipt_cursor > snapshot.receiptCursor) return;
     previous = snapshot;
     const progression = authorizedProgression(snapshot.lifetime, snapshot.progression);
     const remoteProgression = {
@@ -27,8 +31,8 @@ export function createTapCacheBridge(client: QueryClient, scope: PlayerScope) {
       next_threshold: progression.nextThreshold, points_into_level: progression.pointsIntoLevel,
       points_remaining: progression.pointsToNextLevel, dexo_stage: progression.stage,
     };
+    commitCanonical(client, scope, { server_time: new Date(snapshot.serverTime).toISOString(), player_id: snapshot.player, season_id: snapshot.season, config_version: snapshot.config, receipt_cursor: snapshot.receiptCursor, progression: remoteProgression, season_points: snapshot.seasonPoints });
     for (const query of matches) {
-      void client.cancelQueries({ queryKey: query.queryKey, exact: true }, { revert: false });
       client.setQueryData<BootstrapPayload>(query.queryKey, (current) => current ? {
         ...current,
         player: { ...current.player, lifetimeXp: snapshot.lifetime, seasonScore: snapshot.seasonPoints,
@@ -40,7 +44,6 @@ export function createTapCacheBridge(client: QueryClient, scope: PlayerScope) {
       } : current);
     }
     // Update only an already-existing verified Profile cache; no request storm or creation.
-    void client.cancelQueries({ queryKey: queryKeys.profileOverview(scope), exact: true }, { revert: false });
     client.setQueryData<ProfileOverview>(queryKeys.profileOverview(scope), (current) =>
       current ? { ...current, progression: remoteProgression } : current);
   };

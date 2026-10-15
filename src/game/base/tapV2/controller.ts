@@ -111,7 +111,7 @@ export class TapController {
       this.maintenance = null;
       if (this.inFlight || this.monotonic() < this.nextAttemptAt) { this.maintain(1000); return; }
       void this.resume();
-    }, Math.min(60_000, wait));
+    }, Math.min(this.status === "ready" ? 5_000 : 60_000, wait));
   }
 
   private async request<T>(operation: Promise<T>, abort: AbortController): Promise<T> {
