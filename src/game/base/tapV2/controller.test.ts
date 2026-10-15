@@ -357,3 +357,28 @@ it("waits out an explicit-switch cooldown with a read and never repeats takeover
   expect(controller.getSnapshot().error).toBe("ACTIVE_SESSION");
   controller.close();
 });
+
+it("queues a coherent non-Tap reward refresh behind an in-flight receipt instead of dropping it or aborting settlement", async () => {
+  let release!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  let latest = internalSnapshot();
+  const synchronize = vi.fn(async () => structuredClone(latest));
+  const harness = internalHarness({ synchronize, submit: async batch => {
+    const receipt = await harness.settle(batch);
+    latest = { ...structuredClone(receipt), receipts: [], receiptCursor: receipt.receiptCursor + 1,
+      lifetime: receipt.lifetime + 7, seasonPoints: receipt.seasonPoints + 7 };
+    await gate;
+    return receipt;
+  } });
+  await harness.controller.start(); harness.controller.touch();
+  const pending = harness.controller.flush();
+  await Promise.resolve();
+  harness.controller.requestCanonicalRefresh(); harness.controller.requestCanonicalRefresh();
+  expect(synchronize).toHaveBeenCalledTimes(1);
+  release(); await pending;
+  await vi.waitFor(() => expect(harness.controller.getSnapshot().lifetime).toBe(158));
+  expect(synchronize).toHaveBeenCalledTimes(2);
+  expect(harness.submissions).toHaveLength(1);
+  expect(harness.controller.getSnapshot().authorizedUnsent).toBe(0);
+  harness.controller.close();
+});

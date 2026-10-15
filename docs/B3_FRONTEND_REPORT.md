@@ -109,3 +109,17 @@ Earn referral image fallback also uses that shared path. No replacement photo UR
 or extra fallback request is constructed. A shared navigation validator rejects
 unsafe URLs, keeps internal targets on existing game routes and dispatches exact
 Telegram hosts through the Telegram adapter. It does not define pending API fields.
+
+A final client concurrency regression now queues an independent Bootstrap reward
+refresh behind any in-flight Tap receipt, coalesces multiple requests and honors
+existing backoff. Previously that refresh could be dropped by the in-flight guard
+and wait until lease maintenance. No receipt is aborted/re-keyed and no second
+progression model is introduced.
+
+Additional backend discovery at the incremental B3 pin: isolated domain suites
+reported 93 passed, two failing old Tap tests, and one pre-existing skipped benchmark.
+The failures are the old automatic post-takeover renewal expectation and old fixtures
+missing newly required ownership. They were reported to the backend agent in
+[Draft #28](https://github.com/hassan-anari/WEDCAL/pull/28#issuecomment-6187536250).
+They do not invalidate the separately passing actual paired session scenarios,
+but must be resolved upstream before final whole-B3 acceptance.

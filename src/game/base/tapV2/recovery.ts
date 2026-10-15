@@ -20,7 +20,15 @@ export function sessionRecovery(code: string | null, status?: string) {
     label: "ACTIVE TAB", title: "Your game is open in another tab",
     message: "Close the game in your other tab, then try again here.", reopen: false,
   };
-  if (["LOCAL_SESSION_UNAVAILABLE", "JOURNAL_INVALID", "JOURNAL_CHANGED"].includes(code ?? "")) return {
+  if (code === "LOCAL_SESSION_UNAVAILABLE") return {
+    label: "SESSION ISSUE", title: "We couldn't start your game session",
+    message: "Please close Dexo Land and open it again in Telegram, then try again.", reopen: false,
+  };
+  if (code === "JOURNAL_INVALID") return {
+    label: "SESSION ISSUE", title: "We couldn't resume your game session",
+    message: "Please close Dexo Land and open it again in Telegram, then try again.", reopen: false,
+  };
+  if (code === "JOURNAL_CHANGED") return {
     label: "SESSION ISSUE", title: "We couldn't resume your game session",
     message: "Close the game in any other tabs and try again.", reopen: false,
   };

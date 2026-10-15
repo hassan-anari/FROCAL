@@ -51,6 +51,7 @@ export class TapController {
   private starting = false;
   private recovering = false;
   private releaseWork: Promise<void> | null = null;
+  private canonicalRefreshRequested = false;
   private scheduledAt = Infinity;
   private inFlight = false;
   private roundTrip = 240;
@@ -221,8 +222,25 @@ export class TapController {
         this.emit();
         if (this.status === "ready" && this.journal.events.length) this.schedule(0);
         if (this.status === "ready") this.maintain();
+        this.refreshCanonicalWhenIdle();
       }
     }
+  }
+
+  /** Non-Tap rewards may arrive while a Tap receipt is in flight. Queue one
+   * coherent read after that receipt, without aborting or re-keying its request. */
+  requestCanonicalRefresh() {
+    if (this.status === "closed") return;
+    this.canonicalRefreshRequested = true;
+    this.refreshCanonicalWhenIdle();
+  }
+
+  private refreshCanonicalWhenIdle() {
+    if (!this.canonicalRefreshRequested || this.inFlight || ["closed", "storage-blocked", "terminal"].includes(this.status)) return;
+    this.canonicalRefreshRequested = false;
+    const wait = this.nextAttemptAt - this.monotonic();
+    if (wait > 0) this.maintain(wait);
+    else void this.resume();
   }
 
   /** The caller must obtain a new deliberate confirmation for each invocation. */
@@ -452,6 +470,7 @@ export class TapController {
         this.emit();
         if (this.journal.events.length) this.schedule(delay);
         else if (this.status === "ready") this.maintain();
+        this.refreshCanonicalWhenIdle();
       }
     }
   }

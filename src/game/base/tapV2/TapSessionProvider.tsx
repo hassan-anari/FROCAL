@@ -25,7 +25,7 @@ function Session({ controller, children, restart }: { controller: TapController;
     // An independent Daily/Mission refresh has no Tap cursor. Read a coherent v2
     // snapshot rather than injecting a balance or inventing ordering evidence.
     const committed = controller.getSnapshot().committed;
-    if (committed && observedLifetime !== undefined && observedLifetime !== committed.lifetime) void controller.resume();
+    if (committed && observedLifetime !== undefined && observedLifetime !== committed.lifetime) controller.requestCanonicalRefresh();
   }, [controller, observedLifetime]);
   const event = useMemo<LevelUpEvent | null>(() => view.levelChange ? {
     id: `tap-level:${view.levelChange.sequence}`, previousLevel: view.levelChange.previousLevel,
