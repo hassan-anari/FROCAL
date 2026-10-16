@@ -1,3 +1,4 @@
+import { useQueryFeedback } from "@/design-system/components/TransientFeedback";
 import { readSessionPreference, writeSessionPreference } from "@/app/storageRelease";
 import { useB3, missionView } from "@/integrations/api/useB3";
 import { safeDestination } from "@/integrations/api/safeNavigation";
@@ -101,6 +102,7 @@ type ReferralRow = {
   tone: "cyan" | "violet" | "gold" | "blue" | "pink";
   earnedXp?: number;
   activation?: string;
+  photoUrl?: string;
   useTelegramPhoto?: boolean;
 };
 
@@ -137,8 +139,8 @@ export function EarnPage() {
     typingBest: live.typing.data ? { wpm: live.typing.data.best_wpm, accuracy: live.typing.data.best_accuracy_bps / 100, score: 0, completedAt: "" } : null,
     history: [], rewardEvent: live.rewardEvent, levelUpEvent: live.levelUpEvent, dismissReward: live.dismissReward, dismissLevelUp: live.dismissLevelUp, referralSent: false, referralShares: 0,
   } : localEarn;
-  const referralRows: readonly ReferralRow[] = live.remote ? (live.invitees.data?.items ?? []).slice(0,5).map((v, i) => ({ id: `${v.attributed_at}:${i}`, name: v.name, level: v.activation.level, status: v.status === "VERIFIED" ? "Active" : "Pending", invitedAt: new Date(v.attributed_at).toLocaleDateString("en-US"), tone: "cyan", activation: `Level ${v.activation.level} / ${v.activation.required_level} · ${v.activation.eligible ? "Eligible" : "Pending eligibility"}` })) : demoReferralRows;
-  const groupRows = live.remote ? (live.groups.data?.items ?? []).map(v => ({ id: v.public_id, name: v.title, members: v.unique_speakers, admin: v.bot_admin, status: v.state.replaceAll("_", " "), earnedXp: v.earned_points, meta: `${v.qualified_characters} qualified characters · ${v.verification_retrying ? "Check pending" : v.creator_verified_at ? "Creator verified" : "Creator check pending"}`, tone: "cyan" })) : demoGroupRows;
+  const referralRows: readonly ReferralRow[] = live.remote ? (live.invitees.data?.items ?? []).slice(0,5).map((v, i) => ({ id: `${v.attributed_at}:${i}`, name: v.name, photoUrl: v.photo_url, level: v.activation.level, status: v.status === "VERIFIED" ? "Active" : "Pending", invitedAt: new Date(v.attributed_at).toLocaleDateString("en-US"), tone: "cyan", activation: `Level ${v.activation.level} / ${v.activation.required_level} · ${v.activation.eligible ? "Eligible" : "Pending eligibility"}` })) : demoReferralRows;
+  const groupRows = live.remote ? (live.groups.data?.items ?? []).map(v => ({ id: v.public_id, name: v.title, photoUrl: v.photo_url, members: v.unique_speakers, admin: v.bot_admin, status: v.state.replaceAll("_", " "), earnedXp: v.earned_points, meta: `${v.qualified_characters} qualified characters · ${v.verification_retrying ? "Check pending" : v.creator_verified_at ? "Creator verified" : "Creator check pending"}`, tone: "cyan" })) : demoGroupRows;
   const typingMission = earn.missions["typing-session"];
   const typingLimit = live.remote ? live.typing.data?.attempt_limit ?? 0 : TYPING_DAILY_LIMIT;
   const { canEarn } = useGameplayAvailability();
@@ -146,6 +148,8 @@ export function EarnPage() {
     const stored = readSessionPreference(earnTabStorageKey);
     return stored === "network" || stored === "typing" ? stored : "earn";
   });
+  useQueryFeedback(live.remote ? activeTab === "earn" ? live.daily.error ?? live.missions.error : activeTab === "typing" ? live.typing.error : live.referrals.error ?? live.invitees.error ?? live.network.error ?? live.groups.error : null,
+    activeTab === "earn" ? "Rewards couldn't load. Please try again." : activeTab === "typing" ? "Typing Arena couldn't load. Please try again." : "Your network couldn't load. Please try again.");
   const [historyOpen, setHistoryOpen] = useState(false);
   const [guideOpen, setGuideOpen] = useState<NetworkGuideKind | null>(null);
   const [copied, setCopied] = useState(false);
@@ -372,7 +376,7 @@ export function EarnPage() {
                   <header>
                     <div>
                       <span>DAILY CORE</span>
-                      <h2>{live.remote && !live.daily.data ? "Daily reward unavailable." : dailyAvailable ? "Your reward is ready." : "Daily reward secured."}</h2>
+                      <h2>{live.remote && !live.daily.data ? "Daily reward unavailable." : dailyAvailable ? "Your reward is ready." : "Claimed today"}</h2>
                       <p>{live.remote && !live.daily.data ? "Please check your connection and try again." : dailyAvailable ? "Claim today’s XP and continue your streak." : "Return after the reset to extend your daily chain."}</p>
                     </div>
                     <strong>{live.remote ? live.daily.data ? `+${live.daily.data.reward_amount} XP` : "—" : "+40 XP"}</strong>
@@ -494,7 +498,7 @@ export function EarnPage() {
                   <div className={styles.rosterList}>
                     {live.remote && !referralRows.length ? <div className={styles.emptyState}><strong>{live.invitees.isPending ? "Loading explorers…" : live.invitees.isError ? "Invites unavailable." : "No invited explorers yet."}</strong></div> : null}
                     {referralRows.map((person) => {
-                      const photo = person.useTelegramPhoto ? telegramUser?.photo_url : undefined;
+                      const photo = person.photoUrl ?? (person.useTelegramPhoto ? telegramUser?.photo_url : undefined);
                       const displayName = person.useTelegramPhoto
                         ? [telegramUser?.first_name, telegramUser?.last_name].filter(Boolean).join(" ") || person.name
                         : person.name;
@@ -528,7 +532,7 @@ export function EarnPage() {
                     {live.remote && !groupRows.length ? <div className={styles.emptyState}><strong>{live.groups.isPending ? "Loading communities…" : live.groups.isError ? "Communities unavailable." : "No connected communities yet."}</strong></div> : null}
                     {groupRows.map((group) => (
                       <article key={group.id} aria-label={group.name}>
-                        <span className={`${styles.avatar} ${styles[`avatar_${group.tone}`]}`}><AvatarContent owner={`group:${group.id}`} fallback={initials(group.name)} /></span>
+                        <span className={`${styles.avatar} ${styles[`avatar_${group.tone}`]}`}><AvatarContent owner={`group:${group.id}`} photoUrl={"photoUrl" in group ? group.photoUrl : undefined} fallback={initials(group.name)} /></span>
                         <div className={styles.rosterIdentity}><strong>{group.name}</strong><span>{formatNumber(group.members)} {live.remote ? "qualified speakers" : "members"} · {group.meta}</span>
 
                         </div>

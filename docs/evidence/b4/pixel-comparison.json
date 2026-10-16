@@ -1,0 +1,443 @@
+[
+  {
+    "viewport": 320,
+    "screen": "arena-clans",
+    "changed_pixels": 61655,
+    "total_pixels": 224000,
+    "percentage": 27.525
+  },
+  {
+    "viewport": 320,
+    "screen": "arena-players",
+    "changed_pixels": 57198,
+    "total_pixels": 224000,
+    "percentage": 25.535
+  },
+  {
+    "viewport": 320,
+    "screen": "arena-warfront",
+    "changed_pixels": 0,
+    "total_pixels": 224000,
+    "percentage": 0.0
+  },
+  {
+    "viewport": 320,
+    "screen": "base-header",
+    "changed_pixels": 0,
+    "total_pixels": 224000,
+    "percentage": 0.0
+  },
+  {
+    "viewport": 320,
+    "screen": "communities",
+    "changed_pixels": 179981,
+    "total_pixels": 224000,
+    "percentage": 80.349
+  },
+  {
+    "viewport": 320,
+    "screen": "earn-daily",
+    "changed_pixels": 101910,
+    "total_pixels": 224000,
+    "percentage": 45.496
+  },
+  {
+    "viewport": 320,
+    "screen": "earn-missions",
+    "changed_pixels": 12463,
+    "total_pixels": 224000,
+    "percentage": 5.564
+  },
+  {
+    "viewport": 320,
+    "screen": "network",
+    "changed_pixels": 0,
+    "total_pixels": 224000,
+    "percentage": 0.0
+  },
+  {
+    "viewport": 320,
+    "screen": "notifications",
+    "changed_pixels": 30596,
+    "total_pixels": 224000,
+    "percentage": 13.659
+  },
+  {
+    "viewport": 320,
+    "screen": "profile-achievements",
+    "changed_pixels": 197867,
+    "total_pixels": 224000,
+    "percentage": 88.333
+  },
+  {
+    "viewport": 320,
+    "screen": "profile-collection",
+    "changed_pixels": 748,
+    "total_pixels": 224000,
+    "percentage": 0.334
+  },
+  {
+    "viewport": 320,
+    "screen": "profile-customize",
+    "changed_pixels": 40201,
+    "total_pixels": 224000,
+    "percentage": 17.947
+  },
+  {
+    "viewport": 320,
+    "screen": "profile-detail",
+    "changed_pixels": 173526,
+    "total_pixels": 224000,
+    "percentage": 77.467
+  },
+  {
+    "viewport": 320,
+    "screen": "profile-overview",
+    "changed_pixels": 0,
+    "total_pixels": 224000,
+    "percentage": 0.0
+  },
+  {
+    "viewport": 320,
+    "screen": "profile-share",
+    "changed_pixels": 2127,
+    "total_pixels": 224000,
+    "percentage": 0.95
+  },
+  {
+    "viewport": 320,
+    "screen": "referrals",
+    "changed_pixels": 0,
+    "total_pixels": 224000,
+    "percentage": 0.0
+  },
+  {
+    "viewport": 320,
+    "screen": "reward-settlement",
+    "changed_pixels": 223996,
+    "total_pixels": 224000,
+    "percentage": 99.998
+  },
+  {
+    "viewport": 320,
+    "screen": "session-recovery",
+    "changed_pixels": 16623,
+    "total_pixels": 270080,
+    "percentage": 6.155
+  },
+  {
+    "viewport": 320,
+    "screen": "typing-challenge",
+    "changed_pixels": 54395,
+    "total_pixels": 224000,
+    "percentage": 24.283
+  },
+  {
+    "viewport": 320,
+    "screen": "typing-dashboard",
+    "changed_pixels": 466,
+    "total_pixels": 224000,
+    "percentage": 0.208
+  },
+  {
+    "viewport": 320,
+    "screen": "typing-history",
+    "changed_pixels": 466,
+    "total_pixels": 224000,
+    "percentage": 0.208
+  },
+  {
+    "viewport": 390,
+    "screen": "arena-clans",
+    "changed_pixels": 124559,
+    "total_pixels": 329160,
+    "percentage": 37.841
+  },
+  {
+    "viewport": 390,
+    "screen": "arena-players",
+    "changed_pixels": 117918,
+    "total_pixels": 329160,
+    "percentage": 35.824
+  },
+  {
+    "viewport": 390,
+    "screen": "arena-warfront",
+    "changed_pixels": 0,
+    "total_pixels": 329160,
+    "percentage": 0.0
+  },
+  {
+    "viewport": 390,
+    "screen": "base-header",
+    "changed_pixels": 0,
+    "total_pixels": 329160,
+    "percentage": 0.0
+  },
+  {
+    "viewport": 390,
+    "screen": "communities",
+    "changed_pixels": 292354,
+    "total_pixels": 329160,
+    "percentage": 88.818
+  },
+  {
+    "viewport": 390,
+    "screen": "earn-daily",
+    "changed_pixels": 144208,
+    "total_pixels": 329160,
+    "percentage": 43.811
+  },
+  {
+    "viewport": 390,
+    "screen": "earn-missions",
+    "changed_pixels": 144208,
+    "total_pixels": 329160,
+    "percentage": 43.811
+  },
+  {
+    "viewport": 390,
+    "screen": "network",
+    "changed_pixels": 0,
+    "total_pixels": 329160,
+    "percentage": 0.0
+  },
+  {
+    "viewport": 390,
+    "screen": "notifications",
+    "changed_pixels": 76392,
+    "total_pixels": 329160,
+    "percentage": 23.208
+  },
+  {
+    "viewport": 390,
+    "screen": "profile-achievements",
+    "changed_pixels": 256761,
+    "total_pixels": 329160,
+    "percentage": 78.005
+  },
+  {
+    "viewport": 390,
+    "screen": "profile-collection",
+    "changed_pixels": 197352,
+    "total_pixels": 329160,
+    "percentage": 59.956
+  },
+  {
+    "viewport": 390,
+    "screen": "profile-customize",
+    "changed_pixels": 72971,
+    "total_pixels": 329160,
+    "percentage": 22.169
+  },
+  {
+    "viewport": 390,
+    "screen": "profile-detail",
+    "changed_pixels": 243462,
+    "total_pixels": 329160,
+    "percentage": 73.965
+  },
+  {
+    "viewport": 390,
+    "screen": "profile-overview",
+    "changed_pixels": 0,
+    "total_pixels": 329160,
+    "percentage": 0.0
+  },
+  {
+    "viewport": 390,
+    "screen": "profile-share",
+    "changed_pixels": 124480,
+    "total_pixels": 329160,
+    "percentage": 37.817
+  },
+  {
+    "viewport": 390,
+    "screen": "referrals",
+    "changed_pixels": 5953,
+    "total_pixels": 329160,
+    "percentage": 1.809
+  },
+  {
+    "viewport": 390,
+    "screen": "reward-settlement",
+    "changed_pixels": 329131,
+    "total_pixels": 329160,
+    "percentage": 99.991
+  },
+  {
+    "viewport": 390,
+    "screen": "session-recovery",
+    "changed_pixels": 18640,
+    "total_pixels": 329160,
+    "percentage": 5.663
+  },
+  {
+    "viewport": 390,
+    "screen": "typing-challenge",
+    "changed_pixels": 54204,
+    "total_pixels": 329160,
+    "percentage": 16.467
+  },
+  {
+    "viewport": 390,
+    "screen": "typing-dashboard",
+    "changed_pixels": 474,
+    "total_pixels": 329160,
+    "percentage": 0.144
+  },
+  {
+    "viewport": 390,
+    "screen": "typing-history",
+    "changed_pixels": 474,
+    "total_pixels": 329160,
+    "percentage": 0.144
+  },
+  {
+    "viewport": 460,
+    "screen": "arena-clans",
+    "changed_pixels": 165946,
+    "total_pixels": 414000,
+    "percentage": 40.084
+  },
+  {
+    "viewport": 460,
+    "screen": "arena-players",
+    "changed_pixels": 161605,
+    "total_pixels": 414000,
+    "percentage": 39.035
+  },
+  {
+    "viewport": 460,
+    "screen": "arena-warfront",
+    "changed_pixels": 1893,
+    "total_pixels": 414000,
+    "percentage": 0.457
+  },
+  {
+    "viewport": 460,
+    "screen": "base-header",
+    "changed_pixels": 0,
+    "total_pixels": 414000,
+    "percentage": 0.0
+  },
+  {
+    "viewport": 460,
+    "screen": "communities",
+    "changed_pixels": 270004,
+    "total_pixels": 414000,
+    "percentage": 65.218
+  },
+  {
+    "viewport": 460,
+    "screen": "earn-daily",
+    "changed_pixels": 178334,
+    "total_pixels": 414000,
+    "percentage": 43.076
+  },
+  {
+    "viewport": 460,
+    "screen": "earn-missions",
+    "changed_pixels": 178334,
+    "total_pixels": 414000,
+    "percentage": 43.076
+  },
+  {
+    "viewport": 460,
+    "screen": "network",
+    "changed_pixels": 0,
+    "total_pixels": 414000,
+    "percentage": 0.0
+  },
+  {
+    "viewport": 460,
+    "screen": "notifications",
+    "changed_pixels": 109386,
+    "total_pixels": 414000,
+    "percentage": 26.422
+  },
+  {
+    "viewport": 460,
+    "screen": "profile-achievements",
+    "changed_pixels": 274594,
+    "total_pixels": 414000,
+    "percentage": 66.327
+  },
+  {
+    "viewport": 460,
+    "screen": "profile-collection",
+    "changed_pixels": 745,
+    "total_pixels": 414000,
+    "percentage": 0.18
+  },
+  {
+    "viewport": 460,
+    "screen": "profile-customize",
+    "changed_pixels": 268939,
+    "total_pixels": 414000,
+    "percentage": 64.961
+  },
+  {
+    "viewport": 460,
+    "screen": "profile-detail",
+    "changed_pixels": 228300,
+    "total_pixels": 414000,
+    "percentage": 55.145
+  },
+  {
+    "viewport": 460,
+    "screen": "profile-overview",
+    "changed_pixels": 0,
+    "total_pixels": 414000,
+    "percentage": 0.0
+  },
+  {
+    "viewport": 460,
+    "screen": "profile-share",
+    "changed_pixels": 2111,
+    "total_pixels": 414000,
+    "percentage": 0.51
+  },
+  {
+    "viewport": 460,
+    "screen": "referrals",
+    "changed_pixels": 0,
+    "total_pixels": 414000,
+    "percentage": 0.0
+  },
+  {
+    "viewport": 460,
+    "screen": "reward-settlement",
+    "changed_pixels": 413960,
+    "total_pixels": 414000,
+    "percentage": 99.99
+  },
+  {
+    "viewport": 460,
+    "screen": "session-recovery",
+    "changed_pixels": 18623,
+    "total_pixels": 388240,
+    "percentage": 4.797
+  },
+  {
+    "viewport": 460,
+    "screen": "typing-challenge",
+    "changed_pixels": 59772,
+    "total_pixels": 414000,
+    "percentage": 14.438
+  },
+  {
+    "viewport": 460,
+    "screen": "typing-dashboard",
+    "changed_pixels": 474,
+    "total_pixels": 414000,
+    "percentage": 0.114
+  },
+  {
+    "viewport": 460,
+    "screen": "typing-history",
+    "changed_pixels": 474,
+    "total_pixels": 414000,
+    "percentage": 0.114
+  }
+]

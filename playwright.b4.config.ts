@@ -1,5 +1,6 @@
 import { defineConfig } from "@playwright/test";
 export default defineConfig({
+  snapshotPathTemplate: "{testDir}/../docs/evidence/b4/{arg}{ext}",
   testDir: "./e2e", testMatch: "b4*.spec.ts", workers: 2, retries: 0,
   outputDir: "test-results-b4", reporter: [["list"], ["json", { outputFile: "test-results-b4/results.json" }]],
   use: { baseURL: process.env.B4_BASELINE ? "http://127.0.0.1:4176" : "http://127.0.0.1:4174", viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, reducedMotion: "reduce", trace: "off", screenshot: "only-on-failure", launchOptions: { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE } },

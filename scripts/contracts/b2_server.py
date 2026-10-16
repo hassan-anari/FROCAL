@@ -49,6 +49,12 @@ settings.TAP_V2_SESSION_REQUESTS = 10000
 settings.AVATAR_CACHE_ENABLED = True
 settings.AVATAR_S3_BUCKET = "isolated-test-cache"
 settings.AVATAR_PUBLIC_API_ORIGIN = "https://cached-avatar.test"
+# Optional isolated real ranking projection for B4 pairing. Never accepts an external host.
+if os.environ.get("B4_RANKINGS_REDIS") == "1":
+    import redis
+    import apps.arena.services as ranking_services
+    ranking_redis = redis.Redis(host="127.0.0.1", port=6379, db=15)
+    ranking_services._redis = lambda: ranking_redis
 logging.disable(logging.CRITICAL)
 from apps.base_tap.schemas import BatchOutput, BatchInput, TapStateOutput
 if B3:
@@ -154,6 +160,12 @@ def control(data):
             asset = upload_asset(stream, actor)
             PromotionalBanner.objects.create(operator=actor, asset=asset, enabled=state != "disabled", alt_text="Paired promotional banner", starts_at=now() + timedelta(hours=1) if state == "future" else now() - timedelta(hours=2), ends_at=now() - timedelta(hours=1) if state == "expired" else now() + timedelta(hours=1))
         return {"ok": True}
+    if action == "b4-rebuild-rankings" and os.environ.get("B4_RANKINGS_REDIS") == "1":
+        from apps.arena.models import RankingProjectionEvent
+        from apps.arena.services import rebuild_ranking, apply_projection_event
+        for event in RankingProjectionEvent.objects.filter(season=season, processed_at__isnull=True).order_by("id"):
+            apply_projection_event(event)
+        return {"rebuilt": [rebuild_ranking(season, entity) for entity in (RankingProjectionEvent.Entity.PLAYER, RankingProjectionEvent.Entity.CLAN)]}
     if action == "flags":
         settings.TAP_V2_ISSUANCE_ENABLED = data.get("issuance", True)
         settings.BASE_TAP_LEGACY_INGRESS_ENABLED = data.get("legacy", False)
@@ -178,7 +190,7 @@ def control(data):
         return {"season": season.code}
     if action == "player":
         identifier = int(uuid4().hex[:12], 16)
-        player = Player.objects.create(telegram_user_id=identifier, first_name="Verified", first_seen_at=now(), last_seen_at=now(), first_seen_source="MINI_APP", photo_url="https://telegram-photo-blocked.test/photo.jpg")
+        player = Player.objects.create(telegram_user_id=identifier, first_name="Verified", first_seen_at=now(), last_seen_at=now(), first_seen_source="BOT_START" if data.get("start_only") else "MINI_APP", photo_url="" if data.get("start_only") else "https://telegram-photo-blocked.test/photo.jpg")
         amount = int(data.get("points", 150))
         if amount:
             settle_player_reward(player=player, source_type="TEST", source_id=str(player.pk), context="TEST", amount=amount, idempotency_key=f"paired-initial:{player.pk}", occurred_at=now(), resolved_config=resolve_effective_game_config(now()), create_settlement_outbox=False)
@@ -186,6 +198,24 @@ def control(data):
             PlayerAvatar.objects.create(player=player, source_fingerprint=avatars.fingerprint(player), object_key="avatars/isolated.jpg", expires_at=now() + timedelta(days=1), refresh_after=now() + timedelta(days=1))
         return {"player": str(identifier), "initData": credentials(player)}
     player = Player.objects.get(telegram_user_id=int(data["player"]))
+    if action == "b4-archive" and os.environ.get("B4_BACKEND_ROOT"):
+        from apps.seasons.models import PlayerSeasonFinalStanding
+        archived = Season.objects.create(code=f"archive-{uuid4().hex[:8]}", title="Archived fixture", starts_at=now() - timedelta(days=90), ends_at=now() - timedelta(days=45), baseline_config=config)
+        PlayerSeason.objects.create(season=archived, player=player, season_points=7, score_reached_at=now() - timedelta(days=46))
+        PlayerSeasonFinalStanding.objects.create(season=archived, player=player, final_rank=1, final_season_points=42, score_reached_at=now() - timedelta(days=46), ranking_generation=1, ranked_population=1, finalized_at=now() - timedelta(days=45))
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT set_config('dexo.season_transition', 'on', true)")
+            Season.objects.filter(pk=archived.pk).update(status=Season.Status.CLOSED)
+        return {"season": archived.code}
+    if action == "b4-notifications" and os.environ.get("B4_BACKEND_ROOT"):
+        from apps.notifications.models import Notification
+        ids = []
+        for index in range(int(data.get("count", 3))):
+            row = Notification.objects.create(recipient=player, event_key="CLAN_EVENT", source_domain="clan", source_type="TEST", source_id=uuid4().hex, idempotency_key=f"paired-b4:{uuid4()}", title=f"Clan update {index}", body="Your clan has an update.", payload={"url": "javascript:alert(1)"})
+            ids.append(str(row.public_id))
+        Notification.objects.create(recipient=player, event_key="BOT_PRIVATE", source_domain="test", source_type="TEST", source_id=uuid4().hex, idempotency_key=f"paired-private:{uuid4()}", title="Hidden private message")
+        return {"ids": ids}
     if B3 and action == "b3-purge-leases":
         from apps.base_tap.models import TapLease
         from apps.base_tap.v2 import purge_expired_leases
@@ -256,6 +286,8 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.handle_request()
     def do_POST(self):
+        self.handle_request()
+    def do_PUT(self):
         self.handle_request()
     def handle_request(self):
         try:

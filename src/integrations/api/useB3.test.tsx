@@ -3,6 +3,7 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import type { ReactNode } from "react";
 import fixture from "./fixtures/b3/earn-network.json";
+import b4 from "./fixtures/b4/profile-earn.json";
 import { remoteBootstrapSchema, configCacheScope } from "./bootstrapContract";
 import { mapRemoteBootstrap } from "./bootstrap";
 import { queryKeys } from "./queryKeys";
@@ -43,6 +44,7 @@ function setup(post: (path: string, options: any) => Promise<any>) {
     "/daily": fixture.daily_available,
     "/missions": fixture.mission_list,
     "/typing": fixture.typing_state,
+    "/typing/history?limit=20": { items: [], next_cursor: null },
     "/referrals": fixture.referral,
     "/referrals/invitees?offset=0&limit=30": fixture.invitees_empty,
     "/network": fixture.network_summary,
@@ -173,5 +175,54 @@ it("isolates mission pending state from Daily and queues the existing level reve
   expect(h.result.current.rewardEvent?.xp).toBe(response.reward_amount);
   expect(h.result.current.levelUpEvent).toMatchObject({ previousLevel: 1, newLevel: 2 });
   expect(h.result.current.pendingAction).toBeNull();
+  h.unmount(); h.client.clear();
+});
+
+it("settles independent actions concurrently without changing Daily's pending state or losing either reveal", async () => {
+  let finishDaily!: (v: unknown) => void;
+  let finishTyping!: (v: unknown) => void;
+  const dailyGate = new Promise(resolve => { finishDaily = resolve; });
+  const typingGate = new Promise(resolve => { finishTyping = resolve; });
+  const typingResponse = structuredClone(fixture.typing_claim.response);
+  const dailyResponse = structuredClone(fixture.daily_claim.response);
+  typingResponse.canonical.progression.level = 2;
+  dailyResponse.canonical.progression.level = 2;
+  const h = setup(async path => path === "/daily/claim" ? dailyGate : typingGate);
+  await waitFor(() => expect(h.result.current.typing.data).toBeTruthy());
+  let daily!: Promise<unknown>, typing!: Promise<unknown>;
+  act(() => { daily = h.result.current.claimDaily(); typing = h.result.current.claimTyping(); });
+  await waitFor(() => expect(h.result.current.isPending("daily")).toBe(true));
+  expect(h.result.current.isPending("typing-claim")).toBe(true);
+  await act(async () => { finishTyping(typingResponse); await typing; });
+  expect(h.result.current.isPending("daily")).toBe(true);
+  expect(h.result.current.rewardEvent?.xp).toBe(70);
+  expect(h.result.current.levelUpEvent?.newLevel).toBe(2);
+  await act(async () => { finishDaily(dailyResponse); await daily; });
+  act(() => h.result.current.dismissReward());
+  expect(h.result.current.rewardEvent).toBeNull();
+  act(() => h.result.current.dismissLevelUp());
+  expect(h.result.current.rewardEvent?.xp).toBe(80);
+  expect(h.result.current.levelUpEvent).toBeNull();
+  act(() => h.result.current.dismissReward());
+  expect(h.result.current.rewardEvent).toBeNull();
+  expect(h.client.getQueryData(canonicalKey(scope))).toMatchObject({ receipt_cursor: 3 });
+  h.unmount(); h.client.clear();
+});
+
+it("deduplicates published ledger events across remounts and never reveals a null B4 receipt", async () => {
+  let response: unknown = b4.daily_claim;
+  let h = setup(async () => response);
+  await waitFor(() => expect(h.result.current.daily.data).toBeTruthy());
+  await act(async () => { await h.result.current.claimDaily(); });
+  expect(h.result.current.rewardEvent).toMatchObject({ id: b4.daily_claim.reward.event_id, xp: b4.daily_claim.reward.amount });
+  h.unmount(); h.client.clear();
+  h = setup(async () => response);
+  await waitFor(() => expect(h.result.current.daily.data).toBeTruthy());
+  await act(async () => { await h.result.current.claimDaily(); });
+  expect(h.result.current.rewardEvent).toBeNull();
+  response = { ...b4.daily_claim, reward: null };
+  localStorage.clear();
+  await act(async () => { await h.result.current.claimDaily(); });
+  expect(h.result.current.rewardEvent).toBeNull();
   h.unmount(); h.client.clear();
 });

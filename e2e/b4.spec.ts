@@ -77,6 +77,9 @@ test("rejected Profile save leaves draft open and uses the minimal transient err
   await dialog.getByRole("button", { name: "Save profile", exact: true }).click();
   await expect(dialog).toBeVisible();
   await expect(page.getByRole("alert")).toContainText("Your profile couldn't be saved.");
+  const feedbackLayer = await page.getByRole("alert").evaluate(el => Number(getComputedStyle(el.parentElement!).zIndex));
+  const sheetLayer = await dialog.evaluate(el => Number(getComputedStyle(el.parentElement!).zIndex));
+  expect(feedbackLayer).toBeGreaterThan(sheetLayer);
   expect(state.customization.active_frame).toBe("standard");
 });
 
@@ -121,4 +124,40 @@ test("existing Notification Center persists confirmed read state without a dupli
   await page.reload();
   await page.getByRole("button", { name: "Open notifications", exact: true }).click();
   await expect(page.getByRole("button", { name: "Mark all read", exact: true })).toHaveCount(0);
+});
+
+test("referral and community photos reuse existing avatar wells and failed private images show initials", async ({ page }) => {
+  const state = await prepareB4(page);
+  state.invitees.items[0].photo_url = "http://127.0.0.1:4174/api/v1/profile/avatar/00000000-0000-4000-8000-000000000002?token=synthetic";
+  state.groups.items[0].photo_url = "http://127.0.0.1:4174/api/v1/profile/group-avatar/00000000-0000-4000-8000-000000000003?token=synthetic";
+  await page.route("**/profile/avatar/*?token=synthetic", route => route.fulfill({ contentType: "image/webp", path: "public/assets/profile/seasonal-medal-top-10-percent.webp" }));
+  await page.route("**/profile/group-avatar/*?token=synthetic", route => route.fulfill({ status: 410 }));
+  await page.goto(launch("/earn"));
+  await page.getByRole("button", { name: "Network", exact: true }).click();
+  const invite = page.getByRole("article").filter({ has: page.getByText("Start Invitee", { exact: true }) });
+  await expect(invite.locator("img")).toBeVisible();
+  expect(await invite.locator("img").evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
+  const group = page.getByRole("article", { name: state.groups.items[0].title });
+  await group.scrollIntoViewIfNeeded();
+  await expect(group.locator("img")).toHaveCount(0);
+  await expect(group).toContainText(state.groups.items[0].title.split(/\s+/).slice(0, 2).map((part: string) => part[0]).join("").toUpperCase());
+});
+
+test("Notification Center uses documented safe links and server read-all while ignoring payload URLs", async ({ page }) => {
+  const state = await prepareB4(page);
+  state.notifications[0].deep_link = { path: "//attacker.example" };
+  await page.goto(launch("/profile"));
+  await page.getByRole("button", { name: "Open notifications", exact: true }).click();
+  await page.getByRole("button", { name: /Mission complete/ }).click();
+  await expect(page).toHaveURL(/\/profile/);
+  await expect(page.getByRole("heading", { name: "Notifications", exact: true })).toBeVisible();
+  state.notifications[0] = { ...state.notifications[0], unread: true, read_at: null, deep_link: { path: "/earn" } };
+  await page.getByRole("button", { name: "Close notifications", exact: true }).click();
+  await page.getByRole("button", { name: "Open notifications", exact: true }).click();
+  await page.getByRole("button", { name: "Mark all read", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Mark all read", exact: true })).toHaveCount(0);
+  expect(state.calls.filter(c => c.path === "/notifications/read-all")).toHaveLength(1);
+  await page.getByRole("button", { name: /Mission complete/ }).click();
+  await expect(page).toHaveURL(/\/earn/);
+  await expect(page.getByRole("heading", { name: "Notifications", exact: true })).toHaveCount(0);
 });

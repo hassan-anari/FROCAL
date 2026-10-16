@@ -1,6 +1,6 @@
-import { showFeedback } from "@/design-system/components/TransientFeedback";
+import { showFeedback, useQueryFeedback } from "@/design-system/components/TransientFeedback";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { achievementDefinitions, frameById, titleById, medalById, achievementById } from "@/game/profile/profileCatalog";
 import type { AchievementId, AchievementProgress, FrameId, TitleId, MedalId } from "@/game/profile/types";
 import { useBootstrap } from "./BootstrapProvider";
@@ -20,6 +20,18 @@ export function useServerProfile() {
   const baseKey = [...queryKeys.player(scope), "profile"];
   const achievements = useQuery({ queryKey: [...baseKey, "achievements"], queryFn: ({ signal }) => loadAchievements(signal), enabled, staleTime: 10_000, refetchOnMount: "always", refetchOnWindowFocus: true });
   const collection = useQuery({ queryKey: [...baseKey, "collection"], queryFn: ({ signal }) => loadCollection(signal), enabled, staleTime: 10_000, refetchOnMount: "always", refetchOnWindowFocus: true });
+  useQueryFeedback(enabled ? overview.error ?? achievements.error ?? collection.error : null, "Your profile couldn't load. Please try again.");
+  useEffect(() => {
+    if (!enabled) return;
+    let last = 0;
+    const refresh = () => {
+      if (document.hidden || Date.now() - last < 1000) return;
+      last = Date.now();
+      void client.invalidateQueries({ queryKey: [...queryKeys.player(scope), "profile"] });
+    };
+    window.addEventListener("focus", refresh);
+    return () => window.removeEventListener("focus", refresh);
+  }, [enabled, client, scope.session, scope.player, scope.season, scope.config]);
   const [saving, setSaving] = useState(false);
   const lock = useRef(false);
   const [error, setError] = useState<string | null>(null);

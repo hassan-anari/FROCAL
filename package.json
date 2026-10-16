@@ -11,6 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:e2e:b4": "playwright test --config playwright.b4.config.ts",
     "mock:init": "msw init public --save",
     "validate:assets": "node scripts/validate-assets.mjs",
     "validate:structure": "node scripts/validate-structure.mjs",
@@ -22,7 +23,8 @@
     "validate:imports": "node scripts/validate-imports.mjs",
     "validate:motion": "node scripts/validate-motion.mjs",
     "validate:telegram-sdk": "node scripts/validate-telegram-sdk.mjs",
-    "test:paired:b3": "node scripts/contracts/run-paired-b3.mjs"
+    "test:paired:b3": "node scripts/contracts/run-paired-b3.mjs",
+    "test:paired:b4": "node scripts/contracts/run-paired-b4.mjs"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.6",

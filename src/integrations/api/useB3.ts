@@ -1,12 +1,12 @@
 import { showFeedback } from "@/design-system/components/TransientFeedback";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { useBootstrap } from "./BootstrapProvider";
 import { isRemoteDataSource } from "./bootstrap";
 import { queryKeys } from "./queryKeys";
 import { b3Request, B3Error } from "./b3";
-import * as c from "./b3Contracts";
+import * as c from "./b4Contracts";
 import { commitCanonical } from "./canonical";
 import type { EarnMission, MissionId, RewardEvent, LevelUpEvent } from "@/game/earn/types";
 
@@ -83,6 +83,13 @@ export function useB3() {
   const daily = query("daily", "/daily", c.dailySchema);
   const missions = query("missions", "/missions", z.array(c.missionSchema));
   const typing = query("typing", "/typing", c.typingSchema);
+  const typingHistory = useInfiniteQuery({
+    queryKey: key("typing-history"),
+    queryFn: ({ pageParam, signal }) => b3Request(`/typing/history?limit=20${pageParam === null ? "" : `&cursor=${pageParam}`}`, c.typingHistorySchema, { signal }),
+    initialPageParam: null as number | null,
+    getNextPageParam: page => page.next_cursor ?? undefined,
+    enabled, staleTime: 10_000, refetchOnMount: "always", refetchOnWindowFocus: true, retry: false,
+  });
   const referrals = query("referrals", "/referrals", c.referralSchema);
   const invitees = query(
     "invitees",
@@ -104,15 +111,30 @@ export function useB3() {
   const rewardEvent = presentations[0]?.rewardDismissed ? null : presentations[0]?.reward ?? null;
   const levelUpEvent = presentations[0]?.level ?? null;
   const revealed = useRef(new Set<string>());
-  const reveal = (created: boolean, id: string, xp: number, title: string, source: RewardEvent["source"], before: c.CanonicalState | undefined, after: c.CanonicalState) => {
+  const revealedLevel = useRef<number | undefined>(undefined);
+  const reveal = (created: boolean, id: string, xp: number, title: string, source: RewardEvent["source"], before: c.CanonicalState | undefined, after: c.CanonicalState, receipt: c.ConfirmedReward | null | undefined) => {
     // Only newly settled server evidence creates presentation. Reads and duplicate
     // responses never reveal; no client balance/threshold calculation takes place.
-    if (!created || xp <= 0 || revealed.current.has(id) || after.player_id !== scope.player || after.season_id !== scope.season) return;
+    if (receipt === null || (receipt && (!receipt.created || !receipt.ledger_ids.length))) return;
+    id = receipt?.event_id ?? id;
+    xp = receipt?.amount ?? xp;
+    if (!created || xp <= 0 || revealed.current.has(id) || after.player_id !== scope.player || (after.season_id ?? "no-active-season") !== scope.season || after.config_version !== bootstrap.data?.remote?.config.version) return;
+    const storageKey = `dexo-reward-reveals:${scope.player}:${scope.season}`;
+    let persisted: string[] = [];
+    try { const stored: unknown = JSON.parse(localStorage.getItem(storageKey) ?? "[]"); if (Array.isArray(stored)) persisted = stored.filter((entry): entry is string => typeof entry === "string"); } catch { /* mounted deduplication remains available */ }
+    if (persisted.includes(id)) return;
     revealed.current.add(id);
-    const previousLevel = before?.progression.level ?? bootstrap.data?.player.level;
-    const evolution = before !== undefined && before.progression.dexo_stage !== after.progression.dexo_stage;
-    const level: LevelUpEvent | null = previousLevel !== undefined && after.progression.level > previousLevel
-      ? { id, previousLevel, newLevel: after.progression.level, evolution, evolutionTitle: evolution ? after.progression.dexo_stage : null, createdAt: after.server_time } : null;
+    try { localStorage.setItem(storageKey, JSON.stringify([...persisted, id].slice(-200))); } catch { /* server-created evidence still prevents replay */ }
+    const prior = receipt?.progression_before ?? before?.progression;
+    const next = receipt?.progression_after ?? after.progression;
+    const observedLevel = prior?.level ?? bootstrap.data?.player.level;
+    const previousLevel = observedLevel === undefined ? revealedLevel.current : Math.max(observedLevel, revealedLevel.current ?? observedLevel);
+    const evolution = prior !== undefined && prior.dexo_stage !== next.dexo_stage;
+    const level: LevelUpEvent | null = previousLevel !== undefined && next.level > previousLevel
+      ? { id, previousLevel, newLevel: next.level, evolution, evolutionTitle: evolution ? next.dexo_stage : null, createdAt: after.server_time } : null;
+    // Concurrent claims may observe the same earlier projection. Present each
+    // confirmed level boundary once without changing server-owned progression.
+    if (level) revealedLevel.current = level.newLevel;
     setPresentations(queue => [...queue, { reward: { id, source, title, xp, createdAt: after.server_time }, level, rewardDismissed: false }]);
   };
   const previousCanonical = () => client.getQueryData<c.CanonicalState>([...queryKeys.player(scope), "canonical"]);
@@ -169,7 +191,7 @@ export function useB3() {
       );
       client.setQueryData(key("daily"), result.daily);
       await settle(result.canonical);
-      reveal(result.created, `daily:${result.claim_period}`, result.reward_amount, "Daily Core", "daily", before, result.canonical);
+      reveal(result.created, `daily:${result.claim_period}`, result.reward_amount, "Daily Core", "daily", before, result.canonical, result.reward);
       return result;
     });
   const missionAction = (id: string) =>
@@ -189,7 +211,7 @@ export function useB3() {
           body: {},
         });
         await settle(result.canonical);
-        reveal(result.created, `mission:${id}:${result.version}:${result.claimed_at}`, result.reward_amount, m.title, m.key as MissionId, before, result.canonical);
+        reveal(result.created, `mission:${id}:${result.version}:${result.claimed_at}`, result.reward_amount, m.title, m.key as MissionId, before, result.canonical, result.reward);
         return;
       }
       const opened = await b3Request(`${path}/start`, c.missionStartSchema, {
@@ -264,6 +286,7 @@ export function useB3() {
       );
       client.setQueryData(key("typing"), r.typing);
       await missions.refetch();
+      await typingHistory.refetch();
       return r;
     });
   const claimTyping = () =>
@@ -281,7 +304,7 @@ export function useB3() {
       );
       client.setQueryData(key("typing"), r.typing);
       await settle(r.canonical);
-      reveal(r.created, `typing:${r.claimed_at}`, r.amount, "Typing Arena", "typing", before, r.canonical);
+      reveal(r.created, `typing:${r.claimed_at}`, r.amount, "Typing Arena", "typing", before, r.canonical, r.reward);
       return r;
     });
   return {
@@ -290,6 +313,7 @@ export function useB3() {
     daily,
     missions,
     typing,
+    typingHistory,
     referrals,
     invitees,
     network,

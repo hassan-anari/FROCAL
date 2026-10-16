@@ -1,3 +1,4 @@
+import { useQueryFeedback } from "@/design-system/components/TransientFeedback";
 import { readSessionPreference, writeSessionPreference } from "@/app/storageRelease";
 import { useB3 } from "@/integrations/api/useB3";
 import { useBootstrap } from "@/integrations/api/BootstrapProvider";
@@ -49,9 +50,9 @@ const PASS_WPM = 10;
 const earnTabStorageKey = "dalexio-earn-active-tab";
 
 interface ChallengeResult {
-  accuracy: number;
-  wpm: number;
-  score: number;
+  accuracy: number | null;
+  wpm: number | null;
+  score: number | null;
   passed: boolean;
 }
 
@@ -67,6 +68,7 @@ function calculateStats(input: string, target: string, elapsedSeconds: number) {
 export function TypingChallengePage() {
   const { canEarn } = useGameplayAvailability();
   const live = useB3();
+  useQueryFeedback(live.remote ? live.typing.error : null, "Typing Arena couldn't load. Please try again.");
   const { scope } = useBootstrap();
   const [issued, setIssued] = useState<Attempt | null>(null);
   const submitted = useRef(false);
@@ -108,7 +110,7 @@ export function TypingChallengePage() {
       try { localStorage.setItem(submissionKey, JSON.stringify(body)); } catch { /* mounted retry retains exact text */ }
       const response = await live.submitTyping(body.id, body.text);
       if (response) {
-        setResult({ accuracy: (response.accuracy_bps ?? 0) / 100, wpm: response.wpm ?? 0, score: response.reward_amount, passed: response.status === "VALID" });
+        setResult({ accuracy: response.accuracy_bps === null ? null : response.accuracy_bps / 100, wpm: response.wpm, score: response.score ?? null, passed: response.status === "VALID" });
         setPending(null); try { localStorage.removeItem(submissionKey); } catch { /* server idempotency handles a retained submission */ }
         adapter.hapticNotice(response.status === "VALID" ? "success" : "warning");
       }
@@ -272,7 +274,7 @@ export function TypingChallengePage() {
             <motion.section key="result" className={`${styles.resultCard} ${result.passed ? styles.resultPassed : styles.resultFailed}`} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} transition={mobileMotion.reveal}>
               <span>{result.passed ? "ARENA CLEARED" : "RUN COMPLETE"}</span>
               <h2>{result.passed ? "Strong performance." : "Recalibrate and retry."}</h2>
-              <div><strong>{Math.round(result.accuracy)}%</strong><small>accuracy</small><strong>{Math.round(result.wpm)}</strong><small>WPM</small></div>
+              <div><strong>{result.accuracy === null ? "—" : `${Math.round(result.accuracy)}%`}</strong><small>accuracy</small><strong>{result.wpm === null ? "—" : Math.round(result.wpm)}</strong><small>WPM</small></div>
               <p>{attemptsRemaining > 0 ? `${attemptsRemaining} of ${attemptLimit} daily plays remain.` : "You have used today’s plays. Return after the reset for a fresh set."}</p>
               <div className={styles.resultActions}>
                 <Button tone="secondary" disabled={attemptsRemaining <= 0 || live.busy || (live.remote && !canEarn("typing"))} onClick={retry}>Try again</Button>

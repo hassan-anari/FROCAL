@@ -14,6 +14,9 @@ let sequence = 0;
 export function showFeedback(text: string, tone: "error" | "info" = "error") {
   useFeedback.setState({ item: { id: ++sequence, text, tone } });
 }
+export function useQueryFeedback(error: unknown, text: string) {
+  useEffect(() => { if (error) showFeedback(text); }, [error, text]);
+}
 export function TransientFeedback() {
   const item = useFeedback(state => state.item);
   useEffect(() => {

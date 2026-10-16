@@ -6,12 +6,23 @@ for (const viewport of [{ width: 320, height: 700 }, { width: 390, height: 844 }
   test(`preservation evidence ${phase} ${viewport.width}`, async ({ page }) => {
     test.setTimeout(90_000);
     await page.setViewportSize(viewport);
-    await prepareB4(page);
+    const state = await prepareB4(page);
     const dir = `docs/evidence/b4/${viewport.width}`; mkdirSync(dir, { recursive: true });
     const shot = async (name: string) => {
-      await page.evaluate(async () => { await document.fonts.ready; });
+      // Wait for the existing DeferredMount and image decoding, so a loading frame
+      // cannot be mistaken for a design change in the preservation evidence.
+      await page.waitForTimeout(1000);
+      await page.evaluate(async () => { await document.fonts.ready; await Promise.race([Promise.all(Array.from(document.images).filter(img => { const box = img.getBoundingClientRect(); return img.complete || (box.top < innerHeight && box.bottom > 0); }).map(img => img.decode().catch(() => undefined))), new Promise(done => setTimeout(done, 2000))]); });
       await page.screenshot({ path: `${dir}/${phase}-${name}.png`, animations: "disabled" });
+      // These full screens have identical data and no authorized visual changes.
+      // Compare against the saved pre-edit release, never an auto-approved after image.
+      if (phase === "after" && ["base-header", "profile-overview", "network", "arena-warfront"].includes(name)) {
+        await expect(page).toHaveScreenshot([String(viewport.width), `before-${name}.png`], { animations: "disabled", maxDiffPixelRatio: 0.002 });
+      }
     };
+    await page.goto(launch("/base"));
+    await expect(page.getByRole("button", { name: "Interact with Dexo" })).toBeVisible();
+    await shot("base-header");
     await page.goto(launch("/earn"));
     await expect(page.getByRole("button", { name: "Claim daily core" })).toBeVisible();
     await shot("earn-daily");
@@ -22,7 +33,8 @@ for (const viewport of [{ width: 320, height: 700 }, { width: 390, height: 844 }
     await shot("network");
     await page.getByRole("heading", { name: "Latest explorers" }).scrollIntoViewIfNeeded();
     await shot("referrals");
-    await page.getByRole("heading", { name: "Group status" }).scrollIntoViewIfNeeded();
+    await page.waitForTimeout(1000);
+    await page.getByRole("article", { name: state.groups.items[0].title }).evaluate(row => row.scrollIntoView({ block: "center", behavior: "instant" }));
     await shot("communities");
     await page.getByRole("button", { name: "Typing", exact: true }).click();
     await page.getByRole("heading", { name: "Typing Arena", exact: true }).scrollIntoViewIfNeeded();
@@ -68,5 +80,23 @@ for (const viewport of [{ width: 320, height: 700 }, { width: 390, height: 844 }
     await page.getByRole("button", { name: "Open notifications", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Notifications", exact: true })).toBeVisible();
     await shot("notifications");
+    await page.getByRole("button", { name: "Close notifications", exact: true }).click();
+    await page.goto(launch("/earn"));
+    await page.getByRole("navigation", { name: "Earn sections" }).getByRole("button", { name: "Earn", exact: true }).click();
+    await page.getByRole("button", { name: "Claim daily core", exact: true }).click();
+    if (!process.env.B4_BASELINE) await expect(page.getByRole("dialog", { name: "XP reward" })).toBeVisible();
+    await shot("reward-settlement");
+    if (!process.env.B4_BASELINE) {
+      await page.getByRole("button", { name: "Continue", exact: true }).click();
+      await expect(page.getByRole("dialog", { name: "Dexo level up" })).toBeVisible();
+      await shot("level-reveal");
+      await page.getByRole("button", { name: "Return to Earn", exact: true }).click();
+      await page.goto(launch("/profile"));
+      state.saveError = true;
+      await page.getByRole("button", { name: "Customize", exact: true }).click();
+      await page.getByRole("button", { name: "Save profile", exact: true }).click();
+      await expect(page.getByRole("alert")).toContainText("Your profile couldn't be saved.");
+      await shot("transient-error");
+    }
   });
 }

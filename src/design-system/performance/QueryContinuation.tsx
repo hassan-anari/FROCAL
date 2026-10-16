@@ -1,15 +1,16 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
-/** Invisible continuation of an existing scroll list; no additional control or layout. */
-export function QueryContinuation({ hasNext, fetching, load }: { hasNext: boolean; fetching: boolean; load: () => unknown }) {
-  const ref = useRef<HTMLSpanElement>(null);
+/** Continue an existing list by observing its last row. Adds no DOM, control or spacing. */
+export function QueryContinuation({ selector, hasNext, fetching, load }: { selector: string; hasNext: boolean; fetching: boolean; load: () => unknown }) {
   useEffect(() => {
-    if (!hasNext || fetching || !ref.current) return;
+    if (!hasNext || fetching) return;
+    const target = document.querySelector(selector);
+    if (!target) return;
     const observer = new IntersectionObserver(entries => {
       if (entries.some(entry => entry.isIntersecting) && !document.hidden) load();
-    }, { root: ref.current.closest("[data-game-scroll]"), rootMargin: "120px" });
-    observer.observe(ref.current);
+    }, { root: target.closest("[data-game-scroll]"), rootMargin: "120px" });
+    observer.observe(target);
     return () => observer.disconnect();
-  }, [hasNext, fetching, load]);
-  return <span ref={ref} aria-hidden="true" />;
+  }, [selector, hasNext, fetching, load]);
+  return null;
 }

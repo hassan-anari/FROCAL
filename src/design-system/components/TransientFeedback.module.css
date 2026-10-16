@@ -1,6 +1,6 @@
 .position {
   position: fixed;
-  z-index: 700;
+  z-index: 1300;
   top: calc(var(--safe-top) + var(--space-3));
   left: calc(var(--safe-left) + var(--space-3));
   right: calc(var(--safe-right) + var(--space-3));

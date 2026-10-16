@@ -65,3 +65,16 @@ it("orders non-Tap claims and delayed Tap receipts without touching pending jour
   client.clear();
   localStorage.clear();
 });
+it("accepts Profile lifetime progression without an active Season and keeps it isolated", () => {
+  const client = new QueryClient();
+  const remote = remoteBootstrapSchema.parse({ ...fixture.bootstrap, season: null, canonical: { ...fixture.canonical_state, season_id: null, season_points: 0 } });
+  const mapped = mapRemoteBootstrap(remote, "telegram", null, null);
+  const scope = { session: 1, player: remote.canonical!.player_id, season: mapped.season.id, config: configCacheScope(remote.config) };
+  const key = queryKeys.bootstrap(1, "remote", "new-user", "telegram");
+  client.setQueryData(key, mapped);
+  const next = canonicalSchema.parse({ ...remote.canonical, receipt_cursor: 4, progression: { ...remote.progression, lifetime_points: 280, points_into_level: 280, points_remaining: 20 } });
+  expect(commitCanonical(client, scope, next)).toBe(true);
+  expect(client.getQueryData(key)).toMatchObject({ player: { lifetimeXp: 280 }, remote: { season: null } });
+  expect(commitCanonical(client, { ...scope, season: "other-season" }, next)).toBe(false);
+  client.clear();
+});

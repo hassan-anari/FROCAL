@@ -33,5 +33,6 @@ try {
   }
   if (!ready) throw new Error("Isolated backend readiness failed");
   await run(["vitest", "run", "--config", "vitest.b3-paired.config.ts"]);
+  if (process.env.B4_AVAILABLE_APIS === "1") await run(["vitest", "run", "--config", "vitest.b4-paired.config.ts"]);
   await run(["playwright", "test", "--config", "playwright.paired.config.ts"]);
 } finally { server.kill("SIGTERM"); }

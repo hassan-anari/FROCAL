@@ -1,6 +1,7 @@
 import { usePlayerProgression } from "@/integrations/api/usePlayerProgression";
+import { safeDestination } from "@/integrations/api/safeNavigation";
 import { QueryContinuation } from "@/design-system/performance/QueryContinuation";
-import { showFeedback } from "./TransientFeedback";
+import { showFeedback, useQueryFeedback } from "./TransientFeedback";
 import { profilePhotoUrl } from "@/integrations/api/bootstrapContract";
 import { useBootstrap } from "@/integrations/api/BootstrapProvider";
 import { ArrowRight01Icon, Notification03Icon } from "@hugeicons/core-free-icons";
@@ -15,6 +16,7 @@ import { isRemoteDataSource } from "@/integrations/api/bootstrap";
 import {
   loadNotifications,
   markNotificationRead,
+  markAllNotificationsRead,
   type LiveNotification,
   type NotificationPage,
 } from "@/integrations/api/notifications";
@@ -83,6 +85,8 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
     staleTime: 15_000,
   });
 
+  useQueryFeedback(notificationsOpen ? notifications.error : null, "Notifications couldn't load. Please try again.");
+
   const bootstrapPlayerId = bootstrap.data?.player.id ?? "pending-player";
 
   const telegramUser = remoteData ? null : adapter.getUser();
@@ -98,7 +102,7 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
   const avatarSource = useAvatarSource(bootstrapPlayerId, avatar);
   const progression = usePlayerProgression();
   const actualStage =
-    tap?.view.progression?.stage ?? bootstrap.data?.dexo.stage ?? profile.data?.progression.dexo_stage ?? "newborn";
+    remoteData ? progression.stage : tap?.view.progression?.stage ?? bootstrap.data?.dexo.stage ?? profile.data?.progression.dexo_stage ?? "newborn";
   const stageLabel = actualStage ? actualStage.toUpperCase() : "—";
   const level = remoteData
     ? progression.level
@@ -109,8 +113,8 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
   const seasonTitle = season?.name ?? "Season";
   const notificationItems = notifications.data?.pages.flatMap(page => page.items) ?? [];
   const unreadCount = useMemo(
-    () => notificationItems.filter((item) => item.unread).length,
-    [notificationItems],
+    () => notifications.data?.pages[0]?.unread_count ?? notificationItems.filter((item) => item.unread).length,
+    [notifications.data, notificationItems],
   );
 
   useEffect(
@@ -157,22 +161,44 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
 
   const pendingReads = useRef(new Set<string>());
   const markRead = async (id: string) => {
-    if (pendingReads.current.has(id)) return;
+    if (pendingReads.current.has(id)) return false;
     pendingReads.current.add(id);
     adapter.selectionChanged();
     try {
       const confirmed = await markNotificationRead(initData, id);
       updateNotificationCache(item => item.id === id ? confirmed : item);
+      await notifications.refetch();
+      return true;
     } catch { showFeedback("This notification couldn't be updated. Please try again."); }
     finally { pendingReads.current.delete(id); }
   };
 
+  const pendingAll = useRef(false);
   const markAllRead = async () => {
-    await Promise.allSettled(notificationItems.filter(item => item.unread).map(item => markRead(item.id)));
-    // Reconcile partial success without restoring already-read items to unread.
-    await notifications.refetch();
+    if (pendingAll.current) return;
+    pendingAll.current = true;
+    try {
+      if (notifications.data?.pages[0]?.unread_count === undefined) {
+        await Promise.allSettled(notificationItems.filter(item => item.unread).map(item => markRead(item.id)));
+      } else {
+        await markAllNotificationsRead(initData);
+      }
+      await notifications.refetch();
+    } catch { showFeedback("Notifications couldn't be updated. Please try again."); }
+    finally { pendingAll.current = false; }
   };
 
+  const openNotification = async (item: LiveNotification) => {
+    if (item.unread && !await markRead(item.id)) return;
+    // Only the documented deep_link can select an existing internal route.
+    // Payload URLs are never consumed, even when the link is absent or unsafe.
+    const link = item.deep_link?.path;
+    const destination = link?.startsWith("/") ? safeDestination(link) : null;
+    if (destination?.kind === "internal") {
+      setNotificationsOpen(false);
+      void navigate({ to: destination.path });
+    }
+  };
 
   return (
     <>
@@ -240,7 +266,7 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
                   </div>
                 </header>
 
-                <div className={styles.notificationList}>
+                <div className={styles.notificationList} data-notification-list>
                   {notificationItems.length === 0 ? (
                     <div className={styles.notificationEmpty}>No notifications yet.</div>
                   ) : (
@@ -251,7 +277,7 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
                           key={item.id}
                           type="button"
                           className={`${styles.notificationItem} ${item.unread ? "" : styles.notificationRead}`}
-                          onClick={() => void markRead(item.id)}
+                          onClick={() => void openNotification(item)}
                         >
                           <span className={`${styles.notificationGlyph} ${styles[tone]}`}>{tone.slice(0, 1).toUpperCase()}</span>
                           <span className={styles.notificationCopy}>
@@ -264,7 +290,7 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
                       );
                     })
                   )}
-                  <QueryContinuation hasNext={notifications.hasNextPage && !notifications.isFetchNextPageError} fetching={notifications.isFetching} load={notifications.fetchNextPage} />
+                  <QueryContinuation selector="[data-notification-list] > button:last-of-type" hasNext={notifications.hasNextPage && !notifications.isFetchNextPageError} fetching={notifications.isFetching} load={notifications.fetchNextPage} />
                 </div>
               </motion.section>
             </motion.div>

@@ -12,7 +12,7 @@ export function commitCanonical(
   scope: PlayerScope,
   value: CanonicalState,
 ) {
-  if (value.player_id !== scope.player || value.season_id !== scope.season)
+  if (value.player_id !== scope.player || (value.season_id ?? "no-active-season") !== scope.season)
     return false;
   const matches = client
     .getQueryCache()
