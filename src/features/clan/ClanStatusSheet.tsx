@@ -38,7 +38,7 @@ export function ClanStatusSheet({ live, onClose }: { live: ClanRemote; onClose: 
         <strong>{mode === "leave" ? "Your historical contribution stays with this Clan." : mode === "dissolve" ? "The server determines whether a member vote is required." : "A proposal opens a governed removal case. It does not immediately remove a member."}</strong>
         {mode === "leave" ? <p>Join cooldown: {state?.leave_cooldown_hours ?? "—"} hours. Leaves used: {state?.voluntary_leave_count ?? "—"} / {state?.max_voluntary_leaves ?? "—"}.</p> : null}
       </div>
-      {mode === "removal" ? <div className={styles.detailList}>
+      {mode === "removal" ? <div className={`${styles.detailList} ${styles.governanceForm}`}>
         <label>Member <select value={target} onChange={event => setTarget(event.target.value)}><option value="">Select a member</option>{live.rosterRows.filter(row => row.role === "SOLDIER" && !row.own).map(row => <option key={row.membership_id} value={row.membership_id}>{row.first_name || row.username}</option>)}</select></label>
         <label>Reason <select value={reason} onChange={event => setReason(event.target.value)}><option value="">Select a reason</option>{removalReasons.map(value => <option key={value} value={value}>{words(value)}</option>)}</select></label>
         {live.roster.hasNextPage ? <Button size="sm" tone="secondary" disabled={live.roster.isFetching} onClick={() => void live.roster.fetchNextPage()}>Load more members</Button> : null}
@@ -53,7 +53,7 @@ export function ClanStatusSheet({ live, onClose }: { live: ClanRemote; onClose: 
         {request ? <><div><span>Join request</span><strong>{words(request.state)}</strong></div><div><span>Clan</span><strong>{request.clan_name}</strong></div><div><span>Invite</span><strong>{words(request.invite_state)}</strong></div><div><span>Delivery</span><strong>{words(request.delivery_state)}</strong></div>{request.cancellation_pending ? <div><span>Cancellation</span><strong>Revocation pending</strong></div> : null}</> : null}
         {state?.cooldown_until ? <div><span>Join cooldown until</span><strong>{time(state.cooldown_until)}</strong></div> : null}
         {member?.access_rejoin_deadline ? <div><span>Access recovery deadline</span><strong>{time(member.access_rejoin_deadline)}</strong></div> : null}
-        {live.recovery.data ? <><div><span>Clan state</span><strong>{words(live.recovery.data.state)}</strong></div><div><span>Recovery</span><strong>{words(live.recovery.data.reason)}</strong></div><div><span>Group access</span><strong>{live.recovery.data.home_integrity_available ? "Available" : "Admin recovery required"}</strong></div>{live.recovery.data.bot_admin_restore_deadline ? <div><span>Admin recovery deadline</span><strong>{time(live.recovery.data.bot_admin_restore_deadline)}</strong></div> : null}</> : null}
+        {live.recovery.data ? <><div><span>Clan state</span><strong>{words(live.recovery.data.state)}</strong></div><div><span>Recovery</span><strong>{words(live.recovery.data.reason)}</strong></div><div><span>Group access</span><strong>{live.recovery.data.home_integrity_available ? "Available" : "Admin recovery required"}</strong></div>{live.recovery.data.started_at ? <div><span>Recovery started</span><strong>{time(live.recovery.data.started_at)}</strong></div> : null}{live.recovery.data.bot_admin_restore_deadline ? <div><span>Admin recovery deadline</span><strong>{time(live.recovery.data.bot_admin_restore_deadline)}</strong></div> : null}</> : null}
       </div>
       {request?.state === "ACCEPTED" && !member ? <p className={styles.note}>Acceptance reserves a place. Membership activates after the backend verifies your Telegram presence.</p> : null}
       {needsInvite ? <div className={styles.detailList}>
@@ -70,6 +70,7 @@ export function ClanStatusSheet({ live, onClose }: { live: ClanRemote; onClose: 
       {(live.governance.data ?? []).map(governance => <section key={governance.id} className={styles.detailList}>
         <div><span>{words(governance.case_type)}</span><strong>{words(governance.status)}</strong></div>
         <p>{governance.reason}</p>
+        {governance.target_membership_id !== null ? <div><span>Member</span><strong>{governance.target_first_name || governance.target_username || "—"}</strong></div> : null}
         <div><span>Deadline</span><strong>{time(governance.voting_deadline)}</strong></div>
         <div><span>Eligible voters</span><strong>{governance.eligible_count}</strong></div>
         <div><span>Quorum</span><strong>{governance.quorum_bps / 100}%</strong></div>

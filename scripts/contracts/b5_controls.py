@@ -2,6 +2,7 @@
 Only used by b2_server with an explicitly isolated frocal_b5_ PostgreSQL database.
 """
 from uuid import uuid4
+from datetime import timedelta
 from apps.telegram import bot_api
 from apps.telegram.bot_api import TelegramResult
 from apps.telegram.models import TelegramGroup, TelegramGroupCandidate
@@ -47,6 +48,18 @@ def control(data, world):
         reconcile_telegram_membership(player=player, group=group, present=data.get("present", True), telegram_update_id=int(uuid4().hex[:10], 16), observed_at=now, fresh_verified_at=now)
         return {"ok": True}
     member = ClanMembership.objects.select_related("clan_season").get(player=player, ended_at__isnull=True)
+    if action == "b5-mission":
+        from apps.clans.models import ClanMissionDefinition
+        definition = ClanMissionDefinition.objects.create(key="paired-typing-" + uuid4().hex[:8], version=1, kind="INDIVIDUAL", requirement="VALID_TYPING_RUN", target_units=1, reward_band="SMALL", starts_at=now - timedelta(minutes=1), ends_at=now + timedelta(hours=1), enabled=True, config_version=world["config"])
+        return {"key": definition.key}
+    if action == "b5-mission-progress":
+        from apps.clans.missions import queue_mission_signal, process_mission_signals
+        from apps.clans.models import ClanMissionSignal
+        queue_mission_signal(membership=member, source_key="paired-source-" + str(member.pk), requirement="VALID_TYPING_RUN", units=1, occurred_at=now)
+        # The shared isolated harness controls timezone.now; model default callables
+        # were imported before that clock. Schedule this source on the same test clock.
+        ClanMissionSignal.objects.filter(membership=member, processed_at__isnull=True).update(next_attempt_at=now)
+        return {"processed": process_mission_signals()}
     if action == "b5-reward":
         from apps.clans.economy import settle_clan_reward
         result, created = settle_clan_reward(membership=member, source_type="CLAN_ACTIVITY", source_id="isolated-paired-source", gross_amount=100000, idempotency_key="paired-source:" + str(member.pk), occurred_at=now, resolved_config=world["resolve_effective_game_config"](now))

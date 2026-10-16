@@ -59,7 +59,7 @@ export function useClanRemote() {
     if (!enabled || locks.current.size || !membership.data) return undefined;
     return run(`${action}:${item}`, () => clanEconomicIntent(localStorage, { player: scope.player, season: scope.season, membership: membership.data!.membership_id }, action, item, key => api[action](item, key)));
   };
-  const clock = useMemo(() => ({ at: equipment.data?.server_time ? Date.parse(equipment.data.server_time) : Date.now(), tick: performance.now() }), [equipment.data]);
+  const clock = useMemo(() => ({ at: equipment.data?.server_time ? Date.parse(equipment.data.server_time) : bootstrap.data?.serverTime ? Date.parse(bootstrap.data.serverTime) : Date.now(), tick: performance.now() }), [equipment.data, bootstrap.data?.serverTime]);
   const serverNow = () => clock.at + Math.max(0, performance.now() - clock.tick);
   const rows = <T extends { id?: number; membership_id?: number },>(pages: { items: T[] }[] | undefined) => Array.from(new Map((pages ?? []).flatMap(page => page.items).map(row => [row.membership_id ?? row.id, row])).values());
   const clans = Array.from(new Map((discovery.data?.pages.flat() ?? []).map((row: ClanOut) => [row.id, row])).values());

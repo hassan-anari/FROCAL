@@ -58,6 +58,7 @@ for (const width of [320, 390, 460]) test(`actual Captain/Soldier lifecycle, eco
   await expect(other.getByRole("dialog", { name: "Clan status" })).toContainText("PENDING");
   await snapshot(other, width, "request-pending");
   await page.reload();
+  await page.getByRole("navigation", { name: "Clan headquarters sections" }).scrollIntoViewIfNeeded();
   await page.getByRole("button", { name: /recruits waiting/ }).click();
   await page.getByRole("button", { name: "Accept", exact: true }).click();
   await close(page);
@@ -71,6 +72,13 @@ for (const width of [320, 390, 460]) test(`actual Captain/Soldier lifecycle, eco
   await expect(other.getByRole("navigation", { name: "Clan headquarters sections" })).toBeVisible();
   await snapshot(other, width, "soldier-headquarters");
   await control({ action: "b5-reward", player: soldier.player });
+  const mission = await control({ action: "b5-mission", player: soldier.player });
+  await control({ action: "b5-mission-progress", player: soldier.player });
+  await other.reload();
+  await other.getByRole("button", { name: "Missions", exact: true }).click();
+  await other.getByRole("button", { name: "Completed", exact: true }).click();
+  await expect(other.getByText(mission.key.replaceAll("-", " "), { exact: true })).toBeVisible();
+  await snapshot(other, width, "settled-mission");
   await page.reload();
   await page.getByRole("button", { name: "Inventory", exact: true }).click();
   await page.getByRole("button", { name: "Shop", exact: true }).click();
@@ -78,7 +86,18 @@ for (const width of [320, 390, 460]) test(`actual Captain/Soldier lifecycle, eco
   const item = equipment.items.find((row: any) => row.item_id === "rally-beacon");
   await page.getByRole("button").filter({ hasText: item.name }).first().click();
   await snapshot(page, width, "server-price-purchase");
+  const purchaseKeys: string[] = [];
+  if (width === 390) await page.route("**/api/v1/clans/shop/rally-beacon/purchase", async route => {
+    purchaseKeys.push(route.request().postDataJSON().idempotency_key);
+    if (purchaseKeys.length === 1) { await route.fetch(); await route.abort("connectionreset"); }
+    else await route.continue();
+  });
   await page.getByRole("button", { name: `Buy +1 · ${item.price.toLocaleString("en-US")}`, exact: true }).click();
+  if (width === 390) {
+    await expect(page.getByRole("button", { name: `Buy +1 · ${item.price.toLocaleString("en-US")}`, exact: true })).toBeEnabled();
+    await page.getByRole("button", { name: `Buy +1 · ${item.price.toLocaleString("en-US")}`, exact: true }).click();
+    expect(purchaseKeys).toHaveLength(2); expect(purchaseKeys[1]).toBe(purchaseKeys[0]);
+  }
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await page.getByRole("navigation", { name: "Clan headquarters sections" }).getByRole("button", { name: "Inventory", exact: true }).click();
   await page.getByRole("button", { name: "Inventory", exact: true }).last().click();
@@ -105,4 +124,37 @@ for (const width of [320, 390, 460]) test(`actual Captain/Soldier lifecycle, eco
   await expect(other.getByRole("dialog")).toContainText("Join cooldown until");
   expect(membership.clan_id).toBeGreaterThan(0);
   await other.close();
+});
+test("approved governance sheet uses real roster targets, reason codes, electorate and immutable ballots", async ({ page }) => {
+  test.setTimeout(120_000);
+  const captain = await control({ action: "player", points: 2500 });
+  await api(captain, "/clans/role", "POST", { role: "CAPTAIN" });
+  const group = await control({ action: "b5-group", player: captain.player });
+  await api(captain, `/clans/eligible-groups/${group.id}/verify`, "POST");
+  const clan = await api(captain, "/clans/", "POST", { telegram_group_id: group.id, name: "Governance paired", tag: crypto.randomUUID().slice(0, 4), motto: "Server governed" });
+  const members = [];
+  for (let i = 0; i < 3; i++) {
+    const soldier = await control({ action: "player", points: 2500 });
+    await api(soldier, "/clans/role", "POST", { role: "SOLDIER" });
+    const request = await api(soldier, `/clans/${clan.id}/join-requests`, "POST");
+    await api(captain, `/clans/join-requests/${request.id}/decision`, "POST", { accept: true });
+    await control({ action: "b5-presence", player: soldier.player, group: group.id });
+    members.push(await api(soldier, "/clans/membership/current"));
+  }
+  await enter(page, captain);
+  await page.getByRole("button", { name: "Clan status", exact: true }).click();
+  await page.getByRole("button", { name: "Propose removal", exact: true }).click();
+  await page.getByLabel("Member", { exact: true }).selectOption(String(members[0].membership_id));
+  await page.getByLabel("Reason", { exact: true }).selectOption("COMMUNITY_REASON");
+  for (const width of [320, 390, 460]) { await page.setViewportSize({ width, height: 844 }); await snapshot(page, width, "removal-confirmation"); }
+  await page.getByRole("button", { name: "Confirm", exact: true }).click();
+  await expect(page.getByRole("dialog")).toContainText("SOLDIER REMOVAL");
+  await page.getByRole("button", { name: "Vote yes", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Vote yes", exact: true })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Vote no", exact: true })).toBeDisabled();
+  for (const width of [320, 390, 460]) { await page.setViewportSize({ width, height: 844 }); await snapshot(page, width, "immutable-vote"); }
+  await page.getByRole("button", { name: "Request dissolution", exact: true }).click();
+  for (const width of [320, 390, 460]) { await page.setViewportSize({ width, height: 844 }); await snapshot(page, width, "dissolution-confirmation"); }
+  await page.getByRole("button", { name: "Confirm", exact: true }).click();
+  await expect(page.getByRole("dialog")).toContainText("CAPTAIN DISSOLUTION");
 });

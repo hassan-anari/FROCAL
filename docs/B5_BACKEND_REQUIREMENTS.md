@@ -1,67 +1,42 @@
-# B5 frontend API requirements — P-10 / P-11 / P-12
+# B5 frontend API needs and resolved binding
 
-Status: awaiting the WEDCAL B5 implementation handoff. This is a consumer inventory, not a proposed wire contract. One FROCAL draft covers all B5 integration and approved UI corrections. No merge/deployment.
+One FROCAL Draft [PR #6](https://github.com/hassan-anari/FROCAL/pull/6); backend implementation belongs to WEDCAL Draft [PR #30](https://github.com/hassan-anari/WEDCAL/pull/30). Starting frontend main: `ef6f1fca4de541e6eb45c9b8bf3e114bbd163cfb`.
 
-## Provenance and boundary
+The planning-only backend commit `75a43e5e0aa7f0a17092218237da7c88b8996909` was never used as a runtime pin. The actual implementation, OpenAPI and PostgreSQL-generated HTTP fixtures are now pinned at **`af72edee1ea4ffb3fc6443f24dfa5fa1ab372518`** in `scripts/contracts/b5-pin.json`. Historical B2/B3/B4 pins remain unchanged.
 
-- FROCAL approved baseline: `ef6f1fc` (latest merged main when work began).
-- WEDCAL main inspected: `6aaa362daecec86107babd95224398e7e1ac7e75`.
-- Read `CLAN_FRONTEND_SCOPE.md`, `CLAN_REDESIGN_V2_REPORT.md`, `PHASE_5_CLAN_REPORT.md`, ClanPage/ClanOverlays, existing Design System and assets.
-- Read WEDCAL `AGENTS.md`, Source of Truth §§22–35, and `DEXO_LAND_CROSS_REPO_INTEGRATION_CONTRACT.md` §§5/P-10–P-12, 10, D-08. The latest owner task authorizes B5; older register wording that B5 is unauthorized is historical.
-- WEDCAL's existing `apps/clans/api.py` is historical implementation, not a published B5 contract. No B5 branch/PR/contract/fixture handoff was present at inspection. Historical paths below describe that source only.
+## Owner-approved surfaces
 
-## Concrete data and action needs
+The owner explicitly answered **“Approve reuse of existing ClanModal for these required states”** for request cancellation, accepted-invite/Telegram verification, leave confirmation, voting/removal, and recovery/dissolution. `ClanStatusSheet` now reuses that modal, footer/buttons, focus/scroll behavior and hierarchy. The existing Clan status action opens it. No further approval is pending for these surfaces. Backend-owned PH-045/PH-048 decisions below remain separate.
 
-| Approved surface | Required server authority | Historical API gap to resolve in B5 |
-|---|---|---|
-| LockedClan / RoleChoice / RoleConfirmSheet | Configured unlock level, authenticated eligibility, season-persistent Captain/Soldier choice, mutation pending/error/replay and state after reload | `/clans/state` has role/eligibility/cooldown but no complete membership/request snapshot. Do not infer eligibility solely from a feature flag. |
-| CaptainFounding group selection | Backend-known eligible group record; stable selection ID, title, username/photo, verification/admin readiness; registration revalidates user and bot authority, uniqueness and season | `GroupOut.id` is a database PK while create field is named `telegram_group_id`; explicitly define semantics. Existing fields omit photo and verification metadata. No manual chat ID or trusted client admin booleans. |
-| Captain identity form | Accepted name/tag/motto rules, accent persistence or explicit unsupported decision, stable Clan identity and canonical post-create state | Existing create schema has no accent. Never manufacture HQ level/capacity/score after create. |
-| SoldierNetwork / ClanCard / FeaturedClan / ClanPreviewSheet | Paged server discovery/search/preview, identity, roster/capacity/reservations, HQ level/score/rank/status, availability; exact query and continuation semantics | Existing `ClanOut` omits HQ level, artwork state, suggestions/match semantics; no dedicated preview snapshot. Omit unsupported recommendation percentages rather than inventing them, subject to UI owner decision. |
-| PendingJoinCard / applicant decisions | Stable request ID and clan reference, pending/rejected/cancelled/accepted state, single active request rule; own request read, cancel, decision replay/conflict/error | Historical request mutation returns ID/state but `/state` does not expose own request. Do not treat Captain acceptance as active membership. |
-| JoinRequestsSheet | Request ID, authorized applicant identity/photo, level, season points, safe rank/activity/medal/contribution preview fields; pagination and accept/reject permissions | Historical applicants omit photo, rank, active days, medals, contribution preview. Do not display mock replacements for absent evidence. |
-| Clan Home / roster | Own stable membership ID, Clan/season identity, access state, role, authoritative roster IDs and fields, capacity and membership transitions after Telegram verification | Historical MembershipOut lacks membership ID; ContributionOut lacks player/membership IDs, level/photo. Group access, invite credentials and game membership are distinct. |
-| HQ / Treasury / personal contribution | Current HQ state/threshold/progress/max, competitive score/rank, Treasury balance/history, individual and total gross contribution; coherent revisions and invalidation dependencies | Existing home supplies many metrics, but display currently invents history, forecasts, facility counts and rotating HQ states. B5 must define unavailable fields and real snapshots. |
-| Shop / ClanItemSheet | Stable item IDs mapped to approved art, exact configured price/description/effect/availability, purchase/use permissions and reason; authoritative result, idempotency/replay/conflict rules | Historical ShopItemOut lacks description/category/rarity/duration; do not substitute catalog demo economics. Defence/context S2 items must not become purchasable/active in S1. |
-| Inventory / ActiveEffectsStrip | Exact quantity, active effects with server start/end and time reference, activation mode/availability, purchase/activation result with post-mutation state or explicit refetch requirements | No active effects read in historical API. Activation result is only mutation ID/replayed; no client quantity decrement, balance debit or duration calculation. |
-| Group/individual tasks / Trophy Hall | Exact mission windows/progress/status/rewards; group/individual separation; actual earned achievements and progress/history | Missions expose reward band rather than display reward; trophy read absent. Never render simulated XP/trophies. |
-| Existing BasePromoBanner | Properly validated external HTTPS destinations on arbitrary domains, preserved query strings; Telegram/internal links retain their existing safe routing | Current frontend already accepts arbitrary external HTTPS and uses Telegram `openLink`. Confirm B5 server contract parity; no host allowlist added. |
+## Concrete frontend needs mapped to actual endpoints
 
-## Required contract handoff
+All paths below are under authenticated `/api/v1`; Clan IDs and candidate IDs are internal server references, never client assertions about Telegram identity.
 
-Publish actual implemented schemas/OpenAPI, generated success/error/transition fixtures, configuration/version rules, feature flags/migrations, backward compatibility, canonical rewards/progression adoption, cache scope/revision rules, server timestamps, authorization and idempotency/concurrency tests. Provide the exact immutable implementation SHA and handoff documents. No speculative endpoint names or fixture values will be bound.
+| Frontend need | Actual published API / rendering |
+|---|---|
+| Unlock and permanent seasonal role | GET `/clans/state`, POST `/clans/role`: server eligibility, configured Level 5 default, immutable CAPTAIN/SOLDIER, leave limits/cooldown |
+| Known eligible groups and registration | GET `/clans/eligible-groups`, POST `/clans/eligible-groups/{id}/verify`, POST `/clans/`: verify fresh authority before selecting; registration rechecks it. No manual chat ID input |
+| Discovery and preview | GET `/clans/?q=&offset=&limit=20`, GET `/clans/{id}`: server identity, count/capacity/HQ level/score. Unknown rank/match/freshness are not fabricated |
+| Own request persistence and cancellation | GET `/clans/join-requests/current`, POST `/clans/{id}/join-requests`, DELETE `/clans/join-requests/{id}`: pending/declined/accepted/cancellation-pending survive refresh |
+| Applicant review | GET `/clans/applicants`, POST `/clans/join-requests/{id}/decision`: actual request IDs, safe identity, level and Season Points. Unsupported statistics display a dash |
+| Credential/access lifecycle | GET `/clans/invite/current`, GET `/clans/membership/current`: only the authenticated owner obtains an active credential; memory only; safe Telegram opener. Actual Telegram membership events/verification activate membership. Acceptance alone never activates local HQ |
+| HQ and roster | GET `/clans/home`, GET `/clans/{id}`, GET `/clans/roster?offset=&limit=50`: exact HQ thresholds/progress/max state, roster membership IDs, Captain/Soldier access, own contribution. Roster continuation also supports removal-target selection |
+| Treasury and equipment | GET `/clans/treasury`, GET `/clans/equipment`: exact ledger history, balance, prices, quantities, permissions, use limits, effects and server clock. POST `/clans/shop/{item}/purchase`, `/clans/inventory/{item}/activate` carry durable caller intent keys; no optimistic balances/rewards |
+| Missions and trophies | GET `/clans/missions`, GET `/clans/trophies`: actual progress, participant payout state and earned amount, auto settlement, availability and unlocks. Static catalog is artwork/editorial mapping only |
+| Leave and governance | POST `/clans/leave`, GET `/clans/governance`, POST `/clans/removal-cases`, `/clans/governance/{id}/vote`, `/clans/dissolution`: existing modal shows server consequences, electorate/quorum/deadline, immutable own vote and final result. Removal reasons follow the pinned service enum |
+| Recovery and emergency | GET `/clans/recovery`, membership access/rejoin deadline, current invite: render actual recovery reason/start/admin deadline/integrity and available actions. Backend owns warnings, inactivity sweeps, revocation, deadlines and terminal transitions |
+| Earn History and Base Recent Rewards | Existing GET `/rewards/history?limit=20&cursor=`: one authenticated scoped cache, real source/context/player XP/time, server continuation; no local ledger fabrication |
+| Base objectives | Existing GET `/missions`: actual available title/status/reward, priority REWARD_READY → IN_PROGRESS → AVAILABLE, at most three |
+| External banners | Existing GET `/content/banners/BASE`: declared TELEGRAM versus HTTPS type, arbitrary validated HTTPS host/query. Banner-specific strict validation; shared navigation policy retained |
 
-After handoff, create **separate** `scripts/contracts/b5-pin.json` with actual source/fixture blob hashes and a paired checkout at that exact SHA, following B2/B3/B4. Preserve all historical pins and fixture bytes. No placeholder commit or B4-as-B5 pin.
+## Deliberate server boundaries
 
-## Exact UI gaps requiring owner decision before new surfaces
+- **PH-045:** same-season Captain recreation and detailed Captain authority-loss recovery triggers remain backend owner decisions. The frontend displays actual recovery/error state and respects `CLAN_OWNER_DECISION_REQUIRED`; it adds no succession, recreation or guessed timer.
+- **PH-048:** `banner-raised` remains unavailable with null progress/target and no reward. The Trophy Hall renders that state instead of a simulated first milestone.
+- Candidate member count/image, Arena rank, match percentage, applicant active days/medals/contribution forecast, and facility count are not all supplied by this contract. Unknown values remain absent/dashes; artwork/layout is preserved.
+- Captain applicant inbox is the published pending-only list. The frontend does not invent an accepted-request management endpoint or infer another player's credential. Applicant cancellation covers accepted credential revocation; current credential state and cancellation-pending are server-authoritative.
+- No API exists for user-driven mission settlement/claim: completion is automatic. Reads never trigger a simulated reward reveal or credit local XP.
 
-| Gap | Existing approved surface | Required decision |
-|---|---|---|
-| Cancel pending request | PendingJoinCard is status-only; preview has one disabled pending CTA | Approve placement/action for cancellation. No extra button added. |
-| Accepted invite / delivery pending / expired / revoked / verification | PendingJoinCard supports only pending/rejected; store diagnostics jumps directly to HQ | Approve how existing sheet/status conveys accepted-but-not-active and credential recovery, including safe Telegram action. No invite URL logging or persistence. |
-| Leave eligibility, consequences, cooldown and limits | No leave action or confirmation in ClanPage/ClanOverlays | Approve exact surface and confirmation within existing hierarchy. Backend supplies restrictions; no invented cooldown. |
-| Removal case, voter eligibility, quorum/deadline/result | Roster is display-only; no case/vote UI | Approve case initiation and voting surface. No unrestricted kick or additional role. |
-| Captain inactivity / recovery vote / dissolution | Only recovery HQ artwork and visual state concept exist; no explanatory or decision UI | Approve recovery/dissolution presentation and action mapping. No client timer deciding outcomes. |
-| Bot/group-admin loss, inaccessible group, emergency release, rejoin | No access/recovery/credential surface | Approve recovery/error presentation and available actions based on actual backend states. |
-| Unsupported mock fields / S2 items | Match percentages, facilities, history, forecast metrics, applicant samples, full Defence catalog | Decide representation of absent data and locked unavailable items while preserving approved art/layout. Do not relabel mock values as confirmed data. |
+## Paired acceptance
 
-Owner decisions are needed only for these concrete gaps, not for the already approved A1–A4 corrections. Until B5 handoff and those decisions, P-10/P-11/P-12 remain incomplete and must not be activated using local Clan state.
-
-## Paired acceptance to execute after handoff
-
-Captain and Soldier role persistence, eligible selection/admin loss/stale group/duplicate binding; join/cancel/reject/accept/DM/Telegram verification and refresh; cross-user/clan authorization; capacity and duplicate decisions; leave/cooldown and historical contribution; all governance/recovery/dissolution/access-loss paths; invite expiry/revocation; concurrency/idempotency/response-loss for Treasury/shop/inventory/effects; exact mission rewards/trophies; season transitions, profile/Network/Arena regressions and B2/B3/B4 compatibility. Physical Telegram WebView acceptance remains separate from Chromium fixture evidence.
-
-## Coordination update
-
-WEDCAL Draft [#30](https://github.com/hassan-anari/WEDCAL/pull/30), branch `ai/b5-backend-integration`, has now published planning commit `75a43e5e0aa7f0a17092218237da7c88b8996909`. Its `docs/B5_BACKEND_HANDOFF.md` explicitly says this is **not an implementation pin**; runtime, schemas/OpenAPI and generated B5 fixtures are pending. This supersedes the initial absence-of-branch observation above. FROCAL Draft [#6](https://github.com/hassan-anari/FROCAL/pull/6) remains the single consumer PR. Await the actual runtime handoff rather than pinning this planning SHA.
-
-The historical local Clan rendering gate is closed for remote production while waiting, including if the server flag is true. Diagnostics/local scenarios remain available. No invented Clan endpoint, wire fixture, economy or B5 pin has been introduced.
-
-
-## Initial runtime handoff — now available
-
-WEDCAL published implemented runtime `af72edee1ea4ffb3fc6443f24dfa5fa1ab372518`, actual `docs/B5_BACKEND_CONTRACT.md`, generated `docs/fixtures/b5/openapi.json` and PostgreSQL-generated `clan-http.json`. These supersede the planning-only observation above. FROCAL now records that **initial runtime candidate** in its separate `scripts/contracts/b5-pin.json`, including exact source/fixture blob hashes. Backend final validation/review is still pending; advance only this B5 pin after an actual successor handoff.
-
-`b5Schemas.ts` is generated from the pinned OpenAPI; `b5.ts` covers the actual P-10/P-11/P-12 read/mutation paths, validates inputs/outputs, preserves caller-owned economic replay keys and categorical errors, and performs no optimistic settlement or local-state transitions. This adapter foundation is not yet connected to production Clan rendering. The closed remote gate remains until the unrepresentable state surfaces receive owner decisions and complete binding is reviewable.
-
-The `paired-b5-contract` CI job verifies exact source bytes and runs the pinned backend's real PostgreSQL Clan API/domain/governance/concurrency tests, exports fresh HTTP fixtures and validates them through frontend schemas. This establishes a paired read/schema boundary; it does not substitute for missing frontend Captain/Soldier/governance/economy end-to-end scenarios.
+`npm run test:paired:b5-contract` verifies the exact checkout and all pinned bytes, runs the actual backend Clan suite (including governance, invite risk, economy and concurrency), validates freshly generated PostgreSQL HTTP responses, drives the real frontend API client against that backend, and runs Captain/Soldier browser scenarios. Only Telegram transport and isolated source/admin setup are controlled test boundaries; Clan API responses are not fabricated. Mobile screenshots include the reused status, invite, leave, removal, vote, recovery and dissolution surfaces.

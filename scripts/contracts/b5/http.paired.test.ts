@@ -56,7 +56,7 @@ it("refreshes pending/rejected/accepted requests and revokes only the caller's c
   const other = await actor(); await other.api.role({ role: "SOLDIER" });
   expect(await other.api.ownRequests()).toEqual([]);
   await expect(other.api.invite()).rejects.toMatchObject({ status: 404 });
-  await expect(other.api.cancelRequest(request.id)).rejects.toMatchObject({ status: 403 });
+  await expect(other.api.cancelRequest(request.id)).rejects.toMatchObject({ status: 404 });
   await soldier.api.cancelRequest(request.id);
   expect(["CANCELLED", "ACCEPTED"]).toContain((await soldier.api.ownRequests())[0].state);
 }, 30_000);

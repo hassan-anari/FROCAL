@@ -300,7 +300,7 @@ export function ClanItemSheet({
         disabled={!canBuy}
         onClick={onPurchase}
       >
-        {canBuy ? `Buy +1 · ${item.price.toLocaleString()}` : blockedLabel ?? "Not enough Treasury"}
+        {pending ? "Please wait…" : canBuy ? `Buy +1 · ${item.price.toLocaleString()}` : purchaseAllowed === false ? treasury < item.price ? "Not enough Treasury" : "Unavailable" : "Not enough Treasury"}
       </Button>
     );
   } else if (captain && (item.activationMode === "timed" || activationAllowed !== undefined)) {
@@ -314,7 +314,7 @@ export function ClanItemSheet({
         disabled={!canActivate}
         onClick={onActivate}
       >
-        {pending ? "Please wait…" : activationAllowed === false ? blockedLabel ?? "Unavailable" : active ? "Effect already active" : quantity <= 0 ? "No item stored" : `${item.activationVerb}${durationLabel ? ` · ${durationLabel}` : ""}`}
+        {pending ? "Please wait…" : activationAllowed === false ? blockedLabel ?? "Unavailable" : activationAllowed === undefined && active ? "Effect already active" : quantity <= 0 ? "No item stored" : `${item.activationVerb}${durationLabel ? ` · ${durationLabel}` : ""}`}
       </Button>
     );
   } else {
