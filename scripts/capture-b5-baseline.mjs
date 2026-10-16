@@ -22,6 +22,10 @@ if (head.status !== 0 || head.stdout.trim() !== baseline || spawnSync("git", ["-
 const environment = { ...process.env, VITE_DATA_SOURCE: "remote", VITE_ENABLE_DEV_PANEL: "false", VITE_ENABLE_ARENA_DEBUG: "false" };
 const vite = resolve("node_modules/vite/bin/vite.js");
 await command(process.execPath, [vite, "build", "--outDir", output], { cwd: checkout, env: environment });
+// Never certify screenshots from a leftover server on the baseline port.
+let occupied = false;
+try { occupied = (await fetch("http://127.0.0.1:4176")).ok; } catch {}
+if (occupied) throw new Error("Baseline port 4176 is already in use; stop that server before capturing provenance");
 const server = spawn(process.execPath, [vite, "preview", "--outDir", output, "--host", "127.0.0.1", "--port", "4176", "--strictPort"], { cwd: checkout, env: environment, stdio: "inherit" });
 try {
   let ready = false;

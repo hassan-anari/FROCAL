@@ -83,7 +83,7 @@ it("invalidates the shared reward history only when a newer accepted reward rece
   const remote = remoteBootstrapSchema.parse(fixture.bootstrap);
   const scope = { session: 1, player: remote.canonical!.player_id, season: remote.season!.code, config: configCacheScope(remote.config) };
   client.setQueryData(queryKeys.bootstrap(1, "remote", "new-user", "telegram"), mapRemoteBootstrap(remote, "telegram", null, null));
-  const initial = canonicalSchema.parse(fixture.canonical_state);
+  const initial = canonicalSchema.parse(fixture.daily_claim.response.canonical);
   commitCanonical(client, scope, initial);
   client.setQueryData(queryKeys.rewardHistory(scope), { pages: [{ items: [], next_cursor: null }], pageParams: [null] });
   commitCanonical(client, scope, initial);
