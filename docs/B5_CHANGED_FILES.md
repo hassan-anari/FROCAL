@@ -1,16 +1,21 @@
 # B5 changed-file inventory
 
-Compared with approved merged main `ef6f1fca4de541e6eb45c9b8bf3e114bbd163cfb`. Includes reports, mobile evidence and test-only fixture assets. Historical B2/B3/B4 pins and source/fixture bytes have no changes.
+Compared with approved merged main `ef6f1fca4de541e6eb45c9b8bf3e114bbd163cfb`. Includes contracts, reports, mobile evidence and test-only fixture assets. Historical B2/B3/B4 pins and source/fixture bytes have no changes.
 
-## Runtime and styles
+## Runtime, contracts and styles
 
 - `src/design-system/components/GameHeader.tsx`
 - `src/features/earn/EarnOverlays.tsx`
 - `src/integrations/api/b3.contract.test.ts`
+- `src/integrations/api/b5.contract.test.ts`
+- `src/integrations/api/b5.ts`
+- `src/integrations/api/b5Schemas.ts`
 - `src/integrations/api/baseObjectives.test.ts`
 - `src/integrations/api/baseObjectives.ts`
 - `src/integrations/api/canonical.test.ts`
 - `src/integrations/api/canonical.ts`
+- `src/integrations/api/fixtures/b5/clan-http.json`
+- `src/integrations/api/fixtures/b5/openapi.json`
 - `src/integrations/api/queryKeys.ts`
 - `src/integrations/api/rewardHistory.test.ts`
 - `src/integrations/api/rewardHistory.ts`
@@ -32,13 +37,28 @@ Compared with approved merged main `ef6f1fca4de541e6eb45c9b8bf3e114bbd163cfb`. I
 - `e2e/fixtures/b5/community-photo.png`
 - `e2e/phase2.spec.ts`
 
-## Checks and CI
+## Checks, pins and CI
 
 - `.github/workflows/b1-frontend.yml`
 - `package.json`
 - `playwright.b5.config.ts`
 - `playwright.config.ts`
 - `scripts/capture-b5-baseline.mjs`
+- `scripts/contracts/b5-pin.json`
+- `scripts/contracts/b5/read-contract.paired.test.ts`
+- `scripts/contracts/b5/source/apps/clans/api.py`
+- `scripts/contracts/b5/source/apps/clans/economy.py`
+- `scripts/contracts/b5/source/apps/clans/governance.py`
+- `scripts/contracts/b5/source/apps/clans/missions.py`
+- `scripts/contracts/b5/source/apps/clans/models.py`
+- `scripts/contracts/b5/source/apps/clans/services.py`
+- `scripts/contracts/b5/source/apps/rewards/api.py`
+- `scripts/contracts/b5/source/docs/B5_BACKEND_CONTRACT.md`
+- `scripts/contracts/b5/source/docs/B5_BACKEND_HANDOFF.md`
+- `scripts/contracts/check-b2-contract.mjs`
+- `scripts/contracts/generate-b5-schemas.mjs`
+- `scripts/contracts/run-paired-b5-contract.mjs`
+- `vitest.b5-paired.config.ts`
 
 ## Reports
 

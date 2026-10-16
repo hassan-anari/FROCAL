@@ -56,3 +56,12 @@ Captain and Soldier role persistence, eligible selection/admin loss/stale group/
 WEDCAL Draft [#30](https://github.com/hassan-anari/WEDCAL/pull/30), branch `ai/b5-backend-integration`, has now published planning commit `75a43e5e0aa7f0a17092218237da7c88b8996909`. Its `docs/B5_BACKEND_HANDOFF.md` explicitly says this is **not an implementation pin**; runtime, schemas/OpenAPI and generated B5 fixtures are pending. This supersedes the initial absence-of-branch observation above. FROCAL Draft [#6](https://github.com/hassan-anari/FROCAL/pull/6) remains the single consumer PR. Await the actual runtime handoff rather than pinning this planning SHA.
 
 The historical local Clan rendering gate is closed for remote production while waiting, including if the server flag is true. Diagnostics/local scenarios remain available. No invented Clan endpoint, wire fixture, economy or B5 pin has been introduced.
+
+
+## Initial runtime handoff — now available
+
+WEDCAL published implemented runtime `af72edee1ea4ffb3fc6443f24dfa5fa1ab372518`, actual `docs/B5_BACKEND_CONTRACT.md`, generated `docs/fixtures/b5/openapi.json` and PostgreSQL-generated `clan-http.json`. These supersede the planning-only observation above. FROCAL now records that **initial runtime candidate** in its separate `scripts/contracts/b5-pin.json`, including exact source/fixture blob hashes. Backend final validation/review is still pending; advance only this B5 pin after an actual successor handoff.
+
+`b5Schemas.ts` is generated from the pinned OpenAPI; `b5.ts` covers the actual P-10/P-11/P-12 read/mutation paths, validates inputs/outputs, preserves caller-owned economic replay keys and categorical errors, and performs no optimistic settlement or local-state transitions. This adapter foundation is not yet connected to production Clan rendering. The closed remote gate remains until the unrepresentable state surfaces receive owner decisions and complete binding is reviewable.
+
+The `paired-b5-contract` CI job verifies exact source bytes and runs the pinned backend's real PostgreSQL Clan API/domain/governance/concurrency tests, exports fresh HTTP fixtures and validates them through frontend schemas. This establishes a paired read/schema boundary; it does not substitute for missing frontend Captain/Soldier/governance/economy end-to-end scenarios.

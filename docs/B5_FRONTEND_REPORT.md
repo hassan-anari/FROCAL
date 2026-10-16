@@ -1,12 +1,12 @@
 # B5 frontend implementation report
 
-**Status: INCOMPLETE — Draft PR #6; no merge or deployment.** P-10/P-11/P-12 final binding and paired acceptance await the actual WEDCAL B5 runtime contract/fixtures, plus owner decisions for required missing Clan surfaces. Approved Network/Notification/Banner/Base/Earn work is implemented in this same PR.
+**Status: INCOMPLETE — Draft PR #6; no merge or deployment.** P-10/P-11/P-12 final binding and paired acceptance await complete UI binding and final WEDCAL runtime verification, plus owner decisions for required missing Clan surfaces. Approved Network/Notification/Banner/Base/Earn work is implemented in this same PR.
 
-Repository: `hassan-anari/FROCAL`; branch `ai/b5-clan-frontend`; approved starting main `ef6f1fca4de541e6eb45c9b8bf3e114bbd163cfb`. Current review head is the PR head; evidence-specific source commits and commands are recorded below. Paired backend draft: WEDCAL [#30](https://github.com/hassan-anari/WEDCAL/pull/30). Its initial handoff `75a43e5e0aa7f0a17092218237da7c88b8996909` explicitly is **not** an implementation pin.
+Repository: `hassan-anari/FROCAL`; branch `ai/b5-clan-frontend`; approved starting main `ef6f1fca4de541e6eb45c9b8bf3e114bbd163cfb`. Current review head is the PR head; evidence-specific source commits and commands are recorded below. Paired backend draft: WEDCAL [#30](https://github.com/hassan-anari/WEDCAL/pull/30). Its planning-only handoff `75a43e5e0aa7f0a17092218237da7c88b8996909` is superseded by implemented runtime candidate `af72edee1ea4ffb3fc6443f24dfa5fa1ab372518`, now pinned separately. Backend final validation/review remains pending.
 
 ## Implemented behavior
 
-- **A1:** Inspected actual EarnPage avatar rendering, AvatarContent/useAvatarSource, computed styles and mobile photographic baseline. Existing photo container had zero border/shadow/padding but retained the cyan initials background behind rounded clipping. A group-only selector removes that background when an image exists. Size (34px at 320; 38px at 390/460), 13px corners, content/crop/loading/failure handling and missing/failed initials remain. Shared avatars are untouched.
+- **A1:** Inspected actual EarnPage avatar rendering, AvatarContent/useAvatarSource, computed styles and mobile photographic baseline. Existing photo container had zero border/shadow/padding but retained the cyan initials background behind rounded clipping. A group-only loaded-photo class removes that background after successful image load; pending images retain their original background, and error fallback restores it. Size (34px at 320; 38px at 390/460), 13px corners, content/crop/loading/failure handling and missing/failed initials remain. Shared avatars are untouched.
 - **A2:** Scoped Network Group Expansion CTA becomes 46px rather than 64.3125px; trailing icon container becomes 34px. Existing full width, gradient, arrow/label, rounding and add-to-group action remain. Shared Button unchanged.
 - **A3:** Notification Center glyph content is `String(index + 1).padStart(2, "0")` over the flattened visible page order. Backend UUIDs still identify all read mutations/navigation. Glyph dimensions/tone/state/copy/time and Toast icons are unchanged.
 - **A4:** Audit found the current frontend already permits arbitrary properly validated external HTTPS destinations and uses Telegram `openLink`, preserving query strings. No banner runtime/UI or shared navigation policy change was needed. Added external-domain/query/malicious URL and browser adapter regressions; existing lifecycle/error tests remain.
@@ -17,7 +17,7 @@ Repository: `hassan-anari/FROCAL`; branch `ai/b5-clan-frontend`; approved starti
 
 ## Contract and UI decisions
 
-[Backend requirements and exact gaps](B5_BACKEND_REQUIREMENTS.md) inventory all approved Clan surfaces against actual historical backend source. No speculative B5 endpoint or fixture has been created. [UI preservation matrix](B5_UI_PRESERVATION.md) identifies every authorized delta and unchanged surface.
+[Backend requirements and exact gaps](B5_BACKEND_REQUIREMENTS.md) inventory all approved Clan surfaces against actual historical backend source. No speculative B5 endpoint or fixture has been created. The actual runtime/schema/fixture handoff is now recorded in a separate B5 pin. OpenAPI-generated frontend schemas and the typed P-10/P-11/P-12 API client are implemented as a contract foundation, with no production rendering activation. Inputs/outputs, internal IDs, private no-store reads, categorical errors and caller-owned economic idempotency keys follow that exact runtime. [UI preservation matrix](B5_UI_PRESERVATION.md) identifies every authorized delta and unchanged surface.
 
 Required owner decisions before adding surfaces: pending-request cancellation; accepted invite/DM/Telegram verification/credential recovery; leave consequences; governance/removal/voting; inactivity/admin loss/emergency/recovery/dissolution. Existing approved ClanModal can provide the design basis, but those actions are absent from the approved current UI. No new surfaces have been implemented without approval. Backend-owned PH-045 and PH-048 remain isolated; no recreated lifecycle or first-milestone predicate is invented.
 
@@ -28,27 +28,28 @@ Required owner decisions before adding surfaces: pending-request cancellation; a
 | B2 | `34328c76ba3377396660b1549bf8e370ac514a71` |
 | B3 | `c3f8f27d18fda66b62e22c6cadd1480e1f0f4370` |
 | B4 | `75992805c1df2235a7513ddd6aa5864df65dd5c3` |
-| B5 | **Not issued** — actual runtime/schema/generated fixture handoff pending; planning SHA will not be used |
+| B5 | `af72edee1ea4ffb3fc6443f24dfa5fa1ab372518` — initial implemented runtime candidate; final verification/review pending |
 
-Historical pin files and source/fixture bytes are unchanged. Add separate `scripts/contracts/b5-pin.json`, actual source/fixture blob checks, immutable paired checkout and B5 paired CI only after the real handoff. Existing history source schema was audited at WEDCAL main `6aaa362daecec86107babd95224398e7e1ac7e75`; this does not turn that SHA into a B5 runtime pin.
+Historical pin files and source/fixture bytes are unchanged. Separate `scripts/contracts/b5-pin.json`, exact source/fixture blob checks, OpenAPI schema generation/drift gate, and immutable B5 paired contract checkout/CI are now present. Existing history source schema was audited at WEDCAL main `6aaa362daecec86107babd95224398e7e1ac7e75`; the separate B5 runtime pin is the implemented successor listed above.
 
 ## Verification evidence
 
 - `npm run check`: passed locally (39 test files / 248 tests at the initial validation snapshot), including TypeScript, repository structure/assets/import/motion checks, 12 production-policy checks, historical contract blob checks, unit suite, production build and production-bundle exclusion. The additional canonical invalidation case subsequently passed its focused 3-test suite. No standalone ESLint/lint command is configured in this repository; the existing static validators and TypeScript are its current lint-like checks.
 - Focused mission/history/cache/navigation/banner unit group: 59 passed.
 - `npm run validate:telegram-sdk`: passed, official SDK hash/SRI unchanged.
-- B5 browser corrections/data suite: **11 passed**, covering all data/visual cases and full Telegram external-link regression through the initialized official SDK.
+- B5 browser corrections/data suite: **12 passed**, including delayed-photo loading/failure preservation and all data/visual cases and full Telegram external-link regression through the initialized official SDK.
 - Mobile before/after: `docs/evidence/b5/{320,390,460}/`, clean baseline commit and renderer in `baseline-provenance.json`. Real photographic bytes are local NASA/scikit-image public-domain fixture data; they are not live owner group photos. Successful-photo, missing-photo and failed-photo cases included. Profile/Warfront pixel guards retained at all widths.
+- B4 retained browser/visual regression: **17 passed** after a fresh approved-source baseline capture.
 - Broader browser regression: **134 passed**, local mobile/desktop, 7.0 minutes. No retries/skips.
 - Hosted validation at `fc2c7701dceabfacc52c058e47e6a2777d92cc4f`, [run 38944964983](https://github.com/hassan-anari/FROCAL/actions/runs/38944964983): unit/build green; B2 PostgreSQL **15 API/controller + 6 browser**, B3 **29 API/controller + 3 available-API + 13 browser**, B4 **9 API/controller + 16 browser**, all green. Six B4-only cases are intentionally excluded at the historical B3 pin and executed in the dedicated B4 job; do not count those as passed at B3. Browser job is still running. Successor-head evidence will be attached to the same PR.
 
-B5 Captain/Soldier production E2E, governance/recovery/authorization and Treasury/shop/inventory concurrency/idempotency paired tests have **not** run: no actual B5 runtime pin exists. Browser synthetic responses validate presentation and cache logic, not Clan economic authority or physical Telegram WebViews.
+The new B5 paired-contract job runs the exact pinned backend Clan API/domain/governance/concurrency suite and then validates fresh PostgreSQL HTTP reads through frontend schemas. Its result is pending. B5 frontend Captain/Soldier production E2E and governance/economy UI concurrency/idempotency acceptance have **not** run: the required missing surfaces are not approved and full UI binding is incomplete. Browser synthetic responses validate presentation and cache logic, not Clan economic authority or physical Telegram WebViews.
 
 ## Deployment and residual risks
 
 No migrations, production requests, Telegram sends, rollout, merge or deployment. No B6 work. The Draft must remain unmergeable as an overall B5 delivery until actual binding, approved missing surfaces and all required B5 paired checks are complete.
 
-- P1 blocker: P-10/P-11/P-12 adapter/contract pin/paired acceptance pending backend runtime handoff.
+- P1 blocker: P-10/P-11/P-12 full UI binding/paired end-to-end acceptance and final backend runtime verification remain pending. Exact initial runtime pin and typed API foundation are present.
 - P1 blocker: owner design decisions for missing governance/leave/credential surfaces.
 - Pending evidence: final hosted checks and physical Telegram mobile acceptance. Existing known bundle-size warning remains; no unrelated bundling refactor.
 

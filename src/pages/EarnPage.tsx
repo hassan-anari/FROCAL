@@ -128,6 +128,22 @@ function initials(name: string): string {
   return name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
 }
 
+function ConnectedGroupAvatar({ id, name, tone, photoUrl }: { id: string; name: string; tone: string; photoUrl?: string | null }) {
+  const [loadedPhoto, setLoadedPhoto] = useState<string | null>(null);
+  const photoReady = Boolean(photoUrl) && loadedPhoto === photoUrl;
+  return (
+    <span
+      className={`${styles.avatar} ${styles[`avatar_${tone}`]} ${photoReady ? styles.groupPhotoReady : ""}`}
+      onLoadCapture={(event) => {
+        if (event.target instanceof HTMLImageElement && event.target.naturalWidth > 0) setLoadedPhoto(photoUrl ?? null);
+      }}
+      onErrorCapture={() => setLoadedPhoto(null)}
+    >
+      <AvatarContent owner={`group:${id}`} photoUrl={photoUrl} fallback={initials(name)} />
+    </span>
+  );
+}
+
 export function EarnPage() {
   const playerProgression = usePlayerProgression();
   const navigate = useNavigate();
@@ -537,7 +553,7 @@ export function EarnPage() {
                     {live.remote && !groupRows.length ? <div className={styles.emptyState}><strong>{live.groups.isPending ? "Loading communities…" : live.groups.isError ? "Communities unavailable." : "No connected communities yet."}</strong></div> : null}
                     {groupRows.map((group) => (
                       <article key={group.id} aria-label={group.name}>
-                        <span className={`${styles.avatar} ${styles.groupAvatar} ${styles[`avatar_${group.tone}`]}`}><AvatarContent owner={`group:${group.id}`} photoUrl={"photoUrl" in group ? group.photoUrl : undefined} fallback={initials(group.name)} /></span>
+                        <ConnectedGroupAvatar id={group.id} name={group.name} tone={group.tone} photoUrl={"photoUrl" in group ? group.photoUrl : undefined} />
                         <div className={styles.rosterIdentity}><strong>{group.name}</strong><span>{formatNumber(group.members)} {live.remote ? "qualified speakers" : "members"} · {group.meta}</span>
 
                         </div>

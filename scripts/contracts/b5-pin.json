@@ -1,0 +1,51 @@
+{
+  "repository": "hassan-anari/WEDCAL",
+  "commit": "af72edee1ea4ffb3fc6443f24dfa5fa1ab372518",
+  "status": "Initial implemented B5 runtime/schema/fixture candidate; backend final validation and independent review pending. Not the planning-only commit.",
+  "files": {
+    "scripts/contracts/b5/source/docs/B5_BACKEND_CONTRACT.md": {
+      "path": "docs/B5_BACKEND_CONTRACT.md",
+      "blob": "2584d482831e81b41178803838e07198c8262879"
+    },
+    "scripts/contracts/b5/source/docs/B5_BACKEND_HANDOFF.md": {
+      "path": "docs/B5_BACKEND_HANDOFF.md",
+      "blob": "cdf3500110c17de88150ba4f5070dd556ca76d41"
+    },
+    "src/integrations/api/fixtures/b5/openapi.json": {
+      "path": "docs/fixtures/b5/openapi.json",
+      "blob": "81c95e369c7e1edb379d69ae3a1811b0ddac4774"
+    },
+    "src/integrations/api/fixtures/b5/clan-http.json": {
+      "path": "docs/fixtures/b5/clan-http.json",
+      "blob": "504b65d0a17fe0fa75b9c28a4e7118dd98593e26"
+    },
+    "scripts/contracts/b5/source/apps/clans/api.py": {
+      "path": "apps/clans/api.py",
+      "blob": "e9bd8378b351fc0a629f6fb6fe3f6b6dbbd9994e"
+    },
+    "scripts/contracts/b5/source/apps/clans/services.py": {
+      "path": "apps/clans/services.py",
+      "blob": "e2c945e81f243f0c80b74fb3ef4b280778e49603"
+    },
+    "scripts/contracts/b5/source/apps/clans/governance.py": {
+      "path": "apps/clans/governance.py",
+      "blob": "7d690bae508b29a440f955f15f1b88c7f551b5f6"
+    },
+    "scripts/contracts/b5/source/apps/clans/economy.py": {
+      "path": "apps/clans/economy.py",
+      "blob": "b3446388734d759b54ddf7bf255e5e0b25282cf3"
+    },
+    "scripts/contracts/b5/source/apps/clans/missions.py": {
+      "path": "apps/clans/missions.py",
+      "blob": "4b5d9174049a45d8a82279386f8ebc318f620b45"
+    },
+    "scripts/contracts/b5/source/apps/clans/models.py": {
+      "path": "apps/clans/models.py",
+      "blob": "1dfc3492ae17b4ab064fb9248db40e1e8adbdd21"
+    },
+    "scripts/contracts/b5/source/apps/rewards/api.py": {
+      "path": "apps/rewards/api.py",
+      "blob": "53226ae49aee302cf6d8031ecbfac84ff2383a29"
+    }
+  }
+}

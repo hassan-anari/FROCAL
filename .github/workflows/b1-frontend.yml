@@ -215,3 +215,50 @@ jobs:
             test-results-paired/session-measurements.json
             test-results-paired/session-browser-measurements.json
           retention-days: 14
+
+  paired-b5-contract:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: frocal_b5_ci
+          POSTGRES_USER: b5_test
+          POSTGRES_PASSWORD: isolated-test-only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U b5_test -d frocal_b5_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      POSTGRES_DB: frocal_b5_ci
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: '5432'
+      POSTGRES_USER: b5_test
+      POSTGRES_PASSWORD: isolated-test-only
+      B5_BACKEND_ROOT: work/backend-b5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: hassan-anari/WEDCAL
+          ref: af72edee1ea4ffb3fc6443f24dfa5fa1ab372518
+          path: work/backend-b5
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.8.22'
+      - run: uv sync --frozen --python 3.13
+        working-directory: work/backend-b5
+      - run: npm ci
+      - run: npm run validate:contracts
+      - run: npm run test:paired:b5-contract
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: b5-paired-contract-results
+          path: work/b5-paired/
+          retention-days: 14

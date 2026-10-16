@@ -137,3 +137,30 @@ test("external HTTPS banner uses Telegram openLink with its full query string", 
   expect(await page.evaluate(() => (window as any).__externalLinks)).toEqual([destination]);
   expect(new URL(page.url()).pathname).toBe("/base");
 });
+test("group photo keeps its pending background, clears only on load and retains fallback on failure", async ({ page }) => {
+  const state = await prepareB4(page);
+  const origin = new URL(test.info().project.use.baseURL!).origin;
+  state.groups.items[0].title = "Delayed Photo Community";
+  state.groups.items[0].photo_url = `${origin}/api/v1/profile/group-avatar/00000000-0000-4000-8000-000000000090?token=delayed`;
+  let finish!: () => void;
+  const gate = new Promise<void>(done => { finish = done; });
+  await page.route("**/profile/group-avatar/*?token=delayed", async route => {
+    await gate;
+    return route.fulfill({ contentType: "image/png", path: "e2e/fixtures/b5/community-photo.png" });
+  });
+  await page.goto(launch("/earn"));
+  await page.getByRole("button", { name: "Network", exact: true }).click();
+  const row = page.getByRole("article", { name: "Delayed Photo Community", exact: true });
+  await row.scrollIntoViewIfNeeded();
+  const image = row.locator("img");
+  await expect(image).toHaveCount(1);
+  const background = () => image.evaluate(el => getComputedStyle(el.parentElement!).backgroundImage);
+  expect(await background()).toContain("linear-gradient");
+  expect(await image.evaluate(el => (el as HTMLImageElement).complete)).toBe(false);
+  finish();
+  await expect.poll(background).toBe("none");
+  await image.dispatchEvent("error");
+  await expect(image).toHaveCount(0);
+  await expect(row.locator("span").first()).toHaveText("DP");
+  expect(await row.locator("span").first().evaluate(el => getComputedStyle(el).backgroundImage)).toContain("linear-gradient");
+});
