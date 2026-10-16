@@ -2,7 +2,7 @@
 
 Delivery: [FROCAL Draft #5](https://github.com/hassan-anari/FROCAL/pull/5), branch `ai/b4-profile-arena-ui-restoration`. P-08/P-09 and all authorized B3 corrections are in this single Draft. No merge, deployment, live reward calls, real Telegram sends or production data reset.
 
-Backend: [WEDCAL Draft #29](https://github.com/hassan-anari/WEDCAL/pull/29), exact runtime/source/fixture pin **`ec6af7053dfc7e8755998418b826c59ca91191ea`**. This supersedes initial runtime `9a43048` and documentation-only `2d2a856`. Historical B3 remains **`c3f8f27d18fda66b62e22c6cadd1480e1f0f4370`**; B2 remains `34328c76ba3377396660b1549bf8e370ac514a71`. Separate source/fixture Git blobs and CI checkouts enforce each pin. See [contract](../scripts/contracts/b4/source/docs/B4_BACKEND_CONTRACT.md), [handoff/migrations](../scripts/contracts/b4/source/docs/B4_BACKEND_HANDOFF.md), [OpenAPI/fixtures](../src/integrations/api/fixtures/b4), and [mapping](B4_BACKEND_REQUIREMENTS.md).
+Backend: [WEDCAL Draft #29](https://github.com/hassan-anari/WEDCAL/pull/29), exact final review/source/schema/fixture pin **`75992805c1df2235a7513ddd6aa5864df65dd5c3`**. Runtime implementation is `3fd6d87a1d738b8ba78d98788c76b81cb1dc7715`; the final review HEAD also contains the corrected persisted broadcast fixture and legacy migration regression. The B4 pin deliberately uses the final review HEAD, superseding the prior broadcast policy at `ec6af70`/`f4d7921`. Historical B3 remains **`c3f8f27d18fda66b62e22c6cadd1480e1f0f4370`**; B2 remains `34328c76ba3377396660b1549bf8e370ac514a71`. Separate source/fixture Git blobs and CI checkouts enforce each pin. See [contract](../scripts/contracts/b4/source/docs/B4_BACKEND_CONTRACT.md), [handoff/migrations](../scripts/contracts/b4/source/docs/B4_BACKEND_HANDOFF.md), [OpenAPI/fixtures](../src/integrations/api/fixtures/b4), and [mapping](B4_BACKEND_REQUIREMENTS.md).
 
 ## Preserved UI and backend behavior
 
@@ -18,7 +18,7 @@ The [Before/After preservation matrix](B4_UI_PRESERVATION.md) records each touch
 
 ## Verification
 
-| Gate | Local result |
+| Gate | Verified result (local and exact-head CI) |
 |---|---|
 | `npm run check` | Structure/assets/imports/motion/production policies, separate B2/B3/B4 blob checks, semantic TypeScript, **216 units**, production build and bundle exclusion passed |
 | ESLint correctness checks on changed production TS/TSX | Passed with isolated ESLint 9/TypeScript parser tooling; repository lint validators also passed |
@@ -26,7 +26,7 @@ The [Before/After preservation matrix](B4_UI_PRESERVATION.md) records each touch
 | B4 browser/visual gate | **17/17** passed: rewards/duplicates/isolation, Profile confirmed/rejected writes, images/fallbacks, navigation, rankings, notifications, TODAY reset handling and Recovery at all three widths |
 | Historical B2 pair | **15 API/controller + 6 production browser** passed at its unchanged pin |
 | Historical B3 pair | **29 API/controller + 13 production browser** passed at its unchanged pin; consent API compatibility retained, removed consent UI replaced with automatic refresh/absence proof |
-| Final B4 pair | **9 actual PostgreSQL/Redis API/controller + 16 production browser** passed at `ec6af70`, including current-period rollover/foreign anchors, real history, archive/DLX, private invitees, notification read-all and cross-player isolation |
+| Final B4 pair | **9 actual PostgreSQL/Redis API/controller + 16 production browser** passed at `75992805`, including current-period rollover/foreign anchors, real history, archive/DLX, private invitees, notification read-all and cross-player isolation |
 
 CI runs all five jobs, including a separate final B4 backend checkout. The PR records final-head job URLs/results and artifacts. `npm run test:visual:b4-baseline` rebuilds the exact pre-edit UI commit `ae91624f23a48d8a9973154520284706a9df1c21` in a verified worktree. CI renders before and after with the same browser and keeps both; the four unchanged full-screen comparisons retain their 0.2% tolerance. It never auto-approves the B4 image as the baseline. Data-bound/authorized differences remain visible in the full matrix and pixel report.
 
@@ -46,4 +46,14 @@ The owner removed the separate group broadcast consent requirement. This superse
 
 The single `TransientFeedback` presenter now accepts the four owner-selected tones: Info → `InformationSquareIcon`, Success → `CheckmarkSquare02Icon`, Error → `CancelSquareIcon`, Warning → `Alert02Icon`. All four exports were verified in the installed `@hugeicons/core-free-icons` declarations and by runtime imports. Notification Center classes, colors, spacing, safe-area positioning, 6-second lifetime and `mobileMotion.micro` are unchanged. Error/warning use `alert`; info/ordinary success use `status`. No new call sites or copy were added. XP rewards remain exclusively in the original RewardReveal/LevelUpReveal.
 
-Backend policy successor SHA/contract publication is pending on #29. The existing `ec6af70` B4 pin remains an explicitly prior-policy pin, not evidence of the correction. Historical B3 stays unchanged. Consumer synchronization and successor paired acceptance must follow the published implementation, never a guessed or docs-only SHA. [Backend coordination](https://github.com/hassan-anari/WEDCAL/pull/29#issuecomment-6216798134).
+The owner-published final review SHA `75992805c1df2235a7513ddd6aa5864df65dd5c3` is now the separate B4 pin and CI checkout. All existing snapshots and the complete fixture directory are synchronized, including `broadcast-policy.json`; Git blob hashes are checked. Additional source snapshots cover the Network API, broadcast audience selection and additive migration `notifications.0008_owner_broadcast_audience`. The runtime SHA `3fd6d87a1d738b8ba78d98788c76b81cb1dc7715` is recorded for provenance and is not used instead of the final review pin. Historical B2/B3 pins and snapshots remain unchanged.
+
+## Final successor consumer acceptance
+
+The frontend still submits `{}` to the existing Add Bot intent endpoint. The production browser regression asserts that exact payload and records that no `/broadcast-consent` request occurs while displaying/revalidating owned communities. Legacy `broadcast_opted_in` response metadata remains parse-compatible and does not gate display or actions. The four approved Toast icons and every production page/component/CSS file are byte-identical to the independently approved frontend `59a8d9f4354faa6b6aa7d9d364aede69fa09966a`.
+
+Backend fixture `broadcast-policy.json` describes a persisted COMPLETED policy-version-2 campaign using synthetic Telegram HTTP: one started private contact and two direct known groups, with no subscription IDs. It is hashed contract evidence, never production UI data or a frontend campaign action. Backend reports 869 tests and its own migration/eligibility/dispatch checks; consumer tests remain separately reported above.
+
+The exact final consumer SHA, five exact-head CI job URLs/results and mobile screenshot artifact are recorded in the [final review handoff on Draft #5](https://github.com/hassan-anari/FROCAL/pull/5). All owner-design deferrals above remain unchanged. No backend policy code is modified by the consumer; copied source files are immutable review snapshots. No merge, deployment, production mutation, Telegram send or public Welcome activation.
+
+Local execution note: the first paired browser attempt overlapped other browser suites and hit early loading timeouts. The complete successor pair was rerun alone on a fresh isolated database: **9 API/controller + 16 browser passed**, with no application, retry or timeout changes. The original browser matrix and historical B2/B3 regressions run again in independent exact-head CI jobs. Fresh final-head mobile before/after captures are retained in the CI artifact; the existing checked-in captures continue to document the unchanged production UI.

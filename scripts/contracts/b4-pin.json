@@ -1,11 +1,11 @@
 {
   "repository": "hassan-anari/WEDCAL",
-  "commit": "ec6af7053dfc7e8755998418b826c59ca91191ea",
-  "status": "published B4 implementation with authoritative Typing periods; final paired verification",
+  "commit": "75992805c1df2235a7513ddd6aa5864df65dd5c3",
+  "status": "owner-approved final B4 review/source/schema/fixture pin; broadcast policy version 2",
   "files": {
     "src/integrations/api/fixtures/b4/README.md": {
       "path": "docs/fixtures/b4/README.md",
-      "blob": "1788f756a8007cfa11d49d4626e1042a7d96ed44"
+      "blob": "b73df322d8274183adada9d06dbf6e8130865cbc"
     },
     "src/integrations/api/fixtures/b4/dlx-confirmed.json": {
       "path": "docs/fixtures/b4/dlx-confirmed.json",
@@ -17,7 +17,7 @@
     },
     "src/integrations/api/fixtures/b4/openapi.json": {
       "path": "docs/fixtures/b4/openapi.json",
-      "blob": "5285ba5ca5ad7bfc2762c2f00c776340221bc276"
+      "blob": "4d177acfa9ab672e658e5a718921cd3bbbf4afd8"
     },
     "src/integrations/api/fixtures/b4/private-images.json": {
       "path": "docs/fixtures/b4/private-images.json",
@@ -45,11 +45,11 @@
     },
     "scripts/contracts/b4/source/docs/B4_BACKEND_CONTRACT.md": {
       "path": "docs/B4_BACKEND_CONTRACT.md",
-      "blob": "f56c8f5fd6b74ce2e7515e0fe9324cdb25956a81"
+      "blob": "950c1e117191f4a177fb466f4bdbda4fec168cfa"
     },
     "scripts/contracts/b4/source/docs/B4_BACKEND_HANDOFF.md": {
       "path": "docs/B4_BACKEND_HANDOFF.md",
-      "blob": "495bc5460c6bf92eb7f76749919e6f197b9301ca"
+      "blob": "4a72734f2b771ac79a575455a8322d927d148550"
     },
     "scripts/contracts/b4/source/apps/typing_game/schemas.py": {
       "path": "apps/typing_game/schemas.py",
@@ -65,7 +65,7 @@
     },
     "scripts/contracts/b4/source/apps/network/schemas.py": {
       "path": "apps/network/schemas.py",
-      "blob": "ba79f763699b03f4a7b243e94ab86a5445569d91"
+      "blob": "5172e2af4ddd36e72b3a881110a52878792c62ec"
     },
     "scripts/contracts/b4/source/apps/referrals/schemas.py": {
       "path": "apps/referrals/schemas.py",
@@ -74,6 +74,22 @@
     "scripts/contracts/b4/source/apps/arena/api.py": {
       "path": "apps/arena/api.py",
       "blob": "32781357b778352e79c78e153664ad5ea9c65eb9"
+    },
+    "src/integrations/api/fixtures/b4/broadcast-policy.json": {
+      "path": "docs/fixtures/b4/broadcast-policy.json",
+      "blob": "3c8492160582a48da965cec04e697257fc5b50c3"
+    },
+    "scripts/contracts/b4/source/apps/network/api.py": {
+      "path": "apps/network/api.py",
+      "blob": "ddddcba39fce05ed58f508b09950f2f6dc9f7335"
+    },
+    "scripts/contracts/b4/source/apps/notifications/audiences.py": {
+      "path": "apps/notifications/audiences.py",
+      "blob": "db99d7b44b293b9c503edd563046a4840e2fe6b0"
+    },
+    "scripts/contracts/b4/source/apps/notifications/migrations/0008_owner_broadcast_audience.py": {
+      "path": "apps/notifications/migrations/0008_owner_broadcast_audience.py",
+      "blob": "2019524218d90dd8513a5699b7fd503f416773c3"
     }
   }
 }

@@ -1,27 +1,9 @@
 {
-  "backend_runtime_commit": "ec6af7053dfc7e8755998418b826c59ca91191ea",
-  "backend_review_head": "f4d7921421e9518b13348da8fe234345362c1888",
+  "backend_runtime_commit": "3fd6d87a1d738b8ba78d98788c76b81cb1dc7715",
+  "backend_review_head": "75992805c1df2235a7513ddd6aa5864df65dd5c3",
   "b3_compatibility_commit": "c3f8f27d18fda66b62e22c6cadd1480e1f0f4370",
   "b2_compatibility_commit": "34328c76ba3377396660b1549bf8e370ac514a71",
   "approved_ui_commit": "ae91624f23a48d8a9973154520284706a9df1c21",
-  "local_gates": {
-    "typescript_lint_build_policies": "passed",
-    "unit_tests": 216,
-    "original_browser_tests": 134,
-    "b4_browser_visual_tests": 17,
-    "b2_pair": {
-      "api_controller": 15,
-      "browser": 6
-    },
-    "b3_pair": {
-      "api_controller": 29,
-      "browser": 13
-    },
-    "b4_pair": {
-      "api_controller": 9,
-      "browser": 16
-    }
-  },
   "ci_evidence": "Exact final frontend SHA and five CI job URLs/results are recorded on FROCAL Draft PR #5.",
   "screenshot_viewports": [
     {
@@ -45,9 +27,38 @@
   "owner_correction": {
     "toast_icons": "verified installed InformationSquareIcon, CheckmarkSquare02Icon, CancelSquareIcon, Alert02Icon; existing presenter styling and calls unchanged",
     "separate_group_consent": "withdrawn by owner; Add Bot UI/request unchanged",
-    "backend_successor": "pending publication on WEDCAL #29; existing B4 pin is prior policy",
+    "backend_successor": "75992805c1df2235a7513ddd6aa5864df65dd5c3; exact final review HEAD pinned for snapshots, complete fixtures and paired CI",
     "local_check": "216 units, TypeScript, lint and production build passed",
     "mobile_visual": "17/17 B4 browser/visual cases passed at 320/390/460px",
-    "successor_paired_acceptance": "pending exact successor SHA"
+    "successor_paired_acceptance": "9 API/controller + 16 production browser passed locally against exact final review 75992805; exact-head CI reruns all gates",
+    "production_ui_source": "unchanged from approved frontend 59a8d9f4354faa6b6aa7d9d364aede69fa09966a",
+    "add_bot_regression": "existing empty intent payload asserted; consent requests absent; legacy response metadata does not gate UI"
+  },
+  "backend_source_schema_fixture_pin": "75992805c1df2235a7513ddd6aa5864df65dd5c3",
+  "gates": {
+    "typescript_lint_build_policies": "passed",
+    "unit_tests": 216,
+    "original_browser_tests": 134,
+    "b4_browser_visual_tests": 17,
+    "b2_pair": {
+      "api_controller": 15,
+      "browser": 6
+    },
+    "b3_pair": {
+      "api_controller": 29,
+      "browser": 13
+    },
+    "b4_pair": {
+      "api_controller": 9,
+      "browser": 16
+    }
+  },
+  "validation_execution": {
+    "unit_build_typescript_lint_contracts": "local; rerun in exact-head CI",
+    "original_browser_matrix": "rerun in independent exact-head CI",
+    "historical_b2_b3": "rerun in independent exact-head CI; pins unchanged",
+    "successor_b4_pair": "complete local serialized run passed; rerun in exact-head CI",
+    "mobile_visual": "local approved-source baseline plus B4 gate; rerun together in exact-head CI",
+    "initial_local_contention": "overlapping browser run timed out; full isolated B4 rerun passed with no timeout/retry/application changes"
   }
 }

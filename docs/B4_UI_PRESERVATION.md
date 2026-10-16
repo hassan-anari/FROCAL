@@ -18,7 +18,7 @@ Baseline: FROCAL `ae91624` (merged B3). Approved visual references: Phase 3.2.2,
 
 ## Known contract / owner decisions
 
-The B3 backend pin is `c3f8f27d18fda66b62e22c6cadd1480e1f0f4370`. The published B4 implementation is separately pinned at `ec6af7053dfc7e8755998418b826c59ca91191ea`; source/fixtures are hash-checked. The server now supplies authoritative Typing periods and persisted run keys; the existing TODAY list uses them directly.
+The B3 backend pin is `c3f8f27d18fda66b62e22c6cadd1480e1f0f4370`. The published B4 implementation is separately pinned at `75992805c1df2235a7513ddd6aa5864df65dd5c3`; source/fixtures are hash-checked. The server now supplies authoritative Typing periods and persisted run keys; the existing TODAY list uses them directly.
 
 - Backend now exposes real submitted Typing runs, server display score, and private invitee/group images. TODAY uses the published current-period filter, resets stale pages, and displays returned scores/nullable metrics; no client scoring, URL construction or inferred runs.
 - Owner confirmed Arena archive selection has no approved control and remains blocked for design approval. This does not block approved current-season rankings. Do not repurpose Season 2 War History or the seasonal reward capsule.
@@ -90,5 +90,11 @@ Only the existing glyph mapping changes: Info `information-square` (`Information
 | Existing state | Previous approved layer | Owner correction | Evidence |
 |---|---|---|---|
 | Profile save error | Existing Toast above Customize; same concise error copy | Only Error glyph becomes `cancel-square` | [Previous 390px](https://github.com/hassan-anari/FROCAL/blob/83e7c00ab5ba98960cd487666323d3ff2ff9b80c/docs/evidence/b4/390/after-transient-error.png) / [Current 390px](evidence/b4/390/after-transient-error.png); also [320px](evidence/b4/320/after-transient-error.png), [460px](evidence/b4/460/after-transient-error.png), [glyph comparison](evidence/b4/owner-toast-comparison.json) |
-| Network Add Bot | Existing Telegram picker, intent body `{}`, automatic server revalidation | No visible change; separate consent requirement withdrawn by owner; backend successor pending | Existing Network/Communities before/after captures and browser absence/revalidation assertions retained |
+| Network Add Bot | Existing Telegram picker, intent body `{}`, automatic server revalidation | No visible change; separate consent requirement withdrawn by owner; backend successor `75992805` pinned with no UI changes | Existing Network/Communities before/after captures and browser absence/revalidation assertions retained |
 | Confirmed XP / level up | Original RewardReveal / LevelUpReveal | Unchanged; no Toast success for XP | Existing Daily/Mission/Typing and duplicate-reveal regression cases |
+
+## Final backend successor preservation gate
+
+The B4 pin/paired CI checkout now use final review HEAD `75992805c1df2235a7513ddd6aa5864df65dd5c3` (runtime `3fd6d87a1d738b8ba78d98788c76b81cb1dc7715`). All production pages, components, styles and assets remain byte-identical to frontend `59a8d9f`. The only browser-test changes assert the existing Add Bot `{}` payload and the absence of consent requests. Complete source/fixture hashes include the new persisted `broadcast-policy.json`; no fixture becomes production data.
+
+The original browser matrix, same-browser approved-source baseline, B4 mobile captures and unchanged-screen assertions are rerun, alongside independently pinned B2/B3 and successor B4 PostgreSQL/Redis pairing. Final exact consumer SHA and CI/artifact evidence are linked from Draft #5. Existing archive/DLX design deferrals remain unchanged.

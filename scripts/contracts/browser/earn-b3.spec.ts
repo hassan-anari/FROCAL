@@ -153,7 +153,9 @@ test("Network shows canonical invite data, empty rosters and a real pending Crea
     r.url().endsWith("/network/groups/intents"),
   );
   await page.getByRole("button", { name: "Add bot to a group" }).click();
-  const intent = await (await responsePromise).json();
+  const intentResponse = await responsePromise;
+  expect(intentResponse.request().postDataJSON()).toEqual({});
+  const intent = await intentResponse.json();
   await control({
     action: "b3-group",
     player: identity.player,
@@ -194,6 +196,8 @@ async function ownedBroadcastGroup(identity: {
   });
 }
 test("owned communities revalidate automatically without broadcast or manual status controls", async ({ page }) => {
+  const consentRequests: string[] = [];
+  page.on("request", request => { if (request.url().includes("/broadcast-consent")) consentRequests.push(request.url()); });
   await control({ action: "flags" });
   const identity = await control({ action: "player", points: 150 });
   await ownedBroadcastGroup(identity);
@@ -204,4 +208,5 @@ test("owned communities revalidate automatically without broadcast or manual sta
   await page.getByRole("navigation", { name: "Primary game navigation" }).getByRole("button", { name: "Profile", exact: true }).click();
   await page.getByRole("navigation", { name: "Primary game navigation" }).getByRole("button", { name: "Earn", exact: true }).click();
   await expect(page.getByText("Paired real community", { exact: true })).toBeVisible();
+  expect(consentRequests).toEqual([]);
 });
