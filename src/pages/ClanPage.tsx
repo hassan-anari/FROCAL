@@ -1117,4 +1117,7 @@ function RemoteClanPage() {
   </main>;
 }
 
-export function ClanPage() { return isRemoteDataSource() ? <RemoteClanPage /> : <DemoClanPage />; }
+export function ClanPage() {
+  const { scope } = useBootstrap();
+  return isRemoteDataSource() ? <RemoteClanPage key={JSON.stringify(scope)} /> : <DemoClanPage />;
+}
