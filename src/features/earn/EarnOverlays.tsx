@@ -87,7 +87,7 @@ export function HistorySheet({ open, onClose, history, remote = false, loading =
         <p>Daily claims, missions, network growth and Typing Arena results are stored here.</p>
       </header>
       <div className={styles.historyList} data-reward-history aria-busy={loading || fetching}>
-        {remote && !history.length ? <span role="status">{loading ? "Loading rewards…" : error ? "Rewards couldn't load. Please try again later." : "No rewards yet."}</span> : null}
+        {remote && !history.length ? <span role="status">{loading || fetching ? "Loading rewards…" : error ? "Rewards couldn't load. Please try again later." : "No rewards yet."}</span> : null}
         {history.map((item) => (
           <article key={item.id}>
             <i className={styles[`history_${item.type}`]} />

@@ -61,6 +61,11 @@ test("empty and error history never fabricate recent rewards; fewer missions sta
   await page.getByRole("button", { name: "History", exact: true }).click();
   await expect(page.getByRole("dialog", { name: "Earn history" })).toContainText("Rewards couldn't load.");
   await expect(page.getByRole("dialog", { name: "Earn history" })).not.toContainText("private backend diagnostic");
+  failed = false;
+  await page.getByRole("dialog", { name: "Earn history" }).evaluate(el => el.parentElement!.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true })));
+  await expect(page.getByRole("dialog", { name: "Earn history" })).toHaveCount(0);
+  await page.getByRole("button", { name: "History", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "Earn history" })).toContainText("No rewards yet.");
 });
 test("Notification Center numbering follows the flattened page order while mutations use ledger-independent notification IDs", async ({ page }) => {
   const state = await prepareB4(page);

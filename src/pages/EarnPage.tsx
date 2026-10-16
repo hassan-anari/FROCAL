@@ -345,7 +345,7 @@ export function EarnPage() {
             <h1>Grow your journey.</h1>
             <p>Claim daily rewards, complete missions, expand your network and sharpen your skills.</p>
           </div>
-          <button type="button" onClick={() => setHistoryOpen(true)}>
+          <button type="button" onClick={() => { setHistoryOpen(true); if (live.remote && rewardHistory.isError) void rewardHistory.refetch(); }}>
             History
             <HugeiconsIcon icon={ArrowRight01Icon} size={14} strokeWidth={1.7} />
           </button>
