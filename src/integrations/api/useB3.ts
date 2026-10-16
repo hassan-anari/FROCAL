@@ -144,7 +144,7 @@ export function useB3() {
     const previousLevel = observedLevel === undefined ? revealedLevel.current : Math.max(observedLevel, revealedLevel.current ?? observedLevel);
     const evolution = prior !== undefined && prior.dexo_stage !== next.dexo_stage;
     const level: LevelUpEvent | null = previousLevel !== undefined && next.level > previousLevel
-      ? { id, previousLevel, newLevel: next.level, evolution, evolutionTitle: evolution ? next.dexo_stage : null, createdAt: after.server_time } : null;
+      ? { id, previousLevel, newLevel: next.level, evolution, evolutionTitle: evolution ? next.dexo_stage[0].toUpperCase() + next.dexo_stage.slice(1) : null, createdAt: after.server_time } : null;
     // Concurrent claims may observe the same earlier projection. Present each
     // confirmed level boundary once without changing server-owned progression.
     if (level) revealedLevel.current = level.newLevel;

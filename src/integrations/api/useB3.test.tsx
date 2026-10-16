@@ -159,13 +159,14 @@ it("reveals only newly confirmed exact XP, once, and never on refetch or duplica
 
 it("isolates mission pending state from Daily and queues the existing level reveal after settlement", async () => {
   const response = structuredClone(fixture.mission_claim.response);
-  response.canonical = { ...response.canonical, receipt_cursor: 4, progression: { ...response.canonical.progression, level: 2, lifetime_points: 350, current_threshold: 300, next_threshold: 800, points_into_level: 50, points_remaining: 450 } };
+  response.canonical = { ...response.canonical, receipt_cursor: 4, progression: { ...response.canonical.progression, level: 5, lifetime_points: 2610, current_threshold: 2500, next_threshold: 3800, points_into_level: 110, points_remaining: 1190, dexo_stage: "explorer" } };
   let finish!: (v: unknown) => void;
   const gate = new Promise(resolve => { finish = resolve; });
   const h = setup(async () => gate);
   await waitFor(() => expect(h.result.current.missions.data).toBeTruthy());
   act(() => h.client.setQueryData([...queryKeys.player(scope), "b3", "missions"], fixture.mission_list.map(m => ({ ...m, state: m.key === response.key ? "REWARD_READY" : m.state }))));
   await waitFor(() => expect(h.result.current.missions.data?.find(m => m.key === response.key)?.state).toBe("REWARD_READY"));
+  act(() => h.client.setQueryData(canonicalKey(scope), { ...fixture.canonical_state, progression: { ...fixture.canonical_state.progression, lifetime_points: 2490, level: 4, current_threshold: 1500, next_threshold: 2500, points_into_level: 990, points_remaining: 10 } }));
   let action!: Promise<unknown>;
   act(() => { action = h.result.current.missionAction(response.key); });
   await waitFor(() => expect(h.result.current.pendingAction).toBe(`mission:${response.key}`));
@@ -173,7 +174,7 @@ it("isolates mission pending state from Daily and queues the existing level reve
   expect(h.result.current.rewardEvent).toBeNull();
   await act(async () => { finish(response); await action; });
   expect(h.result.current.rewardEvent?.xp).toBe(response.reward_amount);
-  expect(h.result.current.levelUpEvent).toMatchObject({ previousLevel: 1, newLevel: 2 });
+  expect(h.result.current.levelUpEvent).toMatchObject({ previousLevel: 4, newLevel: 5, evolution: true, evolutionTitle: "Explorer" });
   expect(h.result.current.pendingAction).toBeNull();
   h.unmount(); h.client.clear();
 });
