@@ -41,5 +41,13 @@
   "physical_telegram_certification": false,
   "production_or_telegram_mutations": false,
   "merged": false,
-  "deployed": false
+  "deployed": false,
+  "owner_correction": {
+    "toast_icons": "verified installed InformationSquareIcon, CheckmarkSquare02Icon, CancelSquareIcon, Alert02Icon; existing presenter styling and calls unchanged",
+    "separate_group_consent": "withdrawn by owner; Add Bot UI/request unchanged",
+    "backend_successor": "pending publication on WEDCAL #29; existing B4 pin is prior policy",
+    "local_check": "216 units, TypeScript, lint and production build passed",
+    "mobile_visual": "17/17 B4 browser/visual cases passed at 320/390/460px",
+    "successor_paired_acceptance": "pending exact successor SHA"
+  }
 }

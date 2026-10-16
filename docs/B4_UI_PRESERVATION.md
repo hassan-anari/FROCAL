@@ -82,3 +82,13 @@ Additional mobile captures at every width show [referral image](evidence/b4/390/
 [Machine-readable local verification](evidence/b4/verification.json). Full route/endpoint behavior, exact pins and independent-review limitations are in [B4_FRONTEND_REPORT.md](B4_FRONTEND_REPORT.md).
 
 Completed-state proof at all widths: [Mission before](evidence/b4/390/before-mission-completed.png) / [Mission after](evidence/b4/390/after-mission-completed.png) show the preserved card/action with one Completed label. [Claimed Daily](evidence/b4/390/after-daily-completed.png) shows the owner-selected checkmark-circle-02 and Claimed today heading/action after the original reward overlays close.
+
+## Owner-selected Toast icon correction
+
+Only the existing glyph mapping changes: Info `information-square` (`InformationSquareIcon`), Success `checkmark-square-02` (`CheckmarkSquare02Icon`), Error `cancel-square` (`CancelSquareIcon`), Warning `alert-02` (`Alert02Icon`). Installed declarations and runtime imports confirm all four exports. One non-interactive presenter reuses the same Notification Center classes, colors, spacing, safe areas, timing and motion. Warning shares the error live-region urgency; ordinary success/info use status. No new notification events, wording, controls or reward-success Toasts were introduced.
+
+| Existing state | Previous approved layer | Owner correction | Evidence |
+|---|---|---|---|
+| Profile save error | Existing Toast above Customize; same concise error copy | Only Error glyph becomes `cancel-square` | [Previous 390px](https://github.com/hassan-anari/FROCAL/blob/83e7c00ab5ba98960cd487666323d3ff2ff9b80c/docs/evidence/b4/390/after-transient-error.png) / [Current 390px](evidence/b4/390/after-transient-error.png); also [320px](evidence/b4/320/after-transient-error.png), [460px](evidence/b4/460/after-transient-error.png), [glyph comparison](evidence/b4/owner-toast-comparison.json) |
+| Network Add Bot | Existing Telegram picker, intent body `{}`, automatic server revalidation | No visible change; separate consent requirement withdrawn by owner; backend successor pending | Existing Network/Communities before/after captures and browser absence/revalidation assertions retained |
+| Confirmed XP / level up | Original RewardReveal / LevelUpReveal | Unchanged; no Toast success for XP | Existing Daily/Mission/Typing and duplicate-reveal regression cases |

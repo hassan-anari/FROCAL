@@ -37,3 +37,9 @@ All paths use `/api/v1`. Existing B3 pin/fixtures must remain intact for compati
 ## UI decisions remain owner-owned
 
 Owner explicitly confirmed that archive selection and visible DLX allocation are deferred pending design approval and do not block completing current-season rankings. Do not repurpose Season 2 War History or the seasonal reward capsule. No archive selector, DLX card, extra empty state, status banner or action is invented. The before/after preservation matrix is [B4_UI_PRESERVATION.md](B4_UI_PRESERVATION.md). Minimal transient feedback was explicitly approved in chat after confirming no existing presenter; it reuses the Notification Center item styling and motion tokens, has no controls/history, and never shows reward success.
+
+## Owner policy correction — separate broadcast consent withdrawn
+
+The owner explicitly removed the separate group consent/opt-in requirement. WEDCAL #29 owns the new Telegram membership/send-permission eligibility policy, including existing observed groups and dispatch-time revalidation. The frontend preserves the existing Add Bot picker and POST `/network/groups/intents` body `{}`; it adds no authorization flag, control, dialog or explanatory panel. Earlier interpretations requiring separate Mini App consent are superseded.
+
+A new exact runtime SHA with updated contracts/fixtures and migration/rollout evidence is requested in [WEDCAL #29](https://github.com/hassan-anari/WEDCAL/pull/29#issuecomment-6216798134). Until publication, `ec6af70` remains the prior-policy B4 pin. Only the separate B4 pin/CI checkout will advance; historical B3 compatibility remains pinned unchanged. Rerun paired API/browser acceptance against the successor before reporting the policy correction integrated.
