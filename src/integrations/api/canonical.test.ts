@@ -78,3 +78,21 @@ it("accepts Profile lifetime progression without an active Season and keeps it i
   expect(commitCanonical(client, { ...scope, season: "other-season" }, next)).toBe(false);
   client.clear();
 });
+it("invalidates the shared reward history only when a newer accepted reward receipt arrives", () => {
+  const client = new QueryClient();
+  const remote = remoteBootstrapSchema.parse(fixture.bootstrap);
+  const scope = { session: 1, player: remote.canonical!.player_id, season: remote.season!.code, config: configCacheScope(remote.config) };
+  client.setQueryData(queryKeys.bootstrap(1, "remote", "new-user", "telegram"), mapRemoteBootstrap(remote, "telegram", null, null));
+  const initial = canonicalSchema.parse(fixture.canonical_state);
+  commitCanonical(client, scope, initial);
+  client.setQueryData(queryKeys.rewardHistory(scope), { pages: [{ items: [], next_cursor: null }], pageParams: [null] });
+  commitCanonical(client, scope, initial);
+  expect(client.getQueryState(queryKeys.rewardHistory(scope))?.isInvalidated).toBe(false);
+  const newer = canonicalSchema.parse(fixture.typing_claim.response.canonical);
+  commitCanonical(client, scope, newer);
+  expect(client.getQueryState(queryKeys.rewardHistory(scope))?.isInvalidated).toBe(true);
+  client.setQueryData(queryKeys.rewardHistory(scope), { pages: [{ items: [], next_cursor: null }], pageParams: [null] });
+  commitCanonical(client, scope, initial);
+  expect(client.getQueryState(queryKeys.rewardHistory(scope))?.isInvalidated).toBe(false);
+  client.clear();
+});

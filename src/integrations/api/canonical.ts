@@ -41,6 +41,9 @@ export function commitCanonical(
   const current = client.getQueryData<CanonicalState>(canonicalKey(scope));
   if (current && current.receipt_cursor > value.receipt_cursor) return false;
   client.setQueryData(canonicalKey(scope), value);
+  if (current && value.receipt_cursor > current.receipt_cursor) {
+    void client.invalidateQueries({ queryKey: queryKeys.rewardHistory(scope) });
+  }
   const p = value.progression;
   for (const q of matches) {
     client.setQueryData<BootstrapPayload>(q.queryKey, (old) =>

@@ -1,0 +1,29 @@
+{
+  "ctaHeight": 46,
+  "avatar": {
+    "container": {
+      "width": 38,
+      "height": 38,
+      "border": "0px none rgb(8, 16, 33)",
+      "borderRadius": "13px",
+      "padding": "0px",
+      "background": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box",
+      "boxShadow": "none",
+      "outline": "rgb(8, 16, 33) none 3px",
+      "objectFit": "fill",
+      "display": "grid"
+    },
+    "image": {
+      "width": 38,
+      "height": 38,
+      "border": "0px none rgb(8, 16, 33)",
+      "borderRadius": "0px",
+      "padding": "0px",
+      "background": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box",
+      "boxShadow": "none",
+      "outline": "rgb(8, 16, 33) none 3px",
+      "objectFit": "cover",
+      "display": "block"
+    }
+  }
+}

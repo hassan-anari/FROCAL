@@ -50,3 +50,9 @@ Owner decisions are needed only for these concrete gaps, not for the already app
 ## Paired acceptance to execute after handoff
 
 Captain and Soldier role persistence, eligible selection/admin loss/stale group/duplicate binding; join/cancel/reject/accept/DM/Telegram verification and refresh; cross-user/clan authorization; capacity and duplicate decisions; leave/cooldown and historical contribution; all governance/recovery/dissolution/access-loss paths; invite expiry/revocation; concurrency/idempotency/response-loss for Treasury/shop/inventory/effects; exact mission rewards/trophies; season transitions, profile/Network/Arena regressions and B2/B3/B4 compatibility. Physical Telegram WebView acceptance remains separate from Chromium fixture evidence.
+
+## Coordination update
+
+WEDCAL Draft [#30](https://github.com/hassan-anari/WEDCAL/pull/30), branch `ai/b5-backend-integration`, has now published planning commit `75a43e5e0aa7f0a17092218237da7c88b8996909`. Its `docs/B5_BACKEND_HANDOFF.md` explicitly says this is **not an implementation pin**; runtime, schemas/OpenAPI and generated B5 fixtures are pending. This supersedes the initial absence-of-branch observation above. FROCAL Draft [#6](https://github.com/hassan-anari/FROCAL/pull/6) remains the single consumer PR. Await the actual runtime handoff rather than pinning this planning SHA.
+
+The historical local Clan rendering gate is closed for remote production while waiting, including if the server flag is true. Diagnostics/local scenarios remain available. No invented Clan endpoint, wire fixture, economy or B5 pin has been introduced.

@@ -129,3 +129,17 @@ it("accepts the published nullable additive Bootstrap and ownership fields for c
     tapStateSchema.parse({ ...session.initial, ownership: null }).ownership,
   ).toBeNull();
 });
+
+it.each([
+  "https://campaign.example.org/welcome?utm_source=miniapp&target=%2Fseason%3Fid%3D5",
+  "https://new-owner-approved-domain.example/offer?q=one%20two#terms",
+])("keeps arbitrary approved HTTPS banner destinations including queries: %s", destination => {
+  const banner = { ...banners.active.banner, destination_type: "HTTPS" as const, destination };
+  expect(validBanner(c.bannerSchema.parse({ ...banners.active, banner }).banner)).toEqual(banner);
+});
+it.each([
+  "javascript:alert(1)", "data:text/html,bad", "http://external.example", "//external.example",
+  "https://user:pass@external.example/", "https://external.example:8443/", "https://external.example/%0aevil", "https://external.example/\\evil",
+])("rejects malicious HTTPS-type banner destinations: %s", destination => {
+  expect(validBanner({ ...banners.active.banner, width: 1200, height: 260, destination_type: "HTTPS", destination })).toBeNull();
+});

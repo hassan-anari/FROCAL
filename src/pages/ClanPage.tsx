@@ -878,7 +878,9 @@ export function ClanPage() {
   const { level: earnLevel } = usePlayerProgression();
   const { bootstrap } = useBootstrap();
   const minLevel = isRemoteDataSource() ? bootstrap.data?.remote?.config.progression?.clan_min_level ?? 5 : 5;
-  const clanAvailable = isRemoteDataSource() ? Boolean(bootstrap.data?.featureFlags.clan) : earnLevel >= 5;
+  // Historical Clan scenarios must never become remote production authority.
+  // Replace this closed gate only with the published, pinned B5 read/mutation adapter.
+  const clanAvailable = !isRemoteDataSource() && earnLevel >= minLevel;
   const clan = useClanStore();
   const { adapter } = useTelegram();
   const [overlay, setOverlay] = useState<OverlayState>(null);
@@ -935,7 +937,7 @@ export function ClanPage() {
   return (
     <>
       <main className={styles.page}>
-        <header className={`${styles.pageHeader} ${clan.membership === "member" ? styles.pageHeaderCompact : ""} ${clanAvailable && clan.role === null ? styles.pageHeaderWrap : ""}`}>
+        <header className={`${styles.pageHeader} ${clanAvailable && clan.membership === "member" ? styles.pageHeaderCompact : ""} ${clanAvailable && clan.role === null ? styles.pageHeaderWrap : ""}`}>
           <span>{pageCopy.eyebrow}</span>
           <h1>{pageCopy.title}</h1>
           <p>{pageCopy.subtitle}</p>

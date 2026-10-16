@@ -34,11 +34,11 @@ test.describe("Phase 2 game shell", () => {
     await expect(page.getByRole("heading", { name: "Notifications" })).toHaveCount(0);
   });
 
-  test("Base contains action, objective and activity systems", async ({ page }) => {
+  test("Base contains actions and objectives without fictional activity", async ({ page }) => {
     await openCompletedGame(page);
     await expect(page.getByRole("heading", { name: "Defend your clan outpost" })).toHaveCount(0);
     await expect(page.getByRole("heading", { name: "Next Objective" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Since Your Last Visit" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Since Your Last Visit" })).toHaveCount(0);
   });
 
   test("Earn route renders the approved journey", async ({ page }) => {

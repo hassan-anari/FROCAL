@@ -1,3 +1,5 @@
+import { useRewardHistory } from "@/integrations/api/useRewardHistory";
+import { rewardHistoryView } from "@/integrations/api/rewardHistory";
 import { useQueryFeedback } from "@/design-system/components/TransientFeedback";
 import { readSessionPreference, writeSessionPreference } from "@/app/storageRelease";
 import { useB3, missionView } from "@/integrations/api/useB3";
@@ -132,6 +134,7 @@ export function EarnPage() {
   const { adapter } = useTelegram();
   const localEarn = useEarnStore();
   const live = useB3();
+  const rewardHistory = useRewardHistory();
   const earn = live.remote ? { ...localEarn,
     missions: Object.fromEntries((live.missions.data ?? []).map(m => [m.key, missionView(m)])) as Record<string, EarnMission>,
     streak: live.daily.data?.current_streak ?? 0,
@@ -342,7 +345,7 @@ export function EarnPage() {
             <h1>Grow your journey.</h1>
             <p>Claim daily rewards, complete missions, expand your network and sharpen your skills.</p>
           </div>
-          <button type="button" disabled={live.remote} title={live.remote ? "History is currently unavailable" : undefined} onClick={() => setHistoryOpen(true)}>
+          <button type="button" onClick={() => setHistoryOpen(true)}>
             History
             <HugeiconsIcon icon={ArrowRight01Icon} size={14} strokeWidth={1.7} />
           </button>
@@ -525,7 +528,7 @@ export function EarnPage() {
                     <p>Connect a Telegram community, make Dalexio an admin and earn from verified member activity.</p>
                   </div>
                   <div className={styles.groupStats}><span>Connected <strong>{earn.connectedGroups}</strong></span><span>Active <strong>{earn.activeGroups}</strong></span><span>Earned <strong>{formatNumber(earn.groupXpEarned)} XP</strong></span></div>
-                  <Button disabled={live.remote && (!live.network.data?.can_register || live.isPending("group-register"))} trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={17} strokeWidth={1.8} />} onClick={addToGroup}>Add bot to a group</Button>
+                  <Button className={styles.addBotCta} disabled={live.remote && (!live.network.data?.can_register || live.isPending("group-register"))} trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={17} strokeWidth={1.8} />} onClick={addToGroup}>Add bot to a group</Button>
                 </section>
 
                 <section className={styles.groupRoster}>
@@ -534,7 +537,7 @@ export function EarnPage() {
                     {live.remote && !groupRows.length ? <div className={styles.emptyState}><strong>{live.groups.isPending ? "Loading communities…" : live.groups.isError ? "Communities unavailable." : "No connected communities yet."}</strong></div> : null}
                     {groupRows.map((group) => (
                       <article key={group.id} aria-label={group.name}>
-                        <span className={`${styles.avatar} ${styles[`avatar_${group.tone}`]}`}><AvatarContent owner={`group:${group.id}`} photoUrl={"photoUrl" in group ? group.photoUrl : undefined} fallback={initials(group.name)} /></span>
+                        <span className={`${styles.avatar} ${styles.groupAvatar} ${styles[`avatar_${group.tone}`]}`}><AvatarContent owner={`group:${group.id}`} photoUrl={"photoUrl" in group ? group.photoUrl : undefined} fallback={initials(group.name)} /></span>
                         <div className={styles.rosterIdentity}><strong>{group.name}</strong><span>{formatNumber(group.members)} {live.remote ? "qualified speakers" : "members"} · {group.meta}</span>
 
                         </div>
@@ -611,7 +614,7 @@ export function EarnPage() {
         </DeferredMount>
       </main>
 
-      <HistorySheet open={historyOpen} onClose={() => setHistoryOpen(false)} history={earn.history} />
+      <HistorySheet open={historyOpen} onClose={() => setHistoryOpen(false)} history={live.remote ? rewardHistory.items.map(rewardHistoryView) : earn.history} remote={live.remote} loading={live.remote && rewardHistory.isPending} error={live.remote && rewardHistory.isError} fetching={rewardHistory.isFetching} hasNext={rewardHistory.hasNextPage && !rewardHistory.isFetchNextPageError} loadMore={rewardHistory.fetchNextPage} />
       <NetworkGuideSheet kind={guideOpen} onClose={() => setGuideOpen(null)} />
       <RewardReveal reward={earn.rewardEvent} onClose={earn.dismissReward} />
       <LevelUpReveal event={earn.rewardEvent ? null : earn.levelUpEvent} onClose={earn.dismissLevelUp} />
