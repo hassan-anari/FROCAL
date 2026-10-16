@@ -25,6 +25,7 @@ export async function prepareB4(page: Page) {
     notifications: [{ id: "00000000-0000-4000-8000-000000000001", deep_link: null as { path: string } | null, type: "MISSION", title: "Mission complete", body: "Your mission has been verified.", payload: {}, created_at: "2026-10-15T08:00:00Z", read_at: null as string | null, unread: true }],
     calls: [] as { path: string; method: string; query: string }[], dailyDelay: 0, missionDelay: 0, saveDelay: 0, saveError: false, failDaily: false, duplicate: false,
     historyPeriodChanged: false,
+    rankingOverlap: false,
   };
   state.bootstrap.features = { ...state.bootstrap.features, base_tap: false, clan: false, profile: true, arena: true };
   await page.addInitScript(() => {
@@ -91,6 +92,7 @@ export async function prepareB4(page: Page) {
     if (path === "/arena/rankings/players") {
       const offset = Number(url.searchParams.get("offset") ?? 0);
       const items = Array.from({ length: offset === 0 ? 30 : 2 }, (_, i) => ({ rank: offset + i + 1, player_id: offset + i + 1, first_name: `Explorer ${offset + i + 1}`, username: "", avatar_url: "", level: 2, season_points: 5000 - (offset + i) * 10, clan: null }));
+      if (offset > 0 && state.rankingOverlap) items.unshift({ ...items[0], player_id: 30, first_name: "Explorer 30" });
       return send({ items, own_standing: { ...items[0], rank: 50, player_id: 9001, season_points: 270 }, offset, limit: 30 });
     }
     if (path === "/arena/rankings/clans") return send({ items: [{ rank: 1, clan_id: 1, name: "Verified Clan", tag: "VC", crest: null, hq_level: 1, member_count: 2, capacity: 10, competitive_score: 100 }], own_standing: null, offset: 0, limit: 30 });

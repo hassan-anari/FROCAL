@@ -514,9 +514,17 @@ function Rankings({ mode, onMode, rankedClans, ownClan, level, currentName, curr
   const { bootstrap } = useBootstrap();
   const remote = isRemoteDataSource();
   const pages = live.data?.pages ?? [];
-  const players: ArenaPlayerRank[] = remote ? pages.flatMap(page => page.items).flatMap(row => "player_id" in row ? [{ id: row.player_id, name: row.first_name, handle: row.username, level: row.level, score: row.season_points, rank: row.rank, clan: row.clan?.name ?? null, initials: getIdentityInitials(row.first_name), accentHue: getIdentityHue(row.first_name), photoUrl: row.avatar_url }] : []) : arenaPlayerRanking;
+  const rows = useMemo(() => {
+    const seen = new Set<string>();
+    return pages.flatMap(page => page.items).filter(row => {
+      const id = "player_id" in row ? `player:${row.player_id}` : `clan:${row.clan_id}`;
+      if (seen.has(id)) return false;
+      seen.add(id); return true;
+    });
+  }, [pages]);
+  const players: ArenaPlayerRank[] = remote ? rows.flatMap(row => "player_id" in row ? [{ id: row.player_id, name: row.first_name, handle: row.username, level: row.level, score: row.season_points, rank: row.rank, clan: row.clan?.name ?? null, initials: getIdentityInitials(row.first_name), accentHue: getIdentityHue(row.first_name), photoUrl: row.avatar_url }] : []) : arenaPlayerRanking;
   const toClan = (row: { clan_id: string; name: string; tag: string; hq_level: number; member_count: number; capacity: number; rank: number; competitive_score: number; crest: string | null }): RankedClan => ({ id: row.clan_id, name: row.name, tag: row.tag, level: row.hq_level, members: row.member_count, capacity: row.capacity, rank: row.rank, score: row.competitive_score, imageUrl: row.crest });
-  const clans = remote ? pages.flatMap(page => page.items).flatMap(row => "clan_id" in row ? [toClan(row)] : []) : rankedClans;
+  const clans = remote ? rows.flatMap(row => "clan_id" in row ? [toClan(row)] : []) : rankedClans;
   const standing = pages[0]?.own_standing;
   const currentClan = remote ? standing && "clan_id" in standing ? toClan(standing) : null : ownClan;
   const ownRank = remote ? standing?.rank : arenaSeason.playerRank;

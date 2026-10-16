@@ -16,9 +16,9 @@
   {
     "viewport": 320,
     "screen": "arena-warfront",
-    "changed_pixels": 274,
+    "changed_pixels": 0,
     "total_pixels": 224000,
-    "percentage": 0.122
+    "percentage": 0.0
   },
   {
     "viewport": 320,
@@ -37,7 +37,7 @@
   {
     "viewport": 320,
     "screen": "earn-daily",
-    "changed_pixels": 101911,
+    "changed_pixels": 101910,
     "total_pixels": 224000,
     "percentage": 45.496
   },
@@ -47,6 +47,13 @@
     "changed_pixels": 12463,
     "total_pixels": 224000,
     "percentage": 5.564
+  },
+  {
+    "viewport": 320,
+    "screen": "mission-completed",
+    "changed_pixels": 97069,
+    "total_pixels": 224000,
+    "percentage": 43.334
   },
   {
     "viewport": 320,
@@ -79,9 +86,9 @@
   {
     "viewport": 320,
     "screen": "profile-customize",
-    "changed_pixels": 40149,
+    "changed_pixels": 40182,
     "total_pixels": 224000,
-    "percentage": 17.924
+    "percentage": 17.938
   },
   {
     "viewport": 320,
@@ -163,9 +170,9 @@
   {
     "viewport": 390,
     "screen": "arena-warfront",
-    "changed_pixels": 0,
+    "changed_pixels": 61,
     "total_pixels": 329160,
-    "percentage": 0.0
+    "percentage": 0.019
   },
   {
     "viewport": 390,
@@ -194,6 +201,13 @@
     "changed_pixels": 144208,
     "total_pixels": 329160,
     "percentage": 43.811
+  },
+  {
+    "viewport": 390,
+    "screen": "mission-completed",
+    "changed_pixels": 74778,
+    "total_pixels": 329160,
+    "percentage": 22.718
   },
   {
     "viewport": 390,
@@ -226,9 +240,9 @@
   {
     "viewport": 390,
     "screen": "profile-customize",
-    "changed_pixels": 72960,
+    "changed_pixels": 73002,
     "total_pixels": 329160,
-    "percentage": 22.166
+    "percentage": 22.178
   },
   {
     "viewport": 390,
@@ -310,9 +324,9 @@
   {
     "viewport": 460,
     "screen": "arena-warfront",
-    "changed_pixels": 0,
+    "changed_pixels": 46,
     "total_pixels": 414000,
-    "percentage": 0.0
+    "percentage": 0.011
   },
   {
     "viewport": 460,
@@ -341,6 +355,13 @@
     "changed_pixels": 178334,
     "total_pixels": 414000,
     "percentage": 43.076
+  },
+  {
+    "viewport": 460,
+    "screen": "mission-completed",
+    "changed_pixels": 108870,
+    "total_pixels": 414000,
+    "percentage": 26.297
   },
   {
     "viewport": 460,
@@ -373,9 +394,9 @@
   {
     "viewport": 460,
     "screen": "profile-customize",
-    "changed_pixels": 268782,
+    "changed_pixels": 268939,
     "total_pixels": 414000,
-    "percentage": 64.923
+    "percentage": 64.961
   },
   {
     "viewport": 460,

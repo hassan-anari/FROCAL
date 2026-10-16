@@ -100,12 +100,14 @@ test("Network refreshes on entry/return/resume, preserves pending invitees and e
 
 test("Arena binds server order, own standing and scroll pagination while Warfront stays locked", async ({ page }) => {
   const state = await prepareB4(page);
+  state.rankingOverlap = true;
   await page.goto(launch("/arena"));
   await expect(page.getByRole("button", { name: "Unlocks in Season 2", exact: true })).toBeDisabled();
   await page.getByRole("button", { name: "Rankings", exact: true }).click();
   await expect(page.getByText("Explorer 1", { exact: true })).toBeVisible();
   await page.getByText("Explorer 30", { exact: true }).scrollIntoViewIfNeeded();
   await expect(page.getByText("Explorer 32", { exact: true })).toHaveCount(1);
+  await expect(page.getByText("Explorer 30", { exact: true })).toHaveCount(1);
   await expect(page.getByText("#50", { exact: true })).toHaveCount(1);
   expect(state.calls.some(c => c.query.includes("offset=30"))).toBe(true);
   await page.getByRole("button", { name: "Clans", exact: true }).click();

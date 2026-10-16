@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { mkdirSync } from "node:fs";
-import { launch, prepareB4 } from "./b4-fixture";
+import { fixture, launch, prepareB4 } from "./b4-fixture";
 const phase = process.env.B4_BASELINE ? "before" : "after";
 for (const viewport of [{ width: 320, height: 700 }, { width: 390, height: 844 }, { width: 460, height: 900 }]) {
   test(`preservation evidence ${phase} ${viewport.width}`, async ({ page }) => {
@@ -28,6 +28,14 @@ for (const viewport of [{ width: 320, height: 700 }, { width: 390, height: 844 }
     await shot("earn-daily");
     await page.getByRole("heading", { name: "Completed Missions", exact: true }).scrollIntoViewIfNeeded();
     await shot("earn-missions");
+    const availableMissions = state.missions;
+    state.missions = state.missions.map((mission: any) => mission.key === fixture.mission_claim.response.key ? { ...mission, state: "CLAIMED", claimed_at: fixture.mission_claim.response.claimed_at } : mission);
+    await page.reload();
+    await page.waitForTimeout(1000);
+    await page.locator('section[aria-label="Completed missions"] article').first().evaluate(card => card.scrollIntoView({ block: "center", behavior: "instant" }));
+    await shot("mission-completed");
+    state.missions = availableMissions;
+    await page.reload();
     await page.getByRole("button", { name: "Network", exact: true }).click();
     await page.getByRole("heading", { name: "Grow with people and groups." }).scrollIntoViewIfNeeded();
     await shot("network");
@@ -106,6 +114,8 @@ for (const viewport of [{ width: 320, height: 700 }, { width: 390, height: 844 }
       await expect(page.getByRole("dialog", { name: "Dexo level up" })).toBeVisible();
       await shot("level-reveal");
       await page.getByRole("button", { name: "Return to Earn", exact: true }).click();
+      await page.locator("[data-game-scroll]").evaluate(e => e.scrollTop = 0);
+      await shot("daily-completed");
       await page.goto(launch("/profile"));
       state.saveError = true;
       await page.getByRole("button", { name: "Overview", exact: true }).click();

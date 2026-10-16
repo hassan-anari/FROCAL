@@ -80,3 +80,5 @@ Published B4 receipts, private images, notification navigation/read-all, typed a
 Additional mobile captures at every width show [referral image](evidence/b4/390/after-referral-private-image.png), [group image](evidence/b4/390/after-group-private-image.png) and [the approved minimal transient error over the existing Profile sheet](evidence/b4/390/after-transient-error.png). Images are synthetic test assets, not user images. Browser checks prove both successful delivery and initials fallback for each avatar type.
 
 [Machine-readable local verification](evidence/b4/verification.json). Full route/endpoint behavior, exact pins and independent-review limitations are in [B4_FRONTEND_REPORT.md](B4_FRONTEND_REPORT.md).
+
+Completed-state proof at all widths: [Mission before](evidence/b4/390/before-mission-completed.png) / [Mission after](evidence/b4/390/after-mission-completed.png) show the preserved card/action with one Completed label. [Claimed Daily](evidence/b4/390/after-daily-completed.png) shows the owner-selected checkmark-circle-02 and Claimed today heading/action after the original reward overlays close.
