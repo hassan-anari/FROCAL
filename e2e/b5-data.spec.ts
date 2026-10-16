@@ -84,14 +84,14 @@ test("Notification Center numbering follows the flattened page order while mutat
   expect(readPath).toBe("/api/v1/notifications/00000000-0000-4000-8000-000000000022/read");
   await expect(page.getByRole("button", { name: "Customize", exact: true })).toBeVisible();
 });
-test("historical local Clan state cannot unlock production even when the backend feature flag is true", async ({ page }) => {
+test("historical local Clan state cannot unlock production when the actual Clan read is unavailable", async ({ page }) => {
   const state = await prepareB4(page);
   state.bootstrap.features.clan = true;
   await page.addInitScript(() => localStorage.setItem("dalexio-clan-state-v1", JSON.stringify({ version: 0, state: { role: "captain", membership: "member", activeClanId: "nova-vanguard", treasury: 999999 } })));
   await page.goto(launch("/clan"));
   await expect(page.getByRole("button", { name: "Lead a clan" })).toHaveCount(0);
   await expect(page.getByText("999999")).toHaveCount(0);
-  await expect(page.getByRole("heading", { name: "Your clan path waits ahead." })).toBeVisible();
+  await expect(page.getByText("Clan couldn't load. Please try again.", { exact: true })).toBeVisible();
   expect(state.calls.some(call => call.path.startsWith("/clans") && call.method !== "GET")).toBe(false);
 });
 test("history displays pending and continuation-error states without a replacement sheet or fake entries", async ({ page }) => {
@@ -117,7 +117,7 @@ test("history displays pending and continuation-error states without a replaceme
 test("external HTTPS banner uses Telegram openLink with its full query string", async ({ page }) => {
   await prepareB4(page);
   const banner = JSON.parse((await import("node:fs")).readFileSync("src/integrations/api/fixtures/b3/banners.json", "utf8")).active;
-  const destination = "https://owner-approved-partner.example/offer?campaign=B5&next=%2Fjoin%3Fref%3Dtma#details";
+  const destination = "https://owner-approved-partner.example/offer?campaign=B5&next=%2Fjoin%3Fref%3Dtma";
   banner.banner.destination_type = "HTTPS"; banner.banner.destination = destination;
   await page.addInitScript(() => {
     (window as any).__externalLinks = [];

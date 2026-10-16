@@ -255,6 +255,7 @@ jobs:
         working-directory: work/backend-b5
       - run: npm ci
       - run: npm run validate:contracts
+      - run: npx playwright install --with-deps chromium
       - run: npm run test:paired:b5-contract
       - uses: actions/upload-artifact@v4
         if: always()

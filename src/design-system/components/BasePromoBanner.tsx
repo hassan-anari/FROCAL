@@ -12,6 +12,21 @@ import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
 import styles from "@/pages/BasePage.module.css";
 
+/** Banner-only parity with WEDCAL's literal HTTPS validation; general app navigation stays unchanged. */
+function safeBannerUrl(value: string): boolean {
+  if (value.startsWith("/")) return true; // Already checked against the internal route policy.
+  if (value.length > 2048 || value.includes("#") || /%(?![0-9a-f]{2})/i.test(value)) return false;
+  try {
+    const literal = /^https:\/\/([^/?#]+)([^?#]*)/i.exec(value);
+    if (!literal) return false;
+    const decoded = decodeURIComponent(value);
+    const path = decodeURIComponent(literal[2]);
+    if (/[\u0000-\u001f\u007f\\<>"`%]/.test(decoded) || path.startsWith("//") || path.split("/").some(part => part === "." || part === "..")) return false;
+    const host = new URL(value).hostname;
+    return host.startsWith("[") || host.replace(/\.$/, "").split(".").every(label => /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/i.test(label));
+  } catch { return false; }
+}
+
 export function validBanner(
   value: ReturnType<typeof bannerSchema.parse>["banner"],
 ) {
@@ -44,10 +59,10 @@ export function validBanner(
     : null;
   if (
     value.destination &&
-    (!destination ||
+    (!destination || !safeBannerUrl(value.destination) ||
       (value.destination_type === "TELEGRAM" &&
-        destination.kind !== "telegram") ||
-      (value.destination_type === "HTTPS" && destination.kind === "telegram"))
+        (destination.kind !== "telegram" || new URL(value.destination).hostname !== "t.me")) ||
+      (value.destination_type === "HTTPS" && !value.destination.startsWith("/") && new URL(value.destination).hostname === "t.me"))
   )
     return null;
   if (Boolean(value.destination) !== Boolean(value.destination_type))
@@ -89,7 +104,9 @@ export function BasePromoBanner() {
                 href={banner.destination}
                 onClick={(event) => {
                   event.preventDefault();
-                  navigateSafely(banner.destination, adapter, (to) => {
+                  const destination = safeDestination(banner.destination);
+                  if (banner.destination_type === "HTTPS" && destination && destination.kind !== "internal") adapter.openExternalLink(destination.url);
+                  else navigateSafely(banner.destination, adapter, (to) => {
                     void navigate({ to });
                   });
                 }}

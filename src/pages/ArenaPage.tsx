@@ -221,7 +221,7 @@ function ArenaOverview({
 
 function TargetCard({ clan, ownClan, onInspect }: { clan: ClanSummary; ownClan: ClanSummary; onInspect: () => void }) {
   const levelGap = Math.abs(clan.level - ownClan.level);
-  const rankGap = Math.abs(clan.rank - ownClan.rank);
+  const rankGap = Math.abs((clan.rank ?? Infinity) - (ownClan.rank ?? Infinity));
   const fit = Math.max(72, 98 - levelGap * 5 - Math.min(16, rankGap));
   const protectedClan = clan.id === "ion-citadel";
   return (
@@ -230,7 +230,7 @@ function TargetCard({ clan, ownClan, onInspect }: { clan: ClanSummary; ownClan: 
       <div className={styles.targetCopy}>
         <div><strong>{clan.name}</strong>{protectedClan ? <em>PROTECTED</em> : <em>{fit}% TIER FIT</em>}</div>
         <span>HQ LVL {clan.level} · Rank #{clan.rank} · {clan.members}/{clan.capacity} members</span>
-        <p>{8 + (clan.rank % 4)}W · {2 + (clan.level % 4)}L recent war record</p>
+        <p>{8 + ((clan.rank ?? 0) % 4)}W · {2 + (clan.level % 4)}L recent war record</p>
       </div>
       <HugeiconsIcon icon={ArrowRight01Icon} size={17} strokeWidth={1.65} />
     </button>
@@ -244,8 +244,8 @@ function TargetBrowser({ ownClan, onInspect }: { ownClan: ClanSummary; onInspect
     const available = clanCatalog.filter((entry) => entry.id !== ownClan.id);
     if (normalized) return available.filter((entry) => entry.name.toLowerCase().includes(normalized) || entry.tag.toLowerCase().includes(normalized));
     return [...available].sort((a, b) => {
-      const aScore = Math.abs(a.level - ownClan.level) * 5 + Math.abs(a.rank - ownClan.rank);
-      const bScore = Math.abs(b.level - ownClan.level) * 5 + Math.abs(b.rank - ownClan.rank);
+      const aScore = Math.abs(a.level - ownClan.level) * 5 + Math.abs((a.rank ?? Infinity) - (ownClan.rank ?? Infinity));
+      const bScore = Math.abs(b.level - ownClan.level) * 5 + Math.abs((b.rank ?? Infinity) - (ownClan.rank ?? Infinity));
       return aScore - bScore;
     }).slice(0, 6);
   }, [ownClan.id, ownClan.level, ownClan.rank, query]);
@@ -575,7 +575,7 @@ export function ArenaPage() {
   const rival = getClanById(arena.selectedOpponentId) ?? getClanById("void-runners") ?? clanCatalog[0];
   const captain = clan.role === "captain" && clan.membership === "member";
   const soldier = clan.role === "soldier" && clan.membership === "member";
-  const rankedClans = useMemo(() => [...clanCatalog].sort((a, b) => a.rank - b.rank), []);
+  const rankedClans = useMemo(() => [...clanCatalog].sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity)), []);
 
   useEffect(() => {
     if (experienceMode === "season1") {

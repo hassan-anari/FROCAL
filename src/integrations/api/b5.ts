@@ -18,6 +18,7 @@ async function request<T>(initData: string | null, path: string, schema: z.ZodTy
   if (!result.success) throw new ApiError(0, "RESPONSE_INVALID");
   return result.data;
 }
+const clanResponse = c.ClanOut.required({ level: true, score: true, state: true });
 const reference = (id: number) => String(z.number().int().positive().safe().parse(id));
 /** Exact implemented WEDCAL B5 paths. Callers own intentional mutation/replay keys;
  * no optimistic membership, Treasury, inventory, rewards or governance transitions. */
@@ -29,9 +30,9 @@ export function clanApi(initData: string | null) {
     role: (body: c.RoleIn) => post("/role", c.RoleOut, c.RoleIn.parse(body)),
     eligibleGroups: (signal?: AbortSignal) => get("/eligible-groups", z.array(c.GroupOut), signal),
     verifyGroup: (id: number) => post(`/eligible-groups/${reference(id)}/verify`, c.GroupOut),
-    create: (body: c.ClanCreateIn) => post("/", c.ClanOut, c.ClanCreateIn.parse(body)),
-    discover: (q: string, offset = 0, signal?: AbortSignal) => get(`/?q=${encodeURIComponent(q)}&offset=${z.number().int().nonnegative().parse(offset)}&limit=20`, z.array(c.ClanOut), signal),
-    preview: (id: number, signal?: AbortSignal) => get(`/${reference(id)}`, c.ClanOut, signal),
+    create: (body: c.ClanCreateIn) => post("/", clanResponse, c.ClanCreateIn.parse(body)),
+    discover: (q: string, offset = 0, signal?: AbortSignal) => get(`/?q=${encodeURIComponent(q)}&offset=${z.number().int().nonnegative().parse(offset)}&limit=20`, z.array(clanResponse), signal),
+    preview: (id: number, signal?: AbortSignal) => get(`/${reference(id)}`, clanResponse, signal),
     join: (id: number) => post(`/${reference(id)}/join-requests`, c.RequestOut),
     ownRequests: (signal?: AbortSignal) => get("/join-requests/current", z.array(c.OwnRequestOut), signal),
     cancelRequest: (id: number) => request(initData, `/join-requests/${reference(id)}`, c.RequestOut, { method: "DELETE" }),

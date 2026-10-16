@@ -1,0 +1,86 @@
+import { useState } from "react";
+import { ClanModal } from "./ClanOverlays";
+import { Button } from "@/design-system/primitives/Button";
+import { useTelegram } from "@/integrations/telegram/TelegramProvider";
+import { safeDestination } from "@/integrations/api/safeNavigation";
+import type { ClanRemote } from "@/integrations/api/useClanRemote";
+import type { InviteOut } from "@/integrations/api/b5Schemas";
+import styles from "./ClanOverlays.module.css";
+const removalReasons = ["ABUSIVE_BEHAVIOR", "SPAM", "HARASSMENT", "SABOTAGE", "COMMUNITY_REASON", "OTHER"] as const;
+const words = (value: string | null | undefined) => value ? value.replaceAll("_", " ") : "—";
+const time = (value: string | null | undefined) => value ? new Date(value).toLocaleString("en-US") : "—";
+/** Owner-approved extension of the existing ClanModal, using backend state and rules only. */
+export function ClanStatusSheet({ live, onClose }: { live: ClanRemote; onClose: () => void }) {
+  const { adapter } = useTelegram();
+  const [mode, setMode] = useState<"status" | "leave" | "dissolve" | "removal">("status");
+  const [target, setTarget] = useState("");
+  const [reason, setReason] = useState("");
+  // Disposable credentials are deliberately excluded from Query/localStorage/sessionStorage.
+  const [invite, setInvite] = useState<InviteOut | null>(null);
+  const state = live.state.data;
+  const member = live.membership.data;
+  const request = live.currentRequest;
+  const captain = member?.role === "CAPTAIN";
+  const busy = live.pending !== null;
+  const leaveAllowed = member?.role === "SOLDIER" && state !== undefined && state.voluntary_leave_count < state.max_voluntary_leaves;
+  const activeRequest = request && ["PENDING", "ACCEPTED"].includes(request.state);
+  const needsInvite = request?.state === "ACCEPTED" || member?.access_state === "ACCESS_LOST";
+  const destination = invite?.state === "ACTIVE" ? safeDestination(invite.invite_link) : null;
+  const complete = async (action: string, operation: () => Promise<unknown>) => { if (await live.run(action, operation) !== undefined) { setInvite(null); setMode("status"); } };
+  if (mode !== "status") return (
+    <ClanModal eyebrow="Clan governance" title={mode === "leave" ? "Leave Clan" : mode === "dissolve" ? "Request dissolution" : "Propose member removal"} onClose={onClose} footer={
+      <div className={styles.doubleActions}>
+        <Button size="sm" tone="secondary" onClick={() => setMode("status")} disabled={busy}>Go back</Button>
+        <Button size="sm" disabled={busy || (mode === "leave" && !leaveAllowed) || (mode === "removal" && (!target || !reason.trim()))} onClick={() => void complete(mode, () => mode === "leave" ? live.api.leave() : mode === "dissolve" ? live.api.dissolve() : live.api.removalCase({ target_membership_id: Number(target), reason: reason.trim() }))}>Confirm</Button>
+      </div>
+    }>
+      <div className={styles.centerCopy}>
+        <strong>{mode === "leave" ? "Your historical contribution stays with this Clan." : mode === "dissolve" ? "The server determines whether a member vote is required." : "A proposal opens a governed removal case. It does not immediately remove a member."}</strong>
+        {mode === "leave" ? <p>Join cooldown: {state?.leave_cooldown_hours ?? "—"} hours. Leaves used: {state?.voluntary_leave_count ?? "—"} / {state?.max_voluntary_leaves ?? "—"}.</p> : null}
+      </div>
+      {mode === "removal" ? <div className={styles.detailList}>
+        <label>Member <select value={target} onChange={event => setTarget(event.target.value)}><option value="">Select a member</option>{live.rosterRows.filter(row => row.role === "SOLDIER" && !row.own).map(row => <option key={row.membership_id} value={row.membership_id}>{row.first_name || row.username}</option>)}</select></label>
+        <label>Reason <select value={reason} onChange={event => setReason(event.target.value)}><option value="">Select a reason</option>{removalReasons.map(value => <option key={value} value={value}>{words(value)}</option>)}</select></label>
+        {live.roster.hasNextPage ? <Button size="sm" tone="secondary" disabled={live.roster.isFetching} onClick={() => void live.roster.fetchNextPage()}>Load more members</Button> : null}
+      </div> : null}
+    </ClanModal>
+  );
+  return (
+    <ClanModal eyebrow="Clan membership and governance" title="Clan status" onClose={onClose}>
+      <div className={styles.detailList}>
+        <div><span>Role</span><strong>{words(state?.role)}</strong></div>
+        <div><span>Membership</span><strong>{member ? words(member.access_state) : "No active membership"}</strong></div>
+        {request ? <><div><span>Join request</span><strong>{words(request.state)}</strong></div><div><span>Clan</span><strong>{request.clan_name}</strong></div><div><span>Invite</span><strong>{words(request.invite_state)}</strong></div><div><span>Delivery</span><strong>{words(request.delivery_state)}</strong></div>{request.cancellation_pending ? <div><span>Cancellation</span><strong>Revocation pending</strong></div> : null}</> : null}
+        {state?.cooldown_until ? <div><span>Join cooldown until</span><strong>{time(state.cooldown_until)}</strong></div> : null}
+        {member?.access_rejoin_deadline ? <div><span>Access recovery deadline</span><strong>{time(member.access_rejoin_deadline)}</strong></div> : null}
+        {live.recovery.data ? <><div><span>Clan state</span><strong>{words(live.recovery.data.state)}</strong></div><div><span>Recovery</span><strong>{words(live.recovery.data.reason)}</strong></div><div><span>Group access</span><strong>{live.recovery.data.home_integrity_available ? "Available" : "Admin recovery required"}</strong></div>{live.recovery.data.bot_admin_restore_deadline ? <div><span>Admin recovery deadline</span><strong>{time(live.recovery.data.bot_admin_restore_deadline)}</strong></div> : null}</> : null}
+      </div>
+      {request?.state === "ACCEPTED" && !member ? <p className={styles.note}>Acceptance reserves a place. Membership activates after the backend verifies your Telegram presence.</p> : null}
+      {needsInvite ? <div className={styles.detailList}>
+        <Button size="sm" tone="secondary" disabled={busy} onClick={() => { setInvite(null); void live.run("invite", () => live.api.invite()).then(value => { if (value) setInvite(value); }); }}>Check invite and access</Button>
+        {invite ? <div><span>Current credential</span><strong>{words(invite.state)} · {words(invite.delivery_state)}</strong></div> : null}
+        {destination?.kind === "telegram" ? <Button size="sm" onClick={() => adapter.openTelegramLink(destination.url)}>Open Telegram group</Button> : null}
+      </div> : null}
+      <div className={styles.doubleActions}>
+        <Button size="sm" tone="secondary" disabled={busy} onClick={() => { setInvite(null); void live.refresh(); }}>Refresh status</Button>
+        {activeRequest && !member ? <Button size="sm" tone="secondary" disabled={busy || request.cancellation_pending} onClick={() => void complete("cancel", () => live.api.cancelRequest(request.id))}>Cancel request</Button> : null}
+        {member?.role === "SOLDIER" ? <Button size="sm" tone="secondary" disabled={busy || !leaveAllowed} onClick={() => setMode("leave")}>Leave Clan</Button> : null}
+        {captain ? <><Button size="sm" tone="secondary" disabled={busy || live.rosterRows.filter(row => row.role === "SOLDIER").length === 0} onClick={() => setMode("removal")}>Propose removal</Button><Button size="sm" tone="secondary" disabled={busy || live.recovery.data?.state !== "ACTIVE"} onClick={() => setMode("dissolve")}>Request dissolution</Button></> : null}
+      </div>
+      {(live.governance.data ?? []).map(governance => <section key={governance.id} className={styles.detailList}>
+        <div><span>{words(governance.case_type)}</span><strong>{words(governance.status)}</strong></div>
+        <p>{governance.reason}</p>
+        <div><span>Deadline</span><strong>{time(governance.voting_deadline)}</strong></div>
+        <div><span>Eligible voters</span><strong>{governance.eligible_count}</strong></div>
+        <div><span>Quorum</span><strong>{governance.quorum_bps / 100}%</strong></div>
+        <div><span>Approval</span><strong>{governance.approval_bps / 100}%</strong></div>
+        <div><span>Minimum voters</span><strong>{governance.minimum_eligible_voters}</strong></div>
+        <div><span>Your vote</span><strong>{words(governance.own_vote)}</strong></div>
+        {governance.yes_count !== null ? <div><span>Final votes</span><strong>{governance.yes_count} yes · {governance.no_count} no</strong></div> : null}
+        {governance.result ? <div><span>Result</span><strong>{words(governance.result)}</strong></div> : null}
+        {governance.status === "OPEN" ? <div className={styles.doubleActions}>{(["YES", "NO"] as const).map(choice => <Button key={choice} size="sm" tone="secondary" disabled={busy || !governance.is_eligible_voter || Boolean(governance.own_vote)} onClick={() => void complete(`vote:${governance.id}`, () => live.api.vote(governance.id, { choice }))}>Vote {choice.toLowerCase()}</Button>)}</div> : null}
+      </section>)}
+      {live.governance.isError || live.recovery.isError ? <p role="status">Clan status couldn't load fully. Refresh to try again.</p> : null}
+    </ClanModal>
+  );
+}

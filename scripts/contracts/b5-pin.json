@@ -46,6 +46,10 @@
     "scripts/contracts/b5/source/apps/rewards/api.py": {
       "path": "apps/rewards/api.py",
       "blob": "53226ae49aee302cf6d8031ecbfac84ff2383a29"
+    },
+    "scripts/contracts/b5/source/apps/content/services.py": {
+      "path": "apps/content/services.py",
+      "blob": "04d696b50347a1441cf0ba7bb2a2bfb56fc5e5a5"
     }
   }
 }

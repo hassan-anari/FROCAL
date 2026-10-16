@@ -20,5 +20,17 @@ try {
   // stay at Telegram boundaries; no shared database, production request or live send.
   await run(resolve(backend, ".venv/bin/python"), ["-m", "pytest", "apps/clans/tests", "-q", `--junitxml=${output}/backend.xml`], { cwd: backend, env: { ...process.env, B5_EXPORT_FIXTURES: "1" } });
   const fresh = resolve(output, "clan-http.json"); writeFileSync(fresh, readFileSync(fixturePath));
-  await run("npx", ["vitest", "run", "--config", "vitest.b5-paired.config.ts"], { env: { ...process.env, B5_LIVE_FIXTURE: fresh } });
+  const environment = { ...process.env, B5_BACKEND_ROOT: backend, B5_LIVE_FIXTURE: fresh };
+  const server = spawn(resolve(backend, ".venv/bin/python"), ["scripts/contracts/b2_server.py"], { stdio: "inherit", env: environment });
+  try {
+    let ready = false;
+    for (let i = 0; i < 120; i++) {
+      if (server.exitCode !== null) throw new Error("B5 HTTP harness failed to start");
+      try { if ((await fetch("http://127.0.0.1:8792/__ready__")).ok) { ready = true; break; } } catch {}
+      await new Promise(done => setTimeout(done, 250));
+    }
+    if (!ready) throw new Error("B5 HTTP readiness failed");
+    await run("npx", ["vitest", "run", "--config", "vitest.b5-paired.config.ts"], { env: environment });
+    await run("npx", ["playwright", "test", "--config", "playwright.b5-paired.config.ts"], { env: environment });
+  } finally { server.kill("SIGTERM"); }
 } finally { writeFileSync(fixturePath, original); }
