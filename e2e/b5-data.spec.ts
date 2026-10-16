@@ -116,7 +116,6 @@ test("external HTTPS banner uses Telegram openLink with its full query string", 
   banner.banner.destination_type = "HTTPS"; banner.banner.destination = destination;
   await page.addInitScript(() => {
     (window as any).__externalLinks = [];
-    window.Telegram = { WebApp: { platform: "android", openLink: url => { (window as any).__externalLinks.push(url); } } };
   });
   await page.route("**/api/v1/content/banners/BASE", route => route.fulfill({ json: banner }));
   await page.route("https://assets.example.test/**", route => route.fulfill({ contentType: "image/webp", path: "e2e/fixtures/banner.webp" }));
@@ -124,7 +123,12 @@ test("external HTTPS banner uses Telegram openLink with its full query string", 
   const placement = page.getByLabel("Promotional banner placement");
   await expect(placement).toBeVisible();
   await expect(placement.locator("a")).toHaveAttribute("href", destination);
-  await placement.locator("a").click();
+  await page.evaluate(() => {
+    const app = window.Telegram?.WebApp;
+    if (!app) throw new Error("Official local Telegram SDK did not initialize");
+    app.openLink = url => { (window as any).__externalLinks.push(url); };
+  });
+  await placement.locator("img").click();
   expect(await page.evaluate(() => (window as any).__externalLinks)).toEqual([destination]);
   expect(new URL(page.url()).pathname).toBe("/base");
 });
