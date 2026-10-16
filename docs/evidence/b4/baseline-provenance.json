@@ -1,0 +1,7 @@
+{
+  "source_commit": "ae91624f23a48d8a9973154520284706a9df1c21",
+  "renderer": "same Playwright/browser installation as the subsequent B4 gate",
+  "platform": "linux",
+  "architecture": "x64",
+  "node": "v24.19.0"
+}

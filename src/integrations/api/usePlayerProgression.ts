@@ -14,12 +14,13 @@ export function usePlayerProgression() {
   const tap = useTapSession()?.view;
   if (isRemoteDataSource() && canonical && canonical.receipt_cursor > (tap?.committed?.receiptCursor ?? -1)) {
     const p = canonical.progression;
-    return { level: p.level, levelXp: p.points_into_level, xpToNextLevel: p.next_threshold === null ? Math.max(1,p.points_into_level) : p.next_threshold - p.current_threshold, lifetimeXp: p.lifetime_points };
+    return { stage: p.dexo_stage, level: p.level, levelXp: p.points_into_level, xpToNextLevel: p.next_threshold === null ? Math.max(1,p.points_into_level) : p.next_threshold - p.current_threshold, lifetimeXp: p.lifetime_points };
   }
   return isRemoteDataSource() ? {
+    stage: tap?.progression?.stage ?? bootstrap.data?.dexo.stage ?? "newborn",
     level: tap?.progression?.level ?? player?.level ?? 1,
     levelXp: tap?.progression?.pointsIntoLevel ?? player?.xp ?? 0,
     xpToNextLevel: tap?.progression?.levelSpan ?? player?.xpToNextLevel ?? 1,
     lifetimeXp: tap?.lifetime ?? player?.lifetimeXp ?? 0,
-  } : { level: local.level, levelXp: local.levelXp, xpToNextLevel: local.xpToNextLevel, lifetimeXp: local.lifetimeXp };
+  } : { stage: bootstrap.data?.dexo.stage ?? "newborn", level: local.level, levelXp: local.levelXp, xpToNextLevel: local.xpToNextLevel, lifetimeXp: local.lifetimeXp };
 }

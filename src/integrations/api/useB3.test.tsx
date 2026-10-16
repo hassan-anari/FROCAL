@@ -3,6 +3,7 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import type { ReactNode } from "react";
 import fixture from "./fixtures/b3/earn-network.json";
+import b4 from "./fixtures/b4/profile-earn.json";
 import { remoteBootstrapSchema, configCacheScope } from "./bootstrapContract";
 import { mapRemoteBootstrap } from "./bootstrap";
 import { queryKeys } from "./queryKeys";
@@ -43,6 +44,7 @@ function setup(post: (path: string, options: any) => Promise<any>) {
     "/daily": fixture.daily_available,
     "/missions": fixture.mission_list,
     "/typing": fixture.typing_state,
+    "/typing/history?period=current&limit=20": { period: "current", period_key: "2026-10-15T00:00:00+00:00", period_start: "2026-10-15T00:00:00Z", period_end: "2026-10-16T00:00:00Z", items: [], next_cursor: null },
     "/referrals": fixture.referral,
     "/referrals/invitees?offset=0&limit=30": fixture.invitees_empty,
     "/network": fixture.network_summary,
@@ -92,7 +94,8 @@ it("coalesces repeated Daily clicks and never commits an optimistic reward", asy
     finish(fixture.daily_duplicate.response);
     await action;
   });
-  expect(h.result.current.message).toContain("already");
+  expect(h.result.current.message).toBeNull();
+  expect(h.result.current.rewardEvent).toBeNull();
   h.unmount();
   h.client.clear();
 });
@@ -139,4 +142,88 @@ it("keeps Telegram verification failures recoverable without claiming XP", async
   expect(h.result.current.busy).toBe(false);
   h.unmount();
   h.client.clear();
+});
+
+it("reveals only newly confirmed exact XP, once, and never on refetch or duplicate", async () => {
+  const h = setup(async () => fixture.daily_claim.response);
+  await waitFor(() => expect(h.result.current.daily.data).toBeTruthy());
+  expect(h.result.current.rewardEvent).toBeNull();
+  await act(async () => { await h.result.current.claimDaily(); });
+  expect(h.result.current.rewardEvent).toMatchObject({ xp: fixture.daily_claim.response.reward_amount, title: "Daily Core" });
+  act(() => h.result.current.dismissReward());
+  await act(async () => { await h.result.current.refresh(); await h.result.current.claimDaily(); });
+  expect(h.result.current.rewardEvent).toBeNull();
+  expect(h.result.current.message).toBeNull();
+  h.unmount(); h.client.clear();
+});
+
+it("isolates mission pending state from Daily and queues the existing level reveal after settlement", async () => {
+  const response = structuredClone(fixture.mission_claim.response);
+  response.canonical = { ...response.canonical, receipt_cursor: 4, progression: { ...response.canonical.progression, level: 5, lifetime_points: 2610, current_threshold: 2500, next_threshold: 3800, points_into_level: 110, points_remaining: 1190, dexo_stage: "explorer" } };
+  let finish!: (v: unknown) => void;
+  const gate = new Promise(resolve => { finish = resolve; });
+  const h = setup(async () => gate);
+  await waitFor(() => expect(h.result.current.missions.data).toBeTruthy());
+  act(() => h.client.setQueryData([...queryKeys.player(scope), "b3", "missions"], fixture.mission_list.map(m => ({ ...m, state: m.key === response.key ? "REWARD_READY" : m.state }))));
+  await waitFor(() => expect(h.result.current.missions.data?.find(m => m.key === response.key)?.state).toBe("REWARD_READY"));
+  act(() => h.client.setQueryData(canonicalKey(scope), { ...fixture.canonical_state, progression: { ...fixture.canonical_state.progression, lifetime_points: 2490, level: 4, current_threshold: 1500, next_threshold: 2500, points_into_level: 990, points_remaining: 10 } }));
+  let action!: Promise<unknown>;
+  act(() => { action = h.result.current.missionAction(response.key); });
+  await waitFor(() => expect(h.result.current.pendingAction).toBe(`mission:${response.key}`));
+  expect(h.result.current.daily.data?.claimable).toBe(true);
+  expect(h.result.current.rewardEvent).toBeNull();
+  await act(async () => { finish(response); await action; });
+  expect(h.result.current.rewardEvent?.xp).toBe(response.reward_amount);
+  expect(h.result.current.levelUpEvent).toMatchObject({ previousLevel: 4, newLevel: 5, evolution: true, evolutionTitle: "Explorer" });
+  expect(h.result.current.pendingAction).toBeNull();
+  h.unmount(); h.client.clear();
+});
+
+it("settles independent actions concurrently without changing Daily's pending state or losing either reveal", async () => {
+  let finishDaily!: (v: unknown) => void;
+  let finishTyping!: (v: unknown) => void;
+  const dailyGate = new Promise(resolve => { finishDaily = resolve; });
+  const typingGate = new Promise(resolve => { finishTyping = resolve; });
+  const typingResponse = structuredClone(fixture.typing_claim.response);
+  const dailyResponse = structuredClone(fixture.daily_claim.response);
+  typingResponse.canonical.progression.level = 2;
+  dailyResponse.canonical.progression.level = 2;
+  const h = setup(async path => path === "/daily/claim" ? dailyGate : typingGate);
+  await waitFor(() => expect(h.result.current.typing.data).toBeTruthy());
+  let daily!: Promise<unknown>, typing!: Promise<unknown>;
+  act(() => { daily = h.result.current.claimDaily(); typing = h.result.current.claimTyping(); });
+  await waitFor(() => expect(h.result.current.isPending("daily")).toBe(true));
+  expect(h.result.current.isPending("typing-claim")).toBe(true);
+  await act(async () => { finishTyping(typingResponse); await typing; });
+  expect(h.result.current.isPending("daily")).toBe(true);
+  expect(h.result.current.rewardEvent?.xp).toBe(70);
+  expect(h.result.current.levelUpEvent?.newLevel).toBe(2);
+  await act(async () => { finishDaily(dailyResponse); await daily; });
+  act(() => h.result.current.dismissReward());
+  expect(h.result.current.rewardEvent).toBeNull();
+  act(() => h.result.current.dismissLevelUp());
+  expect(h.result.current.rewardEvent?.xp).toBe(80);
+  expect(h.result.current.levelUpEvent).toBeNull();
+  act(() => h.result.current.dismissReward());
+  expect(h.result.current.rewardEvent).toBeNull();
+  expect(h.client.getQueryData(canonicalKey(scope))).toMatchObject({ receipt_cursor: 3 });
+  h.unmount(); h.client.clear();
+});
+
+it("deduplicates published ledger events across remounts and never reveals a null B4 receipt", async () => {
+  let response: unknown = b4.daily_claim;
+  let h = setup(async () => response);
+  await waitFor(() => expect(h.result.current.daily.data).toBeTruthy());
+  await act(async () => { await h.result.current.claimDaily(); });
+  expect(h.result.current.rewardEvent).toMatchObject({ id: b4.daily_claim.reward.event_id, xp: b4.daily_claim.reward.amount });
+  h.unmount(); h.client.clear();
+  h = setup(async () => response);
+  await waitFor(() => expect(h.result.current.daily.data).toBeTruthy());
+  await act(async () => { await h.result.current.claimDaily(); });
+  expect(h.result.current.rewardEvent).toBeNull();
+  response = { ...b4.daily_claim, reward: null };
+  localStorage.clear();
+  await act(async () => { await h.result.current.claimDaily(); });
+  expect(h.result.current.rewardEvent).toBeNull();
+  h.unmount(); h.client.clear();
 });

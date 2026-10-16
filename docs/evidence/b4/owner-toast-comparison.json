@@ -1,0 +1,41 @@
+[
+  {
+    "viewport": 320,
+    "previous_frontend_commit": "83e7c00ab5ba98960cd487666323d3ff2ff9b80c",
+    "screen": "after-transient-error",
+    "authorized_change": "Error glyph: information-circle to cancel-square; existing notification styling/copy/layout retained",
+    "glyph_region": [
+      30,
+      28,
+      60,
+      57
+    ],
+    "changed_glyph_pixels": 186
+  },
+  {
+    "viewport": 390,
+    "previous_frontend_commit": "83e7c00ab5ba98960cd487666323d3ff2ff9b80c",
+    "screen": "after-transient-error",
+    "authorized_change": "Error glyph: information-circle to cancel-square; existing notification styling/copy/layout retained",
+    "glyph_region": [
+      30,
+      28,
+      60,
+      57
+    ],
+    "changed_glyph_pixels": 186
+  },
+  {
+    "viewport": 460,
+    "previous_frontend_commit": "83e7c00ab5ba98960cd487666323d3ff2ff9b80c",
+    "screen": "after-transient-error",
+    "authorized_change": "Error glyph: information-circle to cancel-square; existing notification styling/copy/layout retained",
+    "glyph_region": [
+      40,
+      28,
+      70,
+      57
+    ],
+    "changed_glyph_pixels": 186
+  }
+]

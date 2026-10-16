@@ -1,13 +1,14 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { showFeedback } from "@/design-system/components/TransientFeedback";
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { useBootstrap } from "./BootstrapProvider";
 import { isRemoteDataSource } from "./bootstrap";
 import { queryKeys } from "./queryKeys";
 import { b3Request, B3Error } from "./b3";
-import * as c from "./b3Contracts";
+import * as c from "./b4Contracts";
 import { commitCanonical } from "./canonical";
-import type { EarnMission, MissionId } from "@/game/earn/types";
+import type { EarnMission, MissionId, RewardEvent, LevelUpEvent } from "@/game/earn/types";
 
 export function missionView(
   m: c.Mission,
@@ -58,8 +59,9 @@ export function useB3() {
       queryFn: ({ signal }) => b3Request(path, schema, { signal }),
       enabled,
       staleTime: 10_000,
-      refetchInterval: 30_000,
-      refetchOnWindowFocus: true,
+      refetchInterval: name === "groups" || name === "network" || name === "referrals" || name === "invitees" ? false : 30_000,
+      refetchOnMount: "always" as const,
+      refetchOnWindowFocus: !["groups", "network", "referrals", "invitees"].includes(name),
       retry: false,
     });
   const clock = query("canonical", "/rewards/state", c.canonicalSchema);
@@ -81,6 +83,26 @@ export function useB3() {
   const daily = query("daily", "/daily", c.dailySchema);
   const missions = query("missions", "/missions", z.array(c.missionSchema));
   const typing = query("typing", "/typing", c.typingSchema);
+  const typingHistory = useInfiniteQuery({
+    queryKey: key("typing-history-current"),
+    queryFn: ({ pageParam, signal }) => b3Request(`/typing/history?period=current&limit=20${pageParam === null ? "" : `&cursor=${pageParam}`}`, c.currentTypingHistorySchema, { signal }),
+    initialPageParam: null as number | null,
+    getNextPageParam: page => page.next_cursor ?? undefined,
+    enabled, staleTime: 10_000, refetchOnMount: "always", refetchOnWindowFocus: true, retry: false,
+  });
+  const historyPeriodEnd = typingHistory.data?.pages[0]?.period_end;
+  const restartedHistoryPeriod = useRef<string | null>(null);
+  useEffect(() => {
+    if (typingHistory.error instanceof B3Error && typingHistory.error.code === "TYPING_PERIOD_CHANGED") {
+      void client.resetQueries({ queryKey: key("typing-history-current"), exact: true });
+    }
+  }, [typingHistory.error, client, scope.session, scope.player, scope.season, scope.config]);
+  useEffect(() => {
+    if (!enabled || !historyPeriodEnd || !clock.data || restartedHistoryPeriod.current === historyPeriodEnd) return;
+    const untilReset = Date.parse(historyPeriodEnd) - serverNow();
+    const timer = window.setTimeout(() => { restartedHistoryPeriod.current = historyPeriodEnd; void client.resetQueries({ queryKey: key("typing-history-current"), exact: true }); }, Math.max(0, Math.min(untilReset, 2_147_483_647)));
+    return () => window.clearTimeout(timer);
+  }, [enabled, historyPeriodEnd, clock.data, clock.dataUpdatedAt, client, scope.session, scope.player, scope.season, scope.config]);
   const referrals = query("referrals", "/referrals", c.referralSchema);
   const invitees = query(
     "invitees",
@@ -93,10 +115,45 @@ export function useB3() {
     "/network/groups?offset=0&limit=30",
     c.groupsSchema,
   );
-  const [busy, setBusy] = useState(false);
+  const [pendingActions, setPendingActions] = useState<Set<string>>(new Set());
+  const isPending = (action: string) => pendingActions.has(action);
+  const pendingAction = pendingActions.values().next().value ?? null;
+  const busy = pendingActions.size > 0;
+  type Presentation = { reward: RewardEvent; level: LevelUpEvent | null; rewardDismissed: boolean };
+  const [presentations, setPresentations] = useState<Presentation[]>([]);
+  const rewardEvent = presentations[0]?.rewardDismissed ? null : presentations[0]?.reward ?? null;
+  const levelUpEvent = presentations[0]?.level ?? null;
+  const revealed = useRef(new Set<string>());
+  const revealedLevel = useRef<number | undefined>(undefined);
+  const reveal = (created: boolean, id: string, xp: number, title: string, source: RewardEvent["source"], before: c.CanonicalState | undefined, after: c.CanonicalState, receipt: c.ConfirmedReward | null | undefined) => {
+    // Only newly settled server evidence creates presentation. Reads and duplicate
+    // responses never reveal; no client balance/threshold calculation takes place.
+    if (receipt === null || (receipt && (!receipt.created || !receipt.ledger_ids.length))) return;
+    id = receipt?.event_id ?? id;
+    xp = receipt?.amount ?? xp;
+    if (!created || xp <= 0 || revealed.current.has(id) || after.player_id !== scope.player || (after.season_id ?? "no-active-season") !== scope.season || after.config_version !== bootstrap.data?.remote?.config.version) return;
+    const storageKey = `dexo-reward-reveals:${scope.player}:${scope.season}`;
+    let persisted: string[] = [];
+    try { const stored: unknown = JSON.parse(localStorage.getItem(storageKey) ?? "[]"); if (Array.isArray(stored)) persisted = stored.filter((entry): entry is string => typeof entry === "string"); } catch { /* mounted deduplication remains available */ }
+    if (persisted.includes(id)) return;
+    revealed.current.add(id);
+    try { localStorage.setItem(storageKey, JSON.stringify([...persisted, id].slice(-200))); } catch { /* server-created evidence still prevents replay */ }
+    const prior = receipt?.progression_before ?? before?.progression;
+    const next = receipt?.progression_after ?? after.progression;
+    const observedLevel = prior?.level ?? bootstrap.data?.player.level;
+    const previousLevel = observedLevel === undefined ? revealedLevel.current : Math.max(observedLevel, revealedLevel.current ?? observedLevel);
+    const evolution = prior !== undefined && prior.dexo_stage !== next.dexo_stage;
+    const level: LevelUpEvent | null = previousLevel !== undefined && next.level > previousLevel
+      ? { id, previousLevel, newLevel: next.level, evolution, evolutionTitle: evolution ? next.dexo_stage[0].toUpperCase() + next.dexo_stage.slice(1) : null, createdAt: after.server_time } : null;
+    // Concurrent claims may observe the same earlier projection. Present each
+    // confirmed level boundary once without changing server-owned progression.
+    if (level) revealedLevel.current = level.newLevel;
+    setPresentations(queue => [...queue, { reward: { id, source, title, xp, createdAt: after.server_time }, level, rewardDismissed: false }]);
+  };
+  const previousCanonical = () => client.getQueryData<c.CanonicalState>([...queryKeys.player(scope), "canonical"]);
   const [message, setMessage] = useState<string | null>(null);
-  const lock = useRef(false);
-  const blockedUntil = useRef(0);
+  const locks = useRef(new Set<string>());
+  const blockedUntil = useRef<Record<string, number>>({});
   const refresh = async () => {
     await Promise.all([
       client.invalidateQueries({
@@ -107,29 +164,28 @@ export function useB3() {
     ]);
   };
   const run = async <T>(
-    operation: () => Promise<T>,
+    action: string, operation: () => Promise<T>,
   ): Promise<T | undefined> => {
-    if (lock.current || !enabled) return;
-    if (Date.now() < blockedUntil.current) {
+    if (locks.current.has(action) || !enabled) return;
+    if (Date.now() < (blockedUntil.current[action] ?? 0)) {
       setMessage("Please wait a moment before trying again.");
+      showFeedback("Please wait a moment before trying again.", "info");
       return;
     }
-    lock.current = true;
-    setBusy(true);
+    locks.current.add(action);
+    setPendingActions(current => new Set([...current, action]));
     setMessage(null);
     try {
       return await operation();
     } catch (error) {
       if (error instanceof B3Error && error.retryAfter)
-        blockedUntil.current = Date.now() + error.retryAfter * 1000;
-      setMessage(
-        error instanceof B3Error
-          ? error.message
-          : "We couldn't connect right now. Please try again.",
-      );
+        blockedUntil.current[action] = Date.now() + error.retryAfter * 1000;
+      const text = error instanceof B3Error ? error.message : "We couldn't connect right now. Please try again.";
+      setMessage(text);
+      showFeedback(text);
     } finally {
-      lock.current = false;
-      setBusy(false);
+      locks.current.delete(action);
+      setPendingActions(current => { const next = new Set(current); next.delete(action); return next; });
     }
   };
   const settle = async (canonical: c.CanonicalState) => {
@@ -137,7 +193,8 @@ export function useB3() {
     await refresh();
   };
   const claimDaily = () =>
-    run(async () => {
+    run("daily", async () => {
+      const before = previousCanonical();
       const result = await b3Request("/daily/claim", c.dailyClaimSchema, {
         body: {},
       });
@@ -147,15 +204,12 @@ export function useB3() {
       );
       client.setQueryData(key("daily"), result.daily);
       await settle(result.canonical);
-      setMessage(
-        result.created
-          ? `Daily reward claimed: ${result.reward_amount} XP.`
-          : "Today's reward has already been claimed.",
-      );
+      reveal(result.created, `daily:${result.claim_period}`, result.reward_amount, "Daily Core", "daily", before, result.canonical, result.reward);
       return result;
     });
   const missionAction = (id: string) =>
-    run(async () => {
+    run(`mission:${id}`, async () => {
+      const before = previousCanonical();
       const m = missions.data?.find((v) => v.key === id);
       if (
         !m ||
@@ -170,11 +224,7 @@ export function useB3() {
           body: {},
         });
         await settle(result.canonical);
-        setMessage(
-          result.created
-            ? `Mission reward claimed: ${result.reward_amount} XP.`
-            : "Mission reward already claimed.",
-        );
+        reveal(result.created, `mission:${id}:${result.version}:${result.claimed_at}`, result.reward_amount, m.title, m.key as MissionId, before, result.canonical, result.reward);
         return;
       }
       const opened = await b3Request(`${path}/start`, c.missionStartSchema, {
@@ -191,51 +241,12 @@ export function useB3() {
         body: { open_token: opened.open_token },
       });
       await missions.refetch();
-      setMessage(
-        result.state === "REWARD_READY"
-          ? "Your mission reward is ready to claim."
-          : "This mission is still in progress. Complete the activity and check again.",
-      );
+      if (result.state !== "REWARD_READY") showFeedback("This mission is still in progress. Complete the activity and check again.", "info");
     });
   const registerGroup = () =>
-    run(() =>
+    run("group-register", () =>
       b3Request("/network/groups/intents", c.intentSchema, { body: {} }),
     );
-  const reverifyGroup = (id: string) =>
-    run(async () => {
-      await b3Request(
-        `/network/groups/${encodeURIComponent(id)}/reverify`,
-        z.object({ accepted: z.boolean() }),
-        { body: {} },
-      );
-      await groups.refetch();
-      setMessage("Your group check is queued. Please check back shortly.");
-    });
-  const setGroupBroadcastConsent = (id: string, enabled: boolean) =>
-    run(async () => {
-      if (!groups.data?.items.some((group) => group.public_id === id))
-        throw new B3Error("GROUP_NOT_FOUND", null);
-      try {
-        await b3Request(
-          `/network/groups/${encodeURIComponent(id)}/broadcast-consent`,
-          c.broadcastConsentSchema,
-          { body: { enabled } },
-        );
-      } catch (error) {
-        // Also reconcile a lost response or changed ownership/permissions.
-        await groups.refetch();
-        throw error;
-      }
-      const refreshed = await groups.refetch({ throwOnError: true });
-      const group = refreshed.data?.items.find((item) => item.public_id === id);
-      setMessage(
-        group?.broadcast_opted_in === enabled
-          ? enabled
-            ? "Broadcasts are enabled for this group."
-            : "Broadcast consent has been revoked."
-          : "Broadcast settings changed. Please review this group's current status.",
-      );
-    });
   const requestKey = (kind: string) => {
     const storageKey = `dexo-b3-request:${scope.player}:${scope.season}:${kind}`;
     let value: string | null = null;
@@ -265,7 +276,7 @@ export function useB3() {
   };
   const pendingKeys = useRef<Record<string, string>>({});
   const startTyping = () =>
-    run(async () => {
+    run("typing-start", async () => {
       const k = requestKey("typing-start");
       const r = await b3Request("/typing/attempts/start", c.attemptSchema, {
         body: {},
@@ -276,7 +287,7 @@ export function useB3() {
       return r;
     });
   const submitTyping = (id: string, typed_text: string) =>
-    run(async () => {
+    run("typing-submit", async () => {
       const r = await b3Request(
         `/typing/attempts/${encodeURIComponent(id)}/submit`,
         c.submitSchema,
@@ -288,10 +299,12 @@ export function useB3() {
       );
       client.setQueryData(key("typing"), r.typing);
       await missions.refetch();
+      await typingHistory.refetch();
       return r;
     });
   const claimTyping = () =>
-    run(async () => {
+    run("typing-claim", async () => {
+      const before = previousCanonical();
       const k = requestKey("typing-claim");
       const r = await b3Request("/typing/claim", c.typingClaimSchema, {
         body: {},
@@ -304,11 +317,7 @@ export function useB3() {
       );
       client.setQueryData(key("typing"), r.typing);
       await settle(r.canonical);
-      setMessage(
-        r.created
-          ? `Typing reward claimed: ${r.amount} XP.`
-          : "Typing reward already claimed.",
-      );
+      reveal(r.created, `typing:${r.claimed_at}`, r.amount, "Typing Arena", "typing", before, r.canonical, r.reward);
       return r;
     });
   return {
@@ -317,18 +326,21 @@ export function useB3() {
     daily,
     missions,
     typing,
+    typingHistory,
     referrals,
     invitees,
     network,
     groups,
     busy,
+    pendingAction, isPending,
+    rewardEvent, levelUpEvent,
+    dismissReward: () => setPresentations(queue => queue[0]?.level ? [{ ...queue[0], rewardDismissed: true }, ...queue.slice(1)] : queue.slice(1)),
+    dismissLevelUp: () => setPresentations(queue => queue.slice(1)),
     message,
     refresh,
     claimDaily,
     missionAction,
     registerGroup,
-    reverifyGroup,
-    setGroupBroadcastConsent,
     startTyping,
     submitTyping,
     claimTyping,

@@ -1,0 +1,17 @@
+.position {
+  position: fixed;
+  z-index: 1300;
+  top: calc(var(--safe-top) + var(--space-3));
+  left: calc(var(--safe-left) + var(--space-3));
+  right: calc(var(--safe-right) + var(--space-3));
+  width: min(calc(100% - var(--safe-left) - var(--safe-right) - var(--space-6)), calc(var(--miniapp-max-width) - var(--space-6)));
+  margin-inline: auto;
+  pointer-events: none;
+}
+.feedback {
+  grid-template-columns: auto minmax(0, 1fr);
+  min-height: 0;
+  background: var(--color-bg-800);
+  border-color: var(--color-line);
+  box-shadow: var(--shadow-soft);
+}

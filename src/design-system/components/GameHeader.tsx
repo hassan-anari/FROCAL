@@ -1,8 +1,12 @@
+import { usePlayerProgression } from "@/integrations/api/usePlayerProgression";
+import { safeDestination } from "@/integrations/api/safeNavigation";
+import { QueryContinuation } from "@/design-system/performance/QueryContinuation";
+import { showFeedback, useQueryFeedback } from "./TransientFeedback";
 import { profilePhotoUrl } from "@/integrations/api/bootstrapContract";
 import { useBootstrap } from "@/integrations/api/BootstrapProvider";
 import { ArrowRight01Icon, Notification03Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient, type InfiniteData } from "@tanstack/react-query";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -12,6 +16,7 @@ import { isRemoteDataSource } from "@/integrations/api/bootstrap";
 import {
   loadNotifications,
   markNotificationRead,
+  markAllNotificationsRead,
   type LiveNotification,
   type NotificationPage,
 } from "@/integrations/api/notifications";
@@ -71,12 +76,16 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
 
   const profile = useProfileOverview();
 
-  const notifications = useQuery({
+  const notifications = useInfiniteQuery({
     queryKey: queryKeys.notifications(scope),
-    queryFn: () => loadNotifications(initData),
+    queryFn: ({ pageParam, signal }) => loadNotifications(initData, 20, pageParam, signal),
+    initialPageParam: null as number | null,
+    getNextPageParam: page => page.next_cursor ?? undefined,
     enabled: remoteData && adapter.isTelegram && Boolean(initData) && scope.player !== "unverified",
     staleTime: 15_000,
   });
+
+  useQueryFeedback(notificationsOpen ? notifications.error : null, "Notifications couldn't load. Please try again.");
 
   const bootstrapPlayerId = bootstrap.data?.player.id ?? "pending-player";
 
@@ -91,20 +100,21 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
     ? bootstrap.data.player.avatarUrl
     : profilePhotoUrl(identity?.photo_url) ?? telegramUser?.photo_url ?? null;
   const avatarSource = useAvatarSource(bootstrapPlayerId, avatar);
+  const progression = usePlayerProgression();
   const actualStage =
-    tap?.view.progression?.stage ?? bootstrap.data?.dexo.stage ?? profile.data?.progression.dexo_stage ?? "newborn";
+    remoteData ? progression.stage : tap?.view.progression?.stage ?? bootstrap.data?.dexo.stage ?? profile.data?.progression.dexo_stage ?? "newborn";
   const stageLabel = actualStage ? actualStage.toUpperCase() : "—";
   const level = remoteData
-    ? (tap?.view.progression?.level ?? bootstrap.data?.player.level ?? profile.data?.progression.level ?? 1)
+    ? progression.level
     : bootstrap.data?.player.level ?? 1;
   const initials = displayName.trim().slice(0, 1).toUpperCase() || "D";
   const season = bootstrap.data?.season;
   const seasonCode = season ? seasonBadge(season.id) : "S—";
   const seasonTitle = season?.name ?? "Season";
-  const notificationItems = notifications.data?.items ?? [];
+  const notificationItems = notifications.data?.pages.flatMap(page => page.items) ?? [];
   const unreadCount = useMemo(
-    () => notificationItems.filter((item) => item.unread).length,
-    [notificationItems],
+    () => notifications.data?.pages[0]?.unread_count ?? notificationItems.filter((item) => item.unread).length,
+    [notifications.data, notificationItems],
   );
 
   useEffect(
@@ -144,37 +154,49 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
   };
 
   const updateNotificationCache = (updater: (item: LiveNotification) => LiveNotification) => {
-    queryClient.setQueryData<NotificationPage>(queryKeys.notifications(scope), (current) =>
-      current ? { ...current, items: current.items.map(updater) } : current,
+    queryClient.setQueryData<InfiniteData<NotificationPage>>(queryKeys.notifications(scope), (current) =>
+      current ? { ...current, pages: current.pages.map(page => ({ ...page, items: page.items.map(updater) })) } : current,
     );
   };
 
+  const pendingReads = useRef(new Set<string>());
   const markRead = async (id: string) => {
-    const previous = queryClient.getQueryData<NotificationPage>(queryKeys.notifications(scope));
-    updateNotificationCache((item) =>
-      item.id === id ? { ...item, unread: false, read_at: item.read_at ?? new Date().toISOString() } : item,
-    );
+    if (pendingReads.current.has(id)) return false;
+    pendingReads.current.add(id);
     adapter.selectionChanged();
     try {
-      await markNotificationRead(initData, id);
-    } catch {
-      if (previous) queryClient.setQueryData(queryKeys.notifications(scope), previous);
-    }
+      const confirmed = await markNotificationRead(initData, id);
+      updateNotificationCache(item => item.id === id ? confirmed : item);
+      await notifications.refetch();
+      return true;
+    } catch { showFeedback("This notification couldn't be updated. Please try again."); }
+    finally { pendingReads.current.delete(id); }
   };
 
+  const pendingAll = useRef(false);
   const markAllRead = async () => {
-    const unread = notificationItems.filter((item) => item.unread);
-    if (unread.length === 0) return;
-    const previous = queryClient.getQueryData<NotificationPage>(queryKeys.notifications(scope));
-    updateNotificationCache((item) =>
-      item.unread ? { ...item, unread: false, read_at: item.read_at ?? new Date().toISOString() } : item,
-    );
-    adapter.hapticNotice("success");
-    const results = await Promise.allSettled(
-      unread.map((item) => markNotificationRead(initData, item.id)),
-    );
-    if (results.some((result) => result.status === "rejected") && previous) {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.notifications(scope) });
+    if (pendingAll.current) return;
+    pendingAll.current = true;
+    try {
+      if (notifications.data?.pages[0]?.unread_count === undefined) {
+        await Promise.allSettled(notificationItems.filter(item => item.unread).map(item => markRead(item.id)));
+      } else {
+        await markAllNotificationsRead(initData);
+      }
+      await notifications.refetch();
+    } catch { showFeedback("Notifications couldn't be updated. Please try again."); }
+    finally { pendingAll.current = false; }
+  };
+
+  const openNotification = async (item: LiveNotification) => {
+    if (item.unread && !await markRead(item.id)) return;
+    // Only the documented deep_link can select an existing internal route.
+    // Payload URLs are never consumed, even when the link is absent or unsafe.
+    const link = item.deep_link?.path;
+    const destination = link?.startsWith("/") ? safeDestination(link) : null;
+    if (destination?.kind === "internal") {
+      setNotificationsOpen(false);
+      void navigate({ to: destination.path });
     }
   };
 
@@ -244,7 +266,7 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
                   </div>
                 </header>
 
-                <div className={styles.notificationList}>
+                <div className={styles.notificationList} data-notification-list>
                   {notificationItems.length === 0 ? (
                     <div className={styles.notificationEmpty}>No notifications yet.</div>
                   ) : (
@@ -255,7 +277,7 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
                           key={item.id}
                           type="button"
                           className={`${styles.notificationItem} ${item.unread ? "" : styles.notificationRead}`}
-                          onClick={() => void markRead(item.id)}
+                          onClick={() => void openNotification(item)}
                         >
                           <span className={`${styles.notificationGlyph} ${styles[tone]}`}>{tone.slice(0, 1).toUpperCase()}</span>
                           <span className={styles.notificationCopy}>
@@ -268,6 +290,7 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
                       );
                     })
                   )}
+                  <QueryContinuation selector="[data-notification-list] > button:last-of-type" hasNext={notifications.hasNextPage && !notifications.isFetchNextPageError} fetching={notifications.isFetching} load={notifications.fetchNextPage} />
                 </div>
               </motion.section>
             </motion.div>
