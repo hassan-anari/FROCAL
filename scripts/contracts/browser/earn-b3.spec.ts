@@ -52,6 +52,8 @@ test("production Daily and Missions settle real XP coherently across Earn, Profi
   await expect(
     page.getByRole("button", { name: "Claimed today" }),
   ).toBeDisabled();
+  await expect(page.getByRole("dialog", { name: "XP reward" })).toContainText("+80 XP");
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
   await expect(page.getByLabel("Earn summary")).toContainText("230");
   const mission = page.locator("article").filter({
     has: page.getByRole("heading", { name: "Visit Dalexio", exact: true }),
@@ -66,6 +68,9 @@ test("production Daily and Missions settle real XP coherently across Earn, Profi
     mission.getByRole("button", { name: "Claim 120 XP" }),
   ).toBeEnabled();
   await mission.getByRole("button", { name: "Claim 120 XP" }).click();
+  await expect(page.getByRole("dialog", { name: "XP reward" })).toContainText("+120 XP");
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  if (await page.getByRole("dialog", { name: "Dexo level up" }).count()) await page.getByRole("button", { name: "Return to Earn", exact: true }).click();
   await expect(page.getByLabel("Earn summary")).toContainText("350");
   await page
     .getByRole("navigation", { name: "Primary game navigation" })
@@ -115,17 +120,19 @@ test("Typing uses a real issued phrase and server result, survives a lost submit
   await expect(
     page.getByRole("heading", { name: "Strong performance." }),
   ).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Claim \d+ XP$/ })).toHaveCount(0);
+  await page.getByRole("button", { name: "Back to Typing tab", exact: true }).click();
   const claim = page.getByRole("button", { name: /^Claim \d+ XP$/ });
   await expect(claim).toBeVisible();
   const amount = Number((await claim.innerText()).match(/\d+/)![0]);
   await claim.click();
+  await expect(page.getByRole("dialog", { name: "XP reward" })).toContainText(`+${amount} XP`);
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  if (await page.getByRole("dialog", { name: "Dexo level up" }).count()) await page.getByRole("button", { name: "Return to Earn", exact: true }).click();
   await expect(claim).toHaveCount(0);
   expect(
     (await control({ action: "inspect", player: identity.player })).lifetime,
   ).toBe(150 + amount);
-  await page
-    .getByRole("button", { name: "Back to Typing tab", exact: true })
-    .click();
   await expect(page.getByLabel("Earn summary")).toContainText(
     String(150 + amount),
   );
@@ -186,152 +193,15 @@ async function ownedBroadcastGroup(identity: {
     token: new URL(intent.startgroup_url).searchParams.get("startgroup"),
   });
 }
-test("owned group broadcasts require confirmation, stay unchanged while saving/refreshing, and support real revoke", async ({
-  page,
-}) => {
-  test.setTimeout(60_000);
+test("owned communities revalidate automatically without broadcast or manual status controls", async ({ page }) => {
+  await control({ action: "flags" });
   const identity = await control({ action: "player", points: 150 });
   await ownedBroadcastGroup(identity);
   await enter(page, identity);
   await page.getByRole("button", { name: "Network", exact: true }).click();
-  const row = page.getByRole("article", {
-    name: "Paired real community",
-    exact: true,
-  });
-  await expect(
-    row.getByText("Broadcasts disabled", { exact: true }),
-  ).toBeVisible();
-  const writes: unknown[] = [];
-  let releasePost!: () => void;
-  let releaseRead!: () => void;
-  let readStarted = false;
-  let holdRead = false;
-  const postGate = new Promise<void>((resolve) => {
-    releasePost = resolve;
-  });
-  const readGate = new Promise<void>((resolve) => {
-    releaseRead = resolve;
-  });
-  await page.route(
-    "**/api/v1/network/groups/*/broadcast-consent",
-    async (route) => {
-      writes.push(route.request().postDataJSON());
-      if (writes.length === 1) {
-        const response = await route.fetch();
-        await postGate;
-        holdRead = true;
-        await route.fulfill({ response });
-      } else await route.fallback();
-    },
-  );
-  await page.route("**/api/v1/network/groups?*", async (route) => {
-    if (holdRead) {
-      readStarted = true;
-      await readGate;
-    }
-    await route.fallback();
-  });
-  await row
-    .getByRole("button", { name: "Enable broadcasts", exact: true })
-    .click();
-  let dialog = page.getByRole("dialog", { name: "Enable group broadcasts?" });
-  await expect(dialog).toContainText("Paired real community");
-  expect(writes).toHaveLength(0);
-  await dialog.getByRole("button", { name: "Cancel", exact: true }).click();
-  expect(writes).toHaveLength(0);
-  await row
-    .getByRole("button", { name: "Enable broadcasts", exact: true })
-    .click();
-  dialog = page.getByRole("dialog", { name: "Enable group broadcasts?" });
-  await dialog
-    .getByRole("button", { name: "Enable broadcasts", exact: true })
-    .click();
-  await expect.poll(() => writes.length).toBe(1);
-  await expect(
-    row.getByText("Broadcasts disabled", { exact: true }),
-  ).toBeVisible();
-  await expect(
-    row.getByRole("button", { name: "Enable broadcasts", exact: true }),
-  ).toBeDisabled();
-  releasePost();
-  await expect.poll(() => readStarted).toBe(true);
-  await expect(
-    row.getByText("Broadcasts disabled", { exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByText("Broadcasts are enabled for this group.", { exact: true }),
-  ).toHaveCount(0);
-  holdRead = false;
-  releaseRead();
-  await expect(
-    row.getByText("Broadcasts enabled", { exact: true }),
-  ).toBeVisible();
-  await control({
-    action: "b3-broadcast-verification",
-    player: identity.player,
-    mode: "unavailable",
-  });
-  await row
-    .getByRole("button", { name: "Revoke broadcast consent", exact: true })
-    .click();
-  await expect(
-    row.getByText("Broadcasts disabled", { exact: true }),
-  ).toBeVisible();
-  expect(writes).toEqual([{ enabled: true }, { enabled: false }]);
-  await expect(
-    page.getByText("Broadcast consent has been revoked.", { exact: true }),
-  ).toBeVisible();
-  expect(
-    (await control({ action: "inspect", player: identity.player })).lifetime,
-  ).toBe(150);
+  await expect(page.getByText("Paired real community", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: /broadcast|Check status/i })).toHaveCount(0);
+  await page.getByRole("navigation", { name: "Primary game navigation" }).getByRole("button", { name: "Profile", exact: true }).click();
+  await page.getByRole("navigation", { name: "Primary game navigation" }).getByRole("button", { name: "Earn", exact: true }).click();
+  await expect(page.getByText("Paired real community", { exact: true })).toBeVisible();
 });
-for (const mode of ["denied", "unavailable"]) {
-  test(`broadcast consent ${mode} verification stays disabled and recovers through a new intentional confirmation`, async ({
-    page,
-  }) => {
-    const identity = await control({ action: "player", points: 150 });
-    await ownedBroadcastGroup(identity);
-    await control({
-      action: "b3-broadcast-verification",
-      player: identity.player,
-      mode,
-    });
-    await enter(page, identity);
-    await page.getByRole("button", { name: "Network", exact: true }).click();
-    const row = page.getByRole("article", {
-      name: "Paired real community",
-      exact: true,
-    });
-    const enable = async () => {
-      await row
-        .getByRole("button", { name: "Enable broadcasts", exact: true })
-        .click();
-      await page
-        .getByRole("dialog", { name: "Enable group broadcasts?" })
-        .getByRole("button", { name: "Enable broadcasts", exact: true })
-        .click();
-    };
-    await enable();
-    await expect(page.getByRole("status")).toContainText(
-      "We couldn't verify your permission to change broadcasts.",
-    );
-    await expect(
-      row.getByText("Broadcasts disabled", { exact: true }),
-    ).toBeVisible();
-    await expect(
-      row.getByRole("button", { name: "Enable broadcasts", exact: true }),
-    ).toBeEnabled();
-    expect(await page.locator("main").innerText()).not.toContain(
-      "GROUP_AUTHORIZATION_UNAVAILABLE",
-    );
-    await control({
-      action: "b3-broadcast-verification",
-      player: identity.player,
-      mode: "allow",
-    });
-    await enable();
-    await expect(
-      row.getByText("Broadcasts enabled", { exact: true }),
-    ).toBeVisible();
-  });
-}

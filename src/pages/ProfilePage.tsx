@@ -1,3 +1,4 @@
+import { useServerProfile } from "@/integrations/api/useServerProfile";
 import { reviewProfile } from "@/integrations/api/profile";
 import { readSessionPreference, writeSessionPreference } from "@/app/storageRelease";
 import { usePlayerProgression } from "@/integrations/api/usePlayerProgression";
@@ -84,8 +85,8 @@ export function ProfilePage() {
   const remoteData = isRemoteDataSource();
   useEffect(() => { if (remoteData && player) void reviewProfile().catch(() => { /* Mission verification remains unavailable until a successful review. */ }); }, [remoteData, player?.id]);
   const telegramUser = remoteData ? null : adapter.getUser();
-  const firstName = telegramUser?.first_name ?? player?.firstName ?? "Explorer";
-  const username = telegramUser?.username ?? player?.telegramUsername ?? null;
+  const firstName = telegramUser?.first_name ?? overview.data?.identity.first_name ?? player?.firstName ?? "Explorer";
+  const username = telegramUser?.username ?? overview.data?.identity.username ?? player?.telegramUsername ?? null;
   const photoUrl = remoteData
     ? bootstrap.data?.remote?.player.photo_url !== undefined
       ? player?.avatarUrl ?? null
@@ -93,7 +94,9 @@ export function ProfilePage() {
     : telegramUser?.photo_url ?? player?.avatarUrl ?? null;
 
   const earn = useEarnStore();
-  const profile = useProfileStore();
+  const localProfile = useProfileStore();
+  const liveProfile = useServerProfile();
+  const profile = remoteData ? liveProfile : localProfile;
   const [activeTab, setActiveTab] = useState<ProfileTab>(() => {
     const stored = readSessionPreference(profileTabKey);
     return stored === "achievements" || stored === "collection" ? stored : "overview";
@@ -144,8 +147,12 @@ export function ProfilePage() {
   }, [earn.completeMission, earn.missions, remoteData]);
 
   const filteredAchievements = useMemo(
-    () => achievementDefinitions.filter((achievement) => achievementFilter === "all" || achievement.category === achievementFilter),
-    [achievementFilter],
+    () => achievementDefinitions.filter(achievement => !remoteData || liveProfile.achievements.data?.achievements.some(row => row.key === achievement.id))
+      .map(achievement => {
+        const row = remoteData ? liveProfile.achievements.data?.achievements.find(row => row.key === achievement.id) : null;
+        return row ? { ...achievement, availableNow: row.available_s1, target: row.target, rewardXp: row.point_reward } : achievement;
+      }).filter(achievement => achievementFilter === "all" || achievement.category === achievementFilter),
+    [achievementFilter, remoteData, liveProfile.achievements.data],
   );
 
   const switchTab = (tab: ProfileTab) => {
@@ -168,7 +175,9 @@ export function ProfilePage() {
   };
 
   const openAchievement = (id: AchievementId) => {
-    const achievement = achievementById[id];
+    const definition = achievementById[id];
+    const row = remoteData ? liveProfile.achievements.data?.achievements.find(item => item.key === id) : null;
+    const achievement = row ? { ...definition, availableNow: row.available_s1, rewardXp: row.point_reward } : definition;
     const unlocked = profile.unlockedAchievementIds.includes(id);
     const progress = profile.achievementProgress[id];
     setDetailItem({
@@ -183,9 +192,10 @@ export function ProfilePage() {
       unlockedAt: profile.achievementUnlockDates[id],
       progress,
       primaryLabel: unlocked && profile.featuredAchievementId !== id ? "Feature achievement" : undefined,
-      onPrimary: unlocked && profile.featuredAchievementId !== id ? () => {
-        profile.setFeaturedAchievement(id);
-        adapter.hapticNotice("success");
+      onPrimary: unlocked && profile.featuredAchievementId !== id ? async () => {
+        const saved = await profile.setFeaturedAchievement(id);
+        if (saved !== false) adapter.hapticNotice("success");
+        return saved;
       } : undefined,
     });
   };
@@ -202,9 +212,10 @@ export function ProfilePage() {
       label: profile.activeFrameId === id ? "Currently equipped" : unlocked ? `${frame.rarity} frame` : "Frame locked",
       unlockHint: frame.unlockHint,
       primaryLabel: unlocked && profile.activeFrameId !== id ? "Equip frame" : undefined,
-      onPrimary: unlocked && profile.activeFrameId !== id ? () => {
-        profile.setActiveFrame(id);
-        adapter.hapticNotice("success");
+      onPrimary: unlocked && profile.activeFrameId !== id ? async () => {
+        const saved = await profile.setActiveFrame(id);
+        if (saved !== false) adapter.hapticNotice("success");
+        return saved;
       } : undefined,
     });
   };
@@ -221,17 +232,17 @@ export function ProfilePage() {
       label: profile.featuredMedalId === id ? "Featured medal" : unlocked ? `${medal.rarity} medal` : "Medal locked",
       unlockHint: medal.unlockHint,
       primaryLabel: unlocked && profile.featuredMedalId !== id ? "Feature medal" : undefined,
-      onPrimary: unlocked && profile.featuredMedalId !== id ? () => {
-        profile.setFeaturedMedal(id);
-        adapter.hapticNotice("success");
+      onPrimary: unlocked && profile.featuredMedalId !== id ? async () => {
+        const saved = await profile.setFeaturedMedal(id);
+        if (saved !== false) adapter.hapticNotice("success");
+        return saved;
       } : undefined,
     });
   };
 
   const equipTitle = (id: TitleId) => {
     if (!profile.unlockedTitleIds.includes(id)) return;
-    profile.setActiveTitle(id);
-    adapter.hapticNotice("success");
+    void Promise.resolve(profile.setActiveTitle(id)).then(saved => { if (saved !== false) adapter.hapticNotice("success"); });
   };
 
   return (
@@ -289,6 +300,7 @@ export function ProfilePage() {
                       tone="secondary"
                       size="sm"
                       className={styles.secondaryAction}
+                      disabled={remoteData && (!liveProfile.ready || liveProfile.saving)}
                       onClick={() => setCustomizeOpen(true)}
                     >
                       Customize
@@ -345,7 +357,7 @@ export function ProfilePage() {
                 <section className={styles.showcaseSection}>
                   <header className={styles.sectionHeader}>
                     <div><span>SHOWCASE</span><h2>Featured honors</h2></div>
-                    <button type="button" onClick={() => setCustomizeOpen(true)}>Edit</button>
+                    <button type="button" disabled={remoteData && (!liveProfile.ready || liveProfile.saving)} onClick={() => setCustomizeOpen(true)}>Edit</button>
                   </header>
                   <div className={styles.showcaseGrid}>
                     <button type="button" onClick={() => featuredMedal && openMedal(featuredMedal.id)}>
@@ -494,7 +506,7 @@ export function ProfilePage() {
                           const unlocked = profile.unlockedTitleIds.includes(title.id);
                           const equipped = profile.activeTitleId === title.id;
                           return (
-                            <button key={title.id} type="button" disabled={!unlocked} className={`${styles.titleCard} ${equipped ? styles.titleEquipped : ""}`} onClick={() => equipTitle(title.id)}>
+                            <button key={title.id} type="button" disabled={!unlocked || (remoteData && liveProfile.saving)} className={`${styles.titleCard} ${equipped ? styles.titleEquipped : ""}`} onClick={() => equipTitle(title.id)}>
                               <div className={styles.titleCardPlate}>
                                 <AssetImage assetKey="profile.cosmetic.titlePlate" loading="lazy" draggable={false} />
                                 <strong>{title.name}</strong>
@@ -526,9 +538,10 @@ export function ProfilePage() {
             unlockedMedalIds={profile.unlockedMedalIds}
             unlockedAchievementIds={profile.unlockedAchievementIds}
             onClose={() => setCustomizeOpen(false)}
-            onSave={(input) => {
-              profile.applyCustomization(input);
-              adapter.hapticNotice("success");
+            onSave={async (input) => {
+              const saved = await profile.applyCustomization(input);
+              if (saved !== false) adapter.hapticNotice("success");
+              return saved;
             }}
           />
         ) : null}

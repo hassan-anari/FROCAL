@@ -7,6 +7,7 @@ import { navigateSafely } from "@/integrations/api/safeNavigation";
 import { usePlayerProgression } from "@/integrations/api/usePlayerProgression";
 import {
   ArrowRight01Icon,
+  CheckmarkCircle02Icon,
   InformationCircleIcon,
   CoinsDollarIcon,
   KeyboardIcon,
@@ -20,7 +21,6 @@ import { preloadAssets } from "@/assets/preload";
 import { Button } from "@/design-system/primitives/Button";
 import { DeferredMount } from "@/design-system/performance/DeferredMount";
 import { HistorySheet, LevelUpReveal, NetworkGuideSheet, RewardReveal, type NetworkGuideKind } from "@/features/earn/EarnOverlays";
-import { OverlayFrame } from "@/features/profile/ProfileOverlays";
 import {
   TYPING_DAILY_LIMIT,
   getStarterPathProgress,
@@ -135,7 +135,7 @@ export function EarnPage() {
     verifiedReferrals: live.referrals.data?.verified_count ?? 0, referralXpEarned: live.referrals.data?.earned_points ?? 0,
     connectedGroups: live.network.data?.group_count ?? 0, activeGroups: live.network.data?.active_groups ?? 0, groupXpEarned: live.network.data?.earned_points ?? 0,
     typingBest: live.typing.data ? { wpm: live.typing.data.best_wpm, accuracy: live.typing.data.best_accuracy_bps / 100, score: 0, completedAt: "" } : null,
-    history: [], rewardEvent: null, levelUpEvent: null, referralSent: false, referralShares: 0,
+    history: [], rewardEvent: live.rewardEvent, levelUpEvent: live.levelUpEvent, dismissReward: live.dismissReward, dismissLevelUp: live.dismissLevelUp, referralSent: false, referralShares: 0,
   } : localEarn;
   const referralRows: readonly ReferralRow[] = live.remote ? (live.invitees.data?.items ?? []).slice(0,5).map((v, i) => ({ id: `${v.attributed_at}:${i}`, name: v.name, level: v.activation.level, status: v.status === "VERIFIED" ? "Active" : "Pending", invitedAt: new Date(v.attributed_at).toLocaleDateString("en-US"), tone: "cyan", activation: `Level ${v.activation.level} / ${v.activation.required_level} · ${v.activation.eligible ? "Eligible" : "Pending eligibility"}` })) : demoReferralRows;
   const groupRows = live.remote ? (live.groups.data?.items ?? []).map(v => ({ id: v.public_id, name: v.title, members: v.unique_speakers, admin: v.bot_admin, status: v.state.replaceAll("_", " "), earnedXp: v.earned_points, meta: `${v.qualified_characters} qualified characters · ${v.verification_retrying ? "Check pending" : v.creator_verified_at ? "Creator verified" : "Creator check pending"}`, tone: "cyan" })) : demoGroupRows;
@@ -149,8 +149,6 @@ export function EarnPage() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [guideOpen, setGuideOpen] = useState<NetworkGuideKind | null>(null);
   const [copied, setCopied] = useState(false);
-  const [broadcastGroupId, setBroadcastGroupId] = useState<string | null>(null);
-  const broadcastGroup = live.groups.data?.items.find((group) => group.public_id === broadcastGroupId);
 
   const dailyAvailable = live.remote ? live.daily.data?.claimable === true : isDailyClaimAvailable(earn.lastClaimDate);
   const pathProgress = Object.keys(earn.missions).length ? Math.round(Object.values(earn.missions).filter(m => m.status === "claimed").length / Object.keys(earn.missions).length * 100) : 0;
@@ -184,6 +182,20 @@ export function EarnPage() {
   useEffect(() => {
     writeSessionPreference(earnTabStorageKey, activeTab);
   }, [activeTab]);
+
+  useEffect(() => {
+    if (!live.remote || activeTab !== "network") return;
+    let lastRefresh = 0;
+    const revalidate = () => {
+      if (document.hidden || Date.now() - lastRefresh < 1000) return;
+      lastRefresh = Date.now();
+      void Promise.all([live.referrals.refetch(), live.invitees.refetch(), live.network.refetch(), live.groups.refetch()]);
+    };
+    revalidate();
+    window.addEventListener("focus", revalidate);
+    document.addEventListener("visibilitychange", revalidate);
+    return () => { window.removeEventListener("focus", revalidate); document.removeEventListener("visibilitychange", revalidate); };
+  }, [activeTab, live.remote, live.referrals.refetch, live.invitees.refetch, live.network.refetch, live.groups.refetch]);
 
   const dailyNodes = useMemo(() => {
     const activeIndex = Math.max(0, Math.min(6, live.remote ? (live.daily.data?.cycle_day ?? 1) - 1 : earn.streak === 0 ? 0 : (earn.streak - 1) % 7));
@@ -297,7 +309,7 @@ export function EarnPage() {
           <span>{mission.category}</span>
           <h3>{mission.title}</h3>
         </div>
-        <em>{live.remote && "unavailable" in mission && mission.unavailable ? "Unavailable" : statusLabel(mission)}</em>
+        {mission.status !== "claimed" ? <em>{live.remote && "unavailable" in mission && mission.unavailable ? "Unavailable" : statusLabel(mission)}</em> : null}
       </div>
       {compact ? null : <p>{mission.description}</p>}
       <div className={styles.missionFooter}>
@@ -305,10 +317,10 @@ export function EarnPage() {
         <button
           type="button"
           className={styles.missionAction}
-          disabled={mission.status === "claimed" || !canEarn("missions") || (live.remote && (live.busy || ("unavailable" in mission && Boolean(mission.unavailable))))}
+          disabled={mission.status === "claimed" || !canEarn("missions") || (live.remote && (live.isPending(`mission:${mission.id}`) || ("unavailable" in mission && Boolean(mission.unavailable))))}
           onClick={() => handleMissionAction(mission)}
         >
-          <span>{missionActionLabel(mission, live.remote)}</span>
+          <span>{live.isPending(`mission:${mission.id}`) ? "Please wait…" : missionActionLabel(mission, live.remote)}</span>
           {mission.status === "claimed" ? <i>✓</i> : <HugeiconsIcon icon={ArrowRight01Icon} size={15} strokeWidth={1.8} />}
         </button>
       </div>
@@ -318,8 +330,6 @@ export function EarnPage() {
   return (
     <>
       <main className={styles.page}>
-        {live.remote && (live.busy || live.message) ? <p role="status" aria-live="polite">{live.busy ? "Please wait…" : live.message}</p> : null}
-        {live.remote && [live.daily,live.missions,live.typing,live.referrals,live.invitees,live.network,live.groups].some(q => q.isError) ? <div className={styles.emptyState} role="alert"><strong>Some information couldn't load.</strong><button type="button" disabled={live.busy} onClick={() => { void live.refresh(); }}>Try Again</button></div> : null}
         <header className={styles.pageHeader}>
           <div>
             <span>EARN CENTER</span>
@@ -371,20 +381,19 @@ export function EarnPage() {
                   <div className={styles.dailyPath}>
                     {dailyNodes.map((node) => (
                       <span key={node.label} className={`${node.complete ? styles.dayComplete : ""} ${node.active ? styles.dayActive : ""}`}>
-                        {node.complete ? "✓" : node.label}
+                        {node.complete ? <HugeiconsIcon icon={CheckmarkCircle02Icon} size={18} strokeWidth={1.8} /> : node.label}
                       </span>
                     ))}
                   </div>
 
                   <Button
                     size="lg"
-                    disabled={!dailyAvailable || !canEarn("daily") || live.busy}
+                    disabled={!dailyAvailable || !canEarn("daily") || live.isPending("daily")}
                     trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={18} strokeWidth={1.8} />}
                     onClick={claimDailyCore}
                   >
-                    {live.busy ? "Please wait…" : live.remote && !live.daily.data ? "Unavailable" : dailyAvailable ? "Claim daily core" : "Claimed today"}
+                    {live.isPending("daily") ? "Please wait…" : live.remote && !live.daily.data ? "Unavailable" : dailyAvailable ? "Claim daily core" : "Claimed today"}
                   </Button>
-                {live.remote && live.daily.data ? <small>Streak: {live.daily.data.current_streak} · Resets {new Date(live.daily.data.next_reset).toLocaleString()}</small> : null}
                 </section>
 
                 <section className={styles.pathCard} aria-label="Starter Path progress">
@@ -510,7 +519,7 @@ export function EarnPage() {
                     <p>Connect a Telegram community, make Dalexio an admin and earn from verified member activity.</p>
                   </div>
                   <div className={styles.groupStats}><span>Connected <strong>{earn.connectedGroups}</strong></span><span>Active <strong>{earn.activeGroups}</strong></span><span>Earned <strong>{formatNumber(earn.groupXpEarned)} XP</strong></span></div>
-                  <Button disabled={live.remote && (!live.network.data?.can_register || live.busy)} trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={17} strokeWidth={1.8} />} onClick={addToGroup}>Add bot to a group</Button>
+                  <Button disabled={live.remote && (!live.network.data?.can_register || live.isPending("group-register"))} trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={17} strokeWidth={1.8} />} onClick={addToGroup}>Add bot to a group</Button>
                 </section>
 
                 <section className={styles.groupRoster}>
@@ -519,22 +528,11 @@ export function EarnPage() {
                     {live.remote && !groupRows.length ? <div className={styles.emptyState}><strong>{live.groups.isPending ? "Loading communities…" : live.groups.isError ? "Communities unavailable." : "No connected communities yet."}</strong></div> : null}
                     {groupRows.map((group) => (
                       <article key={group.id} aria-label={group.name}>
-                        <span className={`${styles.avatar} ${styles[`avatar_${group.tone}`]}`}>{initials(group.name)}</span>
+                        <span className={`${styles.avatar} ${styles[`avatar_${group.tone}`]}`}><AvatarContent owner={`group:${group.id}`} fallback={initials(group.name)} /></span>
                         <div className={styles.rosterIdentity}><strong>{group.name}</strong><span>{formatNumber(group.members)} {live.remote ? "qualified speakers" : "members"} · {group.meta}</span>
-                          {live.remote ? <>
-                            <span>{live.groups.isError ? "Broadcast status unavailable" : live.groups.data?.items.find((item) => item.public_id === group.id)?.broadcast_opted_in ? "Broadcasts enabled" : "Broadcasts disabled"}</span>
-                            <button type="button" className={styles.missionAction} disabled={live.busy || live.groups.isError}
-                              onClick={() => {
-                                const current = live.groups.data?.items.find((item) => item.public_id === group.id);
-                                if (!current) return;
-                                if (current.broadcast_opted_in) void live.setGroupBroadcastConsent(group.id, false);
-                                else setBroadcastGroupId(group.id);
-                              }}>
-                              {live.groups.data?.items.find((item) => item.public_id === group.id)?.broadcast_opted_in ? "Revoke broadcast consent" : "Enable broadcasts"}
-                            </button>
-                          </> : null}
+
                         </div>
-                        <div className={styles.rosterStatus}><em className={group.admin ? styles.statusActive : styles.statusPending}>{group.admin ? "Bot admin" : "Admin required"}</em><small>{group.earnedXp ? `${formatNumber(group.earnedXp)} XP earned · ${group.status}` : group.status}</small>{live.remote && ["REVIEW", "ADMIN REQUIRED", "ACTIVE"].includes(group.status) ? <button type="button" disabled={live.busy} onClick={() => { void live.reverifyGroup(group.id); }}>Check status</button> : null}</div>
+                        <div className={styles.rosterStatus}><em className={group.admin ? styles.statusActive : styles.statusPending}>{group.admin ? "Bot admin" : "Admin required"}</em><small>{group.earnedXp ? `${formatNumber(group.earnedXp)} XP earned · ${group.status}` : group.status}</small></div>
                       </article>
                     ))}
                   </div>
@@ -558,7 +556,7 @@ export function EarnPage() {
                 </section>
 
                 <section className={styles.attemptCard}>
-                  <header><div><span>DAILY ATTEMPTS</span><h2>{typingRemaining ? `${typingRemaining} plays remaining` : "Daily limit reached"}</h2></div><em>{live.remote && live.typing.data ? `Resets ${new Date(live.typing.data.next_reset).toLocaleString()}` : "Resets daily"}</em></header>
+                  <header><div><span>DAILY ATTEMPTS</span><h2>{typingRemaining ? `${typingRemaining} plays remaining` : "Daily limit reached"}</h2></div><em>Resets daily</em></header>
                   <div className={styles.attemptPips}>
                     {Array.from({ length: typingLimit }, (_, index) => <i key={index} className={index < typingUsed ? styles.attemptUsed : ""} />)}
                   </div>
@@ -567,7 +565,7 @@ export function EarnPage() {
                   </Button>
                 </section>
 
-                {live.remote && (live.typing.data?.claimable_balance ?? 0) > 0 ? <Button disabled={live.busy || !canEarn("typing")} onClick={() => { void live.claimTyping(); }}>Claim {live.typing.data?.claimable_balance} XP</Button> : null}
+                {live.remote && (live.typing.data?.claimable_balance ?? 0) > 0 ? <Button disabled={live.isPending("typing-claim") || !canEarn("typing")} onClick={() => { void live.claimTyping(); }}>Claim {live.typing.data?.claimable_balance} XP</Button> : null}
                 <section className={styles.typingStats}>
                   <div><span>Best WPM</span><strong>{earn.typingBest ? Math.round(earn.typingBest.wpm) : "—"}</strong></div>
                   <div><span>Best accuracy</span><strong>{earn.typingBest ? `${Math.round(earn.typingBest.accuracy)}%` : "—"}</strong></div>
@@ -606,15 +604,6 @@ export function EarnPage() {
         </DeferredMount>
       </main>
 
-      {live.remote && broadcastGroup ? <OverlayFrame eyebrow="GROUP BROADCASTS" title="Enable group broadcasts?" onClose={() => setBroadcastGroupId(null)} footer={<>
-        <Button tone="secondary" onClick={() => setBroadcastGroupId(null)}>Cancel</Button>
-        <Button disabled={live.busy || live.groups.isError} onClick={() => {
-          setBroadcastGroupId(null);
-          void live.setGroupBroadcastConsent(broadcastGroup.public_id, true);
-        }}>Enable broadcasts</Button>
-      </>}>
-        <p>Allow Dexo Land to send announcements to {broadcastGroup.title}? You can revoke consent at any time.</p>
-      </OverlayFrame> : null}
       <HistorySheet open={historyOpen} onClose={() => setHistoryOpen(false)} history={earn.history} />
       <NetworkGuideSheet kind={guideOpen} onClose={() => setGuideOpen(null)} />
       <RewardReveal reward={earn.rewardEvent} onClose={earn.dismissReward} />

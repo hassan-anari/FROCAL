@@ -202,8 +202,6 @@ export function TypingChallengePage() {
   return (
     <>
       <main className={styles.page}>
-        {live.remote && (live.busy || live.message || live.typing.isError) ? <p role="status" aria-live="polite">{live.busy ? "Please wait…" : live.message ?? "Typing Arena couldn't load. Please try again."}</p> : null}
-        {live.remote && live.typing.isError ? <Button onClick={() => { void live.typing.refetch(); }}>Try Again</Button> : null}
         <header className={styles.header}>
           <button type="button" onClick={returnToTypingTab} aria-label="Back to Typing tab">
             <HugeiconsIcon icon={ArrowRight01Icon} size={18} strokeWidth={1.8} />
@@ -293,8 +291,6 @@ export function TypingChallengePage() {
             </motion.div>
           )}
         </AnimatePresence>
-        {live.remote && (live.typing.data?.claimable_balance ?? 0) > 0 ? <Button disabled={live.busy || !canEarn("typing")} onClick={() => { void live.claimTyping(); }}>Claim {live.typing.data?.claimable_balance} XP</Button> : null}
-        {live.remote && live.typing.data ? <small>Resets {new Date(live.typing.data.next_reset).toLocaleString()}</small> : null}
       </main>
     </>
   );

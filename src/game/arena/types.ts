@@ -4,6 +4,7 @@ export type ArenaRankingMode = "players" | "clans";
 export type ArenaHubSection = "overview" | "war" | "history" | "rankings";
 
 export interface ArenaPlayerRank {
+  photoUrl?: string | null;
   id: string;
   name: string;
   handle: string;

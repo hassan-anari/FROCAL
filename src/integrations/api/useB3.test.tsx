@@ -92,7 +92,8 @@ it("coalesces repeated Daily clicks and never commits an optimistic reward", asy
     finish(fixture.daily_duplicate.response);
     await action;
   });
-  expect(h.result.current.message).toContain("already");
+  expect(h.result.current.message).toBeNull();
+  expect(h.result.current.rewardEvent).toBeNull();
   h.unmount();
   h.client.clear();
 });
@@ -139,4 +140,38 @@ it("keeps Telegram verification failures recoverable without claiming XP", async
   expect(h.result.current.busy).toBe(false);
   h.unmount();
   h.client.clear();
+});
+
+it("reveals only newly confirmed exact XP, once, and never on refetch or duplicate", async () => {
+  const h = setup(async () => fixture.daily_claim.response);
+  await waitFor(() => expect(h.result.current.daily.data).toBeTruthy());
+  expect(h.result.current.rewardEvent).toBeNull();
+  await act(async () => { await h.result.current.claimDaily(); });
+  expect(h.result.current.rewardEvent).toMatchObject({ xp: fixture.daily_claim.response.reward_amount, title: "Daily Core" });
+  act(() => h.result.current.dismissReward());
+  await act(async () => { await h.result.current.refresh(); await h.result.current.claimDaily(); });
+  expect(h.result.current.rewardEvent).toBeNull();
+  expect(h.result.current.message).toBeNull();
+  h.unmount(); h.client.clear();
+});
+
+it("isolates mission pending state from Daily and queues the existing level reveal after settlement", async () => {
+  const response = structuredClone(fixture.mission_claim.response);
+  response.canonical = { ...response.canonical, receipt_cursor: 4, progression: { ...response.canonical.progression, level: 2, lifetime_points: 350, current_threshold: 300, next_threshold: 800, points_into_level: 50, points_remaining: 450 } };
+  let finish!: (v: unknown) => void;
+  const gate = new Promise(resolve => { finish = resolve; });
+  const h = setup(async () => gate);
+  await waitFor(() => expect(h.result.current.missions.data).toBeTruthy());
+  act(() => h.client.setQueryData([...queryKeys.player(scope), "b3", "missions"], fixture.mission_list.map(m => ({ ...m, state: m.key === response.key ? "REWARD_READY" : m.state }))));
+  await waitFor(() => expect(h.result.current.missions.data?.find(m => m.key === response.key)?.state).toBe("REWARD_READY"));
+  let action!: Promise<unknown>;
+  act(() => { action = h.result.current.missionAction(response.key); });
+  await waitFor(() => expect(h.result.current.pendingAction).toBe(`mission:${response.key}`));
+  expect(h.result.current.daily.data?.claimable).toBe(true);
+  expect(h.result.current.rewardEvent).toBeNull();
+  await act(async () => { finish(response); await action; });
+  expect(h.result.current.rewardEvent?.xp).toBe(response.reward_amount);
+  expect(h.result.current.levelUpEvent).toMatchObject({ previousLevel: 1, newLevel: 2 });
+  expect(h.result.current.pendingAction).toBeNull();
+  h.unmount(); h.client.clear();
 });

@@ -1,8 +1,11 @@
+import { usePlayerProgression } from "@/integrations/api/usePlayerProgression";
+import { QueryContinuation } from "@/design-system/performance/QueryContinuation";
+import { showFeedback } from "./TransientFeedback";
 import { profilePhotoUrl } from "@/integrations/api/bootstrapContract";
 import { useBootstrap } from "@/integrations/api/BootstrapProvider";
 import { ArrowRight01Icon, Notification03Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient, type InfiniteData } from "@tanstack/react-query";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -71,9 +74,11 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
 
   const profile = useProfileOverview();
 
-  const notifications = useQuery({
+  const notifications = useInfiniteQuery({
     queryKey: queryKeys.notifications(scope),
-    queryFn: () => loadNotifications(initData),
+    queryFn: ({ pageParam, signal }) => loadNotifications(initData, 20, pageParam, signal),
+    initialPageParam: null as number | null,
+    getNextPageParam: page => page.next_cursor ?? undefined,
     enabled: remoteData && adapter.isTelegram && Boolean(initData) && scope.player !== "unverified",
     staleTime: 15_000,
   });
@@ -91,17 +96,18 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
     ? bootstrap.data.player.avatarUrl
     : profilePhotoUrl(identity?.photo_url) ?? telegramUser?.photo_url ?? null;
   const avatarSource = useAvatarSource(bootstrapPlayerId, avatar);
+  const progression = usePlayerProgression();
   const actualStage =
     tap?.view.progression?.stage ?? bootstrap.data?.dexo.stage ?? profile.data?.progression.dexo_stage ?? "newborn";
   const stageLabel = actualStage ? actualStage.toUpperCase() : "—";
   const level = remoteData
-    ? (tap?.view.progression?.level ?? bootstrap.data?.player.level ?? profile.data?.progression.level ?? 1)
+    ? progression.level
     : bootstrap.data?.player.level ?? 1;
   const initials = displayName.trim().slice(0, 1).toUpperCase() || "D";
   const season = bootstrap.data?.season;
   const seasonCode = season ? seasonBadge(season.id) : "S—";
   const seasonTitle = season?.name ?? "Season";
-  const notificationItems = notifications.data?.items ?? [];
+  const notificationItems = notifications.data?.pages.flatMap(page => page.items) ?? [];
   const unreadCount = useMemo(
     () => notificationItems.filter((item) => item.unread).length,
     [notificationItems],
@@ -144,39 +150,29 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
   };
 
   const updateNotificationCache = (updater: (item: LiveNotification) => LiveNotification) => {
-    queryClient.setQueryData<NotificationPage>(queryKeys.notifications(scope), (current) =>
-      current ? { ...current, items: current.items.map(updater) } : current,
+    queryClient.setQueryData<InfiniteData<NotificationPage>>(queryKeys.notifications(scope), (current) =>
+      current ? { ...current, pages: current.pages.map(page => ({ ...page, items: page.items.map(updater) })) } : current,
     );
   };
 
+  const pendingReads = useRef(new Set<string>());
   const markRead = async (id: string) => {
-    const previous = queryClient.getQueryData<NotificationPage>(queryKeys.notifications(scope));
-    updateNotificationCache((item) =>
-      item.id === id ? { ...item, unread: false, read_at: item.read_at ?? new Date().toISOString() } : item,
-    );
+    if (pendingReads.current.has(id)) return;
+    pendingReads.current.add(id);
     adapter.selectionChanged();
     try {
-      await markNotificationRead(initData, id);
-    } catch {
-      if (previous) queryClient.setQueryData(queryKeys.notifications(scope), previous);
-    }
+      const confirmed = await markNotificationRead(initData, id);
+      updateNotificationCache(item => item.id === id ? confirmed : item);
+    } catch { showFeedback("This notification couldn't be updated. Please try again."); }
+    finally { pendingReads.current.delete(id); }
   };
 
   const markAllRead = async () => {
-    const unread = notificationItems.filter((item) => item.unread);
-    if (unread.length === 0) return;
-    const previous = queryClient.getQueryData<NotificationPage>(queryKeys.notifications(scope));
-    updateNotificationCache((item) =>
-      item.unread ? { ...item, unread: false, read_at: item.read_at ?? new Date().toISOString() } : item,
-    );
-    adapter.hapticNotice("success");
-    const results = await Promise.allSettled(
-      unread.map((item) => markNotificationRead(initData, item.id)),
-    );
-    if (results.some((result) => result.status === "rejected") && previous) {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.notifications(scope) });
-    }
+    await Promise.allSettled(notificationItems.filter(item => item.unread).map(item => markRead(item.id)));
+    // Reconcile partial success without restoring already-read items to unread.
+    await notifications.refetch();
   };
+
 
   return (
     <>
@@ -268,6 +264,7 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
                       );
                     })
                   )}
+                  <QueryContinuation hasNext={notifications.hasNextPage && !notifications.isFetchNextPageError} fetching={notifications.isFetching} load={notifications.fetchNextPage} />
                 </div>
               </motion.section>
             </motion.div>

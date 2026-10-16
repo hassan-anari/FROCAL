@@ -1,3 +1,6 @@
+import { useArenaRankings } from "@/integrations/api/useArenaRankings";
+import { QueryContinuation } from "@/design-system/performance/QueryContinuation";
+import { AvatarContent } from "@/design-system/components/AvatarContent";
 import { useAvatarSource } from "@/integrations/api/useAvatarSource";
 import { useBootstrap } from "@/integrations/api/BootstrapProvider";
 import { isRemoteDataSource } from "@/integrations/api/bootstrap";
@@ -68,7 +71,9 @@ function buildCreatedClanSummary(created: CreatedClan): ClanSummary {
   };
 }
 
-function ClanMark({ clan, large = false }: { clan: ClanSummary; large?: boolean }) {
+type RankedClan = Pick<ClanSummary, "id" | "name" | "tag" | "level" | "members" | "capacity" | "rank" | "score" | "imageUrl">;
+
+function ClanMark({ clan, large = false }: { clan: RankedClan; large?: boolean }) {
   const hue = getIdentityHue(clan.name);
   return (
     <div className={`${styles.clanMark} ${large ? styles.clanMarkLarge : ""}`} style={{ "--identity-hue": hue } as CSSProperties}>
@@ -81,7 +86,7 @@ function ClanMark({ clan, large = false }: { clan: ClanSummary; large?: boolean 
 function PlayerAvatar({ player, large = false }: { player: ArenaPlayerRank; large?: boolean }) {
   return (
     <div className={`${styles.playerAvatar} ${large ? styles.playerAvatarLarge : ""}`} style={{ "--identity-hue": player.accentHue } as CSSProperties}>
-      <span>{player.initials}</span>
+      <span><AvatarContent owner={`ranking:${player.id}`} photoUrl={player.photoUrl} fallback={player.initials} /></span>
       <AssetImage assetKey="profile.frame.standard" className={styles.playerFrame} />
     </div>
   );
@@ -497,22 +502,42 @@ function SeasonOneWarfront() {
 }
 
 function PlayerPodium({ players }: { players: ArenaPlayerRank[] }) {
-  return <div className={styles.podium}>{players.slice(0, 3).map((player, index) => <article key={player.id} className={styles.podiumCard}><span className={styles.podiumRank}>#{index + 1}</span><PlayerAvatar player={player} large /><strong>{player.name}</strong><p>{player.clan ?? "Independent"}</p><b>{player.score.toLocaleString()}</b></article>)}</div>;
+  return <div className={styles.podium}>{players.slice(0, 3).map((player) => <article key={player.id} className={styles.podiumCard}><span className={styles.podiumRank}>#{player.rank}</span><PlayerAvatar player={player} large /><strong>{player.name}</strong><p>{player.clan ?? "Independent"}</p><b>{player.score.toLocaleString()}</b></article>)}</div>;
 }
 
-function ClanPodium({ clans }: { clans: ClanSummary[] }) {
-  return <div className={styles.podium}>{clans.slice(0, 3).map((clan, index) => <article key={clan.id} className={styles.podiumCard}><span className={styles.podiumRank}>#{index + 1}</span><ClanMark clan={clan} large /><strong>{clan.name}</strong><p>LVL {clan.level} · {clan.members}/{clan.capacity}</p><b>{clan.score.toLocaleString()}</b></article>)}</div>;
+function ClanPodium({ clans }: { clans: RankedClan[] }) {
+  return <div className={styles.podium}>{clans.slice(0, 3).map((clan) => <article key={clan.id} className={styles.podiumCard}><span className={styles.podiumRank}>#{clan.rank}</span><ClanMark clan={clan} large /><strong>{clan.name}</strong><p>LVL {clan.level} · {clan.members}/{clan.capacity}</p><b>{clan.score.toLocaleString()}</b></article>)}</div>;
 }
 
 function Rankings({ mode, onMode, rankedClans, ownClan, level, currentName, currentPhotoUrl, showSeasonHero = false }: { mode: ArenaRankingMode; onMode: (mode: ArenaRankingMode) => void; rankedClans: ClanSummary[]; ownClan: ClanSummary | null; level: number; currentName: string; currentPhotoUrl?: string | null; showSeasonHero?: boolean }) {
+  const live = useArenaRankings(mode);
+  const { bootstrap } = useBootstrap();
+  const remote = isRemoteDataSource();
+  const pages = live.data?.pages ?? [];
+  const players: ArenaPlayerRank[] = remote ? pages.flatMap(page => page.items).flatMap(row => "player_id" in row ? [{ id: row.player_id, name: row.first_name, handle: row.username, level: row.level, score: row.season_points, rank: row.rank, clan: row.clan?.name ?? null, initials: getIdentityInitials(row.first_name), accentHue: getIdentityHue(row.first_name), photoUrl: row.avatar_url }] : []) : arenaPlayerRanking;
+  const toClan = (row: { clan_id: string; name: string; tag: string; hq_level: number; member_count: number; capacity: number; rank: number; competitive_score: number; crest: string | null }): RankedClan => ({ id: row.clan_id, name: row.name, tag: row.tag, level: row.hq_level, members: row.member_count, capacity: row.capacity, rank: row.rank, score: row.competitive_score, imageUrl: row.crest });
+  const clans = remote ? pages.flatMap(page => page.items).flatMap(row => "clan_id" in row ? [toClan(row)] : []) : rankedClans;
+  const standing = pages[0]?.own_standing;
+  const currentClan = remote ? standing && "clan_id" in standing ? toClan(standing) : null : ownClan;
+  const ownRank = remote ? standing?.rank : arenaSeason.playerRank;
+  const ownScore = remote ? standing && "season_points" in standing ? standing.season_points : null : arenaSeason.playerScore;
+  const season = bootstrap.data?.remote?.season;
+  const seasonName = remote ? bootstrap.data?.season.name ?? "" : `Season ${String(arenaSeason.number).padStart(2, "0")}`;
+  const now = Date.parse(bootstrap.data?.remote?.server_time ?? bootstrap.data?.remote?.canonical?.server_time ?? "");
+  const start = Date.parse(season?.starts_at ?? "");
+  const end = Date.parse(season?.ends_at ?? "");
+  const timingKnown = Number.isFinite(now) && Number.isFinite(start) && Number.isFinite(end) && end > start;
+  const daysLeft = remote ? timingKnown ? Math.max(0, Math.ceil((end - now) / 86400000)) : null : arenaSeason.daysLeft;
+  const progress = remote ? timingKnown ? Math.max(0, Math.min(1, (now - start) / (end - start))) : 0 : arenaSeason.progress;
   return (
     <div className={styles.stack}>
-      {showSeasonHero ? <section className={styles.seasonHero}><div><span>FOUNDING SEASON</span><h2>Season {String(arenaSeason.number).padStart(2, "0")}</h2><p>Every verified action moves your seasonal score. Finish as high as you can before the reset.</p><div><strong>{arenaSeason.daysLeft} days left</strong><span>{Math.round(arenaSeason.progress * 100)}% complete</span></div><ProgressBar value={arenaSeason.progress * 100} /></div><AssetImage assetKey="arena.rewardCapsule" /></section> : null}
+      {showSeasonHero ? <section className={styles.seasonHero}><div><span>FOUNDING SEASON</span><h2>{seasonName}</h2><p>Every verified action moves your seasonal score. Finish as high as you can before the reset.</p><div><strong>{daysLeft === null ? "—" : `${daysLeft} days left`}</strong><span>{Math.round(progress * 100)}% complete</span></div><ProgressBar value={progress * 100} /></div><AssetImage assetKey="arena.rewardCapsule" /></section> : null}
       <DeferredMount minHeight={520}>
       <section className={styles.panel}>
         <SectionTitle eyebrow="GLOBAL STANDINGS" title="Season Leaderboard" />
         <nav className={styles.rankingSwitch}><button type="button" className={mode === "players" ? styles.rankingSwitchActive : ""} onClick={() => onMode("players")}>Players</button><button type="button" className={mode === "clans" ? styles.rankingSwitchActive : ""} onClick={() => onMode("clans")}>Clans</button></nav>
-        {mode === "players" ? <><PlayerPodium players={arenaPlayerRanking} /><div className={styles.rankingList}>{arenaPlayerRanking.slice(3).map((player) => <article key={player.id}><span>#{player.rank}</span><PlayerAvatar player={player} /><div><strong>{player.name}</strong><p>LVL {player.level} · {player.clan ?? "Independent"}</p></div><b>{player.score.toLocaleString()}</b></article>)}</div><div className={styles.selfRank}><span>#{arenaSeason.playerRank}</span><CurrentPlayerAvatar name={currentName} photoUrl={currentPhotoUrl} /><div><strong>You</strong><p>Level {level} · Current standing</p></div><b>{arenaSeason.playerScore.toLocaleString()}</b></div></> : <><ClanPodium clans={rankedClans} /><div className={styles.rankingList}>{rankedClans.slice(3, 8).map((entry) => <article key={entry.id}><span>#{entry.rank}</span><ClanMark clan={entry} /><div><strong>{entry.name}</strong><p>LVL {entry.level} · {entry.members}/{entry.capacity} members</p></div><b>{entry.score.toLocaleString()}</b></article>)}</div>{ownClan ? <div className={styles.selfRank}><span>#{ownClan.rank}</span><ClanMark clan={ownClan} /><div><strong>{ownClan.name}</strong><p>Your clan · Level {ownClan.level}</p></div><b>{ownClan.score.toLocaleString()}</b></div> : <div className={styles.noClanGate}><HugeiconsIcon icon={UserGroupIcon} size={20} strokeWidth={1.55} /><div><strong>No clan standing yet</strong><p>Join or found a clan to appear in Clan Rankings.</p></div></div>}</>}
+        {mode === "players" ? <><PlayerPodium players={players} /><div className={styles.rankingList}>{players.slice(3).map((player) => <article key={player.id}><span>#{player.rank}</span><PlayerAvatar player={player} /><div><strong>{player.name}</strong><p>LVL {player.level} · {player.clan ?? "Independent"}</p></div><b>{player.score.toLocaleString()}</b></article>)}</div>{ownRank !== undefined && ownRank !== null && ownScore !== null ? <div className={styles.selfRank}><span>#{ownRank}</span><CurrentPlayerAvatar name={currentName} photoUrl={currentPhotoUrl} /><div><strong>You</strong><p>Level {level} · Current standing</p></div><b>{ownScore.toLocaleString()}</b></div> : null}</> : <><ClanPodium clans={clans} /><div className={styles.rankingList}>{clans.slice(3, remote ? undefined : 8).map((entry) => <article key={entry.id}><span>#{entry.rank}</span><ClanMark clan={entry} /><div><strong>{entry.name}</strong><p>LVL {entry.level} · {entry.members}/{entry.capacity} members</p></div><b>{entry.score.toLocaleString()}</b></article>)}</div>{currentClan ? <div className={styles.selfRank}><span>#{currentClan.rank}</span><ClanMark clan={currentClan} /><div><strong>{currentClan.name}</strong><p>Your clan · Level {currentClan.level}</p></div><b>{currentClan.score.toLocaleString()}</b></div> : <div className={styles.noClanGate}><HugeiconsIcon icon={UserGroupIcon} size={20} strokeWidth={1.55} /><div><strong>No clan standing yet</strong><p>Join or found a clan to appear in Clan Rankings.</p></div></div>}</>}
+        {remote ? <QueryContinuation hasNext={live.hasNextPage && !live.isFetchNextPageError} fetching={live.isFetching} load={live.fetchNextPage} /> : null}
       </section>
       </DeferredMount>
     </div>

@@ -23,8 +23,10 @@ export type NotificationPage = z.infer<typeof notificationPageSchema>;
 export async function loadNotifications(
   initData: string | null,
   limit = 20,
+  cursor: number | null = null,
+  signal?: AbortSignal,
 ): Promise<NotificationPage> {
-  const response = await apiRequest(`/notifications?limit=${encodeURIComponent(limit)}`, { initData });
+  const response = await apiRequest(`/notifications?limit=${encodeURIComponent(limit)}${cursor === null ? "" : `&cursor=${cursor}`}`, { initData, signal, cache: "no-store" });
   return notificationPageSchema.parse(await response.json());
 }
 

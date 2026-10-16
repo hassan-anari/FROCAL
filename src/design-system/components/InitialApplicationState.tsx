@@ -92,7 +92,7 @@ export function InitialApplicationState({ children }: { children: ReactNode }) {
           else recoverLaunch();
         } finally { submitting.current = false; setRetrying(false); }
       }}>Try Again</Button>
-      {tapRecovery && tap?.view.canSwitchDevice ? <Button tone="secondary" disabled={retrying || tap.view.recovering || tap.view.error === "COOLDOWN"}
+      {tapRecovery && tap?.view.canSwitchDevice ? <Button tone="secondary" style={{ marginTop: "var(--space-3)" }} disabled={retrying || tap.view.recovering || tap.view.error === "COOLDOWN"}
         onClick={() => setConfirmSwitch(true)}>Switch to This Device</Button> : null}
       {retrying || (tapRecovery && tap?.view.recovering) ? <p role="status" aria-live="polite">Trying to reconnect…</p> : null}
       {tapRecovery && tap?.view.error === "COOLDOWN" ? <p role="status">Please wait a moment before trying again.</p> : null}

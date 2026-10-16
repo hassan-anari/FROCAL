@@ -41,7 +41,7 @@ export interface EarnHistoryEntry {
 
 export interface RewardEvent {
   id: string;
-  source: "daily" | MissionId;
+  source: "daily" | "typing" | MissionId;
   title: string;
   xp: number;
   createdAt: string;

@@ -1,0 +1,124 @@
+import { expect, test } from "@playwright/test";
+import { fixture, launch, prepareB4 } from "./b4-fixture";
+
+test("confirmed Daily reveal uses exact XP then level-up; refresh and duplicate responses never reveal", async ({ page }) => {
+  const state = await prepareB4(page); state.dailyDelay = 600;
+  await page.goto(launch("/earn"));
+  await page.getByRole("button", { name: "Claim daily core" }).click();
+  await expect(page.getByRole("dialog", { name: "XP reward" })).toHaveCount(0);
+  await expect(page.getByRole("dialog", { name: "XP reward" })).toContainText("+80 XP");
+  expect(state.calls.filter(c => c.path === "/daily/claim")).toHaveLength(1);
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "Dexo level up" })).toBeVisible();
+  await page.getByRole("button", { name: "Return to Earn", exact: true }).click();
+  await expect(page.getByLabel("Earn summary")).toContainText("350");
+  await expect(page.locator("main")).not.toContainText(/Daily reward claimed:|Streak:|Resets 10\//);
+  await page.reload();
+  await expect(page.getByRole("button", { name: "Claimed today", exact: true })).toBeDisabled();
+  await expect(page.getByRole("dialog", { name: "XP reward" })).toHaveCount(0);
+});
+
+test("Mission settlement keeps Daily unchanged, reveals exact reward and has one Completed label", async ({ page }) => {
+  const state = await prepareB4(page); state.missionDelay = 800;
+  const key = fixture.mission_claim.response.key;
+  state.missions = state.missions.map((m: any) => ({ ...m, state: m.key === key ? "REWARD_READY" : m.state }));
+  await page.goto(launch("/earn"));
+  const daily = page.getByRole("button", { name: "Claim daily core", exact: true });
+  await expect(daily).toBeEnabled();
+  await page.getByRole("button", { name: `Claim ${fixture.mission_claim.response.reward_amount} XP`, exact: true }).click();
+  await expect(daily).toHaveText("Claim daily core");
+  await expect(daily).toBeEnabled();
+  await expect(page.getByRole("dialog", { name: "XP reward" })).toContainText(`+${fixture.mission_claim.response.reward_amount} XP`);
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  const archive = page.getByRole("region", { name: "Completed missions" });
+  await expect(archive.getByText("Completed", { exact: true })).toHaveCount(1);
+});
+
+test("Typing Claim exists only on Earn dashboard and uses RewardReveal", async ({ page }) => {
+  await prepareB4(page);
+  await page.goto(launch("/earn/typing"));
+  await expect(page.getByRole("heading", { name: "Type with intent." })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Claim / })).toHaveCount(0);
+  await expect(page.locator("main")).not.toContainText(/Resets \d|Typing reward claimed/);
+  await page.getByRole("button", { name: "Back to Typing tab", exact: true }).click();
+  await page.getByRole("button", { name: "Claim 70 XP", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "XP reward" })).toContainText("+70 XP");
+});
+
+test("Profile uses actual entitlements; save waits for confirmation, updates frame immediately and persists on refresh", async ({ page }) => {
+  const state = await prepareB4(page); state.saveDelay = 800;
+  await page.goto(launch("/profile"));
+  await page.getByRole("button", { name: "Customize", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Customize profile" });
+  await expect(dialog.getByRole("button", { name: "Founder locked", exact: true })).toBeDisabled();
+  await dialog.getByRole("button", { name: "Premium", exact: true }).click();
+  await expect(dialog.locator('[class*="frame"]').first()).toBeVisible();
+  await dialog.getByRole("button", { name: "Save profile", exact: true }).click();
+  await expect(dialog.getByRole("button", { name: "Save profile", exact: true })).toBeDisabled();
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toBeHidden();
+  expect(state.customization.active_frame).toBe("premium");
+  await expect(page.locator('[class*="frame"]').first()).toHaveAttribute("src", /premium/);
+  await page.reload();
+  await expect(page.locator('[class*="frame"]').first()).toHaveAttribute("src", /premium/);
+  await expect(page.getByText("Coming soon", { exact: true })).toHaveCount(2);
+  await page.getByRole("button", { name: "Achievements", exact: true }).click();
+  await page.getByText("First Verified Activity", { exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "First Verified Activity" })).toContainText("5 / 200");
+  await expect(page.getByRole("dialog", { name: "First Verified Activity" })).not.toContainText("146");
+});
+
+test("rejected Profile save leaves draft open and uses the minimal transient error", async ({ page }) => {
+  const state = await prepareB4(page); state.saveError = true;
+  await page.goto(launch("/profile"));
+  await page.getByRole("button", { name: "Customize", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Customize profile" });
+  await dialog.getByRole("button", { name: "Premium", exact: true }).click();
+  await dialog.getByRole("button", { name: "Save profile", exact: true }).click();
+  await expect(dialog).toBeVisible();
+  await expect(page.getByRole("alert")).toContainText("Your profile couldn't be saved.");
+  expect(state.customization.active_frame).toBe("standard");
+});
+
+test("Network refreshes on entry/return/resume, preserves pending invitees and exposes no manual controls", async ({ page }) => {
+  const state = await prepareB4(page);
+  await page.goto(launch("/earn"));
+  await page.getByRole("button", { name: "Network", exact: true }).click();
+  await expect(page.getByText("Start Invitee", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: /broadcast|Check status/i })).toHaveCount(0);
+  const reads = state.calls.filter(c => c.path === "/network/groups").length;
+  await page.getByRole("navigation", { name: "Primary game navigation" }).getByRole("button", { name: "Profile", exact: true }).click();
+  state.groups.items[0].title = "Updated community";
+  await page.getByRole("navigation", { name: "Primary game navigation" }).getByRole("button", { name: "Earn", exact: true }).click();
+  await expect(page.getByText("Updated community", { exact: true })).toBeVisible();
+  expect(state.calls.filter(c => c.path === "/network/groups").length).toBeGreaterThan(reads);
+  expect(state.calls.filter(c => c.path.includes("broadcast-consent") || c.path.endsWith("/reverify"))).toHaveLength(0);
+});
+
+test("Arena binds server order, own standing and scroll pagination while Warfront stays locked", async ({ page }) => {
+  const state = await prepareB4(page);
+  await page.goto(launch("/arena"));
+  await expect(page.getByRole("button", { name: "Unlocks in Season 2", exact: true })).toBeDisabled();
+  await page.getByRole("button", { name: "Rankings", exact: true }).click();
+  await expect(page.getByText("Explorer 1", { exact: true })).toBeVisible();
+  await page.getByText("Explorer 30", { exact: true }).scrollIntoViewIfNeeded();
+  await expect(page.getByText("Explorer 32", { exact: true })).toHaveCount(1);
+  await expect(page.getByText("#50", { exact: true })).toHaveCount(1);
+  expect(state.calls.some(c => c.query.includes("offset=30"))).toBe(true);
+  await page.getByRole("button", { name: "Clans", exact: true }).click();
+  await expect(page.getByText("Verified Clan", { exact: true })).toBeVisible();
+  await expect(page.getByText("No clan standing yet", { exact: true })).toBeVisible();
+});
+
+test("existing Notification Center persists confirmed read state without a duplicate center", async ({ page }) => {
+  const state = await prepareB4(page);
+  await page.goto(launch("/profile"));
+  await page.getByRole("button", { name: "Open notifications", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Notifications", exact: true })).toHaveCount(1);
+  await page.getByRole("button", { name: /Mission complete/ }).click();
+  await expect(page.getByRole("button", { name: "Mark all read", exact: true })).toHaveCount(0);
+  expect(state.notifications[0].unread).toBe(false);
+  await page.reload();
+  await page.getByRole("button", { name: "Open notifications", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Mark all read", exact: true })).toHaveCount(0);
+});

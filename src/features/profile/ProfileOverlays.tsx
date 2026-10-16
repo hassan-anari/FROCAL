@@ -31,7 +31,7 @@ export interface ProfileDetailItem {
   unlockedAt?: string;
   progress?: AchievementProgress;
   primaryLabel?: string;
-  onPrimary?: () => void;
+  onPrimary?: () => void | boolean | Promise<void | boolean>;
 }
 
 interface OverlayFrameProps {
@@ -171,6 +171,7 @@ interface DetailSheetProps {
 }
 
 export function ProfileDetailSheet({ item, onClose }: DetailSheetProps) {
+  const [saving, setSaving] = useState(false);
   const progress = item.progress;
   const ratio = progress ? Math.min(1, progress.current / Math.max(1, progress.target)) : 0;
   const action = item.primaryLabel && item.onPrimary ? (
@@ -180,9 +181,12 @@ export function ProfileDetailSheet({ item, onClose }: DetailSheetProps) {
       size="md"
       className={styles.primaryButton}
       data-modal-primary
-      onClick={() => {
-        item.onPrimary?.();
-        onClose();
+      disabled={saving}
+      aria-busy={saving}
+      onClick={async () => {
+        setSaving(true);
+        try { if (await item.onPrimary?.() !== false) onClose(); }
+        finally { setSaving(false); }
       }}
     >
       {item.primaryLabel}
@@ -232,7 +236,7 @@ interface CustomizeSheetProps {
   unlockedMedalIds: MedalId[];
   unlockedAchievementIds: AchievementId[];
   onClose: () => void;
-  onSave: (input: { frameId: FrameId; titleId: TitleId; medalId: MedalId | null; achievementId: AchievementId | null }) => void;
+  onSave: (input: { frameId: FrameId; titleId: TitleId; medalId: MedalId | null; achievementId: AchievementId | null }) => void | boolean | Promise<void | boolean>;
 }
 
 export function CustomizeProfileSheet({
@@ -249,6 +253,7 @@ export function CustomizeProfileSheet({
   onClose,
   onSave,
 }: CustomizeSheetProps) {
+  const [saving, setSaving] = useState(false);
   const [draftFrame, setDraftFrame] = useState(frameId);
   const [draftTitle, setDraftTitle] = useState(titleId);
   const [draftMedal, setDraftMedal] = useState<MedalId | null>(medalId);
@@ -265,9 +270,12 @@ export function CustomizeProfileSheet({
         size="md"
         className={styles.primaryButton}
         data-modal-primary
-        onClick={() => {
-          onSave({ frameId: draftFrame, titleId: draftTitle, medalId: draftMedal, achievementId: draftAchievement });
-          onClose();
+        disabled={saving}
+        aria-busy={saving}
+        onClick={async () => {
+          setSaving(true);
+          try { if (await onSave({ frameId: draftFrame, titleId: draftTitle, medalId: draftMedal, achievementId: draftAchievement }) !== false) onClose(); }
+          finally { setSaving(false); }
         }}
       >
         Save profile
