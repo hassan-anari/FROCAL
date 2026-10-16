@@ -1,6 +1,8 @@
 import { useQueryFeedback } from "@/design-system/components/TransientFeedback";
 import { readSessionPreference, writeSessionPreference } from "@/app/storageRelease";
 import { useB3, missionView } from "@/integrations/api/useB3";
+import { currentTypingRuns } from "@/integrations/api/b4Contracts";
+import { QueryContinuation } from "@/design-system/performance/QueryContinuation";
 import { safeDestination } from "@/integrations/api/safeNavigation";
 import { useGameplayAvailability } from "@/integrations/api/useGameplayAvailability";
 import { AvatarContent } from "@/design-system/components/AvatarContent";
@@ -160,7 +162,7 @@ export function EarnPage() {
   const activeMissions = Object.values(earn.missions).filter((mission) => mission.status !== "claimed");
   const completedMissions = Object.values(earn.missions).filter((mission) => mission.status === "claimed");
   const levelProgress = Math.min(100, Math.round((playerProgression.levelXp / playerProgression.xpToNextLevel) * 100));
-  const typingToday = live.remote ? [] : getTypingAttemptsToday(earn.typingAttemptDate, earn.typingAttempts);
+  const typingToday = live.remote ? currentTypingRuns(live.typingHistory.data?.pages).map(run => ({ id: run.attempt_id, completedAt: run.submitted_at, wpm: run.wpm, accuracy: run.accuracy_bps === null ? null : run.accuracy_bps / 100, score: run.score })) : getTypingAttemptsToday(earn.typingAttemptDate, earn.typingAttempts);
   const typingUsed = live.remote ? live.typing.data?.attempts_used ?? 0 : typingToday.length;
   const typingRemaining = live.remote ? live.typing.data?.attempts_remaining ?? 0 : getTypingAttemptsRemaining(earn.typingAttemptDate, earn.typingAttempts);
   const telegramUser = adapter.getUser();
@@ -193,7 +195,7 @@ export function EarnPage() {
     const revalidate = () => {
       if (document.hidden || Date.now() - lastRefresh < 1000) return;
       lastRefresh = Date.now();
-      void Promise.all([live.referrals.refetch(), live.invitees.refetch(), live.network.refetch(), live.groups.refetch()]);
+      void Promise.all([live.referrals.refetch({ cancelRefetch: false }), live.invitees.refetch({ cancelRefetch: false }), live.network.refetch({ cancelRefetch: false }), live.groups.refetch({ cancelRefetch: false })]);
     };
     revalidate();
     window.addEventListener("focus", revalidate);
@@ -584,15 +586,16 @@ export function EarnPage() {
                   </button>
                 </section> : null}
 
-                <section className={styles.todayRuns}>
+                <section className={styles.todayRuns} data-typing-history>
                   <header className={styles.sectionHeader}><div><span>TODAY</span><h2>Typing History</h2></div><span>{typingUsed} runs</span></header>
                   {typingToday.length ? typingToday.map((result, index) => (
-                    <article key={`${result.completedAt}-${index}`}>
+                    <article key={"id" in result ? result.id : `${result.completedAt}-${index}`}>
                       <span>{String(index + 1).padStart(2, "0")}</span>
-                      <div><strong>{Math.round(result.wpm)} WPM</strong><small>{Math.round(result.accuracy)}% accuracy · {formatResultTime(result.completedAt)}</small></div>
-                      <em>{formatNumber(result.score)}</em>
+                      <div><strong>{result.wpm === null ? "—" : Math.round(result.wpm)} WPM</strong><small>{result.accuracy === null ? "—" : `${Math.round(result.accuracy)}%`} accuracy · {formatResultTime(result.completedAt)}</small></div>
+                      <em>{result.score === null ? "—" : formatNumber(result.score)}</em>
                     </article>
-                  )) : <div className={styles.emptyState}><strong>{live.remote ? "Run history is unavailable." : "No runs today."}</strong><span>{live.remote ? "Your confirmed totals appear above." : "Your first completed game will appear here."}</span></div>}
+                  )) : <div className={styles.emptyState}><strong>{live.remote && live.typingHistory.isError ? "Run history is unavailable." : "No runs today."}</strong><span>{live.remote && live.typingHistory.isError ? "Your confirmed totals appear above." : "Your first completed game will appear here."}</span></div>}
+                  {live.remote ? <QueryContinuation selector="[data-typing-history] > article:last-of-type" hasNext={live.typingHistory.hasNextPage && !live.typingHistory.isFetchNextPageError} fetching={live.typingHistory.isFetching} load={live.typingHistory.fetchNextPage} /> : null}
                 </section>
               </>
             ) : null}

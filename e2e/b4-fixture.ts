@@ -9,8 +9,8 @@ export async function prepareB4(page: Page) {
   const state = {
     bootstrap: structuredClone(fixture.bootstrap), canonical: structuredClone(fixture.canonical_state),
     daily: structuredClone(fixture.daily_available), missions: structuredClone(fixture.mission_list),
-    typing: { ...fixture.typing_state, claimable_balance: 70 },
-    history: { items: [] as typeof b4.typing_history_unclaimed.items, next_cursor: null },
+    typing: { ...b4.typing_result.typing, next_reset: fixture.typing_state.next_reset },
+    history: { period: "current", period_key: "2026-10-15T00:00:00+00:00", period_start: "2026-10-15T00:00:00Z", period_end: "2026-10-16T00:00:00Z", items: b4.typing_history_unclaimed.items.map((run: any) => ({ ...run, reset_period: "2026-10-15T00:00:00+00:00", started_at: "2026-10-15T08:00:00Z", submitted_at: "2026-10-15T08:00:05Z" })), next_cursor: null as number | null },
     overview: structuredClone(fixture.profile_overview),
     customization: { active_frame: "standard", active_title: "explorer", featured_medal: null, featured_achievement: null },
     groups: structuredClone(groupFixture),
@@ -24,6 +24,7 @@ export async function prepareB4(page: Page) {
     collection: { frames: ["standard", "premium", "seasonal", "founder"].map(key => ({ key, available: true, entitled: ["standard", "premium"].includes(key), active: key === "standard" })), titles: [{ key: "explorer", available: true, entitled: true, active: true }], medals: [], owned_medal_count: 0 },
     notifications: [{ id: "00000000-0000-4000-8000-000000000001", deep_link: null as { path: string } | null, type: "MISSION", title: "Mission complete", body: "Your mission has been verified.", payload: {}, created_at: "2026-10-15T08:00:00Z", read_at: null as string | null, unread: true }],
     calls: [] as { path: string; method: string; query: string }[], dailyDelay: 0, missionDelay: 0, saveDelay: 0, saveError: false, failDaily: false, duplicate: false,
+    historyPeriodChanged: false,
   };
   state.bootstrap.features = { ...state.bootstrap.features, base_tap: false, clan: false, profile: true, arena: true };
   await page.addInitScript(() => {
@@ -64,7 +65,10 @@ export async function prepareB4(page: Page) {
       adopt(result.canonical); return send({ ...result, reward });
     }
     if (path === "/typing") return send(state.typing);
-    if (path === "/typing/history") return send(state.history);
+    if (path === "/typing/history") {
+      if (state.historyPeriodChanged && url.searchParams.has("cursor")) { state.historyPeriodChanged = false; return send({ code: "TYPING_PERIOD_CHANGED", detail: "typing period changed", retryable: false, retry_after_seconds: null }, 409); }
+      return send(state.history);
+    }
     if (path === "/typing/claim") { const result = fixture.typing_claim.response; const reward = { ...b4.typing_claim.reward, amount: result.amount, progression_before: state.canonical.progression, progression_after: result.canonical.progression }; state.typing = result.typing; adopt(result.canonical); return send({ ...result, reward }); }
     if (path === "/typing/attempts/start") return send(fixture.typing_start.response);
     if (path.endsWith("/submit")) return send({ ...fixture.typing_submit.response, score: b4.typing_result.score });

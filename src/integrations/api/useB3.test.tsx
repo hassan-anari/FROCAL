@@ -44,7 +44,7 @@ function setup(post: (path: string, options: any) => Promise<any>) {
     "/daily": fixture.daily_available,
     "/missions": fixture.mission_list,
     "/typing": fixture.typing_state,
-    "/typing/history?limit=20": { items: [], next_cursor: null },
+    "/typing/history?period=current&limit=20": { period: "current", period_key: "2026-10-15T00:00:00+00:00", period_start: "2026-10-15T00:00:00Z", period_end: "2026-10-16T00:00:00Z", items: [], next_cursor: null },
     "/referrals": fixture.referral,
     "/referrals/invitees?offset=0&limit=30": fixture.invitees_empty,
     "/network": fixture.network_summary,

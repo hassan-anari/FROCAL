@@ -1,43 +1,59 @@
 {
   "repository": "hassan-anari/WEDCAL",
-  "commit": "9a43048079bfc20bc5a030a88f84216c9451e4a8",
-  "status": "published B4 implementation; paired acceptance in progress",
+  "commit": "ec6af7053dfc7e8755998418b826c59ca91191ea",
+  "status": "published B4 implementation with authoritative Typing periods; final paired verification",
   "files": {
     "src/integrations/api/fixtures/b4/README.md": {
       "path": "docs/fixtures/b4/README.md",
-      "blob": "cfd2b34e0666737c443580de56a1a459a8c4d9c8"
+      "blob": "1788f756a8007cfa11d49d4626e1042a7d96ed44"
     },
     "src/integrations/api/fixtures/b4/dlx-confirmed.json": {
       "path": "docs/fixtures/b4/dlx-confirmed.json",
       "blob": "9178a83b2ee7e8a07608a2c581dccd0710b7f8fd"
     },
+    "src/integrations/api/fixtures/b4/notifications-errors.json": {
+      "path": "docs/fixtures/b4/notifications-errors.json",
+      "blob": "708f46ff0775f97e2a12671a9c3ea8b29c3f7a44"
+    },
     "src/integrations/api/fixtures/b4/openapi.json": {
       "path": "docs/fixtures/b4/openapi.json",
-      "blob": "489e903d79972acff8e5c88fab8466f65250fa31"
+      "blob": "5285ba5ca5ad7bfc2762c2f00c776340221bc276"
+    },
+    "src/integrations/api/fixtures/b4/private-images.json": {
+      "path": "docs/fixtures/b4/private-images.json",
+      "blob": "71ad87298e538469c6b6e5134ef9e9389afba907"
     },
     "src/integrations/api/fixtures/b4/profile-earn.json": {
       "path": "docs/fixtures/b4/profile-earn.json",
-      "blob": "e0036f2e6fbe7a03ae0d361e4192529d40924e90"
+      "blob": "13188c76efe614f32caa41e6d63bdd84809f2133"
     },
     "src/integrations/api/fixtures/b4/rankings.json": {
       "path": "docs/fixtures/b4/rankings.json",
-      "blob": "08bfa31461ed76fb68d14b8cf86be5d7826deec8"
+      "blob": "c4405b0d95a893dd18360a4e112eebd6a142697f"
     },
     "src/integrations/api/fixtures/b4/typing-history.json": {
       "path": "docs/fixtures/b4/typing-history.json",
-      "blob": "453e877eba3ac33d77275313731b3bf0e3940936"
+      "blob": "0ace53016d5a03c144ab8e962b631c018d1cff5f"
+    },
+    "src/integrations/api/fixtures/b4/typing-periods.json": {
+      "path": "docs/fixtures/b4/typing-periods.json",
+      "blob": "bff5f5876cfaac401472fb5e3a9603e968251e57"
+    },
+    "scripts/contracts/b4/source/apps/typing_game/api.py": {
+      "path": "apps/typing_game/api.py",
+      "blob": "2e96af9aeab568bf20b2f5eb62507b40554fb6b3"
     },
     "scripts/contracts/b4/source/docs/B4_BACKEND_CONTRACT.md": {
       "path": "docs/B4_BACKEND_CONTRACT.md",
-      "blob": "ff43e31e33ee9cf609329d55acb603ff975b7d48"
+      "blob": "f56c8f5fd6b74ce2e7515e0fe9324cdb25956a81"
     },
     "scripts/contracts/b4/source/docs/B4_BACKEND_HANDOFF.md": {
       "path": "docs/B4_BACKEND_HANDOFF.md",
-      "blob": "b46dd51d3b6556b512b11e237f0fe82cae5f466a"
+      "blob": "495bc5460c6bf92eb7f76749919e6f197b9301ca"
     },
     "scripts/contracts/b4/source/apps/typing_game/schemas.py": {
       "path": "apps/typing_game/schemas.py",
-      "blob": "82abfd3bf794fda0db99e46b7991004c8cda16f4"
+      "blob": "b85ba75fdffadedfcc8436cf2d881fd02dc5e1ef"
     },
     "scripts/contracts/b4/source/apps/rewards/reveals.py": {
       "path": "apps/rewards/reveals.py",
@@ -45,7 +61,7 @@
     },
     "scripts/contracts/b4/source/apps/notifications/api.py": {
       "path": "apps/notifications/api.py",
-      "blob": "7d9822b325060a66d8168f906a2c4558ded60ebf"
+      "blob": "e58286cbe0a01d97431025906b34eec266944f08"
     },
     "scripts/contracts/b4/source/apps/network/schemas.py": {
       "path": "apps/network/schemas.py",

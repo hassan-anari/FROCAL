@@ -19,8 +19,18 @@ export const submitSchema = b3.submitSchema.extend({ score: count.nullable().opt
 export const inviteesSchema = b3.inviteesSchema.extend({ items: z.array(b3.inviteesSchema.shape.items.element.extend({ photo_url: z.string().optional() })) });
 export const groupsSchema = b3.groupsSchema.extend({ items: z.array(b3.groupsSchema.shape.items.element.extend({ photo_url: z.string().optional() })) });
 export const typingRunSchema = z.object({
+  reset_period: z.string().min(1),
   attempt_id: z.string().uuid(), status: z.string(), started_at: z.string(), submitted_at: z.string(),
   accuracy_bps: count.max(10000).nullable(), wpm: count.nullable(), score: count.nullable(),
   reward_amount: count, season: z.string(), config_version: z.string(), claimed: z.boolean(),
 });
-export const typingHistorySchema = z.object({ items: z.array(typingRunSchema), next_cursor: z.number().int().positive().nullable() });
+export const typingHistorySchema = z.object({ period: z.enum(["all", "current"]), period_key: z.string().nullable(), period_start: z.string().datetime({ offset: true }).nullable(), period_end: z.string().datetime({ offset: true }).nullable(), items: z.array(typingRunSchema), next_cursor: z.number().int().positive().nullable() });
+export const currentTypingHistorySchema = typingHistorySchema.extend({ period: z.literal("current"), period_key: z.string().min(1), period_start: z.string().datetime({ offset: true }), period_end: z.string().datetime({ offset: true }) });
+export function currentTypingRuns(pages: z.infer<typeof currentTypingHistorySchema>[] | undefined) {
+  const key = pages?.[0]?.period_key;
+  const seen = new Set<string>();
+  return (pages ?? []).filter(page => page.period_key === key).flatMap(page => page.items).filter(run => {
+    if (run.reset_period !== key || seen.has(run.attempt_id)) return false;
+    seen.add(run.attempt_id); return true;
+  });
+}

@@ -4,7 +4,7 @@ import { launch, prepareB4 } from "./b4-fixture";
 const phase = process.env.B4_BASELINE ? "before" : "after";
 for (const viewport of [{ width: 320, height: 700 }, { width: 390, height: 844 }, { width: 460, height: 900 }]) {
   test(`preservation evidence ${phase} ${viewport.width}`, async ({ page }) => {
-    test.setTimeout(90_000);
+    test.setTimeout(120_000);
     await page.setViewportSize(viewport);
     const state = await prepareB4(page);
     const dir = `docs/evidence/b4/${viewport.width}`; mkdirSync(dir, { recursive: true });
@@ -33,6 +33,21 @@ for (const viewport of [{ width: 320, height: 700 }, { width: 390, height: 844 }
     await shot("network");
     await page.getByRole("heading", { name: "Latest explorers" }).scrollIntoViewIfNeeded();
     await shot("referrals");
+    if (phase === "after") {
+      const origin = new URL(page.url()).origin;
+      state.invitees.items[0].photo_url = `${origin}/api/v1/profile/avatar/00000000-0000-4000-8000-000000000002?token=visual`;
+      state.groups.items[0].photo_url = `${origin}/api/v1/profile/group-avatar/00000000-0000-4000-8000-000000000003?token=visual`;
+      await page.route("**/profile/*avatar/*?token=visual", route => route.fulfill({ contentType: "image/webp", path: "public/assets/profile/seasonal-medal-top-10-percent.webp" }));
+      await page.reload();
+      await page.getByRole("heading", { name: "Latest explorers" }).scrollIntoViewIfNeeded();
+      await shot("referral-private-image");
+      await page.waitForTimeout(1000);
+      await page.getByRole("article", { name: state.groups.items[0].title }).evaluate(row => row.scrollIntoView({ block: "center", behavior: "instant" }));
+      await shot("group-private-image");
+      state.invitees.items[0].photo_url = "";
+      state.groups.items[0].photo_url = "";
+      await page.reload();
+    }
     await page.waitForTimeout(1000);
     await page.getByRole("article", { name: state.groups.items[0].title }).evaluate(row => row.scrollIntoView({ block: "center", behavior: "instant" }));
     await shot("communities");
@@ -93,6 +108,7 @@ for (const viewport of [{ width: 320, height: 700 }, { width: 390, height: 844 }
       await page.getByRole("button", { name: "Return to Earn", exact: true }).click();
       await page.goto(launch("/profile"));
       state.saveError = true;
+      await page.getByRole("button", { name: "Overview", exact: true }).click();
       await page.getByRole("button", { name: "Customize", exact: true }).click();
       await page.getByRole("button", { name: "Save profile", exact: true }).click();
       await expect(page.getByRole("alert")).toContainText("Your profile couldn't be saved.");

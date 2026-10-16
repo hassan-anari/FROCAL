@@ -12,6 +12,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:b4": "playwright test --config playwright.b4.config.ts",
+    "test:visual:b4-baseline": "node scripts/capture-b4-baseline.mjs",
     "mock:init": "msw init public --save",
     "validate:assets": "node scripts/validate-assets.mjs",
     "validate:structure": "node scripts/validate-structure.mjs",

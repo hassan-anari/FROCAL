@@ -4,7 +4,7 @@ Frontend scope: P-08/P-09 plus owner-requested B3 restoration, one Draft PR. No 
 
 Owner-confirmed merged WEDCAL main: `1fa937af4628a10cec384b711210755ff28a6a8a`.
 Existing B3 compatibility pin remains **`c3f8f27d18fda66b62e22c6cadd1480e1f0f4370`** unchanged.
-The relevant merged Profile/Arena/notifications/Typing/referral/network API/schema blobs match that B3 pin. They were inspected through the GitHub connector. Published B4 runtime source/fixture pin: **`9a43048079bfc20bc5a030a88f84216c9451e4a8`**, separate from historical B3. Runtime schemas and fixtures are copied byte-for-byte with Git blob hashes in `scripts/contracts/b4-pin.json`. Current-period Typing history evidence is requested from the backend before final synchronization.
+The relevant merged Profile/Arena/notifications/Typing/referral/network API/schema blobs match that B3 pin. They were inspected through the GitHub connector. Published B4 runtime source/fixture pin: **`ec6af7053dfc7e8755998418b826c59ca91191ea`**, separate from historical B3. Runtime schemas and fixtures are copied byte-for-byte with Git blob hashes in `scripts/contracts/b4-pin.json`. Authoritative current-period Typing evidence is published and bound; no client reset-policy calculation is used.
 
 ## Existing implemented contracts being reused
 
@@ -22,7 +22,7 @@ All paths use `/api/v1`. Existing B3 pin/fixtures must remain intact for compati
 
 | Requirement | Needed authoritative information / acceptance |
 |---|---|
-| Typing History | Authenticated actual run list; stable run identity, completion time, WPM, accuracy and exact value for the approved score column. Backend owns status/scoring/day selection/pagination. Include empty, real-history, failed/expired/incomplete and duplicate submission fixtures. Never infer runs from aggregate count/best. |
+| Typing History | `GET /typing/history?period=current` returns actual submitted runs, `period_key/start/end` and persisted run `reset_period`. Existing TODAY rows use server WPM/accuracy/nullable score, separately from reward credit. `TYPING_PERIOD_CHANGED` clears stale pages and reloads page one; a one-shot server-boundary timer and navigation/focus revalidate. No local date/score/credit derivation or invented runs. |
 | Invited-player images | Published `photo_url` now binds the existing avatar/fallback, including start-only invitees. No Telegram file ID/client-built path or unrelated current-user photo. |
 | Connected-group images | Published `photo_url` binds existing group avatars/fallback. GET schedules bounded verification; navigation/focus/resume refreshes actual state. No broadcast or manual verification mutation is exposed in this Mini App. |
 | Archived seasons/rankings | Explicit current/archive season contract, season identity and correct ranking query scope; frozen/settled accounting. Owner must approve archive-selection UI mapping before adding controls. |
@@ -32,7 +32,7 @@ All paths use `/api/v1`. Existing B3 pin/fixtures must remain intact for compati
 
 ## Paired gate
 
-Publish exact B4 implementation SHA, generated OpenAPI/fixtures, migration requirements and deterministic local test harness dependencies. The frontend will add a separate B4 source/fixture pin (not overwrite B3), synchronize CI checkout, and exercise the existing original paired B2/B3 regressions alongside B4 controller/browser tests against isolated PostgreSQL. No shared/live reward requests or production data reset.
+`npm run validate:contracts` verifies separate B2/B3/B4 Git blobs. `npm run test:paired:b4` requires the exact B4 checkout, isolated local PostgreSQL (guarded `frocal_b3_` database prefix) and Redis database 15. It applies the pinned migrations only to that isolated database and exercises the actual APIs and production browser release. CI checks out the exact B4 SHA separately from historical B2/B3 jobs. The paired B4 gate passes 9 API/controller checks and 16 browser cases. Backend contract/rollout instructions are preserved in `scripts/contracts/b4/source/docs/B4_BACKEND_HANDOFF.md`. No shared/live reward requests, real Telegram sends or production data reset.
 
 ## UI decisions remain owner-owned
 

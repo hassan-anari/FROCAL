@@ -61,7 +61,7 @@ export function useB3() {
       staleTime: 10_000,
       refetchInterval: name === "groups" || name === "network" || name === "referrals" || name === "invitees" ? false : 30_000,
       refetchOnMount: "always" as const,
-      refetchOnWindowFocus: true,
+      refetchOnWindowFocus: !["groups", "network", "referrals", "invitees"].includes(name),
       retry: false,
     });
   const clock = query("canonical", "/rewards/state", c.canonicalSchema);
@@ -84,12 +84,25 @@ export function useB3() {
   const missions = query("missions", "/missions", z.array(c.missionSchema));
   const typing = query("typing", "/typing", c.typingSchema);
   const typingHistory = useInfiniteQuery({
-    queryKey: key("typing-history"),
-    queryFn: ({ pageParam, signal }) => b3Request(`/typing/history?limit=20${pageParam === null ? "" : `&cursor=${pageParam}`}`, c.typingHistorySchema, { signal }),
+    queryKey: key("typing-history-current"),
+    queryFn: ({ pageParam, signal }) => b3Request(`/typing/history?period=current&limit=20${pageParam === null ? "" : `&cursor=${pageParam}`}`, c.currentTypingHistorySchema, { signal }),
     initialPageParam: null as number | null,
     getNextPageParam: page => page.next_cursor ?? undefined,
     enabled, staleTime: 10_000, refetchOnMount: "always", refetchOnWindowFocus: true, retry: false,
   });
+  const historyPeriodEnd = typingHistory.data?.pages[0]?.period_end;
+  const restartedHistoryPeriod = useRef<string | null>(null);
+  useEffect(() => {
+    if (typingHistory.error instanceof B3Error && typingHistory.error.code === "TYPING_PERIOD_CHANGED") {
+      void client.resetQueries({ queryKey: key("typing-history-current"), exact: true });
+    }
+  }, [typingHistory.error, client, scope.session, scope.player, scope.season, scope.config]);
+  useEffect(() => {
+    if (!enabled || !historyPeriodEnd || !clock.data || restartedHistoryPeriod.current === historyPeriodEnd) return;
+    const untilReset = Date.parse(historyPeriodEnd) - serverNow();
+    const timer = window.setTimeout(() => { restartedHistoryPeriod.current = historyPeriodEnd; void client.resetQueries({ queryKey: key("typing-history-current"), exact: true }); }, Math.max(0, Math.min(untilReset, 2_147_483_647)));
+    return () => window.clearTimeout(timer);
+  }, [enabled, historyPeriodEnd, clock.data, clock.dataUpdatedAt, client, scope.session, scope.player, scope.season, scope.config]);
   const referrals = query("referrals", "/referrals", c.referralSchema);
   const invitees = query(
     "invitees",

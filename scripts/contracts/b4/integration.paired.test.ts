@@ -90,5 +90,27 @@ describe.skipIf(!process.env.B4_BACKEND_ROOT)("published B4 implementation", () 
     expect(dlxBalanceSchema.parse((await call(`/arena/dlx?season=${archived.season}`)).data)).toMatchObject({ confirmed: 0, claimable: 0, claimable_enabled: false, transferable: false });
     expect((await call("/arena/rankings/players?season=unknown-season")).status).toBe(409);
   });
+  it("keeps TODAY pagination in the server Typing period and rejects stale or foreign anchors at rollover", async () => {
+    for (let index = 0; index < 2; index++) {
+      const run = c.attemptSchema.parse((await call("/typing/attempts/start", {}, `period-${index}`)).data);
+      await control({ action: "b3-attempt-time", player: actor.player, seconds: 8 });
+      expect((await call(`/typing/attempts/${run.attempt_id}/submit`, { typed_text: run.phrase_text })).status).toBe(200);
+    }
+    const first = c.currentTypingHistorySchema.parse((await call("/typing/history?period=current&limit=1")).data);
+    expect(first.next_cursor).not.toBeNull();
+    expect(first.items[0].reset_period).toBe(first.period_key);
+    const second = c.currentTypingHistorySchema.parse((await call(`/typing/history?period=current&limit=1&cursor=${first.next_cursor}`)).data);
+    expect(second.items[0].reset_period).toBe(first.period_key);
+    const now = await control({ action: "advance", seconds: 0 });
+    await control({ action: "advance", seconds: (Date.parse(first.period_end) - Date.parse(now.server_time)) / 1000 + 0.1 });
+    actor.initData = (await control({ action: "credentials", player: actor.player })).initData;
+    const current = c.currentTypingHistorySchema.parse((await call("/typing/history?period=current")).data);
+    expect(current.period_key).not.toBe(first.period_key); expect(current.items).toEqual([]);
+    const stale = await call(`/typing/history?period=current&cursor=${first.next_cursor}`);
+    expect(stale.status).toBe(409); expect(stale.data.code).toBe("TYPING_PERIOD_CHANGED");
+    const other = await control({ action: "player", points: 0 });
+    expect((await call(`/typing/history?period=current&cursor=${first.next_cursor}`, undefined, undefined, other)).status).toBe(422);
+    expect(c.typingHistorySchema.parse((await call("/typing/history?period=all")).data).items).toHaveLength(2);
+  });
 });
 const settingsToken = "123456:isolated-b2-test-only";

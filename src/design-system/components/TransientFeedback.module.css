@@ -11,7 +11,7 @@
 .feedback {
   grid-template-columns: auto minmax(0, 1fr);
   min-height: 0;
-  background: var(--color-surface-strong);
+  background: var(--color-bg-800);
   border-color: var(--color-line);
   box-shadow: var(--shadow-soft);
 }

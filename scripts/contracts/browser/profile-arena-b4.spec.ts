@@ -50,3 +50,23 @@ test("the sole Notification Center navigates a real canonical link and marks unl
   await expect(page).toHaveURL(/\/clan/);
   await expect(page.getByRole("heading", { name: "Notifications", exact: true })).toHaveCount(0);
 });
+test("the approved TODAY history presents an actual submitted run and server display score", async ({ page }) => {
+  const actor = await control({ action: "player", points: 0 });
+  const post = async (path: string, body: object, key?: string) => {
+    const response = await fetch(`${api}/api/v1${path}`, { method: "POST", headers: { Authorization: `tma ${actor.initData}`, "Content-Type": "application/json", ...(key ? { "Idempotency-Key": key } : {}) }, body: JSON.stringify(body) });
+    expect(response.status).toBe(200); return response.json();
+  };
+  const started = await post("/typing/attempts/start", {}, "browser-history");
+  await control({ action: "b3-attempt-time", player: actor.player, seconds: 8 });
+  const submitted = await post(`/typing/attempts/${started.attempt_id}/submit`, { typed_text: started.phrase_text });
+  await enter(page, actor, "/earn");
+  await page.getByRole("button", { name: "Typing", exact: true }).click();
+  const history = page.locator("[data-typing-history]");
+  await expect(history.locator("article")).toHaveCount(1);
+  await expect(history.locator("article strong")).toHaveText(`${submitted.wpm} WPM`);
+  await expect(history.locator("article em")).toHaveText(Number(submitted.score).toLocaleString("en-US"));
+  await expect(page.getByText("Run history is unavailable.", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("dialog", { name: "XP reward" })).toHaveCount(0);
+  await page.reload();
+  await expect(history.locator("article")).toHaveCount(1);
+});

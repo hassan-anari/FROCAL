@@ -6,10 +6,10 @@ Baseline: FROCAL `ae91624` (merged B3). Approved visual references: Phase 3.2.2,
 |---|---|---|---|---|
 | Earn / Daily | Daily card, seven day nodes, one Claim control; RewardReveal then LevelUpReveal; existing pathway, summaries and dock | Global raw success/loading paragraphs, raw Streak/reset line, extra global Retry panel | Owner-selected Hugeicons checkmark-circle-02; isolated pending state; owner approved replacing the completed heading with the existing “Claimed today” wording | Daily settlement amount and canonical projection only |
 | Earn / Missions | Active/completed lists, number/icon, reward footer, single action; same reward overlays | Duplicate Completed text, raw success paragraphs | One Completed action label; per-mission pending state | Published mission definitions and server verification/claim |
-| Earn / Typing dashboard | Attempts, arena entry, dashboard Claim, best stats, mission, TODAY history rows | Raw reset date, reward-claimed paragraph | Existing rows await real backend history; no fabricated runs | Typing aggregate/claim already implemented; history API absent at B3 pin |
+| Earn / Typing dashboard | Attempts, arena entry, dashboard Claim, best stats, mission, TODAY history rows | Raw reset date, reward-claimed paragraph | Existing TODAY rows bind real current-period runs; no fabricated runs | Current-period history/claim; server score, nullable metrics and reset evidence |
 | Typing challenge | Back navigation, Dexo, 30-second timer, phrase/input, scoring/results, existing start/finish/retry | Detail-page Claim, raw reset timestamp, raw page feedback/extra error Retry | Shared transient failure presentation | Existing issued attempt, exact retry/submission and server result |
 | Network / Referrals | Copy/share, guide sheet, tier rail/metrics, latest five rows, avatar/initials, pending/active status | None of the existing roster hierarchy | Navigation/focus/resume revalidation | Existing invitees support start-only attribution; B4 private `photo_url` with existing fallback |
-| Network / Communities | Group picker, guide, summary and existing group rows/status | Broadcast status/enable/revoke controls and consent overlay; manual Check status | Automatic revalidation; optional group image waits for actual URL contract | Existing registration/verification state and settled XP; B4 private `photo_url` |
+| Network / Communities | Group picker, guide, summary and existing group rows/status | Broadcast status/enable/revoke controls and consent overlay; manual Check status | Automatic revalidation; private images use the existing avatar/fallback | Existing registration/verification state and settled XP; B4 private `photo_url` |
 | Profile Overview / Share | Identity/frame/title, compact Customize/Share, level bar, journey stats, showcase, symbolic share sheet | Production use of demo profile entitlements/customization | Existing save/equip/feature actions wait for server confirmation | Overview, achievements, collection, PUT customization; canonical lifetime progression |
 | Profile Achievements / Collection / Customize | Existing filters, cards, detail sheet, locked Got it, frame/title/medal rails, live preview, Save profile | Demo unlocks/progress/rewards in authenticated views | Server entitlement/progress/reward values; existing locked artwork retained | Known catalog IDs map server keys; no new assets/design |
 | Arena Warfront / Rankings | Locked S2 preview unchanged; Players/Clans toggle, podium/list/self-standing | Demo rankings/season figures in authenticated views | Existing rows bind actual current season; scroll loads server pages | Current/archive ranking and DLX typed reads; archive selector/DLX presentation deferred |
@@ -18,9 +18,9 @@ Baseline: FROCAL `ae91624` (merged B3). Approved visual references: Phase 3.2.2,
 
 ## Known contract / owner decisions
 
-The B3 backend pin is `c3f8f27d18fda66b62e22c6cadd1480e1f0f4370`. The published B4 implementation is separately pinned at `9a43048079bfc20bc5a030a88f84216c9451e4a8`; source/fixtures are hash-checked. The remaining TODAY history mapping requires authoritative Typing reset-period evidence, requested on backend Draft #29.
+The B3 backend pin is `c3f8f27d18fda66b62e22c6cadd1480e1f0f4370`. The published B4 implementation is separately pinned at `ec6af7053dfc7e8755998418b826c59ca91191ea`; source/fixtures are hash-checked. The server now supplies authoritative Typing periods and persisted run keys; the existing TODAY list uses them directly.
 
-- Backend now exposes real submitted Typing runs, server display score, and private invitee/group images. Current-period evidence is requested to bind the approved TODAY list accurately; no client scoring, URL construction or inferred runs.
+- Backend now exposes real submitted Typing runs, server display score, and private invitee/group images. TODAY uses the published current-period filter, resets stale pages, and displays returned scores/nullable metrics; no client scoring, URL construction or inferred runs.
 - Owner confirmed Arena archive selection has no approved control and remains blocked for design approval. This does not block approved current-season rankings. Do not repurpose Season 2 War History or the seasonal reward capsule.
 - Owner confirmed Arena has no approved visible DLX allocation component. Preserve the typed read layer; visible allocation remains blocked for design approval and does not block current-season rankings. No wallet/card/claim interaction.
 - First Verified Activity has a secondary active-days presentation, while the current achievements response exposes one progress/target pair. Do not infer active days.
@@ -32,7 +32,7 @@ Screenshots, before/after comparisons, executed checks and outstanding gates are
 
 ## Mobile screenshot review
 
-The before images are the pre-edit `ae91624` release served from a preserved build. Both runs use identical synthetic HTTP fixtures, Inter fonts, reduced-motion settings and settled artwork/DeferredMount content. They are UI evidence, not production balances or physical Telegram measurements. All original artwork stays repository-maintained.
+The before images are the exact pre-edit `ae91624` release, rebuilt in a checked worktree by `npm run test:visual:b4-baseline`. CI captures that release and B4 using the same Playwright/browser installation and keeps both artifacts. This removes cross-platform renderer differences without replacing the approved source or loosening the comparison threshold. [Baseline provenance](evidence/b4/baseline-provenance.json). Both runs use identical synthetic HTTP fixtures, Inter fonts, reduced-motion settings and settled artwork/DeferredMount content. They are UI evidence, not production balances or physical Telegram measurements. All original artwork stays repository-maintained.
 
 Full captures: [320px](evidence/b4/320), [390px](evidence/b4/390), [460px](evidence/b4/460). Each directory contains matching `before-*` / `after-*` PNGs. [Pixel comparison](evidence/b4/pixel-comparison.json) reports raw changed pixels; data-bound and explicitly authorized differences are not hidden by that report. Automated preservation assertions compare the four unchanged full-screen views with the actual pre-edit images, allowing only small rendering/antialiasing differences.
 
@@ -45,7 +45,7 @@ Full captures: [320px](evidence/b4/320), [390px](evidence/b4/390), [460px](evide
 | Referral roster | [Before](evidence/b4/390/before-referrals.png) | [After](evidence/b4/390/after-referrals.png) | Existing pending/active rows; no substitute current-user photo. |
 | Connected communities | [Before](evidence/b4/390/before-communities.png) | [After](evidence/b4/390/after-communities.png) | Removed consent controls and Check status; retained original row/status. |
 | Typing dashboard | [Before](evidence/b4/390/before-typing-dashboard.png) | [After](evidence/b4/390/after-typing-dashboard.png) | Raw reset timestamp removed; dashboard Claim preserved. |
-| Typing history | [Before](evidence/b4/390/before-typing-history.png) | [After](evidence/b4/390/after-typing-history.png) | Same existing list surface; real-history contract pending. |
+| Typing history | [Before](evidence/b4/390/before-typing-history.png) | [After](evidence/b4/390/after-typing-history.png) | Same existing list surface; actual submitted current-period runs and server score. |
 | Typing challenge | [Before](evidence/b4/390/before-typing-challenge.png) | [After](evidence/b4/390/after-typing-challenge.png) | Detail Claim/reset/raw feedback removed; scoring/timer/navigation retained. |
 | Profile overview | [Before](evidence/b4/390/before-profile-overview.png) | [After](evidence/b4/390/after-profile-overview.png) | Identical overview composition for identical confirmed state. |
 | Customize sheet | [Before](evidence/b4/390/before-profile-customize.png) | [After](evidence/b4/390/after-profile-customize.png) | Same viewport/safe-area sheet; actual entitlements replace demo unlocks. |
@@ -66,13 +66,17 @@ The only new stylesheet is the owner-approved minimal transient feedback positio
 
 ## Executed validation before final backend synchronization
 
-- `npm run check`: structure/assets/imports/motion, production policy, unchanged B2/B3 source pins, semantic TypeScript, 211 units, production build and bundle exclusion passed.
+- `npm run check`: structure/assets/imports/motion, production policy, unchanged B2/B3 source pins, semantic TypeScript, 216 units, production build and bundle exclusion passed.
 - ESLint 9 + TypeScript parser (isolated tooling, changed production TS/TSX): correctness rules passed; existing repository lint validators also passed.
 - Original `npm run test:e2e -- --workers=2`: 134/134 mobile/desktop scenarios passed.
-- `npm run test:e2e:b4`: 14/14 browser/visual scenarios passed, including pre-edit screenshot comparisons and all three mobile Recovery spacings.
+- `npm run test:e2e:b4`: 17/17 browser/visual scenarios passed, including pre-edit screenshot comparisons and all three mobile Recovery spacings.
 - Original B3 compatibility pairing at unchanged `c3f8f27`: 29/29 actual PostgreSQL API/controller tests and 13/13 production browser tests passed. Updated browser expectations dismiss the original reward overlays and claim Typing only on the Earn dashboard. Backend consent API compatibility tests remain, while removed consent UI tests are replaced with absence/automatic-refresh proof.
 - Original B2 pairing at unchanged `34328c7`: 15/15 actual PostgreSQL API/controller tests and 6/6 production browser tests passed.
 
 Additional tests against the existing implemented Profile/Arena APIs passed: 3/3 using actual PostgreSQL and Redis, including cross-credential customization, rejection/isolation, server tie ordering, own standing and pagination. CI runs these in addition to the unchanged B3 compatibility suite. This is not a final B4 backend pin.
 
-Published B4 receipts, private images, notification navigation/read-all, typed archives and DLX are integrated at the separate exact B4 pin. Its current paired PostgreSQL/Redis gate passes 8 API/controller checks and 13 existing production browser cases. Expanded browser and final visual gates are in progress. The TODAY history period mapping remains pending backend contract confirmation. Archive selection and visible DLX allocation are intentionally deferred by owner decision and do not block approved current-season rankings. No merge or deployment.
+Published B4 receipts, private images, notification navigation/read-all, typed archives and DLX are integrated at the separate exact B4 pin. Its final local paired PostgreSQL/Redis gate passes 9 API/controller checks and 16 production browser cases, including real current-period history and exact rollover/stale-cursor rejection. Local B4 browser/visual gates pass 17 cases. Final exact-head CI is recorded in the PR before owner handoff. Archive selection and visible DLX allocation are intentionally deferred by owner decision and do not block approved current-season rankings. No merge or deployment.
+
+Additional mobile captures at every width show [referral image](evidence/b4/390/after-referral-private-image.png), [group image](evidence/b4/390/after-group-private-image.png) and [the approved minimal transient error over the existing Profile sheet](evidence/b4/390/after-transient-error.png). Images are synthetic test assets, not user images. Browser checks prove both successful delivery and initials fallback for each avatar type.
+
+[Machine-readable local verification](evidence/b4/verification.json). Full route/endpoint behavior, exact pins and independent-review limitations are in [B4_FRONTEND_REPORT.md](B4_FRONTEND_REPORT.md).

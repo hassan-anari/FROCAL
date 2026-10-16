@@ -27,10 +27,11 @@ export function useServerProfile() {
     const refresh = () => {
       if (document.hidden || Date.now() - last < 1000) return;
       last = Date.now();
-      void client.invalidateQueries({ queryKey: [...queryKeys.player(scope), "profile"] });
+      void client.invalidateQueries({ queryKey: [...queryKeys.player(scope), "profile"] }, { cancelRefetch: false });
     };
     window.addEventListener("focus", refresh);
-    return () => window.removeEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    return () => { window.removeEventListener("focus", refresh); document.removeEventListener("visibilitychange", refresh); };
   }, [enabled, client, scope.session, scope.player, scope.season, scope.config]);
   const [saving, setSaving] = useState(false);
   const lock = useRef(false);

@@ -16,9 +16,9 @@
   {
     "viewport": 320,
     "screen": "arena-warfront",
-    "changed_pixels": 0,
+    "changed_pixels": 274,
     "total_pixels": 224000,
-    "percentage": 0.0
+    "percentage": 0.122
   },
   {
     "viewport": 320,
@@ -37,7 +37,7 @@
   {
     "viewport": 320,
     "screen": "earn-daily",
-    "changed_pixels": 101910,
+    "changed_pixels": 101911,
     "total_pixels": 224000,
     "percentage": 45.496
   },
@@ -79,9 +79,9 @@
   {
     "viewport": 320,
     "screen": "profile-customize",
-    "changed_pixels": 40201,
+    "changed_pixels": 40149,
     "total_pixels": 224000,
-    "percentage": 17.947
+    "percentage": 17.924
   },
   {
     "viewport": 320,
@@ -128,23 +128,23 @@
   {
     "viewport": 320,
     "screen": "typing-challenge",
-    "changed_pixels": 54395,
+    "changed_pixels": 54394,
     "total_pixels": 224000,
     "percentage": 24.283
   },
   {
     "viewport": 320,
     "screen": "typing-dashboard",
-    "changed_pixels": 466,
+    "changed_pixels": 3386,
     "total_pixels": 224000,
-    "percentage": 0.208
+    "percentage": 1.512
   },
   {
     "viewport": 320,
     "screen": "typing-history",
-    "changed_pixels": 466,
+    "changed_pixels": 3386,
     "total_pixels": 224000,
-    "percentage": 0.208
+    "percentage": 1.512
   },
   {
     "viewport": 390,
@@ -177,9 +177,9 @@
   {
     "viewport": 390,
     "screen": "communities",
-    "changed_pixels": 292354,
+    "changed_pixels": 238694,
     "total_pixels": 329160,
-    "percentage": 88.818
+    "percentage": 72.516
   },
   {
     "viewport": 390,
@@ -226,9 +226,9 @@
   {
     "viewport": 390,
     "screen": "profile-customize",
-    "changed_pixels": 72971,
+    "changed_pixels": 72960,
     "total_pixels": 329160,
-    "percentage": 22.169
+    "percentage": 22.166
   },
   {
     "viewport": 390,
@@ -247,9 +247,9 @@
   {
     "viewport": 390,
     "screen": "profile-share",
-    "changed_pixels": 124480,
+    "changed_pixels": 2007,
     "total_pixels": 329160,
-    "percentage": 37.817
+    "percentage": 0.61
   },
   {
     "viewport": 390,
@@ -282,16 +282,16 @@
   {
     "viewport": 390,
     "screen": "typing-dashboard",
-    "changed_pixels": 474,
+    "changed_pixels": 48376,
     "total_pixels": 329160,
-    "percentage": 0.144
+    "percentage": 14.697
   },
   {
     "viewport": 390,
     "screen": "typing-history",
-    "changed_pixels": 474,
+    "changed_pixels": 48376,
     "total_pixels": 329160,
-    "percentage": 0.144
+    "percentage": 14.697
   },
   {
     "viewport": 460,
@@ -310,9 +310,9 @@
   {
     "viewport": 460,
     "screen": "arena-warfront",
-    "changed_pixels": 1893,
+    "changed_pixels": 0,
     "total_pixels": 414000,
-    "percentage": 0.457
+    "percentage": 0.0
   },
   {
     "viewport": 460,
@@ -373,9 +373,9 @@
   {
     "viewport": 460,
     "screen": "profile-customize",
-    "changed_pixels": 268939,
+    "changed_pixels": 268782,
     "total_pixels": 414000,
-    "percentage": 64.961
+    "percentage": 64.923
   },
   {
     "viewport": 460,
@@ -422,22 +422,22 @@
   {
     "viewport": 460,
     "screen": "typing-challenge",
-    "changed_pixels": 59772,
+    "changed_pixels": 59773,
     "total_pixels": 414000,
     "percentage": 14.438
   },
   {
     "viewport": 460,
     "screen": "typing-dashboard",
-    "changed_pixels": 474,
+    "changed_pixels": 62908,
     "total_pixels": 414000,
-    "percentage": 0.114
+    "percentage": 15.195
   },
   {
     "viewport": 460,
     "screen": "typing-history",
-    "changed_pixels": 474,
+    "changed_pixels": 62908,
     "total_pixels": 414000,
-    "percentage": 0.114
+    "percentage": 15.195
   }
 ]

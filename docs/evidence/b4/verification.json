@@ -1,0 +1,45 @@
+{
+  "backend_runtime_commit": "ec6af7053dfc7e8755998418b826c59ca91191ea",
+  "backend_review_head": "f4d7921421e9518b13348da8fe234345362c1888",
+  "b3_compatibility_commit": "c3f8f27d18fda66b62e22c6cadd1480e1f0f4370",
+  "b2_compatibility_commit": "34328c76ba3377396660b1549bf8e370ac514a71",
+  "approved_ui_commit": "ae91624f23a48d8a9973154520284706a9df1c21",
+  "local_gates": {
+    "typescript_lint_build_policies": "passed",
+    "unit_tests": 216,
+    "original_browser_tests": 134,
+    "b4_browser_visual_tests": 17,
+    "b2_pair": {
+      "api_controller": 15,
+      "browser": 6
+    },
+    "b3_pair": {
+      "api_controller": 29,
+      "browser": 13
+    },
+    "b4_pair": {
+      "api_controller": 9,
+      "browser": 16
+    }
+  },
+  "ci_evidence": "Exact final frontend SHA and five CI job URLs/results are recorded on FROCAL Draft PR #5.",
+  "screenshot_viewports": [
+    {
+      "width": 320,
+      "height": 700
+    },
+    {
+      "width": 390,
+      "height": 844
+    },
+    {
+      "width": 460,
+      "height": 900
+    }
+  ],
+  "visual_comparison": "Same browser renders exact approved pre-edit source and B4; unchanged full-screen gate retains 0.002 maxDiffPixelRatio. Data-bound/authorized differences are documented, not auto-approved.",
+  "physical_telegram_certification": false,
+  "production_or_telegram_mutations": false,
+  "merged": false,
+  "deployed": false
+}
