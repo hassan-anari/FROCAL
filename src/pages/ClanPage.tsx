@@ -1,3 +1,5 @@
+import { ClanRecentActivity } from "@/features/clan/ClanRecentActivity";
+import { clanRankLabel } from "@/integrations/api/clanActivity";
 import { ClanQueryState } from "@/features/clan/ClanQueryState";
 import { clanAddBotUrl } from "@/integrations/telegram/botLinks";
 import { showFeedback } from "@/design-system/components/TransientFeedback";
@@ -297,7 +299,7 @@ function ClanCard({
           <strong>{clan.name}</strong>
           {clan.fresh ? <em>ACTIVE</em> : null}
         </div>
-        <span>LVL {clan.level} · {clan.members}/{clan.capacity} members · Rank {clan.rank === null ? "—" : `#${clan.rank}`}</span>
+        <span>LVL {clan.level} · {clan.members}/{clan.capacity} members · Rank {clanRankLabel(clan.rank, clan.rankStatus)}</span>
         <div className={styles.miniMeta}>
           <span>{clan.status}</span>
           <span>{pending ? "Request pending" : clan.match === undefined ? "—" : `${clan.match}% match`}</span>
@@ -315,7 +317,7 @@ function FeaturedClan({ clan, onOpen, remote = false }: { clan: ClanSummary; onO
       <div className={styles.featuredShade} />
       <div className={styles.featuredTop}>
         <ClanEmblem clan={clan} size="md" />
-        <span>{clan.rank === null ? "—" : `#${clan.rank}`} SEASON</span>
+        <span>{clanRankLabel(clan.rank, clan.rankStatus)} SEASON</span>
       </div>
       <div className={styles.featuredCopy}>
         <span>{remote ? "CLAN NETWORK" : `RECOMMENDED · ${clan.match ?? 90}% MATCH`}</span>
@@ -615,7 +617,7 @@ function TaskCard({ task }: { task: (typeof clanTasks)[number] }) {
         <strong>{task.title}</strong>
         <p>{task.description}</p>
         <div className={styles.taskProgress}>
-          <div><span>{task.current} / {task.target} {task.unit}</span><strong>{task.rewardLabel}</strong></div>
+          <div><span>{task.current} / {task.target} {task.unit}</span><strong title={task.rewardLabel}>{task.rewardLabel}</strong></div>
           <div className={styles.progressTrack}><i style={{ transform: `scaleX(${ratio})` }} /></div>
         </div>
       </div>
@@ -720,7 +722,7 @@ function Headquarters({
             <h2>{clan.name}</h2>
             <p>{clan.summary}</p>
           </div>
-          <span className={styles.hqRank}>{clan.rank === null ? "—" : `#${clan.rank}`}</span>
+          <span className={styles.hqRank}>{clanRankLabel(clan.rank, clan.rankStatus)}</span>
         </div>
 
         <div className={styles.hqArtStage}>
@@ -800,7 +802,7 @@ function Headquarters({
                 </button>
                 <div className={styles.rankPanel}>
                   <span>SEASON STANDING</span>
-                  <strong>{clan.rank === null ? "—" : `#${clan.rank}`}</strong>
+                  <strong>{clanRankLabel(clan.rank, clan.rankStatus)}</strong>
                   <p>{clan.score.toLocaleString()} clan score</p>
                 </div>
               </section>
@@ -819,13 +821,11 @@ function Headquarters({
 
               <section className={styles.panel}>
                 <SectionTitle eyebrow="HEADQUARTERS LOG" title="Recent activity" />
-                {live && live.treasury.data?.history.length === 0 ? <ClanQueryState title="No recent activity yet" description="New Clan activity will appear here when available." /> : null}
-                <div className={styles.activityList}>
-                  {live ? (live.treasury.data?.history ?? []).map((entry, index) => <article key={`${entry.occurred_at}:${index}`}><span>{new Date(entry.occurred_at).toLocaleDateString("en-US")}</span><div><strong>{entry.direction === "CREDIT" ? "+" : "−"}{entry.amount.toLocaleString()} Treasury</strong><p>{({ CLAN_ACTIVITY: "Clan activity", CLAN_MISSION: "Clan mission", SHOP_PURCHASE: "Equipment purchase", CONTRIBUTION: "Member contribution", ITEM: "Item activation" } as Record<string, string>)[entry.source_type] ?? "Treasury update"}</p></div></article>) : <>
+                {live ? <ClanRecentActivity live={live} /> : <div className={styles.activityList}>
                   <article><span>12m</span><div><strong>Mira Vale +180 contribution</strong><p>Personal mission progress reached the clan.</p></div></article>
                   <article><span>1h</span><div><strong>Emergency Repair Kit stored</strong><p>A shared defence item entered the clan inventory.</p></div></article>
-                  <article><span>3h</span><div><strong>Build the Relay reached 64%</strong><p>The next clan milestone moved closer.</p></div></article></>}
-                </div>
+                  <article><span>3h</span><div><strong>Build the Relay reached 64%</strong><p>The next clan milestone moved closer.</p></div></article>
+                </div>}
               </section>
             </>
           ) : null}
@@ -1098,7 +1098,7 @@ function RemoteClanPage() {
   const home = live.home.data;
   const hqReady = member && identity && home && live.equipment.data && live.trophies.data && live.missions.data && live.treasury.data && live.roster.data;
   const hqError = member && [live.identity, live.home, live.equipment, live.trophies, live.missions, live.treasury, live.roster].some(query => query.isError);
-  const clan = identity && home ? { ...clanSummary(identity), accent: clanTone(live.scope.player, identity.id), level: home.hq_level, members: home.used_capacity, capacity: home.effective_capacity, score: home.competitive_score, hqState: (home.state === "RECOVERY" || live.membership.data?.access_state === "ACCESS_LOST" ? "recovery" : home.max_level ? "max" : "normal") as ClanSummary["hqState"] } : null;
+  const clan = identity && home ? { ...clanSummary(identity), accent: clanTone(live.scope.player, identity.id), rank: home.rank_status === "RANKED" ? home.rank ?? null : null, rankStatus: home.rank_status ?? "UNAVAILABLE", level: home.hq_level, members: home.used_capacity, capacity: home.effective_capacity, score: home.competitive_score, hqState: (home.state === "RECOVERY" || live.membership.data?.access_state === "ACCESS_LOST" ? "recovery" : home.max_level ? "max" : "normal") as ClanSummary["hqState"] } : null;
   const current = live.activeRequest;
   const hasRequest = current !== null;
   const effects: ClanActiveEffect[] = (live.equipment.data?.active_effects ?? []).filter(effect => effect.effective).map(effect => ({ id: String(effect.id), itemId: effect.item_id, startedAt: Date.parse(effect.starts_at), endsAt: Date.parse(effect.expires_at) }));

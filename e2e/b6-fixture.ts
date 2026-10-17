@@ -3,11 +3,11 @@ import { readFileSync } from "node:fs";
 import { prepareB4, auth } from "./b4-fixture";
 const pinned = JSON.parse(readFileSync("src/integrations/api/fixtures/b5/clan-http.json", "utf8"));
 const lifecycle = JSON.parse(readFileSync("src/integrations/api/fixtures/b5/lifecycle-http.json", "utf8"));
-/** B5 response fields only. Mutable transport controls are isolated browser diagnostics. */
+/** Published B5/B6 response fields only. Mutable transport controls are isolated browser diagnostics. */
 export async function prepareClan(page: Page) {
   const app = await prepareB4(page);
   app.bootstrap.features.clan = true;
-  const data = structuredClone(pinned);
+  const data = { ...structuredClone(pinned), activity: { items: [], next_cursor: null, as_of: "2026-10-17T00:00:00Z" } };
   const member = data["membership/current"];
   const identity = { id: member.clan_id, name: member.clan_name, tag: "API", motto: "", level: data.home.hq_level, member_count: data.home.used_capacity, capacity: data.home.effective_capacity, accepting_members: true, rank: null, score: data.home.competitive_score, state: "ACTIVE", image_url: null };
   const gates = new Map<string, Promise<void>>();

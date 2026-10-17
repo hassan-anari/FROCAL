@@ -9,7 +9,7 @@ import { ApiError } from "./client";
 import { selectClanApplications } from "./clanApplications";
 import { clanEconomicIntent } from "./clanIntent";
 import { showFeedback } from "@/design-system/components/TransientFeedback";
-import type { ClanOut } from "./b5Schemas";
+import type { ClanOut } from "./b6Schemas";
 
 export function useClanRemote() {
   const { bootstrap, scope } = useBootstrap();
@@ -33,6 +33,7 @@ export function useClanRemote() {
   const home = read(`home:${memberKey}`, signal => api.home(signal), member);
   const roster = useInfiniteQuery({ queryKey: [...root, "roster", memberKey], queryFn: ({ pageParam, signal }) => api.roster(pageParam, signal), initialPageParam: 0, getNextPageParam: (page, _pages, offset) => page.next_offset !== null && page.next_offset > offset ? page.next_offset : undefined, enabled: member, retry: false, staleTime: 5_000, refetchOnWindowFocus: false, refetchInterval: member ? 30_000 : false });
   const treasury = read(`treasury:${memberKey}`, signal => api.treasury(signal), member);
+  const activity = useInfiniteQuery({ queryKey: [...root, "activity", memberKey], queryFn: ({ pageParam, signal }) => api.activity(pageParam, signal), initialPageParam: null as string | null, getNextPageParam: page => page.next_cursor ?? undefined, enabled: member, retry: false, staleTime: 5_000, refetchOnWindowFocus: false, refetchInterval: member ? 30_000 : false });
   const equipment = read(`equipment:${memberKey}`, signal => api.equipment(signal), member);
   const missions = read(`missions:${memberKey}`, signal => api.missions(signal), member);
   const trophies = read(`trophies:${memberKey}`, signal => api.trophies(signal), member);
@@ -107,6 +108,6 @@ export function useClanRemote() {
   const serverNow = () => clock.at + Math.max(0, performance.now() - clock.tick);
   const rows = <T extends { id?: number; membership_id?: number },>(pages: { items: T[] }[] | undefined) => Array.from(new Map((pages ?? []).flatMap(page => page.items).map(row => [row.membership_id ?? row.id, row])).values());
   const clans = Array.from(new Map((discovery.data?.pages.flat() ?? []).map((row: ClanOut) => [row.id, row])).values());
-  return { scope, scopeKey: JSON.stringify(scope), remote, enabled, api, state, eligible, membership, membershipDenied, member, requests, activeRequest, operatorRequest, blockingRequests, requestHistory, lastHistoricalRequest, applicationProblem, applicationsBlocked, groups, home, roster, rosterRows: rows(roster.data?.pages), treasury, equipment, missions, trophies, applicants, governance, recovery, identity, discovery, clans, search, setSearch, previewId, setPreviewId, preview, requestIdentity, pending, run, economic, refresh, serverNow };
+  return { scope, scopeKey: JSON.stringify(scope), remote, enabled, api, state, eligible, membership, membershipDenied, member, requests, activeRequest, operatorRequest, blockingRequests, requestHistory, lastHistoricalRequest, applicationProblem, applicationsBlocked, groups, home, roster, rosterRows: rows(roster.data?.pages), treasury, activity, equipment, missions, trophies, applicants, governance, recovery, identity, discovery, clans, search, setSearch, previewId, setPreviewId, preview, requestIdentity, pending, run, economic, refresh, serverNow };
 }
 export type ClanRemote = ReturnType<typeof useClanRemote>;

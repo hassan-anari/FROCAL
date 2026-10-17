@@ -82,8 +82,8 @@ for (const width of [320, 390, 460]) test(`actual Captain/Soldier lifecycle, eco
   await other.getByRole("button", { name: "Completed", exact: true }).click();
   const settledMission = (await api(soldier, "/clans/missions")).find((row: any) => row.key === mission.key);
   expect(settledMission.completed).toBe(true);
-  await expect(other.getByText("Clan mission", { exact: true }).first()).toBeVisible();
-  await expect(other.getByText(`${settledMission.progress_units} / ${settledMission.target_units} units`, { exact: true }).first()).toBeVisible();
+  await expect(other.getByText(settledMission.title || "Clan mission", { exact: true }).first()).toBeVisible();
+  await expect(other.getByText(`${settledMission.progress_units} / ${settledMission.target_units} runs`, { exact: true }).first()).toBeVisible();
   await expect(other.getByText(mission.key.replaceAll("-", " "), { exact: true })).toHaveCount(0);
   await snapshot(other, width, "settled-mission");
   await page.bringToFront();

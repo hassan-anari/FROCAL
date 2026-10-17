@@ -15,10 +15,11 @@ from time import monotonic
 from urllib.parse import urlencode, urlsplit
 from uuid import uuid4
 
-B5 = bool(os.environ.get("B5_BACKEND_ROOT"))
+B6 = bool(os.environ.get("B6_BACKEND_ROOT"))
+B5 = B6 or bool(os.environ.get("B5_BACKEND_ROOT"))
 B3 = B5 or bool(os.environ.get("B3_BACKEND_ROOT"))
-ROOT = Path(os.environ.get("B5_BACKEND_ROOT") or os.environ.get("B3_BACKEND_ROOT") or os.environ["B2_BACKEND_ROOT"]).resolve()
-if not os.environ.get("POSTGRES_DB", "").startswith("frocal_b5_" if B5 else "frocal_b3_" if B3 else "frocal_b2_") or os.environ.get("POSTGRES_HOST") not in {"127.0.0.1", "localhost"}:
+ROOT = Path(os.environ.get("B6_BACKEND_ROOT") or os.environ.get("B5_BACKEND_ROOT") or os.environ.get("B3_BACKEND_ROOT") or os.environ["B2_BACKEND_ROOT"]).resolve()
+if not os.environ.get("POSTGRES_DB", "").startswith("frocal_b6_" if B6 else "frocal_b5_" if B5 else "frocal_b3_" if B3 else "frocal_b2_") or os.environ.get("POSTGRES_HOST") not in {"127.0.0.1", "localhost"}:
     raise RuntimeError("Paired harness requires an isolated local frocal_b2_ database")
 sys.path.insert(0, str(ROOT))
 os.environ["DJANGO_SETTINGS_MODULE"] = "dexo_land.settings.test"
@@ -136,10 +137,15 @@ def publish(payload):
 if B5:
     from b5_controls import install, control as clan_control
     install(globals())
+if B6:
+    from b6_controls import install as install_b6, control as b6_control
+    install_b6(globals())
 
 def control(data):
     global offset, config, season
     action = data.get("action", "player")
+    if B6 and action.startswith("b6-"):
+        return b6_control(data, globals())
     if B5 and action.startswith("b5-"):
         return clan_control(data, globals())
     if action == "advance":

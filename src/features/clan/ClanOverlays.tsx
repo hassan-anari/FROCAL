@@ -1,3 +1,4 @@
+import { clanRankLabel } from "@/integrations/api/clanActivity";
 import {
   InformationCircleIcon,
   UserGroupIcon,
@@ -238,7 +239,7 @@ export function ClanPreviewSheet({
             <AssetImage assetKey={getClanEmblemAssetKey()} className={styles.clanMarkFrame} />
           </div>
           <div>
-            <span>{clan.rank === null ? "—" : `#${clan.rank}`} SEASON</span>
+            <span>{clanRankLabel(clan.rank, clan.rankStatus)} SEASON</span>
             <h3>{clan.name}</h3>
             <p>{clan.summary}</p>
           </div>
@@ -416,8 +417,8 @@ export function JoinRequestsSheet({
               <div className={styles.requestStats}>
                 <span><b>LVL</b>{applicant.level}</span>
                 <span><b>SCORE</b>{applicant.seasonScore.toLocaleString()}</span>
-                <span><b>RANK</b>{applicant.globalRank === null ? "—" : `#${applicant.globalRank.toLocaleString()}`}</span>
-                <span><b>ACTIVE</b>{applicant.activeDays === null ? "—" : `${applicant.activeDays}d`}</span>
+                <span><b>RANK</b>{clanRankLabel(applicant.globalRank, applicant.rankStatus)}</span>
+                <span><b>STREAK</b>{applicant.currentStreak === null ? "Unavailable" : `${applicant.currentStreak}d`}</span>
               </div>
               {applicant.contributionPreview !== null || applicant.medals.length > 0 ? <div className={styles.requestMeta}>
                 {applicant.contributionPreview !== null ? <span>Contribution {applicant.contributionPreview.toLocaleString()}</span> : null}

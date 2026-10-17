@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { apiRequest, ApiError } from "./client";
-import * as c from "./b5Schemas";
+import * as c from "./b6Schemas";
 const errorSchema = z.object({ code: z.string(), retryable: z.boolean().optional(), retry_after_seconds: z.number().nullable().optional() });
 export class ClanApiError extends Error {
   constructor(readonly code: string, readonly status: number, readonly retryable = false, readonly retryAfter: number | null = null) {
@@ -20,7 +20,7 @@ async function request<T>(initData: string | null, path: string, schema: z.ZodTy
 }
 const clanResponse = c.ClanOut.required({ level: true, score: true, state: true });
 const reference = (id: number) => String(z.number().int().positive().safe().parse(id));
-/** Exact implemented WEDCAL B5 paths. Callers own intentional mutation/replay keys;
+/** Exact implemented WEDCAL B6 paths. Callers own intentional mutation/replay keys;
  * no optimistic membership, Treasury, inventory, rewards or governance transitions. */
 export function clanApi(initData: string | null) {
   const get = <T>(path: string, schema: z.ZodType<T>, signal?: AbortSignal) => request(initData, path, schema, { signal });
@@ -45,6 +45,7 @@ export function clanApi(initData: string | null) {
     home: (signal?: AbortSignal) => get("/home", c.ClanHomeOut, signal),
     roster: (offset = 0, signal?: AbortSignal) => get(`/roster?offset=${z.number().int().nonnegative().parse(offset)}&limit=50`, c.RosterPage, signal),
     treasury: (signal?: AbortSignal) => get("/treasury", c.TreasuryOut, signal),
+    activity: (cursor: string | null = null, signal?: AbortSignal) => get(`/activity?limit=20${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ""}`, c.ClanActivityPage, signal),
     equipment: (signal?: AbortSignal) => get("/equipment", c.EquipmentOut, signal),
     purchase: (item: string, idempotencyKey: string) => post(`/shop/${encodeURIComponent(item)}/purchase`, c.MutationOut, c.IdempotencyIn.parse({ idempotency_key: idempotencyKey })),
     activate: (item: string, idempotencyKey: string) => post(`/inventory/${encodeURIComponent(item)}/activate`, c.MutationOut, c.IdempotencyIn.parse({ idempotency_key: idempotencyKey })),

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { prepareClan } from "./b6-fixture";
 import { launch } from "./b4-fixture";
 const before = Boolean(process.env.B6_BASELINE);
@@ -70,6 +70,22 @@ for (const width of [320, 390, 460]) test(`B6 preserved scenes and corrected asy
   await expect(page.getByRole("dialog")).toContainText(before ? "No rewards yet." : "No Network earnings yet"); await shot("history-empty");
   historyState = "rows"; await page.reload(); await page.getByRole("button", { name: "History", exact: true }).click();
   await expect(page.getByRole("dialog").locator("article")).toHaveCount(before ? 3 : 2); await shot("history-filtered");
+  const b6Standing = JSON.parse(readFileSync("src/integrations/api/fixtures/b6/clan-standing-http.json", "utf8"));
+  const b6Applicants = JSON.parse(readFileSync("src/integrations/api/fixtures/b6/applicants-http.json", "utf8"));
+  const b6Activity = JSON.parse(readFileSync("src/integrations/api/fixtures/b6/activity-http.json", "utf8"));
+  Object.assign(f.data.home, b6Standing.home);
+  f.setMembership(f.member); f.setApplicants(b6Applicants.ready);
+  f.data.activity = b6Activity[0];
+  await page.goto(launch("/clan"));
+  await expect(page.getByRole("navigation", { name: "Clan headquarters sections" })).toBeVisible();
+  await shot("canonical-standing");
+  await page.getByRole("button", { name: /recruits waiting/ }).click();
+  await expect(page.getByRole("dialog")).toContainText(before ? "ACTIVE" : "STREAK");
+  await shot("applicant-metrics");
+  await page.getByRole("button", { name: "Close", exact: true }).click();
+  await page.getByRole("heading", { name: "Recent activity", exact: true }).scrollIntoViewIfNeeded();
+  if (!before) await expect(page.locator("[data-activity-id]")).toHaveCount(b6Activity[0].items.length);
+  await shot("source-activity");
   for (const path of ["/base", "/profile", "/arena"]) {
     await page.goto(launch(path));
     await expect(page.locator("main")).toBeVisible();

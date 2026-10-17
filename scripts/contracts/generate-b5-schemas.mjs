@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
-const input = "src/integrations/api/fixtures/b5/openapi.json";
-const output = "src/integrations/api/b5Schemas.ts";
+const batch = process.argv.includes("--b6") ? "b6" : "b5";
+const input = `src/integrations/api/fixtures/${batch}/openapi.json`;
+const output = `src/integrations/api/${batch}Schemas.ts`;
 const definitions = JSON.parse(readFileSync(input, "utf8")).components.schemas;
 const selected = ["StateOut", "RoleOut", "GroupOut", "ClanOut", "RequestOut", "OwnRequestOut", "ApplicantOut", "MembershipOut", "InviteOut", "ClanHomeOut", "ContributionOut", "TreasuryOut", "EquipmentOut", "InventoryOut", "ShopItemOut", "MutationOut", "ClanMissionOut", "TrophyOut", "GovernanceOut", "RecoveryOut", "RosterPage", "RoleIn", "ClanCreateIn", "DecisionIn", "RemovalCaseIn", "VoteIn", "IdempotencyIn"];
 const emitted = new Map();
@@ -30,9 +31,10 @@ function emit(value) {
   }
   throw new Error(`Unsupported B5 schema: ${JSON.stringify(value)}`);
 }
+if (batch === "b6") selected.push("ClanActivityOut", "ClanActivityPage");
 selected.forEach(ref);
-const text = '// Generated from the exact B5 pin\'s OpenAPI; do not hand-edit.\nimport { z } from "zod";\n\n' + Array.from(emitted.values()).join("\n\n") + "\n";
+const text = `// Generated from the exact ${batch.toUpperCase()} pin's OpenAPI; do not hand-edit.\nimport { z } from "zod";\n\n` + Array.from(emitted.values()).join("\n\n") + "\n";
 if (process.argv.includes("--check")) {
   if (readFileSync(output, "utf8") !== text) throw new Error("B5 generated schema drift");
-  console.log("B5 generated schemas match pinned OpenAPI");
+  console.log(`${batch.toUpperCase()} generated schemas match pinned OpenAPI`);
 } else writeFileSync(output, text);

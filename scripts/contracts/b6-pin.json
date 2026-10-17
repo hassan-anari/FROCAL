@@ -1,0 +1,72 @@
+{
+  "repository": "hassan-anari/WEDCAL",
+  "commit": "28a6b8805db5f9a8c70b78c5eadf5c6276dbccd1",
+  "runtime_commit": "13e7b1988181980b6ad80b69a8e9f28347e31802",
+  "status": "Final owner-approved B6 handoff acknowledged in FROCAL Issue #8; paired acceptance recorded in B6 frontend report.",
+  "files": {
+    "scripts/contracts/b6/source/docs/B6_BACKEND_CONTRACT.md": {
+      "path": "docs/B6_BACKEND_CONTRACT.md",
+      "blob": "a722c971706a9190ca860826807dd8d99f774c90"
+    },
+    "scripts/contracts/b6/source/docs/B6_OPERATOR_GUIDE.md": {
+      "path": "docs/B6_OPERATOR_GUIDE.md",
+      "blob": "cfbd55f04ffa6e7d895d76eb9367ba26d1af24cd"
+    },
+    "scripts/contracts/b6/source/docs/B6_RUNTIME_PIN.md": {
+      "path": "docs/B6_RUNTIME_PIN.md",
+      "blob": "1a3aca44936b35e658e39dfa3492d01afc41c251"
+    },
+    "scripts/contracts/b6/source/docs/B6_SECURITY_ECONOMIC_REVIEW.md": {
+      "path": "docs/B6_SECURITY_ECONOMIC_REVIEW.md",
+      "blob": "2203ae4c00bf6c6d455859e732d35c643e5ee694"
+    },
+    "scripts/contracts/b6/source/docs/fixtures/b6/README.md": {
+      "path": "docs/fixtures/b6/README.md",
+      "blob": "7b5cc47cbc70ed16ad5eb22a5671c2f5f3d970ab"
+    },
+    "scripts/contracts/b6/source/apps/clans/api.py": {
+      "path": "apps/clans/api.py",
+      "blob": "75fe203f6dfd5fa3a4881ec4b8bda3496399d77b"
+    },
+    "scripts/contracts/b6/source/apps/clans/feed.py": {
+      "path": "apps/clans/feed.py",
+      "blob": "2a2482bd62261fbc5814f9dd9bb165a1333c5388"
+    },
+    "scripts/contracts/b6/source/apps/clans/economy.py": {
+      "path": "apps/clans/economy.py",
+      "blob": "aec1cd5fffa8218cd03013e69fc66fbadb58e8ef"
+    },
+    "scripts/contracts/b6/source/apps/clans/missions.py": {
+      "path": "apps/clans/missions.py",
+      "blob": "36a9b200be9fbed5b36eba653015740c86d89140"
+    },
+    "scripts/contracts/b6/source/apps/arena/services.py": {
+      "path": "apps/arena/services.py",
+      "blob": "c28376db63837a0ef25971e26b1ab99cf3b650f8"
+    },
+    "scripts/contracts/b6/source/apps/players/group_avatars.py": {
+      "path": "apps/players/group_avatars.py",
+      "blob": "d248e722d940f0d7b62292344c900ccec0552a55"
+    },
+    "scripts/contracts/b6/source/apps/clans/tests/test_b6_reads.py": {
+      "path": "apps/clans/tests/test_b6_reads.py",
+      "blob": "fa739518dcc82f94a83b8f7acedeaca21181270f"
+    },
+    "src/integrations/api/fixtures/b6/activity-http.json": {
+      "path": "docs/fixtures/b6/activity-http.json",
+      "blob": "6c62b86e2272c7e2ff70563d24766d7fbf964a92"
+    },
+    "src/integrations/api/fixtures/b6/applicants-http.json": {
+      "path": "docs/fixtures/b6/applicants-http.json",
+      "blob": "fb6f31df853dcadfcf5f4f80b5d9944d2e177061"
+    },
+    "src/integrations/api/fixtures/b6/clan-standing-http.json": {
+      "path": "docs/fixtures/b6/clan-standing-http.json",
+      "blob": "2b1ce3bb806e4fc09dcd56b1aaf9c7c5f4127f9b"
+    },
+    "src/integrations/api/fixtures/b6/openapi.json": {
+      "path": "docs/fixtures/b6/openapi.json",
+      "blob": "e11896947bc49dc28f4a508c86de2fac9e419332"
+    }
+  }
+}
