@@ -221,3 +221,22 @@ Existing listed Clan views/hooks and paired harness/tests are updated in scope. 
 - `src/integrations/api/clanApplications.test.ts`
 - `src/integrations/api/useClanRemote.test.tsx`
 - `docs/B5_ACTIVE_APPLICATION_REVIEW.md`
+
+Targeted local pre-handoff evidence additions:
+
+- `docs/evidence/b5/active-application-review/manifest.json`
+- `docs/evidence/b5/active-application-review/320/review-accepted-behind-cancelled-history.png`
+- `docs/evidence/b5/active-application-review/320/review-overlap-safe.png`
+- `docs/evidence/b5/active-application-review/320/review-pending-blocks-other-clan.png`
+- `docs/evidence/b5/active-application-review/320/review-revocation-pending.png`
+- `docs/evidence/b5/active-application-review/320/review-verified-membership.png`
+- `docs/evidence/b5/active-application-review/390/review-accepted-behind-cancelled-history.png`
+- `docs/evidence/b5/active-application-review/390/review-overlap-safe.png`
+- `docs/evidence/b5/active-application-review/390/review-pending-blocks-other-clan.png`
+- `docs/evidence/b5/active-application-review/390/review-revocation-pending.png`
+- `docs/evidence/b5/active-application-review/390/review-verified-membership.png`
+- `docs/evidence/b5/active-application-review/460/review-accepted-behind-cancelled-history.png`
+- `docs/evidence/b5/active-application-review/460/review-overlap-safe.png`
+- `docs/evidence/b5/active-application-review/460/review-pending-blocks-other-clan.png`
+- `docs/evidence/b5/active-application-review/460/review-revocation-pending.png`
+- `docs/evidence/b5/active-application-review/460/review-verified-membership.png`

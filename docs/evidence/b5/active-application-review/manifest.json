@@ -1,0 +1,128 @@
+{
+  "status": "local pre-handoff regressions; not final corrected-pin acceptance",
+  "frontend_source_files_sha": "f27d0c97ecf3121ba1876c647f03cb85eaa63fd6",
+  "frontend_implementation_sha": "1cd04ef672e859bdfa83123b24cf53e613a22a9c",
+  "browser_spec_sha256": "d50a3cc6caf74fe863a27ee60f6ff56e3e42f4f3efa3903f2a12e7c7d3578a49",
+  "backend_runtime_sha": "c38a7a65ba9bacce53a04bec6c10dfbeb71ed008",
+  "environment": "isolated PostgreSQL 16.2, real authenticated Clan APIs, synthetic Telegram boundary, system Chromium mobile emulation, scale 1, reduced motion",
+  "results": {
+    "unit_files": 43,
+    "unit_tests": 282,
+    "focused_tests": 17,
+    "older_accepted_newer_terminal_api_regression": "passed",
+    "request_lifecycle_mobile_scenarios": 3,
+    "safe_overlap_mobile_scenario": 1,
+    "viewports": [
+      320,
+      390,
+      460
+    ]
+  },
+  "screenshots": {
+    "docs/evidence/b5/active-application-review/320/review-accepted-behind-cancelled-history.png": {
+      "sha256": "41479185a7acaa76a289847622f2dfc1047ab25d7d521b89bbfbec2ab924ee7f",
+      "viewport": [
+        320,
+        844
+      ]
+    },
+    "docs/evidence/b5/active-application-review/320/review-overlap-safe.png": {
+      "sha256": "97f2acbaaab55e7891e272f0ae4b26fbb82aa20e20a78ad37a7a07be2bd58d76",
+      "viewport": [
+        320,
+        844
+      ]
+    },
+    "docs/evidence/b5/active-application-review/320/review-pending-blocks-other-clan.png": {
+      "sha256": "61e5d175d23abcb0b9d8daff0e67a712e05e4f446f58c103dedd4a007dfc1ef2",
+      "viewport": [
+        320,
+        844
+      ]
+    },
+    "docs/evidence/b5/active-application-review/320/review-revocation-pending.png": {
+      "sha256": "ffed5894bcbe1b48dd7261ec8b71c696ea7fe59267808cb59dcf1cd4c80f5e01",
+      "viewport": [
+        320,
+        844
+      ]
+    },
+    "docs/evidence/b5/active-application-review/320/review-verified-membership.png": {
+      "sha256": "cfa6ef2de6e067e665cba360fb47704a07d8e4bd8dd6491ffe017e6abc716350",
+      "viewport": [
+        320,
+        844
+      ]
+    },
+    "docs/evidence/b5/active-application-review/390/review-accepted-behind-cancelled-history.png": {
+      "sha256": "b0a19843723c6bbfd2595c6a1d3ce4d3dbfad95a2094b6edfd79558aab2855c2",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    "docs/evidence/b5/active-application-review/390/review-overlap-safe.png": {
+      "sha256": "6c8e3292200ae33a2e38cf5a6b6dd22310b80afc6bc5c657f203faf9caee125e",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    "docs/evidence/b5/active-application-review/390/review-pending-blocks-other-clan.png": {
+      "sha256": "e8a3bbfbdd8b482671e27ffa0108e71d0227c2821875a514d9a0fe756cfea4b3",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    "docs/evidence/b5/active-application-review/390/review-revocation-pending.png": {
+      "sha256": "108852a6c51b42a6913e87909bf1e5224e618e53308531c65f8bb9b1b64f646d",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    "docs/evidence/b5/active-application-review/390/review-verified-membership.png": {
+      "sha256": "0004910370ad2510037a760770b513e865f75e8241dffa056b348793378e9e77",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    "docs/evidence/b5/active-application-review/460/review-accepted-behind-cancelled-history.png": {
+      "sha256": "456b2301dca0fc33fe865b1ac365d2bca2c70c4709882f851510c418fababb6b",
+      "viewport": [
+        460,
+        844
+      ]
+    },
+    "docs/evidence/b5/active-application-review/460/review-overlap-safe.png": {
+      "sha256": "ef148d2271bde60ac31c30879dfdb5b5348db4adb08195d51794b4304e5e404c",
+      "viewport": [
+        460,
+        844
+      ]
+    },
+    "docs/evidence/b5/active-application-review/460/review-pending-blocks-other-clan.png": {
+      "sha256": "9aae98009a2d780fe3d2216f59feb1dcce6cd2b83c5ef1585193b1a69cb8cbda",
+      "viewport": [
+        460,
+        844
+      ]
+    },
+    "docs/evidence/b5/active-application-review/460/review-revocation-pending.png": {
+      "sha256": "22875f1304aa5e052a5af51009c731a1e22a66bc4a9c415f676b931d790f9249",
+      "viewport": [
+        460,
+        844
+      ]
+    },
+    "docs/evidence/b5/active-application-review/460/review-verified-membership.png": {
+      "sha256": "96df091c71a843fe30b0e26bcc6933ec252a03d5dd2996981cc212164c2b95b6",
+      "viewport": [
+        460,
+        844
+      ]
+    }
+  }
+}
