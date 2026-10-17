@@ -1,0 +1,84 @@
+{
+  "reviewed_baseline_commit": "a0c0d4802b4554320b6f225a1b07eff51b82d4a5",
+  "implementation_code_commit": "f3f7472c90c14fef5fa89556513039f7f1877c33",
+  "backend_checkout": "589210a8e28436c2110fa60b1ee9e12ddb05ccc8",
+  "backend_runtime_schema": "e99aa45474f7a9f372738a95eb96c2716b06b1d4",
+  "source_sha256": {
+    "src/features/clan/ClanRecentActivity.test.tsx": "c8f7e9a7ada228768c9244f7750e32fdcb41948de8f3f5b9a5a6d409de4aff7c",
+    "src/integrations/api/clanActivity.ts": "fdc15e459a14e2a11b4f5303ddc7aa4027def628ed87fdefe0f08aefcc905b1c"
+  },
+  "evidence_sha256": {
+    "docs/evidence/b6-zero-net/320/after-recent-activity.png": "e21b35305c1795480d68d8391ca81711d2b842acfa4741395204857f44a96730",
+    "docs/evidence/b6-zero-net/320/before-geometry.json": "f5f37dceea5bdedad7b91e50891e66e596b74e42bea1019562242b2e3f6f0a7e",
+    "docs/evidence/b6-zero-net/320/before-recent-activity.png": "a78ffd32ae0a7b874479ea28f7b3bf5f41846f7779e496e596a62033be6a978d",
+    "docs/evidence/b6-zero-net/390/after-recent-activity.png": "22c5ac304f71232eb49ca051310bd9bea47b84cb2d0591cc885e27a03945457f",
+    "docs/evidence/b6-zero-net/390/before-geometry.json": "b2699f74aec30f843c66e250215f6d385886ebf5e5e76f001c5bbfdb925e085f",
+    "docs/evidence/b6-zero-net/390/before-recent-activity.png": "e43e3b6e23dac6217fb6ab38b9ca9b0f5efb98cdcbfa5aca9a2cf9491fcf14f4",
+    "docs/evidence/b6-zero-net/460/after-recent-activity.png": "16d26c1a0f4f2e1b7d1492d0b80528d804dac8db5812ef2d9672561f3e43b380",
+    "docs/evidence/b6-zero-net/460/before-geometry.json": "6fbaed8a03d3043abe4043ed9d401beb28a337d693c1cce341ea634d33d342ad",
+    "docs/evidence/b6-zero-net/460/before-recent-activity.png": "0cde2f18b467d777fe22b62f599a7e8e05fe472bcc6823b258cc903193534031",
+    "docs/evidence/b6-zero-net/baseline-provenance.json": "ea062d365e2a74bc11b91e801b908eb7e483bf960affb5c6af72f8c196d72304",
+    "docs/evidence/b6-zero-net/zero-net-activity-http.json": "0151b97dae1c713ea762995fa7dfd991424c9f4d63ceae12d9ae8859d46df52f"
+  },
+  "fixture_provenance": {
+    "producer": "scripts/contracts/b6/integration.paired.test.ts: real zero-net rollover test",
+    "endpoint": "authenticated GET /api/v1/clans/activity",
+    "source": "Exact pinned Django/PostgreSQL/Redis isolated harness; existing real settle_clan_reward control; synthetic Captain/Clan and controlled server clock. Response values are unmodified.",
+    "source_gross_inputs": [
+      9,
+      1
+    ],
+    "canonical_rollover_response": {
+      "gross": 1,
+      "player_amount": 0,
+      "treasury_amount": 1
+    },
+    "frontend_calculation": "None; actual backend values asserted; feed units never added."
+  },
+  "comparisons": [
+    {
+      "viewport_width": 320,
+      "before_dimensions": [
+        298,
+        200
+      ],
+      "after_dimensions": [
+        298,
+        214
+      ],
+      "pixels_changed_above_10": null,
+      "changed_ratio": null,
+      "dimension_note": "Natural title wrapping at 320px; card width, grid and styles checked unchanged by the browser regression."
+    },
+    {
+      "viewport_width": 390,
+      "before_dimensions": [
+        368,
+        200
+      ],
+      "after_dimensions": [
+        368,
+        200
+      ],
+      "pixels_changed_above_10": 935,
+      "changed_ratio": 0.012703804347826086,
+      "dimension_note": "Same card dimensions; only title copy differs."
+    },
+    {
+      "viewport_width": 460,
+      "before_dimensions": [
+        438,
+        200
+      ],
+      "after_dimensions": [
+        438,
+        200
+      ],
+      "pixels_changed_above_10": 935,
+      "changed_ratio": 0.01067351598173516,
+      "dimension_note": "Same card dimensions; only title copy differs."
+    }
+  ],
+  "style_assertions": "e2e/b6-activity.spec.ts compares measured card width, grid columns, padding, gaps, fonts and colors against the immutable reviewed head at each width; no overflow; timestamps and IDs retained.",
+  "paired_evidence": "Fresh actual responses and mobile PNGs are regenerated under work/b6-paired and uploaded by the final-head CI job; this sample is independent of pinned contract artifacts."
+}

@@ -1,5 +1,7 @@
 import type { AssetKey } from "@/assets/registry";
 
+export type ClanRankStatus = "RANKED" | "UNRANKED" | "UNAVAILABLE" | "RECONCILING";
+
 export type ClanRole = "captain" | "soldier";
 export type ClanMembershipStatus = "none" | "pending" | "member";
 export type JoinRequestState = "none" | "pending" | "rejected";
@@ -19,6 +21,7 @@ export interface ClanSummary {
   members: number;
   capacity: number;
   rank: number | null;
+  rankStatus?: ClanRankStatus;
   score: number;
   status: "Recruiting" | "Focused" | "Full";
   summary: string;
@@ -92,7 +95,8 @@ export interface ClanJoinApplicant {
   level: number;
   seasonScore: number;
   globalRank: number | null;
-  activeDays: number | null;
+  rankStatus?: ClanRankStatus;
+  currentStreak: number | null;
   contributionPreview: number | null;
   medals: string[];
   initial: string;

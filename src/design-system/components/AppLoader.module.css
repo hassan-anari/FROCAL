@@ -20,6 +20,14 @@
   opacity: .9;
 }
 
+.compact {
+  min-height: 150px;
+  padding: 1.5rem .75rem;
+  border-radius: 21px;
+  background: transparent;
+  text-align: center;
+}
+
 .track {
   width: 108px;
   height: 2px;

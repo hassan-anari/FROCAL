@@ -1,0 +1,48 @@
+{
+  "items": [
+    {
+      "id": "reward:00000000000000000030",
+      "event_type": "CLAN_REWARD_SETTLED",
+      "occurred_at": "2026-10-17T22:57:15.667Z",
+      "recorded_at": "2026-10-17T22:57:15.683Z",
+      "actor_name": "Verified",
+      "amount": 0,
+      "unit": "PLAYER_POINTS",
+      "treasury_amount": 1,
+      "contribution_amount": 1,
+      "item_id": null,
+      "mission_key": null,
+      "mission_version": null
+    },
+    {
+      "id": "reward:00000000000000000029",
+      "event_type": "CLAN_REWARD_SETTLED",
+      "occurred_at": "2026-10-17T22:57:13.822Z",
+      "recorded_at": "2026-10-17T22:57:13.834Z",
+      "actor_name": "Verified",
+      "amount": 9,
+      "unit": "PLAYER_POINTS",
+      "treasury_amount": 0,
+      "contribution_amount": 9,
+      "item_id": null,
+      "mission_key": null,
+      "mission_version": null
+    },
+    {
+      "id": "join:00000000000000000006",
+      "event_type": "MEMBER_JOINED",
+      "occurred_at": "2026-10-17T22:57:13.813Z",
+      "recorded_at": null,
+      "actor_name": "Verified",
+      "amount": null,
+      "unit": null,
+      "treasury_amount": null,
+      "contribution_amount": null,
+      "item_id": null,
+      "mission_key": null,
+      "mission_version": null
+    }
+  ],
+  "next_cursor": null,
+  "as_of": "2026-10-17T22:57:16.911Z"
+}

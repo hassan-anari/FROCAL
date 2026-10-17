@@ -1,3 +1,4 @@
+import { clanRankLabel } from "@/integrations/api/clanActivity";
 import {
   InformationCircleIcon,
   UserGroupIcon,
@@ -11,6 +12,7 @@ import { createPortal } from "react-dom";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
 import { usePauseBackgroundMotion } from "@/design-system/motion/usePauseBackgroundMotion";
 import { Button } from "@/design-system/primitives/Button";
+import { ClanQueryState } from "./ClanQueryState";
 import type { ClanAchievement, ClanInventoryItem, ClanJoinApplicant, ClanRole, ClanSummary } from "@/game/clan/types";
 import { clanRoleArt, getClanEmblemAssetKey, getClanHqStateAssetKey, getIdentityHue, getIdentityInitials } from "@/game/clan/clanVisuals";
 import styles from "./ClanOverlays.module.css";
@@ -237,7 +239,7 @@ export function ClanPreviewSheet({
             <AssetImage assetKey={getClanEmblemAssetKey()} className={styles.clanMarkFrame} />
           </div>
           <div>
-            <span>{clan.rank === null ? "—" : `#${clan.rank}`} SEASON</span>
+            <span>{clanRankLabel(clan.rank, clan.rankStatus)} SEASON</span>
             <h3>{clan.name}</h3>
             <p>{clan.summary}</p>
           </div>
@@ -382,12 +384,17 @@ export function JoinRequestsSheet({
   onAccept,
   onReject,
   pendingAction = false,
+  loading = false, error = false, retry, fetching = false,
 }: {
   applicants: ClanJoinApplicant[];
   onClose: () => void;
   onAccept: (id: string) => void;
   onReject: (id: string) => void;
   pendingAction?: boolean;
+  loading?: boolean;
+  error?: boolean;
+  retry?: () => unknown;
+  fetching?: boolean;
 }) {
   const pending = applicants.filter((applicant) => applicant.status === "pending");
 
@@ -395,9 +402,10 @@ export function JoinRequestsSheet({
     <ClanModal eyebrow="Captain tools" title="Join requests" onClose={onClose}>
       <div className={styles.requestIntro}>
         <HugeiconsIcon icon={UserGroupIcon} size={22} strokeWidth={1.55} />
-        <div><strong>{pending.length} pending explorers</strong><span>Review each request before opening a place in your roster.</span></div>
+        <div><strong>{loading ? "Join requests" : `${pending.length} pending explorers`}</strong><span>Review each request before opening a place in your roster.</span></div>
       </div>
       <div className={styles.requestList}>
+        {loading ? <ClanQueryState loading title="Checking join requests…" /> : error ? <ClanQueryState title="Join requests couldn't refresh." description="Retry before reviewing applicants." retry={retry} busy={fetching} /> : !applicants.length ? <ClanQueryState title="No join requests yet" description="New requests will appear here for review." /> : null}
         {applicants.map((applicant) => (
           <article key={applicant.id} className={styles.request}>
             <div className={styles.avatar} style={{ "--identity-hue": getIdentityHue(applicant.name) } as CSSProperties}>
@@ -409,13 +417,13 @@ export function JoinRequestsSheet({
               <div className={styles.requestStats}>
                 <span><b>LVL</b>{applicant.level}</span>
                 <span><b>SCORE</b>{applicant.seasonScore.toLocaleString()}</span>
-                <span><b>RANK</b>{applicant.globalRank === null ? "—" : `#${applicant.globalRank.toLocaleString()}`}</span>
-                <span><b>ACTIVE</b>{applicant.activeDays === null ? "—" : `${applicant.activeDays}d`}</span>
+                <span><b>RANK</b>{clanRankLabel(applicant.globalRank, applicant.rankStatus)}</span>
+                <span><b>STREAK</b>{applicant.currentStreak === null ? "Unavailable" : `${applicant.currentStreak}d`}</span>
               </div>
-              <div className={styles.requestMeta}>
-                <span>Contribution {applicant.contributionPreview?.toLocaleString() ?? "—"}</span>
+              {applicant.contributionPreview !== null || applicant.medals.length > 0 ? <div className={styles.requestMeta}>
+                {applicant.contributionPreview !== null ? <span>Contribution {applicant.contributionPreview.toLocaleString()}</span> : null}
                 {applicant.medals.slice(0, 2).map((medal) => <em key={medal}>{medal}</em>)}
-              </div>
+              </div> : null}
             </div>
             {applicant.status === "pending" ? (
               <div className={styles.requestActions}>

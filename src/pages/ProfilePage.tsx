@@ -1,3 +1,5 @@
+import { configuredBotUrl } from "@/integrations/telegram/botLinks";
+import { showFeedback } from "@/design-system/components/TransientFeedback";
 import { useServerProfile } from "@/integrations/api/useServerProfile";
 import { reviewProfile } from "@/integrations/api/profile";
 import { readSessionPreference, writeSessionPreference } from "@/app/storageRelease";
@@ -52,7 +54,7 @@ import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import styles from "./ProfilePage.module.css";
 
 const profileTabKey = "dalexio-profile-active-tab";
-const profileLink = "https://t.me/DalexioBot?start=dexoairdrop";
+const profileLink = configuredBotUrl();
 
 const profileTabs: Array<{ id: ProfileTab; label: string }> = [
   { id: "overview", label: "Overview" },
@@ -163,13 +165,16 @@ export function ProfilePage() {
   };
 
   const shareProfile = () => {
+    if (!profileLink) { showFeedback("The Telegram link is unavailable. Please try again later."); return; }
     const text = `${firstName} is exploring Dexo Land as ${activeTitle.name}. Level ${level} · ${lifetimeXp.toLocaleString()} lifetime XP.`;
     profile.incrementShareCount();
     adapter.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(profileLink)}&text=${encodeURIComponent(text)}`);
   };
 
   const copyProfileLink = async () => {
-    await navigator.clipboard.writeText(profileLink);
+    if (!profileLink) { showFeedback("The Telegram link is unavailable. Please try again later."); return; }
+    try { await navigator.clipboard.writeText(profileLink); }
+    catch { showFeedback("The link couldn't be copied. Please try again."); return; }
     profile.incrementShareCount();
     adapter.hapticNotice("success");
   };

@@ -144,6 +144,8 @@
 }
 .historyList::-webkit-scrollbar { display: none; }
 
+.historyState { display: grid; justify-items: center; gap: .45rem; padding: .85rem; border: 1px dashed rgba(137, 176, 240, .13); border-radius: 17px; background: rgba(5, 11, 27, .42); text-align: center; }
+
 .historyList article {
   display: grid;
   grid-template-columns: auto 1fr auto;
