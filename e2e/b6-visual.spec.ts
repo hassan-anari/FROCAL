@@ -78,6 +78,7 @@ for (const width of [320, 390, 460]) test(`B6 preserved scenes and corrected asy
   f.data.activity = b6Activity[0];
   await page.goto(launch("/clan"));
   await expect(page.getByRole("navigation", { name: "Clan headquarters sections" })).toBeVisible();
+  await page.getByText("SEASON STANDING", { exact: true }).scrollIntoViewIfNeeded();
   await shot("canonical-standing");
   await page.getByRole("button", { name: /recruits waiting/ }).click();
   await expect(page.getByRole("dialog")).toContainText(before ? "ACTIVE" : "STREAK");

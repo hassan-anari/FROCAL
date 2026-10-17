@@ -20,7 +20,7 @@ async function enter(page: Page, actor: any, path = "/clan") {
 }
 const close = async (page: Page) => { await page.bringToFront(); await page.keyboard.press("Escape"); await expect(page.getByRole("dialog")).toHaveCount(0); };
 async function snapshot(page: Page, width: number, name: string) {
-  const folder = `work/b5-paired/mobile/${width}`; mkdirSync(folder, { recursive: true });
+  const folder = `work/${process.env.B6_BACKEND_ROOT ? "b6" : "b5"}-paired/mobile/${width}`; mkdirSync(folder, { recursive: true });
   await page.evaluate(() => document.activeElement instanceof HTMLElement && document.activeElement.blur());
   await page.screenshot({ path: `${folder}/${name}.png`, animations: "disabled" });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
