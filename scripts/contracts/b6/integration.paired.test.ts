@@ -85,3 +85,33 @@ it("uses secure group-avatar capabilities or existing null fallback without expo
   expect(JSON.stringify(row)).not.toMatch(/synthetic-key|synthetic-secret|object_key|bot_token|file_id/);
   const image = await nativeFetch(origin + new URL(row.image_url!).pathname); expect(image.status).toBe(200); expect(image.headers.get("content-type")).toBe("image/jpeg");
 }, 30000);
+
+for (const scenario of ["pre-activation", "inactive gap", "delayed deactivation"] as const) it(`pairs source-time mission eligibility: ${scenario}`, async () => {
+  const { captain } = await world();
+  const definitions = await control({ action: "b6-missions", player: captain.player, target_units: 1, activate: scenario !== "pre-activation" });
+  const toggle = async () => { for (const row of definitions.missions) await control({ action: "b6-mission-toggle", player: captain.player, key: row.key }); };
+  if (scenario === "inactive gap") await toggle();
+  // Capture an actual queued source at this point in the lifecycle, never move it.
+  const source = await control({ action: "b6-capture-signal", player: captain.player });
+  await toggle(); // Activate/reactivate, or deactivate before delayed processing.
+  await control({ action: "b6-process-signals", player: captain.player });
+  const completed = (await captain.api.activity()).items.filter(row => row.event_type === "MISSION_COMPLETED");
+  if (scenario === "delayed deactivation") {
+    expect(completed).toHaveLength(2);
+    for (const row of completed) expect(Date.parse(row.occurred_at)).toBe(Date.parse(source.occurred_at));
+    await toggle(); // Existing completed progress is visible again after reactivation.
+    const rows = (await captain.api.missions()).filter(row => definitions.missions.some((d: any) => d.key === row.key));
+    expect(rows).toHaveLength(2); expect(rows.every(row => row.completed && row.reward_state === "SETTLED" && row.progress_units === 1)).toBe(true);
+    const ids = completed.map(row => row.id);
+    await control({ action: "b6-process-signals", player: captain.player });
+    expect((await captain.api.activity()).items.filter(row => row.event_type === "MISSION_COMPLETED").map(row => row.id)).toEqual(ids);
+  } else {
+    expect(completed).toHaveLength(0);
+    const rows = (await captain.api.missions()).filter(row => definitions.missions.some((d: any) => d.key === row.key));
+    expect(rows).toHaveLength(2); expect(rows.every(row => !row.completed && row.progress_units === 0)).toBe(true);
+    expect((await captain.api.treasury()).balance).toBe(0);
+    // A genuinely later, newly captured active source can complete both missions.
+    await control({ action: "b6-signal", player: captain.player });
+    expect((await captain.api.activity()).items.filter(row => row.event_type === "MISSION_COMPLETED")).toHaveLength(2);
+  }
+}, 60000);

@@ -6,7 +6,7 @@ The description preserves each available nonnegative integer Treasury and Contri
 
 ## Exact backend and fixture provenance
 
-The backend still publishes checkout **`28a6b8805db5f9a8c70b78c5eadf5c6276dbccd1`**, runtime/schema **`13e7b1988181980b6ad80b69a8e9f28347e31802`**. No successor final handoff was published when this correction was implemented. The checkout pin, verbatim OpenAPI, generated schemas, migrations and backend source remain unchanged. Backend PR #31's separate mission lifecycle review and final paired acceptance remain dependencies; this frontend correction does not approve that review.
+The published mission lifecycle successor is pinned at checkout **`589210a8e28436c2110fa60b1ee9e12ddb05ccc8`**, runtime/schema **`e99aa45474f7a9f372738a95eb96c2716b06b1d4`**. It supersedes the previously tested `28a6b880…` / `13e7b198…` pair. Runtime changes and migration `clans.0019_b6_mission_active_intervals` are confirmed; HTTP OpenAPI and published HTTP fixtures remain byte-identical. The successor is explicitly acknowledged in Issue #8 and its exact source/contract artifacts are pinned. No backend code is edited. See the [implementation report](B6_FRONTEND_REPORT.md) for activation/source-time pairing and cutover semantics. Final owner/independent review remains required.
 
 [`zero-net-activity-http.json`](evidence/b6-zero-net/zero-net-activity-http.json) is an unmodified authenticated `/api/v1/clans/activity` response captured from the exact pinned backend in an isolated PostgreSQL/Redis paired run. The existing source control invokes the real `settle_clan_reward` service twice in a fresh synthetic Clan (gross 9, then gross 1). The backend returns gross 1, Player 0, Treasury 1 and contribution 1 for the rollover. The frontend asserts those canonical values rather than deriving the split. The paired test also checks replay, canonical Treasury/Home balances and one stable activity ID. This frontend-owned evidence sample is separate from the immutable published backend contract fixtures.
 
@@ -28,4 +28,4 @@ Measured card rasters: **298×200 → 298×214px** at 320px (one additional titl
 
 See [baseline provenance](evidence/b6-zero-net/baseline-provenance.json), per-width before-geometry files and [source/fixture/screenshot hashes and pixel measurements](evidence/b6-zero-net/validation-manifest.json). The broader [B6 visual report](B6_VISUAL_REPORT.md) retains the immutable-main preservation evidence. Exact final-head CI results and SHAs are recorded in [Draft PR #9](https://github.com/hassan-anari/FROCAL/pull/9).
 
-PR #9 remains Draft until backend review and final paired acceptance are complete. No merge, deployment or new phase is authorized.
+PR #9 remains Draft for final owner/independent review and acceptance. No merge, deployment or new phase is authorized.

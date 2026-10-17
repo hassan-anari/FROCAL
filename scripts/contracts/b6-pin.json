@@ -1,28 +1,28 @@
 {
   "repository": "hassan-anari/WEDCAL",
-  "commit": "28a6b8805db5f9a8c70b78c5eadf5c6276dbccd1",
-  "runtime_commit": "13e7b1988181980b6ad80b69a8e9f28347e31802",
-  "status": "Final owner-approved B6 handoff acknowledged in FROCAL Issue #8; paired acceptance recorded in B6 frontend report.",
+  "commit": "589210a8e28436c2110fa60b1ee9e12ddb05ccc8",
+  "runtime_commit": "e99aa45474f7a9f372738a95eb96c2716b06b1d4",
+  "status": "Published mission lifecycle successor explicitly acknowledged in FROCAL Issue #8; exact paired results recorded in B6 report and Draft PR #9.",
   "files": {
     "scripts/contracts/b6/source/docs/B6_BACKEND_CONTRACT.md": {
       "path": "docs/B6_BACKEND_CONTRACT.md",
-      "blob": "a722c971706a9190ca860826807dd8d99f774c90"
+      "blob": "0a5b02fa0691a6d335dbb5c883f26398b3f83e0d"
     },
     "scripts/contracts/b6/source/docs/B6_OPERATOR_GUIDE.md": {
       "path": "docs/B6_OPERATOR_GUIDE.md",
-      "blob": "cfbd55f04ffa6e7d895d76eb9367ba26d1af24cd"
+      "blob": "73f0727cc69c5b92109de97380e4e7c40f68b3ae"
     },
     "scripts/contracts/b6/source/docs/B6_RUNTIME_PIN.md": {
       "path": "docs/B6_RUNTIME_PIN.md",
-      "blob": "1a3aca44936b35e658e39dfa3492d01afc41c251"
+      "blob": "a376c186ba5c287caebfc1b0348817fc3fd7efd6"
     },
     "scripts/contracts/b6/source/docs/B6_SECURITY_ECONOMIC_REVIEW.md": {
       "path": "docs/B6_SECURITY_ECONOMIC_REVIEW.md",
-      "blob": "2203ae4c00bf6c6d455859e732d35c643e5ee694"
+      "blob": "830e710911bf69749a13f0046b0ab7af030c4715"
     },
     "scripts/contracts/b6/source/docs/fixtures/b6/README.md": {
       "path": "docs/fixtures/b6/README.md",
-      "blob": "7b5cc47cbc70ed16ad5eb22a5671c2f5f3d970ab"
+      "blob": "5995f1384ba3b5c833a68d3f7cfcfc4d73ed152b"
     },
     "scripts/contracts/b6/source/apps/clans/api.py": {
       "path": "apps/clans/api.py",
@@ -38,7 +38,7 @@
     },
     "scripts/contracts/b6/source/apps/clans/missions.py": {
       "path": "apps/clans/missions.py",
-      "blob": "36a9b200be9fbed5b36eba653015740c86d89140"
+      "blob": "5e4c16c2a260c98ed41743d45dfcf35ebd191083"
     },
     "scripts/contracts/b6/source/apps/arena/services.py": {
       "path": "apps/arena/services.py",
@@ -67,6 +67,26 @@
     "src/integrations/api/fixtures/b6/openapi.json": {
       "path": "docs/fixtures/b6/openapi.json",
       "blob": "e11896947bc49dc28f4a508c86de2fac9e419332"
+    },
+    "scripts/contracts/b6/source/docs/B6_MISSION_LIFECYCLE_REVIEW.md": {
+      "path": "docs/B6_MISSION_LIFECYCLE_REVIEW.md",
+      "blob": "832ed58797708d81c4cfc1724910ff1f807d8360"
+    },
+    "scripts/contracts/b6/source/docs/B6_BACKEND_HANDOFF.md": {
+      "path": "docs/B6_BACKEND_HANDOFF.md",
+      "blob": "7ca9fc61d159d9660635dc77e8b9bdb918b49c4b"
+    },
+    "scripts/contracts/b6/source/docs/evidence/B6_MISSION_LIFECYCLE.sql": {
+      "path": "docs/evidence/B6_MISSION_LIFECYCLE.sql",
+      "blob": "aef180a404d07b1df03538994562f256fb0f3bf9"
+    },
+    "scripts/contracts/b6/source/apps/clans/migrations/0019_b6_mission_active_intervals.py": {
+      "path": "apps/clans/migrations/0019_b6_mission_active_intervals.py",
+      "blob": "9ec257d14cb8f201f8d500363c184c4da5786149"
+    },
+    "scripts/contracts/b6/source/apps/clans/tests/test_b6_mission_lifecycle.py": {
+      "path": "apps/clans/tests/test_b6_mission_lifecycle.py",
+      "blob": "94e7d254d4b5e1c60124b82be1fdc49c9c0175b1"
     }
   }
 }

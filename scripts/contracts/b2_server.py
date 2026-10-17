@@ -73,7 +73,10 @@ call_command("migrate", interactive=False, verbosity=0)
 
 epoch = monotonic()
 offset = 0.0
-BASE = datetime(2026, 1, 2, tzinfo=UTC)
+# B6 activation intervals use the actual PostgreSQL clock. Start its isolated
+# source clock at real UTC so a source captured after activation follows it.
+# Historical B2-B5 fixtures retain their original fixed clock.
+BASE = datetime.now(UTC) if B6 else datetime(2026, 1, 2, tzinfo=UTC)
 def now():
     return BASE + timedelta(seconds=monotonic() - epoch + offset)
 timezone.now = now

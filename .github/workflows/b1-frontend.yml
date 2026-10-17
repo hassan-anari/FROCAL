@@ -57,6 +57,7 @@ jobs:
             docs/evidence/b4/
             docs/evidence/b5/
             docs/evidence/b6/
+            docs/evidence/b6-zero-net/
             work/test-results-b6/
             work/test-results-b5/
           retention-days: 14
@@ -302,7 +303,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: hassan-anari/WEDCAL
-          ref: 28a6b8805db5f9a8c70b78c5eadf5c6276dbccd1
+          ref: 589210a8e28436c2110fa60b1ee9e12ddb05ccc8
           path: work/backend-b6
           persist-credentials: false
       - uses: actions/setup-node@v4

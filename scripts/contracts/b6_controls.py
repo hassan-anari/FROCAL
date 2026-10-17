@@ -73,20 +73,44 @@ def control(data, world):
         for kind, band, title in [("GROUP", "GROUP", "Build the signal together"), ("INDIVIDUAL", "SMALL", "Complete a verified run")]:
             key = "paired-b6-" + kind.lower() + "-" + uuid4().hex[:8]
             description = "Complete verified runs with your Clan." if kind == "GROUP" else "Finish one server-verified Typing run."
-            result = client.post("/admin/clans/clanmissiondefinition/add/", clan_data(member.clan_season.config_version, now, key=key, kind=kind, reward_band=band, title=title, description=description, target_units=2 if kind == "GROUP" else 1))
+            result = client.post("/admin/clans/clanmissiondefinition/add/", clan_data(member.clan_season.config_version, now, key=key, kind=kind, reward_band=band, title=title, description=description, target_units=data.get("target_units", 2 if kind == "GROUP" else 1)))
             if result.status_code != 302:
                 raise RuntimeError("Isolated Admin mission creation failed")
             row = ClanMissionDefinition.objects.get(key=key)
             if row.enabled:
                 raise RuntimeError("Admin draft unexpectedly activated")
-            if admin_control(client, "clans/clanmissiondefinition", row).status_code != 302:
+            if data.get("activate", True) and admin_control(client, "clans/clanmissiondefinition", row).status_code != 302:
                 raise RuntimeError("Isolated signed Admin activation failed")
             rows.append({"key": key, "title": title, "description": description})
         return {"missions": rows}
-    if action == "b6-signal":
+    if action == "b6-mission-toggle":
+        from django.contrib.auth.models import User
+        from django.test import Client
+        from apps.clans.models import ClanMissionDefinition
+        from apps.clans.tests.test_b6_admin import control as admin_control
+        if not data["key"].startswith("paired-b6-"):
+            raise ValueError("Only isolated paired mission definitions may be toggled")
+        row = ClanMissionDefinition.objects.get(key=data["key"], config_version=member.clan_season.config_version)
+        operator = User.objects.get(username="isolated-b6-operator")
+        client = Client()
+        client.force_login(operator)
+        if admin_control(client, "clans/clanmissiondefinition", row).status_code != 302:
+            raise RuntimeError("Isolated signed lifecycle transition failed")
+        row.refresh_from_db()
+        return {"enabled": row.enabled}
+    if action == "b6-process-signals":
+        from apps.clans.missions import process_mission_signals
+        return {"processed": process_mission_signals()}
+    if action in {"b6-signal", "b6-capture-signal"}:
         from apps.clans.missions import queue_mission_signal, process_mission_signals
         from apps.clans.models import ClanMissionSignal
-        queue_mission_signal(membership=member, source_key=data.get("key") or "b6-verified-run-" + uuid4().hex, requirement="VALID_TYPING_RUN", units=1, occurred_at=now)
+        if action == "b6-capture-signal" and world["offset"] != 0:
+            raise RuntimeError("Source-time lifecycle cases must precede synthetic expiry clock advances")
+        key = data.get("key") or "b6-verified-run-" + uuid4().hex
+        queue_mission_signal(membership=member, source_key=key, requirement="VALID_TYPING_RUN", units=1, occurred_at=now)
+        if action == "b6-capture-signal":
+            row = ClanMissionSignal.objects.get(source_key=key, membership=member)
+            return {"key": key, "occurred_at": row.occurred_at.isoformat()}
         ClanMissionSignal.objects.filter(membership=member, processed_at__isnull=True).update(next_attempt_at=now)
         return {"processed": process_mission_signals()}
     raise ValueError("Unknown isolated B6 source control")
