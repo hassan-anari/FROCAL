@@ -40,6 +40,18 @@
   ],
   "rewrites": [
     {
+      "source": "^/api/v1/?$",
+      "destination": "https://api.dalexio.com/api/v1/"
+    },
+    {
+      "source": "^/api/v1/([^/]+)/?$",
+      "destination": "https://api.dalexio.com/api/v1/$1/"
+    },
+    {
+      "source": "^/api/v1/([^/]+)/(.+?)/?$",
+      "destination": "https://api.dalexio.com/api/v1/$1/$2"
+    },
+    {
       "source": "/api/v1/:path*",
       "destination": "https://api.dalexio.com/api/v1/:path*"
     },
