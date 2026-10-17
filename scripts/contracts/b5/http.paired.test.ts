@@ -197,3 +197,15 @@ it("detects a current active path plus an unresolved terminal credential before 
   expect(selectClanApplications(await soldier.api.ownRequests()).blocksNewApplication).toBe(false);
   expect((await soldier.api.join(b.clan.id)).state).toBe("PENDING");
 }, 30_000);
+it("retains legacy overlapping applications and reveals no invitation until explicit authorized resolution", async () => {
+  const a = await world(0), b = await world(0), soldier = await actor(); await soldier.api.role({ role: "SOLDIER" });
+  const accepted = await soldier.api.join(a.clan.id); await a.captain.api.decision(accepted.id, { accept: true });
+  const legacy = await control({ action: "b5-request-history", player: soldier.player, clan: b.clan.id, state: "PENDING" });
+  const selection = selectClanApplications(await soldier.api.ownRequests());
+  expect(selection).toMatchObject({ ambiguous: true, activeRequest: null, blocksNewApplication: true });
+  expect(selection.blockingRequests.map(row => row.id).sort()).toEqual([accepted.id, legacy.ids[0]].sort());
+  await expect(soldier.api.invite()).rejects.toMatchObject({ status: 409, code: "CLAN_STATE_CONFLICT" });
+  await soldier.api.cancelRequest(legacy.ids[0]);
+  expect(selectClanApplications(await soldier.api.ownRequests()).activeRequest?.id).toBe(accepted.id);
+  expect((await soldier.api.invite()).state).toBe("ACTIVE");
+}, 30_000);
