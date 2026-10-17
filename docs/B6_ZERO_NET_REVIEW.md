@@ -24,6 +24,8 @@ The browser tests replay that same real HTTP response against immutable reviewed
 | 390px | [Before](evidence/b6-zero-net/390/before-recent-activity.png) | [After](evidence/b6-zero-net/390/after-recent-activity.png) |
 | 460px | [Before](evidence/b6-zero-net/460/before-recent-activity.png) | [After](evidence/b6-zero-net/460/after-recent-activity.png) |
 
+Measured card rasters: **298×200 → 298×214px** at 320px (one additional title line); **368×200px** at 390px and **438×200px** at 460px remain the same size. Equal-size raster differences above the 10/255 channel threshold are **1.27%** and **1.07%**, respectively, confined to the title. A whole-image ratio is not claimed for the differently sized 320px pair. The original 102 broader captures were rerendered with this production source; all nine Base/Profile/Arena preservation comparisons remain zero above that threshold. There are **108 committed PNGs / 54 before-after pairs** across both evidence sets.
+
 See [baseline provenance](evidence/b6-zero-net/baseline-provenance.json), per-width before-geometry files and [source/fixture/screenshot hashes and pixel measurements](evidence/b6-zero-net/validation-manifest.json). The broader [B6 visual report](B6_VISUAL_REPORT.md) retains the immutable-main preservation evidence. Exact final-head CI results and SHAs are recorded in [Draft PR #9](https://github.com/hassan-anari/FROCAL/pull/9).
 
 PR #9 remains Draft until backend review and final paired acceptance are complete. No merge, deployment or new phase is authorized.

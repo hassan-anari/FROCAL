@@ -1,6 +1,6 @@
 {
   "baseline_commit": "f7324b07cda2ede8d55679457699ad376d03447d",
-  "implementation_code_commit": "e27266624b8a67603772c53d4a491b621b71c866",
+  "implementation_code_commit": "a1788d22c7dc280ff702277d7848b09a2d635b72",
   "backend_pin": "28a6b8805db5f9a8c70b78c5eadf5c6276dbccd1",
   "backend_runtime": "13e7b1988181980b6ad80b69a8e9f28347e31802",
   "backend_contract": "Final acknowledged B6 contract",
@@ -19,6 +19,7 @@
     "src/features/clan/ClanOverlays.tsx": "09390f2a1f497a4d2b6063eac3fedc5da26d83a82608f97a9075b64a6afe5cac",
     "src/features/clan/ClanQueryState.test.tsx": "a198380ac2a32b077d3015f1d7b9dd1dc840294064c45197411f7729b011d2a9",
     "src/features/clan/ClanQueryState.tsx": "79af0869ae50b1548b468b323a206ed28a510a9c7bde548fb2fd956aa459aba0",
+    "src/features/clan/ClanRecentActivity.test.tsx": "c8f7e9a7ada228768c9244f7750e32fdcb41948de8f3f5b9a5a6d409de4aff7c",
     "src/features/clan/ClanRecentActivity.tsx": "af20074c7fa635b31b0370214bca649c83854dc4cea19940bb28014ed70a38d0",
     "src/features/clan/ClanStatusSheet.tsx": "9f6908ce448093f18953045529d42cc7719119fe3fa0801cb8f20089ee363eca",
     "src/features/clan/clanStatusLabels.ts": "2a9c229620e3f69d83d4bc1a8c52683e78b886bc6d3937359e66174bf4f0b545",
@@ -30,7 +31,7 @@
     "src/integrations/api/b5.ts": "47db6981990b72c82058a310d9140042c0dd393ce685725c3b68ddf13f688f43",
     "src/integrations/api/b6.contract.test.ts": "ff075d7f8094628a8b387d2ef1897b5af5a387a8c79d581a102d69bcd7852a6d",
     "src/integrations/api/b6Schemas.ts": "fcdf5782e2ccfc3d66e994ae0a555247b0f5ed0a75f61af44959be9ae91d2c90",
-    "src/integrations/api/clanActivity.ts": "ebc6e936bb26d76f5fbd0a97c133f16ae17dacc5b8f6ebf47b04ca5b75ed3ef9",
+    "src/integrations/api/clanActivity.ts": "fdc15e459a14e2a11b4f5303ddc7aa4027def628ed87fdefe0f08aefcc905b1c",
     "src/integrations/api/clanApplications.ts": "428c4cee6f37cd3fd4c4affb97968a4dc86776dc9b8d9d679369793fe723c9d1",
     "src/integrations/api/clanViews.test.ts": "d0a3a68fe03fb1a7f3b89427ae03f58e7a983929df90de3b32e7e05f688f82cc",
     "src/integrations/api/clanViews.ts": "88705f5fb3f529f451e80d61fa65ffb079d19c0aae21c326ab0b6839aaef6260",
@@ -272,7 +273,7 @@
       "pixels_changed_above_10": 0,
       "changed_ratio": 0.0,
       "before_sha256": "79d15d414689f90672df63117846bc3892c52d9cf2fdea756c5f0edbfa88bb7e",
-      "after_sha256": "3a077bdddfccd752b49d884992fd323b0d27dc17c1c899af2c869ad5bda7b104"
+      "after_sha256": "c0f9c1102e52ac822bbb87281622e80994eedc4133ed1187675de1066bb5623e"
     },
     {
       "width": 320,
