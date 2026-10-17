@@ -19,7 +19,7 @@
     "check": "npm run validate:structure && npm run validate:assets && npm run validate:imports && npm run validate:motion && npm run validate:production && npm run validate:contracts && npm run typecheck && npm run test && npm run build && npm run validate:production-bundle",
     "validate:contracts": "node scripts/contracts/check-b2-contract.mjs && node scripts/contracts/generate-b5-schemas.mjs --check",
     "test:paired": "node scripts/contracts/run-paired.mjs",
-    "validate:production": "node --test scripts/production-policy.test.mjs",
+    "validate:production": "node --test scripts/production-policy.test.mjs scripts/vercel-api-routing.test.mjs",
     "validate:production-bundle": "node scripts/validate-production-bundle.mjs",
     "validate:imports": "node scripts/validate-imports.mjs",
     "validate:motion": "node scripts/validate-motion.mjs",
