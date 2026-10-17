@@ -12,7 +12,7 @@ function effectLabel(effect: c.EffectRuleOut): string {
     case "CLAN_MISSION_PROGRESS_BONUS_BPS": return `+${percent} Clan mission progress`;
     case "SEASON_CAPACITY_ADD": return `+${effect.value} Clan capacity this Season`;
     case "HQ_XP_GRANT": return `+${effect.value.toLocaleString("en-US")} HQ XP`;
-    default: return `${effect.category.replaceAll("_", " ")}: ${effect.value}`;
+    default: return "Effect details unavailable";
   }
 }
 export function clanItem(row: c.ItemRuleOut): ClanInventoryItem | null {
@@ -21,8 +21,13 @@ export function clanItem(row: c.ItemRuleOut): ClanInventoryItem | null {
   return { ...art, name: row.name, price: row.price, activationMode: row.activation === "TIMED" ? "timed" : "context", durationMinutes: row.duration_minutes ?? undefined, effect: row.effects.map(effectLabel).join(" · "), contextLabel: row.activation === "TIMED" ? undefined : "Use", description: art.description };
 }
 export function clanMission(row: c.ClanMissionOut): ClanTask {
-  const editorial = clanTasks.find(task => task.id === row.key);
-  return { id: row.key, title: editorial?.title ?? row.key.replaceAll("-", " "), description: editorial?.description ?? row.requirement.replaceAll("_", " "), type: row.kind === "GROUP" ? "group" : "individual", status: row.completed ? "completed" : "active", current: row.progress_units, target: row.target_units, unit: editorial?.unit ?? "units", rewardLabel: row.availability === "UNAVAILABLE" ? "Unavailable" : row.own_player_reward !== null ? `${row.own_player_reward} XP · ${row.reward_state.replaceAll("_", " ")}` : row.participant_gross_points !== null ? `${row.participant_gross_points} gross points` : row.reward_state.replaceAll("_", " "), timeLabel: new Date(row.ends_at).toLocaleString("en-US") };
+  const editorial = row.availability === "AVAILABLE" ? clanTasks.find(task => task.id === row.key) : undefined;
+  const rewardState = ({ SETTLED: "Settled", PAID: "Settled", PENDING: "Pending", NOT_PARTICIPATING: "No participant reward", INELIGIBLE: "Not eligible for a reward", NOT_COMPLETED: "In progress", IN_PROGRESS: "In progress", UNAVAILABLE: "Unavailable" } as Record<string, string>)[row.reward_state] ?? "Reward status unavailable";
+  return { id: row.key, title: editorial?.title ?? "Clan mission", description: editorial?.description ?? (row.availability === "UNAVAILABLE" ? "This mission is unavailable." : "Mission details are unavailable."), type: row.kind === "GROUP" ? "group" : "individual", status: row.completed ? "completed" : "active", current: row.progress_units, target: row.target_units, unit: editorial?.unit ?? "units", rewardLabel: row.availability === "UNAVAILABLE" ? "Unavailable" : row.own_player_reward !== null ? `${row.own_player_reward} XP · ${rewardState}` : row.participant_gross_points !== null ? `${row.participant_gross_points} gross points` : rewardState, timeLabel: new Date(row.ends_at).toLocaleString("en-US") };
+}
+export function clanItemBlockedLabel(reason: string | null | undefined, insufficient: boolean) {
+  if (insufficient) return "Insufficient Treasury";
+  return ({ CAPTAIN_OR_CLAN_STATE_REQUIRED: "Requires active Captain access", NOT_OWNED: "Not in Clan inventory", SEASON_USE_LIMIT: "Season use limit reached", CAPACITY_LIMIT: "Clan capacity limit reached" } as Record<string, string>)[reason ?? ""] ?? "Unavailable";
 }
 export function clanTrophy(row: c.TrophyOut): ClanAchievement {
   const editorial = clanAchievements.find(item => item.id === row.key);

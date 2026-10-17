@@ -1,0 +1,714 @@
+{
+  "baseline_commit": "f7324b07cda2ede8d55679457699ad376d03447d",
+  "implementation_code_commit": "7a54dfce14aee8f7dded5f3f4b851dd4699dc593",
+  "backend_pin": "65a2c45810c0d5f721c662f3d4681967829ef242",
+  "backend_contract": "B5; B6 handoff pending",
+  "viewports": [
+    320,
+    390,
+    460
+  ],
+  "height": 844,
+  "renderer": "Installed Chromium; same runtime for immutable-main before and after",
+  "pixel_threshold_per_channel": 10,
+  "source_sha256": {
+    "src/design-system/components/AppLoader.module.css": "4906c51acdb12a3cf90b42e4d5466504e61c088881722c47c6372a3aea7423a6",
+    "src/design-system/components/AppLoader.tsx": "a8ba3f6eb17120a6c904e0d356fad832b9611ddbf68454e90c7560ac756d1406",
+    "src/design-system/components/InitialApplicationState.tsx": "1c85e8041c4230206846577ea229775d200769f53724b7ddab7b7670f1955f81",
+    "src/features/clan/ClanOverlays.tsx": "0f56ae359672c840c2712e82e3e484e27c4be11dfe4587cab59d7907638f37c6",
+    "src/features/clan/ClanQueryState.test.tsx": "a198380ac2a32b077d3015f1d7b9dd1dc840294064c45197411f7729b011d2a9",
+    "src/features/clan/ClanQueryState.tsx": "79af0869ae50b1548b468b323a206ed28a510a9c7bde548fb2fd956aa459aba0",
+    "src/features/clan/ClanStatusSheet.tsx": "9f6908ce448093f18953045529d42cc7719119fe3fa0801cb8f20089ee363eca",
+    "src/features/clan/clanStatusLabels.ts": "2a9c229620e3f69d83d4bc1a8c52683e78b886bc6d3937359e66174bf4f0b545",
+    "src/features/earn/EarnHistory.test.tsx": "ca6586a1fbbfe78f23bf1451a9c239d179cd1ded6c7c65d15231c8d073b97096",
+    "src/features/earn/EarnOverlays.module.css": "92a9d1ec88c766984cd64a92d0e0a0502beaf78b9ea0473939fee87835ae5a02",
+    "src/features/earn/EarnOverlays.tsx": "a4cb0386db4898a792f12cffcee71fad0bc0913d6b56757d75436e7a361050d7",
+    "src/integrations/api/clanApplications.ts": "428c4cee6f37cd3fd4c4affb97968a4dc86776dc9b8d9d679369793fe723c9d1",
+    "src/integrations/api/clanViews.test.ts": "d0a3a68fe03fb1a7f3b89427ae03f58e7a983929df90de3b32e7e05f688f82cc",
+    "src/integrations/api/clanViews.ts": "b9b868f3acc643a2bd0dd4bfd4aa9b8c8f11563dd6105d6e2a68f2f0032b8bb5",
+    "src/integrations/api/rewardHistory.test.ts": "f5d18b59fbbb5a9bcb9d2630c21957ac630edbb5dee9493846775e5551ae7213",
+    "src/integrations/api/rewardHistory.ts": "30db4826c1595251726e4beaeeb9bc81e4f38509933cb022ddc6f3c98df239c4",
+    "src/integrations/api/useClanRemote.test.tsx": "bc8a58292fbef390678a22f75159839bc0a60a9501f67c7cabd09773f24b7d85",
+    "src/integrations/api/useClanRemote.ts": "21adcc61999cc31ab7cc4b6dd2d56fd91b0ca187bb74628493d3d9157c60fc28",
+    "src/integrations/telegram/botLinks.test.ts": "2b4b4af0807dbaabcb2e189c299c0b3f2d5bc5e278665fa655bf4653f31c955d",
+    "src/integrations/telegram/botLinks.ts": "e61d137b8baf59a3e98b4569ea0a1db8326a67352d5c21c7a25af879d106014e",
+    "src/pages/ClanPage.module.css": "2820efc0e30ff044e57db13e1e3c6dfb3d1fc0a3391689f87ccfe8bfe4bb9158",
+    "src/pages/ClanPage.tsx": "237ed436b35fb1226967da657369e8a96098e989f7fc97e556d6d98a4f93b962",
+    "src/pages/EarnPage.tsx": "ad0650c360fa079d2ffa14531402c3be480f577c4d134059414a8764d5d9098e",
+    "src/pages/ProfilePage.tsx": "5858669dff76ca223aeb2cb982b18793c6200aaeef5995c3f6e3e13af9a8a88b"
+  },
+  "comparisons": [
+    {
+      "width": 320,
+      "surface": "captain-groups-empty",
+      "before_dimensions": [
+        320,
+        844
+      ],
+      "after_dimensions": [
+        320,
+        844
+      ],
+      "pixels_changed_above_10": 70039,
+      "changed_ratio": 0.25932686611374406,
+      "before_sha256": "601c4129d20c7b99260d3f9a271703b17e74264d44c2ce5b182d75aa6adb3027",
+      "after_sha256": "46ca0b24d1475af0496fc8ca3840a04c4d3ea205c4abd39485e4acfc9a6c85f5"
+    },
+    {
+      "width": 320,
+      "surface": "captain-hq",
+      "before_dimensions": [
+        320,
+        844
+      ],
+      "after_dimensions": [
+        320,
+        844
+      ],
+      "pixels_changed_above_10": 70402,
+      "changed_ratio": 0.2606709123222749,
+      "before_sha256": "6813e9a3b6433fbaaf850f829e52ea218934d38cc7d283b9f8f1bf98154b6424",
+      "after_sha256": "caeee2ce0d33f9d1b319f75dd065fd5598c79c321672dc202d2af8bb3e1c098c"
+    },
+    {
+      "width": 320,
+      "surface": "captain-registration",
+      "before_dimensions": [
+        320,
+        844
+      ],
+      "after_dimensions": [
+        320,
+        844
+      ],
+      "pixels_changed_above_10": 87963,
+      "changed_ratio": 0.3256923874407583,
+      "before_sha256": "b0f05ff172678036671224ec7808f619f096e2d14ffbf34f029653f9918e3818",
+      "after_sha256": "2da16a59c27ea8e3835b4f4f9b9b5e3e8b9fee5f845c2ce6a306c3bfc112c392"
+    },
+    {
+      "width": 320,
+      "surface": "clan-initial",
+      "before_dimensions": [
+        320,
+        844
+      ],
+      "after_dimensions": [
+        320,
+        844
+      ],
+      "pixels_changed_above_10": 19468,
+      "changed_ratio": 0.07208234597156397,
+      "before_sha256": "50a8117dc95c0688ef71367d5da5b7aa343ecfeb325e933ce7f9c4ceaf3bba76",
+      "after_sha256": "fab6cd8b74d699ea2b684ac52eba97640e1431409aa73233fcc94f8b77d9977a"
+    },
+    {
+      "width": 320,
+      "surface": "clan-status",
+      "before_dimensions": [
+        320,
+        844
+      ],
+      "after_dimensions": [
+        320,
+        844
+      ],
+      "pixels_changed_above_10": 32182,
+      "changed_ratio": 0.11915728672985781,
+      "before_sha256": "e055e7ab7d70af890c33526d296ac22a197cf9bce9caaeeee3a06ce7b639f4e4",
+      "after_sha256": "92c7a477c6611c334604bc47e7ac61de165ada51d96cfc38a5924fd75529e7b4"
+    },
+    {
+      "width": 320,
+      "surface": "history-empty",
+      "before_dimensions": [
+        320,
+        844
+      ],
+      "after_dimensions": [
+        320,
+        844
+      ],
+      "pixels_changed_above_10": 28205,
+      "changed_ratio": 0.1044320201421801,
+      "before_sha256": "6407e2b58a4927968a6d98a65d71765fabe373f2f1326fca207d6ec9e6a9ba2b",
+      "after_sha256": "0e327ee8cbd7fbcf38db368a5e9d40947c62e981887f30b07aa90b79943af770"
+    },
+    {
+      "width": 320,
+      "surface": "history-error",
+      "before_dimensions": [
+        320,
+        844
+      ],
+      "after_dimensions": [
+        320,
+        844
+      ],
+      "pixels_changed_above_10": 40675,
+      "changed_ratio": 0.1506035248815166,
+      "before_sha256": "638bdccdabe998aa2b66f2790ecc2e5819f67c2b1b5357fd02c0b56e3bc3c187",
+      "after_sha256": "2115bed66d7b5bdefecb64e17a3ad9281bfba7cf2fbe1efe19db64f9ca5738b1"
+    },
+    {
+      "width": 320,
+      "surface": "history-filtered",
+      "before_dimensions": [
+        320,
+        844
+      ],
+      "after_dimensions": [
+        320,
+        844
+      ],
+      "pixels_changed_above_10": 42698,
+      "changed_ratio": 0.1580938981042654,
+      "before_sha256": "7cd4f42eb1eebd342c543794e6f5de14804bab0259767aa829c8f97ce36f22a4",
+      "after_sha256": "d693da4f4f428751b8ec0dd187f2797033b78546ba3d5cc3b7da491ed0d66fc6"
+    },
+    {
+      "width": 320,
+      "surface": "history-loading",
+      "before_dimensions": [
+        320,
+        844
+      ],
+      "after_dimensions": [
+        320,
+        844
+      ],
+      "pixels_changed_above_10": 49150,
+      "changed_ratio": 0.18198311611374407,
+      "before_sha256": "6c925d9406a6a1c853435b73063270cd666aa61fcc1a6d698033326847dfef77",
+      "after_sha256": "c3806c8d996ecf7caf9d019fcb9a7cf0aa3a9648e4c28196cbdd4626da5d01f8"
+    },
+    {
+      "width": 320,
+      "surface": "hq-refresh-error",
+      "before_dimensions": [
+        320,
+        844
+      ],
+      "after_dimensions": [
+        320,
+        844
+      ],
+      "pixels_changed_above_10": 124534,
+      "changed_ratio": 0.46110041469194313,
+      "before_sha256": "6813e9a3b6433fbaaf850f829e52ea218934d38cc7d283b9f8f1bf98154b6424",
+      "after_sha256": "06052ff7b6cc39343ddc0f7205a14ab71c119347ea70924a519c2ca75c352a0a"
+    },
+    {
+      "width": 320,
+      "surface": "hq-scene",
+      "before_dimensions": [
+        298,
+        471
+      ],
+      "after_dimensions": [
+        298,
+        471
+      ],
+      "pixels_changed_above_10": 1503,
+      "changed_ratio": 0.010708331552173727,
+      "before_sha256": "b4bae62b06c2fbe371f30f8c0440379bc0131cddfb720a70444b87cd4759bf8f",
+      "after_sha256": "8e52d4e3389f90cfbb862c05bf5a815528a39514f9113a1095cb5f20bd55c34a"
+    },
+    {
+      "width": 320,
+      "surface": "preserved-arena",
+      "before_dimensions": [
+        320,
+        844
+      ],
+      "after_dimensions": [
+        320,
+        844
+      ],
+      "pixels_changed_above_10": 0,
+      "changed_ratio": 0.0,
+      "before_sha256": "3a077bdddfccd752b49d884992fd323b0d27dc17c1c899af2c869ad5bda7b104",
+      "after_sha256": "79d15d414689f90672df63117846bc3892c52d9cf2fdea756c5f0edbfa88bb7e"
+    },
+    {
+      "width": 320,
+      "surface": "preserved-base",
+      "before_dimensions": [
+        320,
+        844
+      ],
+      "after_dimensions": [
+        320,
+        844
+      ],
+      "pixels_changed_above_10": 0,
+      "changed_ratio": 0.0,
+      "before_sha256": "cea293fdd31c8aecd6b440d822c574f6ede29afb5f25aff2eb40d9b6b70fbaaf",
+      "after_sha256": "cea293fdd31c8aecd6b440d822c574f6ede29afb5f25aff2eb40d9b6b70fbaaf"
+    },
+    {
+      "width": 320,
+      "surface": "preserved-profile",
+      "before_dimensions": [
+        320,
+        844
+      ],
+      "after_dimensions": [
+        320,
+        844
+      ],
+      "pixels_changed_above_10": 0,
+      "changed_ratio": 0.0,
+      "before_sha256": "b70659752d1fe2a30c2b73094824a3897a3eb2c2b7f696af940d606c2faa7564",
+      "after_sha256": "b70659752d1fe2a30c2b73094824a3897a3eb2c2b7f696af940d606c2faa7564"
+    },
+    {
+      "width": 390,
+      "surface": "captain-groups-empty",
+      "before_dimensions": [
+        390,
+        844
+      ],
+      "after_dimensions": [
+        390,
+        844
+      ],
+      "pixels_changed_above_10": 83113,
+      "changed_ratio": 0.2525003038036213,
+      "before_sha256": "a2b8f528bf9c89edf75a737a59bc894034cd61a4e7cbf42b9e6d2f69525ccffe",
+      "after_sha256": "1f1e2e9d9cadd25d8b84ef3992894e8d8cb2636963b64fa9beb5ce19e131684b"
+    },
+    {
+      "width": 390,
+      "surface": "captain-hq",
+      "before_dimensions": [
+        390,
+        844
+      ],
+      "after_dimensions": [
+        390,
+        844
+      ],
+      "pixels_changed_above_10": 81074,
+      "changed_ratio": 0.24630574796451574,
+      "before_sha256": "6a11d4f1c2b19cab25882c7ac731229bbc93f7c66fca15e533a542a423b18bbc",
+      "after_sha256": "273276f95aac0824409e06d6665bb9090d961ff621dd3ba74f5003547d8077b2"
+    },
+    {
+      "width": 390,
+      "surface": "captain-registration",
+      "before_dimensions": [
+        390,
+        844
+      ],
+      "after_dimensions": [
+        390,
+        844
+      ],
+      "pixels_changed_above_10": 106443,
+      "changed_ratio": 0.32337768866204886,
+      "before_sha256": "69bd0a32b409f940dcb5338d88d27e4379e7a489680487cfa14beb2cceb1d1b0",
+      "after_sha256": "b38462f220921bc094b5e6fda790a5afd12bb815b8ef89733ac2e6b5d5598dc3"
+    },
+    {
+      "width": 390,
+      "surface": "clan-initial",
+      "before_dimensions": [
+        390,
+        844
+      ],
+      "after_dimensions": [
+        390,
+        844
+      ],
+      "pixels_changed_above_10": 19941,
+      "changed_ratio": 0.06058148013124316,
+      "before_sha256": "4d8e61f8e5697d493e1d160b519567ce3f480e346e39f3435ab7bd1260f60731",
+      "after_sha256": "5c5b4c2d34d362db173fbc4597f36c80749a016e010ad4e35fe0bdde3cc261ac"
+    },
+    {
+      "width": 390,
+      "surface": "clan-status",
+      "before_dimensions": [
+        390,
+        844
+      ],
+      "after_dimensions": [
+        390,
+        844
+      ],
+      "pixels_changed_above_10": 37715,
+      "changed_ratio": 0.1145795357880666,
+      "before_sha256": "227a39c2effb043ef0b8bdb1b5dd274bdd75b47956b1744d51b48437d2d83395",
+      "after_sha256": "1cb0296e46569107c2b11229eeb6130b2c078fc4a2cef79cc86cf80098f9bd26"
+    },
+    {
+      "width": 390,
+      "surface": "history-empty",
+      "before_dimensions": [
+        390,
+        844
+      ],
+      "after_dimensions": [
+        390,
+        844
+      ],
+      "pixels_changed_above_10": 24620,
+      "changed_ratio": 0.07479645157370275,
+      "before_sha256": "cfba2876cfc013a69f318083a90de436b6f4d5b6b6544be313752a56b53a9ba0",
+      "after_sha256": "7ebe345d903fa96a6a93d9ac16c44c95ce974d51c828bf9615729d9a5b7d917e"
+    },
+    {
+      "width": 390,
+      "surface": "history-error",
+      "before_dimensions": [
+        390,
+        844
+      ],
+      "after_dimensions": [
+        390,
+        844
+      ],
+      "pixels_changed_above_10": 50301,
+      "changed_ratio": 0.15281625956981407,
+      "before_sha256": "3fbf8f5f133a97f18939ffaefbe4fde38343e4e95f01c9a3db141ebe1cf93917",
+      "after_sha256": "d63bbab59525b6d1cc9e2a8b0b14f60402a665ca4a8ddae99ef2b14096a6d008"
+    },
+    {
+      "width": 390,
+      "surface": "history-filtered",
+      "before_dimensions": [
+        390,
+        844
+      ],
+      "after_dimensions": [
+        390,
+        844
+      ],
+      "pixels_changed_above_10": 51816,
+      "changed_ratio": 0.15741888443310245,
+      "before_sha256": "f5aac4a55e75dbde9a174a5f21a814dddd646770fcb2df65c8e219528887f641",
+      "after_sha256": "7d1f6ac6bfe5200dbd7d55450a054a9c76bf7a6b3fe262d05a35d1db7f40f27e"
+    },
+    {
+      "width": 390,
+      "surface": "history-loading",
+      "before_dimensions": [
+        390,
+        844
+      ],
+      "after_dimensions": [
+        390,
+        844
+      ],
+      "pixels_changed_above_10": 60694,
+      "changed_ratio": 0.18439056993559363,
+      "before_sha256": "c70cd69a76476d510cbc06abe54807fd4ae783d78b7909eda1437b71062a7ac1",
+      "after_sha256": "d2f40f508f214aa73918b6e054af849550bbb70dd9d91775cdced8f72069d988"
+    },
+    {
+      "width": 390,
+      "surface": "hq-refresh-error",
+      "before_dimensions": [
+        390,
+        844
+      ],
+      "after_dimensions": [
+        390,
+        844
+      ],
+      "pixels_changed_above_10": 139713,
+      "changed_ratio": 0.4244531534815895,
+      "before_sha256": "6a11d4f1c2b19cab25882c7ac731229bbc93f7c66fca15e533a542a423b18bbc",
+      "after_sha256": "bb8ec8f2b30bc96fb9ab9505855a3a2d8e20b70995f439bc2947a53bf7ebaf04"
+    },
+    {
+      "width": 390,
+      "surface": "hq-scene",
+      "before_dimensions": [
+        368,
+        507
+      ],
+      "after_dimensions": [
+        368,
+        507
+      ],
+      "pixels_changed_above_10": 21317,
+      "changed_ratio": 0.11425370894434439,
+      "before_sha256": "c9b410027d1a72cff947b53d04df93a108fed840aea95d5af20c6c4a9a996e6f",
+      "after_sha256": "fd40ba4ba8abb8e6276d1219514342513b7d264a866f167e3748a132b0ca26e2"
+    },
+    {
+      "width": 390,
+      "surface": "preserved-arena",
+      "before_dimensions": [
+        390,
+        844
+      ],
+      "after_dimensions": [
+        390,
+        844
+      ],
+      "pixels_changed_above_10": 0,
+      "changed_ratio": 0.0,
+      "before_sha256": "8738f96393bcb9b688295c6b40e52663cfa551c9934ce1c64bb3b2ec4619e892",
+      "after_sha256": "05144c5be3eb1842c3932d857ed9dc3ef3f9c4e3e3002dc76a5a0e8a701ac805"
+    },
+    {
+      "width": 390,
+      "surface": "preserved-base",
+      "before_dimensions": [
+        390,
+        844
+      ],
+      "after_dimensions": [
+        390,
+        844
+      ],
+      "pixels_changed_above_10": 0,
+      "changed_ratio": 0.0,
+      "before_sha256": "c94814c924e222e3ecde49a943b936cc1f7fb0de6b982ccbbc69dc69887ab7c9",
+      "after_sha256": "c94814c924e222e3ecde49a943b936cc1f7fb0de6b982ccbbc69dc69887ab7c9"
+    },
+    {
+      "width": 390,
+      "surface": "preserved-profile",
+      "before_dimensions": [
+        390,
+        844
+      ],
+      "after_dimensions": [
+        390,
+        844
+      ],
+      "pixels_changed_above_10": 0,
+      "changed_ratio": 0.0,
+      "before_sha256": "f0b306f38a5b56482ea40581f4f7cd0deb9b0dc626da424d378427b2ead1a470",
+      "after_sha256": "f0b306f38a5b56482ea40581f4f7cd0deb9b0dc626da424d378427b2ead1a470"
+    },
+    {
+      "width": 460,
+      "surface": "captain-groups-empty",
+      "before_dimensions": [
+        460,
+        844
+      ],
+      "after_dimensions": [
+        460,
+        844
+      ],
+      "pixels_changed_above_10": 95025,
+      "changed_ratio": 0.24475839686791676,
+      "before_sha256": "17a348b6135e56fc6cf9dbeb2c0cc1fc08358fd178d235b0c35a35938e0bb35f",
+      "after_sha256": "ad4e04265093447da4831a3166ab542fb97580b28f703360255e63de3276710a"
+    },
+    {
+      "width": 460,
+      "surface": "captain-hq",
+      "before_dimensions": [
+        460,
+        844
+      ],
+      "after_dimensions": [
+        460,
+        844
+      ],
+      "pixels_changed_above_10": 89061,
+      "changed_ratio": 0.22939676488769833,
+      "before_sha256": "77e3137515042cc445e1cc1b487242cc6a658eaa6bf4e500e5e0a9028ee1ecab",
+      "after_sha256": "4fb48e72cd2cd5e40b9392f9b67d50c97d522b4eff8efe26ebbcb268533199cd"
+    },
+    {
+      "width": 460,
+      "surface": "captain-registration",
+      "before_dimensions": [
+        460,
+        844
+      ],
+      "after_dimensions": [
+        460,
+        844
+      ],
+      "pixels_changed_above_10": 113611,
+      "changed_ratio": 0.29263084689882546,
+      "before_sha256": "8202198060a39dfe26688c7995273bebb721e2682277c538856fda11c591c8bf",
+      "after_sha256": "c340476a920d22393a05415ebdfa6738a719ae5fd5013acc64a53a5c5a27b3df"
+    },
+    {
+      "width": 460,
+      "surface": "clan-initial",
+      "before_dimensions": [
+        460,
+        844
+      ],
+      "after_dimensions": [
+        460,
+        844
+      ],
+      "pixels_changed_above_10": 19852,
+      "changed_ratio": 0.05113331959612611,
+      "before_sha256": "384cffae834243a3d60fbfc413f9f27b57edb05cac5c2bc626cc45a3cc18c07f",
+      "after_sha256": "0e4f876350daae6d780ca41f17003a21696f8ce4b39a1629faa27b2174f561da"
+    },
+    {
+      "width": 460,
+      "surface": "clan-status",
+      "before_dimensions": [
+        460,
+        844
+      ],
+      "after_dimensions": [
+        460,
+        844
+      ],
+      "pixels_changed_above_10": 35859,
+      "changed_ratio": 0.09236297135792293,
+      "before_sha256": "ff60a10aebd0dc5d1ebfb024b6f01d3990f4a84d58e9dadab63920bd12951b60",
+      "after_sha256": "515de19b3fb854f67d34add1fc5f744b0a9dd2ea15b91b31787198049582a221"
+    },
+    {
+      "width": 460,
+      "surface": "history-empty",
+      "before_dimensions": [
+        460,
+        844
+      ],
+      "after_dimensions": [
+        460,
+        844
+      ],
+      "pixels_changed_above_10": 26644,
+      "changed_ratio": 0.06862765299814548,
+      "before_sha256": "493e67db1e9ed1fd50f62d8f2a222664c270a6d3167fd2328a7ac6be5f40edba",
+      "after_sha256": "67facd64f3f88308399529277e46846e3975e6f1e9226127489651d6f184a3e0"
+    },
+    {
+      "width": 460,
+      "surface": "history-error",
+      "before_dimensions": [
+        460,
+        844
+      ],
+      "after_dimensions": [
+        460,
+        844
+      ],
+      "pixels_changed_above_10": 59193,
+      "changed_ratio": 0.15246497012157428,
+      "before_sha256": "44204d7e9a44ff1ff80fbe6f092bd3466601fb57810671da823fbbf420890c96",
+      "after_sha256": "ac06ee1de58c9fe656b29505db42868e671ee87279d4758df5ec0099298b5d64"
+    },
+    {
+      "width": 460,
+      "surface": "history-filtered",
+      "before_dimensions": [
+        460,
+        844
+      ],
+      "after_dimensions": [
+        460,
+        844
+      ],
+      "pixels_changed_above_10": 59166,
+      "changed_ratio": 0.15239542550999383,
+      "before_sha256": "556f363a83322b863d3d1eafe17879ce4b452300e8646193a02cad17e0271996",
+      "after_sha256": "5a9ff7fe57f6d0f87cdab5d1c748288903d8c360538c277af40c22be87ab2181"
+    },
+    {
+      "width": 460,
+      "surface": "history-loading",
+      "before_dimensions": [
+        460,
+        844
+      ],
+      "after_dimensions": [
+        460,
+        844
+      ],
+      "pixels_changed_above_10": 70395,
+      "changed_ratio": 0.18131825674840304,
+      "before_sha256": "dadc070eb56a82fa6f3414e73e33e5af6ad0c9fb57b56339f08774a517ddc47a",
+      "after_sha256": "adedbb85f3b8f1846479bb4d3005ff0968996c797494f1b26c42c48909952325"
+    },
+    {
+      "width": 460,
+      "surface": "hq-refresh-error",
+      "before_dimensions": [
+        460,
+        844
+      ],
+      "after_dimensions": [
+        460,
+        844
+      ],
+      "pixels_changed_above_10": 150411,
+      "changed_ratio": 0.3874175767566454,
+      "before_sha256": "77e3137515042cc445e1cc1b487242cc6a658eaa6bf4e500e5e0a9028ee1ecab",
+      "after_sha256": "658db94e4fa9daa4427b0e6232ba63b2a372ee5dd83d23b3996e92426a98ea0e"
+    },
+    {
+      "width": 460,
+      "surface": "hq-scene",
+      "before_dimensions": [
+        438,
+        523
+      ],
+      "after_dimensions": [
+        438,
+        523
+      ],
+      "pixels_changed_above_10": 1595,
+      "changed_ratio": 0.00696281550939871,
+      "before_sha256": "81dc615907e9a27a49da9890a72065e78902b6d7a76e6a311a9fc1fd38a05e09",
+      "after_sha256": "971107826de1eb38c037490bc709bde516687bc96213fad6552430605c8e49ac"
+    },
+    {
+      "width": 460,
+      "surface": "preserved-arena",
+      "before_dimensions": [
+        460,
+        844
+      ],
+      "after_dimensions": [
+        460,
+        844
+      ],
+      "pixels_changed_above_10": 0,
+      "changed_ratio": 0.0,
+      "before_sha256": "fe79777cf726ae0db3bb9e937c23af80302f40858531d14c4884e016cf3a6de4",
+      "after_sha256": "a9cbfaa9b6ab8326c75177f275cd693f03d247de2f94837d8bfe568d9e33509a"
+    },
+    {
+      "width": 460,
+      "surface": "preserved-base",
+      "before_dimensions": [
+        460,
+        844
+      ],
+      "after_dimensions": [
+        460,
+        844
+      ],
+      "pixels_changed_above_10": 0,
+      "changed_ratio": 0.0,
+      "before_sha256": "065ddbb334c9806d21e0961ef7de501b02d9f46612ae74d6038dc410e7bf17e6",
+      "after_sha256": "065ddbb334c9806d21e0961ef7de501b02d9f46612ae74d6038dc410e7bf17e6"
+    },
+    {
+      "width": 460,
+      "surface": "preserved-profile",
+      "before_dimensions": [
+        460,
+        844
+      ],
+      "after_dimensions": [
+        460,
+        844
+      ],
+      "pixels_changed_above_10": 0,
+      "changed_ratio": 0.0,
+      "before_sha256": "1cbe75710ff1fc1d83231e6fa9777c1a32dd9c438b295ebb9f61ee8cafa6af3c",
+      "after_sha256": "1cbe75710ff1fc1d83231e6fa9777c1a32dd9c438b295ebb9f61ee8cafa6af3c"
+    }
+  ]
+}

@@ -1,6 +1,9 @@
+import { ClanQueryState } from "@/features/clan/ClanQueryState";
+import { clanAddBotUrl } from "@/integrations/telegram/botLinks";
+import { showFeedback } from "@/design-system/components/TransientFeedback";
 import { applicationStatusMessage } from "@/integrations/api/clanApplications";
 import { useClanRemote, type ClanRemote } from "@/integrations/api/useClanRemote";
-import { clanSummary, clanMember, clanApplicant, clanItem, clanMission, clanTrophy } from "@/integrations/api/clanViews";
+import { clanSummary, clanMember, clanApplicant, clanItem, clanMission, clanTrophy, clanItemBlockedLabel } from "@/integrations/api/clanViews";
 import { clanTone, saveClanTone } from "@/integrations/api/clanAppearance";
 import { ClanStatusSheet } from "@/features/clan/ClanStatusSheet";
 import { QueryContinuation } from "@/design-system/performance/QueryContinuation";
@@ -9,6 +12,7 @@ import { AvatarContent } from "@/design-system/components/AvatarContent";
 import { isRemoteDataSource } from "@/integrations/api/bootstrap";
 import {
   ArrowRight01Icon,
+  SquareActivityIcon,
   InformationCircleIcon,
   Sword01Icon,
   UserGroupIcon,
@@ -68,6 +72,12 @@ type OverlayState =
   | { type: "requests" }
   | { type: "trophies" }
   | null;
+
+function openClanBot(adapter: ReturnType<typeof useTelegram>["adapter"]) {
+  const url = clanAddBotUrl();
+  if (url) adapter.openTelegramLink(url);
+  else showFeedback("The Telegram bot link is unavailable. Please try again later.");
+}
 
 function ClanEmblem({
   clan,
@@ -224,7 +234,7 @@ function LockedClan({ level, minLevel = 5 }: { level: number; minLevel?: number 
   );
 }
 
-function RoleChoice({ onChoose }: { onChoose: (role: ClanRole) => void }) {
+function RoleChoice({ onChoose, disabled = false }: { onChoose: (role: ClanRole) => void; disabled?: boolean }) {
   return (
     <div className={styles.stack}>
       <section className={styles.roleIntro}>
@@ -234,7 +244,7 @@ function RoleChoice({ onChoose }: { onChoose: (role: ClanRole) => void }) {
       </section>
 
       <section className={styles.roleGrid}>
-        <button type="button" className={`${styles.roleCard} ${styles.captainCard}`} onClick={() => onChoose("captain")}>
+        <button type="button" className={`${styles.roleCard} ${styles.captainCard}`} disabled={disabled} onClick={() => onChoose("captain")}>
           <div className={styles.roleArtStage}>
             <span className={styles.roleHalo} />
             <motion.div className={styles.roleFloat} animate={{ y: [0, -5, 0], rotate: [0, .6, 0] }} transition={{ duration: 4.4, repeat: Infinity, ease: "easeInOut" }}><AssetImage assetKey={clanRoleArt.captain} className={styles.roleArt} /></motion.div>
@@ -247,7 +257,7 @@ function RoleChoice({ onChoose }: { onChoose: (role: ClanRole) => void }) {
           <em>Lead a clan <HugeiconsIcon icon={ArrowRight01Icon} size={16} strokeWidth={1.7} /></em>
         </button>
 
-        <button type="button" className={`${styles.roleCard} ${styles.soldierCard}`} onClick={() => onChoose("soldier")}>
+        <button type="button" className={`${styles.roleCard} ${styles.soldierCard}`} disabled={disabled} onClick={() => onChoose("soldier")}>
           <div className={styles.roleArtStage}>
             <span className={styles.roleHalo} />
             <motion.div className={styles.roleFloat} animate={{ y: [0, -5, 0], rotate: [0, -.6, 0] }} transition={{ duration: 4.8, repeat: Infinity, ease: "easeInOut", delay: .25 }}><AssetImage assetKey={clanRoleArt.soldier} className={styles.roleArt} /></motion.div>
@@ -317,7 +327,7 @@ function FeaturedClan({ clan, onOpen, remote = false }: { clan: ClanSummary; onO
   );
 }
 
-function PendingJoinCard({ clan, rejected, accepted = false }: { clan: ClanSummary | null; rejected: boolean; accepted?: boolean }) {
+function PendingJoinCard({ clan, rejected, accepted = false }: { clan: Pick<ClanSummary, "name" | "tag" | "accent" | "imageUrl"> | null; rejected: boolean; accepted?: boolean }) {
   if (!clan) return null;
   return (
     <section className={`${styles.requestState} ${rejected ? styles.requestRejected : ""}`}>
@@ -346,8 +356,8 @@ function SoldierNetwork({
   const [tab, setTab] = useState<SoldierClanTab>("discover");
   const [query, setQuery] = useState("");
 
-  useEffect(() => { live?.setSearch(query); }, [query, live?.setSearch]);
-  const pendingClan = live ? live.requestIdentity.data ? clanSummary(live.requestIdentity.data) : null : getClanById(pendingClanId);
+  useEffect(() => { const timer = window.setTimeout(() => live?.setSearch(query.trim()), 250); return () => window.clearTimeout(timer); }, [query, live?.setSearch]);
+  const pendingClan = live ? live.requestIdentity.data ? clanSummary(live.requestIdentity.data) : live.activeRequest ? { name: live.activeRequest.clan_name, tag: "", accent: "cyan" as const } : null : getClanById(pendingClanId);
   const suggested = live ? live.clans.map(clanSummary) : suggestedClanIds
     .map((id) => getClanById(id))
     .filter((clan): clan is ClanSummary => clan !== null);
@@ -421,7 +431,7 @@ function SoldierNetwork({
           ) : null}
 
           {live ? <QueryContinuation selector="[data-clan-discovery] > button:last-of-type" hasNext={live.discovery.hasNextPage && !live.discovery.isFetchNextPageError} fetching={live.discovery.isFetching} load={live.discovery.fetchNextPage} /> : null}
-          {live?.discovery.isPending ? <p role="status">Loading clans…</p> : live?.discovery.isError ? <p role="status">Clans couldn't load. Refresh to try again.</p> : live && !live.clans.length ? <p role="status">No clans found.</p> : null}
+          {live?.discovery.isPending ? <ClanQueryState loading title="Finding clans…" /> : live?.discovery.isError ? <section className={styles.panel}><ClanQueryState title="Clans couldn't load." description="Your requests are safe. Retry to refresh the list." retry={() => live.discovery.isFetchNextPageError ? live.discovery.fetchNextPage() : live.discovery.refetch()} busy={live.discovery.isFetching} /></section> : live && !live.clans.length ? <section className={styles.panel}><ClanQueryState title="No clans found" description="Try another name or return when more clans are recruiting." /></section> : null}
         </motion.div>
       </DeferredMount>
     </div>
@@ -444,10 +454,15 @@ function CaptainFounding({
   const [accent, setAccent] = useState<ClanSummary["accent"]>("cyan");
 
   const selectGroup = async (group: ClanEligibleGroup) => {
-    if (live && await live.run(`verify:${group.id}`, () => live.api.verifyGroup(Number(group.id))) === undefined) return;
-    setSelectedGroup(group);
-    setName(group.title);
-    setTag(getIdentityInitials(group.title).slice(0, 4));
+    let selected = group;
+    if (live) {
+      const verified = await live.run(`verify:${group.id}`, () => live.api.verifyGroup(Number(group.id)));
+      if (!verified) return;
+      selected = { ...group, title: verified.title, username: verified.username || null, photoUrl: verified.image_url === undefined ? group.photoUrl : verified.image_url, memberCount: verified.member_count === undefined ? group.memberCount : verified.member_count, botIsAdmin: true, userIsAdmin: true };
+    }
+    setSelectedGroup(selected);
+    setName(selected.title);
+    setTag(getIdentityInitials(selected.title).slice(0, 4));
   };
 
   const verifiedGroups: ClanEligibleGroup[] = live ? (live.groups.data ?? []).map(group => ({ id: String(group.id), title: group.title, username: group.username || null, memberCount: group.member_count ?? null, botIsAdmin: group.verification_state === "VERIFIED", userIsAdmin: group.verification_state === "VERIFIED", userIsOwner: false, photoUrl: group.image_url })) : eligibleClanGroups.filter(group => group.botIsAdmin && group.userIsAdmin);
@@ -491,13 +506,13 @@ function CaptainFounding({
             {verifiedGroups.map((group) => {
               const hue = getIdentityHue(group.title);
               return (
-                <button type="button" key={group.id} className={styles.groupCard} disabled={Boolean(live?.pending)} onClick={() => void selectGroup(group)}>
+                <button type="button" key={group.id} className={styles.groupCard} disabled={Boolean(live?.pending) || live?.groups.isError} onClick={() => void selectGroup(group)}>
                   <span className={styles.groupAvatar} style={{ "--identity-hue": hue } as CSSProperties}>
                     <AvatarContent owner={`clan-group:${group.id}`} photoUrl={group.photoUrl} fallback={getIdentityInitials(group.title)} />
                   </span>
                   <div>
                     <strong>{group.title}</strong>
-                    <span>{group.memberCount?.toLocaleString() ?? "—"} members{group.username ? ` · @${group.username}` : ""}</span>
+                    <span>{group.memberCount === null ? "Member count unavailable" : `${group.memberCount.toLocaleString()} members`}{group.username ? ` · @${group.username}` : ""}</span>
                     <em>{live ? group.botIsAdmin && group.userIsAdmin ? "Verified" : "Verification required" : `Bot admin ✓ · ${group.userIsOwner ? "Owner verified" : "Admin verified"} ✓`}</em>
                   </div>
                   <HugeiconsIcon icon={ArrowRight01Icon} size={17} strokeWidth={1.65} />
@@ -506,12 +521,13 @@ function CaptainFounding({
             })}
           </div>
 
-          {live?.groups.isPending ? <p role="status">Loading Telegram groups…</p> : live?.groups.isError ? <p role="status">Groups couldn't load. Refresh to try again.</p> : live && !verifiedGroups.length ? <p role="status">No eligible groups yet.</p> : null}
+          {live?.groups.isPending ? <ClanQueryState loading title="Finding your Telegram groups…" /> : live?.groups.isError ? <ClanQueryState title="Groups couldn't load." description="Retry after checking the bot's admin permissions." retry={() => live.groups.refetch()} busy={live.groups.isFetching} /> : live && !verifiedGroups.length ? <ClanQueryState title="No eligible groups yet" description="Add the bot as an admin, then refresh your groups." /> : null}
           <div className={styles.groupHelp}>
             <div><strong>Don't see your group?</strong><span>Add the Dalexio bot as an admin first, then return and refresh the eligible group list.</span></div>
             <Button type="button" tone="secondary" size="sm" className={styles.fullButton} onClick={onAddGroup}>
               Add Dalexio Bot to a group
             </Button>
+            {live ? <Button type="button" tone="secondary" size="sm" disabled={live.groups.isFetching || live.pending !== null} onClick={() => void live.groups.refetch()}>Refresh groups</Button> : null}
           </div>
         </section>
       </div>
@@ -560,9 +576,9 @@ function CaptainFounding({
           type="button"
           tone="primary"
           size="md"
-          className={styles.fullButton}
+          className={`${styles.fullButton} ${styles.registerButton}`}
           trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={17} strokeWidth={1.7} />}
-          disabled={!valid || Boolean(live?.pending)}
+          disabled={!valid || Boolean(live?.pending) || live?.groups.isError || live?.state.isError || live?.membership.isError}
           onClick={() => onCreate({
             name: name.trim(),
             tag: tag.trim().slice(0, 4).toUpperCase(),
@@ -763,10 +779,10 @@ function Headquarters({
 
           {tab === "home" ? (
             <>
-              {captain && pendingRequests > 0 ? (
+              {captain && (pendingRequests > 0 || live?.applicants.isPending || live?.applicants.isError) ? (
                 <button type="button" className={styles.captainInbox} onClick={onOpenRequests}>
                   <div className={styles.inboxIcon}><HugeiconsIcon icon={UserGroupIcon} size={24} strokeWidth={1.55} /></div>
-                  <div><span>CAPTAIN INBOX</span><strong>{pendingRequests} recruits waiting</strong><p>Review them before the roster fills.</p></div>
+                  <div><span>CAPTAIN INBOX</span><strong>{live?.applicants.isPending ? "Checking join requests…" : live?.applicants.isError ? "Join requests need refreshing" : `${pendingRequests} recruits waiting`}</strong><p>{live?.applicants.isError ? "Open your inbox to retry." : "Review them before the roster fills."}</p></div>
                   <HugeiconsIcon icon={ArrowRight01Icon} size={17} strokeWidth={1.7} />
                 </button>
               ) : null}
@@ -803,8 +819,9 @@ function Headquarters({
 
               <section className={styles.panel}>
                 <SectionTitle eyebrow="HEADQUARTERS LOG" title="Recent activity" />
+                {live && live.treasury.data?.history.length === 0 ? <ClanQueryState title="No recent activity yet" description="New Clan activity will appear here when available." /> : null}
                 <div className={styles.activityList}>
-                  {live ? (live.treasury.data?.history ?? []).map((entry, index) => <article key={`${entry.occurred_at}:${index}`}><span>{new Date(entry.occurred_at).toLocaleDateString("en-US")}</span><div><strong>{entry.direction} {entry.amount}</strong><p>{entry.source_type.replaceAll("_", " ")}</p></div></article>) : <>
+                  {live ? (live.treasury.data?.history ?? []).map((entry, index) => <article key={`${entry.occurred_at}:${index}`}><span>{new Date(entry.occurred_at).toLocaleDateString("en-US")}</span><div><strong>{entry.direction === "CREDIT" ? "+" : "−"}{entry.amount.toLocaleString()} Treasury</strong><p>{({ CLAN_ACTIVITY: "Clan activity", CLAN_MISSION: "Clan mission", SHOP_PURCHASE: "Equipment purchase", CONTRIBUTION: "Member contribution", ITEM: "Item activation" } as Record<string, string>)[entry.source_type] ?? "Treasury update"}</p></div></article>) : <>
                   <article><span>12m</span><div><strong>Mira Vale +180 contribution</strong><p>Personal mission progress reached the clan.</p></div></article>
                   <article><span>1h</span><div><strong>Emergency Repair Kit stored</strong><p>A shared defence item entered the clan inventory.</p></div></article>
                   <article><span>3h</span><div><strong>Build the Relay reached 64%</strong><p>The next clan milestone moved closer.</p></div></article></>}
@@ -985,7 +1002,7 @@ function DemoClanPage() {
               clan.createClan(input);
               adapter.hapticNotice("success");
             }}
-            onAddGroup={() => adapter.openTelegramLink("https://t.me/DalexioBot?startgroup=dexoairdrop")}
+            onAddGroup={() => openClanBot(adapter)}
           />
         ) : null}
 
@@ -1071,9 +1088,11 @@ function RemoteClanPage() {
   const state = live.state.data;
   const minLevel = state?.unlock_level ?? 5;
   const role = state?.role === "CAPTAIN" ? "captain" : state?.role === "SOLDIER" ? "soldier" : null;
-  const locked = !live.enabled || (state !== undefined && (!state.enabled || !state.eligible));
-  const membershipReady = role === null || live.membership.isSuccess;
+  const locked = state !== undefined ? state.enabled && !state.eligible && state.unlock_level !== null && level < state.unlock_level : !live.enabled && level < minLevel;
+  const membershipReady = role === null || live.membership.data !== undefined;
   const ready = live.eligible && membershipReady;
+  const initialError = live.membershipDenied || (!state && live.state.isError) || (Boolean(role) && live.membership.data === undefined && live.membership.isError) || Boolean(state?.role && !role) || Boolean(state && !locked && (!state.enabled || !state.eligible));
+  const resolving = !locked && !initialError && (!ready || (role === "soldier" && !live.member && live.applicationProblem === "loading"));
   const member = ready && live.member;
   const identity = live.identity.data;
   const home = live.home.data;
@@ -1084,35 +1103,38 @@ function RemoteClanPage() {
   const hasRequest = current !== null;
   const effects: ClanActiveEffect[] = (live.equipment.data?.active_effects ?? []).filter(effect => effect.effective).map(effect => ({ id: String(effect.id), itemId: effect.item_id, startedAt: Date.parse(effect.starts_at), endsAt: Date.parse(effect.expires_at) }));
   const applicants = (live.applicants.data ?? []).map(clanApplicant);
-  const title = locked ? "Your clan path waits ahead." : !state ? "Clan network" : member && clan ? clan.name : role === "captain" ? "Register your headquarters." : role === "soldier" ? "Find your seasonal home." : "Choose your place in the season.";
-  const subtitle = locked ? `Reach Level ${minLevel} to unlock the social game layer.` : member ? "Your seasonal home is online." : role === "captain" ? "Promote a verified Telegram group into your seasonal clan home." : role === "soldier" ? "Compare active clans and keep one request in play." : "Lead one headquarters or earn your place inside one.";
+  const destinationReady = !resolving && !initialError && (!member || Boolean(hqReady));
+  const title = !destinationReady ? "Clan network" : locked ? "Your clan path waits ahead." : !state ? "Clan network" : member && clan ? clan.name : role === "captain" ? "Register your headquarters." : role === "soldier" ? "Find your seasonal home." : "Choose your place in the season.";
+  const subtitle = !destinationReady ? "Your seasonal Clan connection." : locked ? `Reach Level ${minLevel} to unlock the social game layer.` : member ? "Your seasonal home is online." : role === "captain" ? "Promote a verified Telegram group into your seasonal clan home." : role === "soldier" ? "Compare active clans and keep one request in play." : "Lead one headquarters or earn your place inside one.";
   const openClan = (id: string) => { live.setPreviewId(Number(id)); setOverlay({ type: "clan", clanId: id }); adapter.selectionChanged(); };
   const close = () => { setOverlay(null); live.setPreviewId(null); };
   const after = async (action: string, operation: () => Promise<unknown>, next: OverlayState | { type: "status" } = null) => { if (await live.run(action, operation) !== undefined) setOverlay(next); };
   const itemRule = overlay?.type === "item" ? live.equipment.data?.items.find(item => item.item_id === overlay.itemId) : undefined;
   const item = itemRule ? clanItem(itemRule) : null;
-  const purchaseAllowed = itemRule?.can_purchase === true && !live.equipment.isError && !live.membership.isError;
-  const activationAllowed = itemRule?.can_activate === true && !live.equipment.isError && !live.membership.isError;
+  const purchaseAllowed = itemRule?.can_purchase === true && !live.equipment.isError && !live.membership.isError && !live.state.isError && !live.home.isError;
+  const activationAllowed = itemRule?.can_activate === true && !live.equipment.isError && !live.membership.isError && !live.state.isError && !live.home.isError;
   const requestState = live.applicationProblem !== null ? "none" : hasRequest ? "pending" : live.lastHistoricalRequest?.state === "DECLINED" ? "rejected" : "none";
   return <main className={styles.page}>
     <header className={`${styles.pageHeader} ${member ? styles.pageHeaderCompact : ""} ${ready && !role ? styles.pageHeaderWrap : ""}`}>
-      <span>{role === "captain" && member ? "CAPTAIN COMMAND" : "CLAN NETWORK"}</span><h1>{title}</h1><p>{subtitle}</p>
-      {ready && role ? <Button size="sm" tone="secondary" onClick={() => setOverlay({ type: "status" })}>Clan status</Button> : null}
+      <div className={styles.headerTop}><span>{role === "captain" && member ? "CAPTAIN COMMAND" : "CLAN NETWORK"}</span>
+      {ready && role ? <Button className={styles.statusButton} size="sm" tone="secondary" leadingIcon={<HugeiconsIcon icon={SquareActivityIcon} size={17} strokeWidth={1.8} />} onClick={() => setOverlay({ type: "status" })}>Clan status</Button> : null}</div><h1>{title}</h1><p>{subtitle}</p>
     </header>
     {locked ? <LockedClan level={level} minLevel={minLevel} /> : null}
-    {!locked && (live.state.isPending || (state?.role && live.membership.isPending)) ? <p role="status">Loading Clan…</p> : null}
-    {!locked && (live.state.isError || live.membership.isError || (state?.role && !role)) ? <><p role="status">Clan couldn't load. Please try again.</p></> : null}
-    {ready && role === null && state?.role === null ? <RoleChoice onChoose={value => setOverlay({ type: "role", role: value })} /> : null}
-    {ready && role === "soldier" && live.applicationProblem ? <p role="status">{applicationStatusMessage[live.applicationProblem]}</p> : null}
-    {ready && role === "soldier" && live.membership.data === null ? <SoldierNetwork live={live} pendingClanId={hasRequest ? String(current.clan_id) : null} requestState={requestState} onOpenClan={openClan} /> : null}
-    {ready && role === "captain" && live.membership.data === null ? <CaptainFounding live={live} onCreate={input => { void after("create", () => live.api.create({ telegram_group_id: Number(input.telegramGroupId), name: input.name, tag: input.tag, motto: input.motto }).then(value => { saveClanTone(live.scope.player, value.id, input.accent); return value; })); }} onAddGroup={() => adapter.openTelegramLink("https://t.me/DalexioBot?startgroup=dexoairdrop")} /> : null}
-    {member && (!hqReady || hqError) ? <><p role="status">{hqError ? "Headquarters couldn't load fully." : "Loading headquarters…"}</p></> : null}
-    {hqReady && !hqError && clan ? <Headquarters live={live} clan={clan} captain={live.membership.data?.role === "CAPTAIN"} treasury={home.treasury_balance} ownedItemIds={[]} activeEffects={effects} applicants={applicants} onOpenItem={(itemId, source) => setOverlay({ type: "item", itemId, source })} onOpenRequests={() => setOverlay({ type: "requests" })} onOpenTrophies={() => setOverlay({ type: "trophies" })} /> : null}
+    {resolving ? <section className={styles.panel}><ClanQueryState loading title="Connecting to your Clan…" /></section> : null}
+    {initialError ? <section className={styles.panel}><ClanQueryState title="Clan couldn't load. Please try again." description="Your Clan progress is safe." retry={live.refresh} busy={live.state.isFetching || live.membership.isFetching} /></section> : null}
+    {!initialError && !hqReady && state && (live.state.isError || live.membership.isError) ? <section className={styles.panel}><ClanQueryState title="Some Clan details couldn't refresh." description="Retry before taking another action." retry={live.refresh} busy={live.state.isFetching || live.membership.isFetching} /></section> : null}
+    {destinationReady && ready && role === null && state?.role === null ? <RoleChoice disabled={live.pending !== null || live.state.isError || live.state.isFetching} onChoose={value => setOverlay({ type: "role", role: value })} /> : null}
+    {destinationReady && ready && role === "soldier" && live.applicationProblem && live.applicationProblem !== "loading" ? <section className={styles.panel}><ClanQueryState title={applicationStatusMessage[live.applicationProblem]} retry={live.refresh} busy={live.requests.isFetching} /></section> : null}
+    {destinationReady && ready && role === "soldier" && live.membership.data === null && live.applicationProblem !== "loading" && live.applicationProblem !== "error" ? <SoldierNetwork live={live} pendingClanId={hasRequest ? String(current.clan_id) : null} requestState={requestState} onOpenClan={openClan} /> : null}
+    {destinationReady && ready && role === "captain" && live.membership.data === null ? <CaptainFounding live={live} onCreate={input => { void after("create", () => live.api.create({ telegram_group_id: Number(input.telegramGroupId), name: input.name, tag: input.tag, motto: input.motto }).then(value => { saveClanTone(live.scope.player, value.id, input.accent); return value; })); }} onAddGroup={() => openClanBot(adapter)} /> : null}
+    {member && !hqReady ? <section className={styles.panel}><ClanQueryState loading={!hqError} title={hqError ? "Headquarters couldn't load fully." : "Preparing your headquarters…"} description={hqError ? "Retry to load your confirmed Clan details." : undefined} retry={hqError ? live.refresh : undefined} busy={live.home.isFetching} /></section> : null}
+    {hqReady && (hqError || live.membership.isError || live.state.isError) ? <section className={styles.panel}><ClanQueryState title="Some Clan details couldn't refresh." description="Showing the last confirmed details." retry={live.refresh} busy={live.home.isFetching || live.membership.isFetching} /></section> : null}
+    {hqReady && clan ? <Headquarters live={live} clan={clan} captain={live.membership.data?.role === "CAPTAIN"} treasury={home.treasury_balance} ownedItemIds={[]} activeEffects={effects} applicants={applicants} onOpenItem={(itemId, source) => setOverlay({ type: "item", itemId, source })} onOpenRequests={() => setOverlay({ type: "requests" })} onOpenTrophies={() => setOverlay({ type: "trophies" })} /> : null}
     <AnimatePresence>
-      {overlay?.type === "role" ? <RoleConfirmSheet role={overlay.role} pending={live.pending !== null} onClose={close} onConfirm={() => void after("role", () => live.api.role({ role: overlay.role === "captain" ? "CAPTAIN" : "SOLDIER" }))} /> : null}
-      {overlay?.type === "clan" && live.preview.data ? <ClanPreviewSheet clan={clanSummary(live.preview.data)} pendingClanId={hasRequest ? String(current.clan_id) : null} pending={live.pending !== null || live.applicationsBlocked || Boolean(state?.cooldown_until && Date.parse(state.cooldown_until) > live.serverNow()) || Boolean(state && state.voluntary_leave_count >= state.max_voluntary_leaves)} onClose={close} onJoin={() => { if (!live.applicationsBlocked) void after("join", () => live.api.join(Number(overlay.clanId)), { type: "status" }); }} /> : overlay?.type === "clan" ? <ClanModal eyebrow="Clan preview" title="Clan preview" onClose={close}><p role="status">{live.preview.isError ? "Clan couldn't load. Please try again." : "Loading Clan…"}</p></ClanModal> : null}
-      {overlay?.type === "requests" && member ? <JoinRequestsSheet applicants={applicants} pendingAction={live.pending !== null || live.applicants.isError} onClose={close} onAccept={id => void live.run(`accept:${id}`, () => live.api.decision(Number(id), { accept: true }))} onReject={id => void live.run(`reject:${id}`, () => live.api.decision(Number(id), { accept: false }))} /> : null}
-      {overlay?.type === "item" && itemRule && item && home && member ? <ClanItemSheet item={item} quantity={itemRule.quantity} captain={live.membership.data?.role === "CAPTAIN"} treasury={home.treasury_balance} source={overlay.source} activeUntil={(live.equipment.data?.active_effects ?? []).filter(effect => effect.item_id === item.id && effect.effective).reduce<number | null>((last, effect) => Math.max(last ?? 0, Date.parse(effect.expires_at)), null)} purchaseAllowed={purchaseAllowed} activationAllowed={activationAllowed} pending={live.pending !== null} blockedLabel={itemRule.blocked_reason?.replaceAll("_", " ") ?? "Unavailable"} onClose={close} onPurchase={() => { void live.economic("purchase", item.id).then(value => { if (value) close(); }); }} onActivate={() => { void live.economic("activate", item.id).then(value => { if (value) close(); }); }} /> : null}
+      {overlay?.type === "role" ? <RoleConfirmSheet role={overlay.role} pending={live.pending !== null || live.state.isError} onClose={close} onConfirm={() => void after("role", () => live.api.role({ role: overlay.role === "captain" ? "CAPTAIN" : "SOLDIER" }))} /> : null}
+      {overlay?.type === "clan" && live.preview.data ? <ClanPreviewSheet clan={clanSummary(live.preview.data)} pendingClanId={hasRequest ? String(current.clan_id) : null} pending={live.pending !== null || live.applicationsBlocked || Boolean(state?.cooldown_until && Date.parse(state.cooldown_until) > live.serverNow()) || Boolean(state && state.voluntary_leave_count >= state.max_voluntary_leaves)} onClose={close} onJoin={() => { if (!live.applicationsBlocked) void after("join", () => live.api.join(Number(overlay.clanId)), { type: "status" }); }} /> : overlay?.type === "clan" ? <ClanModal eyebrow="Clan preview" title="Clan preview" onClose={close}><ClanQueryState loading={!live.preview.isError} title={live.preview.isError ? "Clan couldn't load. Please try again." : "Preparing Clan preview…"} retry={live.preview.isError ? () => live.preview.refetch() : undefined} busy={live.preview.isFetching} /></ClanModal> : null}
+      {overlay?.type === "requests" && member ? <JoinRequestsSheet applicants={applicants} loading={live.applicants.isPending} error={live.applicants.isError} retry={() => live.applicants.refetch()} fetching={live.applicants.isFetching} pendingAction={live.pending !== null || live.applicants.isError || live.membership.isError || live.state.isError} onClose={close} onAccept={id => void live.run(`accept:${id}`, () => live.api.decision(Number(id), { accept: true }))} onReject={id => void live.run(`reject:${id}`, () => live.api.decision(Number(id), { accept: false }))} /> : null}
+      {overlay?.type === "item" && itemRule && item && home && member ? <ClanItemSheet item={item} quantity={itemRule.quantity} captain={live.membership.data?.role === "CAPTAIN"} treasury={home.treasury_balance} source={overlay.source} activeUntil={(live.equipment.data?.active_effects ?? []).filter(effect => effect.item_id === item.id && effect.effective).reduce<number | null>((last, effect) => Math.max(last ?? 0, Date.parse(effect.expires_at)), null)} purchaseAllowed={purchaseAllowed} activationAllowed={activationAllowed} pending={live.pending !== null} blockedLabel={clanItemBlockedLabel(itemRule.blocked_reason, overlay.source === "shop" && home.treasury_balance < itemRule.price)} onClose={close} onPurchase={() => { void live.economic("purchase", item.id).then(value => { if (value) close(); }); }} onActivate={() => { void live.economic("activate", item.id).then(value => { if (value) close(); }); }} /> : null}
       {overlay?.type === "trophies" && member ? <ClanAchievementsSheet achievements={(live.trophies.data ?? []).map(clanTrophy)} onClose={close} /> : null}
       {overlay?.type === "status" ? <ClanStatusSheet key={live.scopeKey} live={live} onClose={close} /> : null}
     </AnimatePresence>
