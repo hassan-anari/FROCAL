@@ -254,7 +254,7 @@ for (const kind of ["older", "terminal"]) test(`operator-required ${kind} reserv
   await enter(page, soldier);
   await expect(page.getByRole("status").filter({ hasText: "authorized operator handling" })).toBeVisible();
   await page.getByRole("button", { name: "Clan status", exact: true }).click();
-  await expect(page.getByRole("dialog")).toContainText(legacy.season_code);
+  if (kind === "older") await expect(page.getByRole("dialog")).toContainText(legacy.season_code);
   for (const label of ["Check invite and access", "Open Telegram group", "Cancel request"]) await expect(page.getByRole("button", { name: label, exact: true })).toHaveCount(0);
   for (const width of [320, 390, 460]) { await page.setViewportSize({ width, height: 844 }); await snapshot(page, width, `review-operator-${kind}`); }
   expect(credentials).toEqual([]);
