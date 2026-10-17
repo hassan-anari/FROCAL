@@ -1,5 +1,7 @@
 # Batch 6 focused visual review
 
+The zero-net independent-review follow-up has [three additional before/after card pairs](B6_ZERO_NET_REVIEW.md), using reviewed B6 head `a0c0d4802b4554320b6f225a1b07eff51b82d4a5` as its immutable baseline and a real pinned-backend rollover response. Its title copy changes; the existing card styles and geometry are checked unchanged. The original broader immutable-main comparison follows.
+
 Baseline: immutable merged main **`f7324b07cda2ede8d55679457699ad376d03447d`**. Captures use the same installed Chromium, reduced motion and 320/390/460 × 844px viewports. No PR-head screenshot is accepted as its own baseline. [Baseline provenance](evidence/b6/baseline-provenance.json) and [source/screenshot hashes and comparisons](evidence/b6/validation-manifest.json).
 
 **102 PNGs / 51 before-after pairs** cover Clan entry, Captain HQ and the isolated HQ scene, Status, background HQ error, empty candidates, registration, History loading/error/empty/filtering, canonical Season Standing, applicant Rank/Streak, source-backed activity, and preserved Base/Profile/Arena. These are isolated browser diagnostics using the published B4/B5/B6 contracts and verbatim B6 HTTP examples; actual PostgreSQL-backed Captain/Soldier, mission and activity screenshots are retained in the exact-backend CI artifact. Physical Telegram-device certification is not implied. The exact backend checkout is `28a6b8805db5f9a8c70b78c5eadf5c6276dbccd1`; runtime/schema is `13e7b1988181980b6ad80b69a8e9f28347e31802`.

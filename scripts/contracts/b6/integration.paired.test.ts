@@ -1,9 +1,9 @@
 import { beforeAll, expect, it, vi } from "vitest";
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { clanApi } from "../../../src/integrations/api/b5";
 import * as c from "../../../src/integrations/api/b6Schemas";
 import { clanApplicant, clanMission } from "../../../src/integrations/api/clanViews";
-import { clanActivityRows } from "../../../src/integrations/api/clanActivity";
+import { clanActivityRows, clanActivityView } from "../../../src/integrations/api/clanActivity";
 const origin = "http://127.0.0.1:8792", nativeFetch = globalThis.fetch;
 beforeAll(() => { vi.stubGlobal("window", { setTimeout, clearTimeout }); vi.stubGlobal("fetch", (url: string | URL | Request, options: RequestInit) => nativeFetch(typeof url === "string" && url.startsWith("/") ? origin + url : url, options)); });
 async function control(body: object): Promise<any> { const response = await nativeFetch(origin + "/__b2_test__", { method: "POST", body: JSON.stringify(body) }); expect(response.status).toBe(200); return response.json(); }
@@ -60,6 +60,22 @@ it("consumes real Admin Group/Individual text and server-automatic progress/sett
   missions = await captain.api.missions(); expect(missions.some(row => row.kind === "INDIVIDUAL" && row.completed && row.reward_state === "SETTLED")).toBe(true); expect(missions.find(row => row.kind === "GROUP")?.progress_units).toBe(1);
   await control({ action: "b6-signal", player: captain.player }); missions = await captain.api.missions(); expect(missions.filter(row => created.missions.some((m: any) => m.key === row.key)).every(row => row.completed && row.reward_state === "SETTLED")).toBe(true);
   expect((await captain.api.activity()).items.filter(row => row.event_type === "MISSION_COMPLETED")).toHaveLength(2);
+}, 30000);
+it("presents a real B6 zero-net rollover as a Treasury contribution, preserving canonical history and replay", async () => {
+  const { captain } = await world();
+  await control({ action: "b6-settle", player: captain.player, gross: 9 });
+  const key = crypto.randomUUID();
+  const settled = await control({ action: "b6-settle", player: captain.player, gross: 1, key });
+  expect(settled).toMatchObject({ created: true, gross: 1, player_amount: 0, treasury_amount: 1 });
+  const page = await captain.api.activity();
+  const row = page.items.find(row => row.event_type === "CLAN_REWARD_SETTLED" && row.amount === 0)!;
+  expect(row).toMatchObject({ event_type: "CLAN_REWARD_SETTLED", amount: 0, unit: "PLAYER_POINTS", treasury_amount: 1, contribution_amount: 1 });
+  expect(clanActivityView(row)).toEqual({ title: `${row.actor_name || "A member"} contributed to the Clan Treasury`, description: "1 Treasury credits · 1 contribution" });
+  expect((await captain.api.treasury()).balance).toBe(1);
+  expect((await captain.api.home()).treasury_balance).toBe(1);
+  expect(await control({ action: "b6-settle", player: captain.player, gross: 1, key })).toMatchObject({ id: settled.id, created: false, player_amount: 0, treasury_amount: 1 });
+  expect((await captain.api.activity()).items.filter(item => item.id === row.id)).toHaveLength(1);
+  writeFileSync(`${process.env.B6_FRESH_FIXTURES}/zero-net-activity-http.json`, JSON.stringify(page, null, 2) + "\n");
 }, 30000);
 it("uses secure group-avatar capabilities or existing null fallback without exposing storage or bot secrets", async () => {
   const captain = await actor(); await captain.api.role({ role: "CAPTAIN" }); const group = await control({ action: "b5-group", player: captain.player });

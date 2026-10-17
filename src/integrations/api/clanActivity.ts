@@ -24,6 +24,20 @@ export function clanActivityView(row: ClanActivityOut, items: readonly Pick<Item
     case "ITEM_PURCHASED": return { title: `${item} purchased`, description: row.amount != null && row.unit === "TREASURY_CREDITS" ? `${row.amount.toLocaleString()} Treasury credits` : "Added to Clan inventory." };
     case "ITEM_ACTIVATED": return { title: `${item} activated`, description: `Used by ${actor}.` };
     case "TREASURY_CREDIT": case "TREASURY_DEBIT": return { title: `Treasury ${row.event_type === "TREASURY_CREDIT" ? "credit" : "debit"}`, description: row.amount != null && row.unit === "TREASURY_CREDITS" ? `${row.amount.toLocaleString()} credits` : "Treasury updated." };
-    case "CLAN_REWARD_SETTLED": return { title: row.amount != null && row.unit === "PLAYER_POINTS" ? `${actor} earned ${row.amount.toLocaleString()} points` : "Clan activity settled", description: [row.treasury_amount != null ? `${row.treasury_amount.toLocaleString()} Treasury credits` : null, row.contribution_amount != null ? `${row.contribution_amount.toLocaleString()} contribution` : null].filter(Boolean).join(" · ") || "Confirmed Clan activity reward." };
+    case "CLAN_REWARD_SETTLED": {
+      // Distinct server units: a Treasury credit never implies Player points.
+      const validAmount = (value: unknown): value is number => typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
+      const playerAmount = validAmount(row.amount) ? row.amount : null;
+      const consistent = row.unit === "PLAYER_POINTS" && playerAmount !== null
+        && (row.treasury_amount == null || validAmount(row.treasury_amount))
+        && (row.contribution_amount == null || validAmount(row.contribution_amount));
+      let title = "Clan activity settled";
+      if (consistent && playerAmount !== null && playerAmount > 0) title = `${actor} earned ${playerAmount.toLocaleString()} points`;
+      else if (consistent && playerAmount === 0 && validAmount(row.treasury_amount) && row.treasury_amount > 0) title = `${actor} contributed to the Clan Treasury`;
+      return {
+        title,
+        description: [validAmount(row.treasury_amount) ? `${row.treasury_amount.toLocaleString()} Treasury credits` : null, validAmount(row.contribution_amount) ? `${row.contribution_amount.toLocaleString()} contribution` : null].filter(Boolean).join(" · ") || "Confirmed Clan activity reward.",
+      };
+    }
   }
 }

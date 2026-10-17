@@ -32,6 +32,7 @@
     "test:visual:b5-clan-baseline": "node scripts/capture-b5-clan-baseline.mjs",
     "test:e2e:b6": "playwright test --config playwright.b6.config.ts",
     "test:visual:b6-baseline": "node scripts/capture-b6-baseline.mjs",
+    "test:visual:b6-activity-baseline": "node scripts/capture-b6-activity-review.mjs",
     "test:paired:b6": "node scripts/contracts/run-paired-b6.mjs"
   },
   "dependencies": {
