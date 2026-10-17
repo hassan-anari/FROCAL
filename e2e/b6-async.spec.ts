@@ -87,6 +87,7 @@ test("request error and unsafe legacy reservations stay persistent and read-only
   f.failures.clear(); const row = f.lifecycle.pending_request[0];
   f.setOwn([row, { ...row, id: row.id + 1 }]); await page.getByRole("button", { name: "Retry", exact: true }).click();
   await expect(page.getByText("Your Clan requests need review before you can continue. Refresh your status or contact support.")).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Clan discovery sections" })).toBeVisible();
   await page.getByRole("button", { name: "Clan status", exact: true }).click();
   await expect(page.getByRole("button", { name: "Cancel request", exact: true })).toHaveCount(0);
   f.setOwn([{ ...row, is_current_season: false, handling: "OPERATOR_REQUIRED" }]);
