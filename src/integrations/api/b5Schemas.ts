@@ -61,6 +61,15 @@ export const OwnRequestOut = z.object({
   "invite_state": z.union([z.string(), z.null()]),
   "delivery_state": z.union([z.string(), z.null()]),
   "cancellation_pending": z.boolean(),
+  "clan_season_id": z.number().int().safe(),
+  "season_id": z.number().int().safe(),
+  "season_code": z.string(),
+  "is_current_season": z.boolean(),
+  "is_active": z.boolean(),
+  "reserves_capacity": z.boolean(),
+  "credential_unresolved": z.boolean(),
+  "blocks_new_application": z.boolean(),
+  "handling": z.enum(["CURRENT_SEASON","OPERATOR_REQUIRED","HISTORY"]),
 });
 export type OwnRequestOut = z.infer<typeof OwnRequestOut>;
 

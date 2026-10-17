@@ -42,16 +42,18 @@ export function useClanRemote() {
   const [previewId, setPreviewId] = useState<number | null>(null);
   const preview = read(`preview:${previewId}`, signal => api.preview(previewId!, signal), eligible && previewId !== null);
   const applicationSelection = selectClanApplications(requests.data ?? []);
-  const applicationProblem: "loading" | "error" | "overlap" | null = state.isError ? "error" : !state.isSuccess ? "loading" : state.data.role !== "SOLDIER" ? null
+  const applicationProblem: "loading" | "error" | "overlap" | "operator" | null = state.isError ? "error" : !state.isSuccess ? "loading" : state.data.role !== "SOLDIER" ? null
     : requests.isError || membership.isError ? "error"
     : !requests.isSuccess || !membership.isSuccess ? "loading"
-    : applicationSelection.ambiguous ? "overlap" : null;
+    : applicationSelection.ambiguous ? "overlap" : applicationSelection.operatorRequired ? "operator" : null;
   const activeRequest = member ? null : applicationSelection.activeRequest;
+  const operatorRequest = applicationSelection.operatorRequest;
+  const blockingRequests = applicationSelection.blockingRequests;
   const requestHistory = applicationSelection.history;
   const lastHistoricalRequest = requestHistory[0] ?? null; // Display only; never an action target.
   const requestDisplay = activeRequest ?? (lastHistoricalRequest?.state === "DECLINED" ? lastHistoricalRequest : null);
   const requestIdentity = read(`request-clan:${requestDisplay?.clan_id}`, signal => api.preview(requestDisplay!.clan_id, signal), eligible && applicationProblem === null && Boolean(requestDisplay));
-  const applicationsBlocked = applicationProblem !== null || Boolean(activeRequest) || Boolean(member);
+  const applicationsBlocked = applicationProblem !== null || applicationSelection.blocksNewApplication || Boolean(member);
   const [pending, setPending] = useState<string | null>(null);
   const locks = useRef(new Set<string>());
   const refresh = useCallback(async () => {
@@ -73,6 +75,6 @@ export function useClanRemote() {
   const serverNow = () => clock.at + Math.max(0, performance.now() - clock.tick);
   const rows = <T extends { id?: number; membership_id?: number },>(pages: { items: T[] }[] | undefined) => Array.from(new Map((pages ?? []).flatMap(page => page.items).map(row => [row.membership_id ?? row.id, row])).values());
   const clans = Array.from(new Map((discovery.data?.pages.flat() ?? []).map((row: ClanOut) => [row.id, row])).values());
-  return { scope, scopeKey: JSON.stringify(scope), remote, enabled, api, state, eligible, membership, member, requests, activeRequest, requestHistory, lastHistoricalRequest, applicationProblem, applicationsBlocked, groups, home, roster, rosterRows: rows(roster.data?.pages), treasury, equipment, missions, trophies, applicants, governance, recovery, identity, discovery, clans, search, setSearch, previewId, setPreviewId, preview, requestIdentity, pending, run, economic, refresh, serverNow };
+  return { scope, scopeKey: JSON.stringify(scope), remote, enabled, api, state, eligible, membership, member, requests, activeRequest, operatorRequest, blockingRequests, requestHistory, lastHistoricalRequest, applicationProblem, applicationsBlocked, groups, home, roster, rosterRows: rows(roster.data?.pages), treasury, equipment, missions, trophies, applicants, governance, recovery, identity, discovery, clans, search, setSearch, previewId, setPreviewId, preview, requestIdentity, pending, run, economic, refresh, serverNow };
 }
 export type ClanRemote = ReturnType<typeof useClanRemote>;

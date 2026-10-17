@@ -16,8 +16,8 @@ vi.mock("./bootstrap", () => ({ isRemoteDataSource: () => true }));
 vi.mock("@/integrations/telegram/TelegramProvider", () => ({ useTelegram: () => ({ adapter: { isTelegram: true, getInitData: () => "synthetic-auth", openTelegramLink: vi.fn() } }) }));
 vi.mock("./b5", async original => ({ ...(await original<typeof import("./b5")>()), clanApi: () => api }));
 vi.mock("@/design-system/components/TransientFeedback", () => ({ showFeedback: feedback }));
-const accepted = OwnRequestOut.parse({ ...lifecycle.pending_request[0], id: 1, clan_id: 1, clan_name: "Accepted Clan", state: "ACCEPTED", invite_state: "ACTIVE" });
-const cancelled = { ...accepted, id: 2, clan_id: 2, clan_name: "Historical Clan", state: "CANCELLED", invite_state: null };
+const accepted = OwnRequestOut.parse({ ...lifecycle.pending_request[0], id: 1, clan_id: 1, clan_name: "Accepted Clan", state: "ACCEPTED", invite_state: "ACTIVE", credential_unresolved: true });
+const cancelled = { ...accepted, id: 2, clan_id: 2, clan_name: "Historical Clan", state: "CANCELLED", invite_state: null, is_active: false, credential_unresolved: false, blocks_new_application: false, handling: "HISTORY" as const };
 let rows = [cancelled, accepted];
 let member: any = null;
 let client: QueryClient;
@@ -53,7 +53,7 @@ it("keeps accepted invite access in the existing modal, then hides credentials a
   expect(JSON.stringify(client.getQueryCache().getAll().map(query => query.state.data))).not.toContain("PRIVATE_TEST_CREDENTIAL"); expect(JSON.stringify(localStorage)).not.toContain("PRIVATE_TEST_CREDENTIAL");
   rows = [cancelled, accepted, { ...accepted, id: 3, clan_id: 3, clan_name: "Overlapping Clan", state: "PENDING" }];
   await act(async () => { await client.invalidateQueries(); });
-  await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("More than one active Clan request"));
+  await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("More than one blocking Clan application"));
   for (const name of ["Open Telegram group", "Check invite and access", "Cancel request"]) expect(screen.queryByRole("button", { name })).not.toBeInTheDocument();
   expect(api.invite).toHaveBeenCalledTimes(1);
 });
@@ -63,11 +63,11 @@ it("holds cancellation-pending reservations until the server confirms terminaliz
   api.cancelRequest.mockImplementationOnce(async () => { rows = [{ ...accepted, cancellation_pending: true, invite_state: "UNCERTAIN" }]; return { id: 1, state: "ACCEPTED" }; });
   await act(async () => { await hook.result.current.run("cancel", () => hook.result.current.api.cancelRequest(1)); });
   await waitFor(() => expect(hook.result.current.activeRequest?.cancellation_pending).toBe(true)); expect(hook.result.current.applicationsBlocked).toBe(true);
-  rows = [{ ...accepted, state: "CANCELLED" }]; await act(async () => { await hook.result.current.refresh(); });
+  rows = [cancelled]; await act(async () => { await hook.result.current.refresh(); });
   await waitFor(() => expect(hook.result.current.applicationsBlocked).toBe(false)); expect(hook.result.current.activeRequest).toBeNull();
   rows = [accepted]; await act(async () => { await hook.result.current.refresh(); });
   await waitFor(() => expect(hook.result.current.activeRequest?.state).toBe("ACCEPTED")); expect(hook.result.current.member).toBe(false);
-  member = fixture["membership/current"]; rows = [{ ...accepted, state: "ACTIVATED" }]; await act(async () => { await hook.result.current.refresh(); });
+  member = fixture["membership/current"]; rows = [{ ...cancelled, state: "ACTIVATED" }]; await act(async () => { await hook.result.current.refresh(); });
   await waitFor(() => expect(hook.result.current.member).toBe(true)); expect(hook.result.current.activeRequest).toBeNull(); expect(hook.result.current.requestHistory[0].state).toBe("ACTIVATED");
 });
 it("uses the existing feedback and authoritative refresh after a server conflict without creating local state", async () => {
@@ -82,7 +82,7 @@ it("hides a late credential response after the application becomes ambiguous", a
   const { wrapper } = setup(); render(<Status />, { wrapper });
   await screen.findByRole("button", { name: "Check invite and access" }); fireEvent.click(screen.getByRole("button", { name: "Check invite and access" })); await waitFor(() => expect(api.invite).toHaveBeenCalledOnce());
   rows = [accepted, { ...accepted, id: 3, clan_id: 3, state: "PENDING" }]; await act(async () => { await client.invalidateQueries(); });
-  await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("More than one active Clan request"));
+  await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("More than one blocking Clan application"));
   await act(async () => { finish({ state: "ACTIVE", invite_link: "https://t.me/+STALE_PRIVATE_CREDENTIAL", delivery_state: "PENDING" }); });
   await waitFor(() => expect(screen.getByRole("button", { name: "Refresh status" })).toBeEnabled());
   expect(screen.queryByRole("button", { name: "Open Telegram group" })).not.toBeInTheDocument(); expect(screen.getByRole("dialog")).not.toHaveTextContent("STALE_PRIVATE_CREDENTIAL");
@@ -96,3 +96,19 @@ it("blocks joins and credential access when the authoritative request refresh fa
   expect(screen.queryByRole("button", { name: "Open Telegram group" })).not.toBeInTheDocument(); expect(screen.queryByRole("button", { name: "Cancel request" })).not.toBeInTheDocument(); expect(screen.getByRole("button", { name: "Refresh status" })).toBeEnabled();
 });
 function Status() { const live = useClanRemote(); return <ClanStatusSheet live={live} onClose={() => {}} />; }
+
+it.each(["older", "terminal"])("keeps %s operator-required reservations read-only and blocks joins", async kind => {
+  const operator = kind === "older" ? { ...accepted, is_current_season: false, season_id: 77, clan_season_id: 88, season_code: "older-season", handling: "OPERATOR_REQUIRED" as const }
+    : { ...cancelled, credential_unresolved: true, blocks_new_application: true, handling: "OPERATOR_REQUIRED" as const };
+  rows = [operator]; const { wrapper } = setup(); render(<Status />, { wrapper });
+  await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("authorized operator handling"));
+  for (const name of ["Open Telegram group", "Check invite and access", "Cancel request"]) expect(screen.queryByRole("button", { name })).not.toBeInTheDocument();
+  if (kind === "older") expect(screen.getByRole("dialog")).toHaveTextContent("older-season");
+  expect(api.invite).not.toHaveBeenCalled(); expect(api.cancelRequest).not.toHaveBeenCalled();
+});
+it("counts an unresolved terminal credential before selecting a current pending path", async () => {
+  rows = [{ ...accepted, state: "PENDING" }, { ...cancelled, credential_unresolved: true, blocks_new_application: true, handling: "OPERATOR_REQUIRED" }];
+  const { wrapper } = setup(); const hook = renderHook(() => useClanRemote(), { wrapper });
+  await waitFor(() => expect(hook.result.current.applicationProblem).toBe("overlap"));
+  expect(hook.result.current.activeRequest).toBeNull(); expect(hook.result.current.applicationsBlocked).toBe(true); expect(hook.result.current.blockingRequests).toHaveLength(2);
+});

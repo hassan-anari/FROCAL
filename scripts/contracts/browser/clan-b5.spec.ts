@@ -213,7 +213,7 @@ for (const width of [320, 390, 460]) test(`one active request and older accepted
   const request = await api(soldier, `/clans/${a.clan.id}/join-requests`, "POST"); await enter(page, soldier); await preview(page, b.name);
   await expect(joinButton(page)).toBeDisabled(); await snapshot(page, width, "review-pending-blocks-other-clan"); await close(page);
   await api(a.captain, `/clans/join-requests/${request.id}/decision`, "POST", { accept: true });
-  await control({ action: "b5-request-history", player: soldier.player, clan: b.clan.id, count: 1 }); await page.reload();
+  await control({ action: "b5-request-history", player: soldier.player, clan: b.clan.id, count: 26 }); await page.reload();
   await page.getByRole("button", { name: "Clan status", exact: true }).click();
   await expect(page.getByRole("dialog")).toContainText(a.name); await expect(page.getByRole("dialog")).toContainText("ACCEPTED"); await expect(page.getByLabel("Clan request history")).toContainText("CANCELLED");
   await page.getByRole("button", { name: "Check invite and access", exact: true }).click(); await expect(page.getByRole("button", { name: "Open Telegram group", exact: true })).toBeVisible(); await snapshot(page, width, "review-accepted-behind-cancelled-history");
@@ -240,9 +240,45 @@ test("unexpected legacy overlapping active requests expose no Clan credential or
   const request = await api(soldier, `/clans/${a.clan.id}/join-requests`, "POST"); await api(a.captain, `/clans/join-requests/${request.id}/decision`, "POST", { accept: true });
   await control({ action: "b5-request-history", player: soldier.player, clan: b.clan.id, state: "PENDING" });
   const credentials: string[] = []; page.on("request", request => { if (request.url().includes("/invite/current")) credentials.push(request.url()); });
-  await enter(page, soldier); await expect(page.getByRole("status").filter({ hasText: "More than one active Clan request" })).toBeVisible(); await page.getByRole("button", { name: "Clan status", exact: true }).click(); await expect(page.getByRole("button", { name: "Refresh status", exact: true })).toBeVisible();
+  await enter(page, soldier); await expect(page.getByRole("status").filter({ hasText: "More than one blocking Clan application" })).toBeVisible(); await page.getByRole("button", { name: "Clan status", exact: true }).click(); await expect(page.getByRole("button", { name: "Refresh status", exact: true })).toBeVisible();
   for (const label of ["Check invite and access", "Open Telegram group", "Cancel request"]) await expect(page.getByRole("button", { name: label, exact: true })).toHaveCount(0);
   for (const width of [320, 390, 460]) { await page.setViewportSize({ width, height: 844 }); await snapshot(page, width, "review-overlap-safe"); }
-  await page.getByRole("button", { name: "Refresh status", exact: true }).click(); await expect(page.getByRole("dialog")).toContainText("More than one active Clan request"); expect(credentials).toEqual([]);
+  await page.getByRole("button", { name: "Refresh status", exact: true }).click(); await expect(page.getByRole("dialog")).toContainText("More than one blocking Clan application"); expect(credentials).toEqual([]);
   await close(page); await preview(page, b.name); await expect(joinButton(page)).toBeDisabled();
+});
+for (const kind of ["older", "terminal"]) test(`operator-required ${kind} reservation remains read-only until authoritative resolution`, async ({ page }) => {
+  const a = await requestWorld(), b = await requestWorld(), soldier = await control({ action: "player", points: 2500 });
+  await api(soldier, "/clans/role", "POST", { role: "SOLDIER" });
+  const legacy = await control({ action: "b5-legacy-path", player: soldier.player, clan: a.clan.id, kind });
+  const credentials: string[] = []; page.on("request", request => { if (request.url().includes("/invite/current")) credentials.push(request.url()); });
+  await enter(page, soldier);
+  await expect(page.getByRole("status").filter({ hasText: "authorized operator handling" })).toBeVisible();
+  await page.getByRole("button", { name: "Clan status", exact: true }).click();
+  await expect(page.getByRole("dialog")).toContainText(legacy.season_code);
+  for (const label of ["Check invite and access", "Open Telegram group", "Cancel request"]) await expect(page.getByRole("button", { name: label, exact: true })).toHaveCount(0);
+  for (const width of [320, 390, 460]) { await page.setViewportSize({ width, height: 844 }); await snapshot(page, width, `review-operator-${kind}`); }
+  expect(credentials).toEqual([]);
+  await close(page); await preview(page, b.name); await expect(joinButton(page)).toBeDisabled(); await close(page);
+  // Isolated operator proof invokes the actual authorized backend service; there is no product control for it.
+  await control({ action: "b5-resolve-proof", player: soldier.player, request: legacy.request });
+  await page.getByRole("button", { name: "Clan status", exact: true }).click(); await page.getByRole("button", { name: "Refresh status", exact: true }).click();
+  await expect(page.getByRole("dialog")).not.toContainText("authorized operator handling");
+  await close(page); await preview(page, b.name); await expect(joinButton(page)).toBeEnabled(); await joinButton(page).click();
+  await expect(page.getByRole("dialog", { name: "Clan status" })).toContainText("PENDING");
+});
+test("a current application plus an unresolved terminal credential fails closed before any invite action", async ({ page }) => {
+  const a = await requestWorld(), b = await requestWorld(), soldier = await control({ action: "player", points: 2500 });
+  await api(soldier, "/clans/role", "POST", { role: "SOLDIER" });
+  await api(soldier, `/clans/${a.clan.id}/join-requests`, "POST");
+  const legacy = await control({ action: "b5-legacy-path", player: soldier.player, clan: b.clan.id, kind: "terminal" });
+  const credentials: string[] = []; page.on("request", request => { if (request.url().includes("/invite/current")) credentials.push(request.url()); });
+  await enter(page, soldier); await expect(page.getByRole("status").filter({ hasText: "More than one blocking Clan application" })).toBeVisible();
+  await page.getByRole("button", { name: "Clan status", exact: true }).click();
+  for (const label of ["Check invite and access", "Open Telegram group", "Cancel request"]) await expect(page.getByRole("button", { name: label, exact: true })).toHaveCount(0);
+  for (const width of [320, 390, 460]) { await page.setViewportSize({ width, height: 844 }); await snapshot(page, width, "review-mixed-blockers"); }
+  expect(credentials).toEqual([]);
+  await control({ action: "b5-resolve-proof", player: soldier.player, request: legacy.request }); await page.getByRole("button", { name: "Refresh status", exact: true }).click();
+  await expect(page.getByRole("dialog")).toContainText(a.name); await expect(page.getByRole("dialog")).toContainText("PENDING");
+  await page.getByRole("button", { name: "Cancel request", exact: true }).click(); await expect(page.getByRole("button", { name: "Cancel request", exact: true })).toHaveCount(0);
+  await close(page); await preview(page, b.name); await expect(joinButton(page)).toBeEnabled();
 });

@@ -56,6 +56,26 @@ def control(data, world):
             raise ValueError("Unsupported isolated legacy state")
         rows = [ClanJoinRequest.objects.create(clan_season=clan_season, applicant=player, state=state, decided_at=None if state == "PENDING" else now) for _ in range(min(int(data.get("count", 1)), 30))]
         return {"ids": [row.pk for row in rows]}
+    if action == "b5-legacy-path":
+        from apps.clans.models import ClanJoinRequest, ClanSeason, ClanInvite
+        from apps.seasons.models import Season
+        cs = ClanSeason.objects.get(clan_id=data["clan"], season=world["season"])
+        if data["kind"] == "older":
+            old = Season.objects.create(code="paired-older-" + uuid4().hex[:8], title="Isolated older Season", starts_at=now - timedelta(days=100), ends_at=now - timedelta(days=55), baseline_config=world["config"])
+            cs = ClanSeason.objects.create(clan=cs.clan, season=old, captain=cs.captain, base_capacity=cs.base_capacity, config_version=cs.config_version)
+        elif data["kind"] != "terminal":
+            raise ValueError("Unsupported isolated legacy path")
+        request = ClanJoinRequest.objects.create(applicant=player, clan_season=cs, state="ACCEPTED" if data["kind"] == "older" else "CANCELLED")
+        ClanInvite.objects.create(join_request=request, purpose="JOIN", state="MANUAL_REVIEW", unknown_credential_risk=True)
+        return {"request": request.pk, "season_code": cs.season.code, "season_id": cs.season_id, "clan_season_id": cs.pk}
+    if action == "b5-resolve-proof":
+        from django.contrib.auth.models import User
+        from apps.clans.models import ClanInvite
+        from apps.clans.services import resolve_invite_credential_risk
+        invite = ClanInvite.objects.get(join_request_id=data["request"], join_request__applicant=player)
+        actor, _ = User.objects.get_or_create(username="isolated-paired-operator", defaults={"is_superuser": True, "is_staff": True})
+        result = resolve_invite_credential_risk(invite_id=invite.pk, outcome="CONFIRMED_REVOKED", actor=actor, reason="Isolated paired positive revocation proof")
+        return {"state": result.state}
     if action == "b5-revoke-worker":
         from apps.clans.models import ClanInvite
         from apps.clans.services import revoke_invite_remote

@@ -1,31 +1,31 @@
 {
   "repository": "hassan-anari/WEDCAL",
-  "commit": "c38a7a65ba9bacce53a04bec6c10dfbeb71ed008",
-  "status": "Implemented B5 runtime and generated schema/HTTP fixtures; exact source bytes and paired PostgreSQL checks verified. Backend and frontend PRs remain Draft for independent review.",
+  "commit": "65a2c45810c0d5f721c662f3d4681967829ef242",
+  "status": "Final independently reviewed B5 runtime with authoritative blocking/Season/credential metadata; exact source/schema/HTTP fixtures, paired validation required.",
   "files": {
     "scripts/contracts/b5/source/docs/B5_BACKEND_CONTRACT.md": {
       "path": "docs/B5_BACKEND_CONTRACT.md",
-      "blob": "f269573f830ba6ac9f0885191278acbd59014780"
+      "blob": "7bbaae3effb4258019312ce2fadbf5718cd86a2e"
     },
     "scripts/contracts/b5/source/docs/B5_BACKEND_HANDOFF.md": {
       "path": "docs/B5_BACKEND_HANDOFF.md",
-      "blob": "de6f042b9366b8406afa05eb775d4f2d13efc14f"
+      "blob": "cd44b3103cdeddeaabb4005bed0b8b36016859ad"
     },
     "src/integrations/api/fixtures/b5/openapi.json": {
       "path": "docs/fixtures/b5/openapi.json",
-      "blob": "dcd6c9e4b5d2c8f3d69418960f0e48cb832f5e15"
+      "blob": "781c9061abcdd3fd9dbaff9323da875fba811fe4"
     },
     "src/integrations/api/fixtures/b5/clan-http.json": {
       "path": "docs/fixtures/b5/clan-http.json",
-      "blob": "137bb8fd2bf72d32af725455058d55cd80130922"
+      "blob": "cb3912e44d80fd249008fd77556ca75e3e476118"
     },
     "scripts/contracts/b5/source/apps/clans/api.py": {
       "path": "apps/clans/api.py",
-      "blob": "18beb2abd91677eaf3a9e70521f8780150487b88"
+      "blob": "807247ab5c3e54470e90da75ce97e81d442ac6bb"
     },
     "scripts/contracts/b5/source/apps/clans/services.py": {
       "path": "apps/clans/services.py",
-      "blob": "96de800c711bd500f1f420002967d9efa7515c1e"
+      "blob": "ca0dc79096535128d6ffdc45cdb6f47376390b91"
     },
     "scripts/contracts/b5/source/apps/clans/governance.py": {
       "path": "apps/clans/governance.py",
@@ -33,7 +33,7 @@
     },
     "scripts/contracts/b5/source/apps/clans/economy.py": {
       "path": "apps/clans/economy.py",
-      "blob": "b3446388734d759b54ddf7bf255e5e0b25282cf3"
+      "blob": "cc76f698afef515df9d6d79e9b2d83da22267e96"
     },
     "scripts/contracts/b5/source/apps/clans/missions.py": {
       "path": "apps/clans/missions.py",
@@ -41,7 +41,7 @@
     },
     "scripts/contracts/b5/source/apps/clans/models.py": {
       "path": "apps/clans/models.py",
-      "blob": "dabc27ee9005aa827d1d5251eb50256fef6c0e96"
+      "blob": "09e401ce2f6f5f40a71727534f64d55b9b5c8474"
     },
     "scripts/contracts/b5/source/apps/rewards/api.py": {
       "path": "apps/rewards/api.py",
@@ -65,15 +65,39 @@
     },
     "scripts/contracts/b5/source/docs/fixtures/b5/README.md": {
       "path": "docs/fixtures/b5/README.md",
-      "blob": "21e02b386d26d9d7765cee247db15c07e099fc32"
+      "blob": "6fb773d74dae8ba374f9624ee0f9a280f31cab77"
     },
     "src/integrations/api/fixtures/b5/authority-http.json": {
       "path": "docs/fixtures/b5/authority-http.json",
-      "blob": "5d411553e9fc8359313f42c7908fa2f1e0f4f384"
+      "blob": "318aff00313dfd3dea1f1cfaa80534281bb44a1c"
     },
     "src/integrations/api/fixtures/b5/lifecycle-http.json": {
       "path": "docs/fixtures/b5/lifecycle-http.json",
-      "blob": "b5bd4edeeddbf216bcbf63d421dc743b059a740c"
+      "blob": "a90195cbefcd342b0066fbc364bb4016275cf0e4"
+    },
+    "src/integrations/api/fixtures/b5/single-application-http.json": {
+      "path": "docs/fixtures/b5/single-application-http.json",
+      "blob": "fc50a39439a3327b3f1cbeee7d1bd41ce060203b"
+    },
+    "src/integrations/api/fixtures/b5/request-history-isolation-http.json": {
+      "path": "docs/fixtures/b5/request-history-isolation-http.json",
+      "blob": "b986ea9d1ec8c27909ee541592ac0144a9799ec7"
+    },
+    "src/integrations/api/fixtures/b5/request-visibility-http.json": {
+      "path": "docs/fixtures/b5/request-visibility-http.json",
+      "blob": "8715a413a95f978ce2c63b3596b9654beb5c00d0"
+    },
+    "scripts/contracts/b5/source/docs/evidence/B5_SINGLE_APPLICATION.md": {
+      "path": "docs/evidence/B5_SINGLE_APPLICATION.md",
+      "blob": "572bb7e38df45ffaebacdf04b1c5b96f0569c219"
+    },
+    "scripts/contracts/b5/source/docs/evidence/B5_REQUEST_VISIBILITY.md": {
+      "path": "docs/evidence/B5_REQUEST_VISIBILITY.md",
+      "blob": "4d97807cb56019a3f214c41a4df7a4beb23d36f4"
+    },
+    "scripts/contracts/b5/source/apps/clans/tests/test_b5_request_visibility.py": {
+      "path": "apps/clans/tests/test_b5_request_visibility.py",
+      "blob": "56860735f49955ed390bfc6daa5443c0c655ddfa"
     }
   }
 }

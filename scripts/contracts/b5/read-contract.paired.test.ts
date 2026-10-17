@@ -29,3 +29,18 @@ it("validates fresh authority loss/recovery and governance/access/unsafe-credent
   for (const key of ["pending_request", "unsafe_cancellation_retained"]) for (const row of lifecycle[key]) c.OwnRequestOut.parse(row);
   expect(lifecycle.unsafe_cancellation_retained[0]).toMatchObject({ state: "ACCEPTED", invite_state: "UNCERTAIN", cancellation_pending: true });
 });
+it("consumes fresh authoritative global visibility and bounded-history metadata", async () => {
+  const { selectClanApplications } = await import("../../../src/integrations/api/clanApplications");
+  const history = JSON.parse(readFileSync(process.env.B5_HISTORY_FIXTURE!, "utf8"));
+  const visibility = JSON.parse(readFileSync(process.env.B5_VISIBILITY_FIXTURE!, "utf8"));
+  const application = JSON.parse(readFileSync(process.env.B5_APPLICATION_FIXTURE!, "utf8"));
+  c.RequestOut.parse(application.first_request); expect(application.second_clan_conflict.code).toBe("CLAN_STATE_CONFLICT");
+  const rows = history.default_response.map((row: unknown) => c.OwnRequestOut.parse(row));
+  expect(history.newer_terminal_count).toBe(26);
+  expect(selectClanApplications(rows).activeRequest).toMatchObject({ state: "ACCEPTED", cancellation_pending: true, blocks_new_application: true });
+  const overlap = visibility.all_active_despite_history_offset.map((row: unknown) => c.OwnRequestOut.parse(row));
+  expect(selectClanApplications(overlap)).toMatchObject({ ambiguous: true, activeRequest: null, blocksNewApplication: true });
+  const old = overlap.find((row: c.OwnRequestOut) => !row.is_current_season)!;
+  expect(selectClanApplications([old])).toMatchObject({ operatorRequired: true, activeRequest: null });
+  expect(visibility.ambiguous_invite.code).toBe("CLAN_STATE_CONFLICT");
+});

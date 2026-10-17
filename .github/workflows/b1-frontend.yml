@@ -242,7 +242,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: hassan-anari/WEDCAL
-          ref: c38a7a65ba9bacce53a04bec6c10dfbeb71ed008
+          ref: 65a2c45810c0d5f721c662f3d4681967829ef242
           path: work/backend-b5
           persist-credentials: false
       - uses: actions/setup-node@v4

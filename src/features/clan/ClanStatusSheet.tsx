@@ -21,12 +21,13 @@ export function ClanStatusSheet({ live, onClose }: { live: ClanRemote; onClose: 
   const state = live.state.data;
   const member = live.membership.data;
   const request = live.activeRequest;
+  const displayRequest = request ?? live.operatorRequest;
   const captain = member?.role === "CAPTAIN";
   const busy = live.pending !== null;
   const leaveAllowed = member?.role === "SOLDIER" && state !== undefined && state.voluntary_leave_count < state.max_voluntary_leaves;
   const activeRequest = request !== null && live.applicationProblem === null;
   const needsInvite = live.applicationProblem === null && (request?.state === "ACCEPTED" || member?.access_state === "ACCESS_LOST");
-  const inviteOwner = needsInvite ? `${live.scopeKey}:${request ? `request:${request.id}:${request.clan_id}:${request.invite_state}:${request.cancellation_pending}` : `member:${member!.membership_id}:${member!.clan_id}`}` : null;
+  const inviteOwner = needsInvite ? `${live.scopeKey}:${request ? `request:${request.id}:${request.clan_id}:${request.clan_season_id}:${request.season_id}:${request.handling}:${request.invite_state}:${request.cancellation_pending}` : `member:${member!.membership_id}:${member!.clan_id}`}` : null;
   const credential = invite?.owner === inviteOwner ? invite.credential : null;
   const destination = credential?.state === "ACTIVE" && !request?.cancellation_pending ? safeDestination(credential.invite_link) : null;
   useEffect(() => { setInvite(null); }, [inviteOwner]);
@@ -54,7 +55,7 @@ export function ClanStatusSheet({ live, onClose }: { live: ClanRemote; onClose: 
       <div className={styles.detailList}>
         <div><span>Role</span><strong>{words(state?.role)}</strong></div>
         <div><span>Membership</span><strong>{member ? words(member.access_state) : "No active membership"}</strong></div>
-        {request ? <><div><span>Join request</span><strong>{words(request.state)}</strong></div><div><span>Clan</span><strong>{request.clan_name}</strong></div><div><span>Invite</span><strong>{words(request.invite_state)}</strong></div><div><span>Delivery</span><strong>{words(request.delivery_state)}</strong></div>{request.cancellation_pending ? <div><span>Cancellation</span><strong>Revocation pending</strong></div> : null}</> : null}
+        {displayRequest ? <><div><span>Join request</span><strong>{words(displayRequest.state)}</strong></div><div><span>Clan</span><strong>{displayRequest.clan_name}</strong></div><div><span>Season</span><strong>{displayRequest.season_code}</strong></div><div><span>Invite</span><strong>{words(displayRequest.invite_state)}</strong></div><div><span>Delivery</span><strong>{words(displayRequest.delivery_state)}</strong></div>{displayRequest.cancellation_pending ? <div><span>Cancellation</span><strong>Revocation pending</strong></div> : null}</> : null}
         {state?.cooldown_until ? <div><span>Join cooldown until</span><strong>{time(state.cooldown_until)}</strong></div> : null}
         {member?.access_rejoin_deadline ? <div><span>Access recovery deadline</span><strong>{time(member.access_rejoin_deadline)}</strong></div> : null}
         {live.recovery.data ? <><div><span>Clan state</span><strong>{words(live.recovery.data.state)}</strong></div><div><span>Recovery</span><strong>{live.recovery.data.reasons.map(words).join(" · ") || "—"}</strong></div><div><span>Group access</span><strong>{live.recovery.data.home_integrity_available ? "Available" : "Admin recovery required"}</strong></div>{live.recovery.data.captain_authority_lost_at ? <div><span>Captain authority lost</span><strong>{time(live.recovery.data.captain_authority_lost_at)}</strong></div> : null}{live.recovery.data.started_at ? <div><span>Recovery started</span><strong>{time(live.recovery.data.started_at)}</strong></div> : null}{live.recovery.data.bot_admin_restore_deadline ? <div><span>Admin recovery deadline</span><strong>{time(live.recovery.data.bot_admin_restore_deadline)}</strong></div> : null}</> : null}

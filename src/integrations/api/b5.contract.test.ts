@@ -2,6 +2,10 @@ import { expect, it, vi } from "vitest";
 import fixture from "./fixtures/b5/clan-http.json";
 import authority from "./fixtures/b5/authority-http.json";
 import lifecycle from "./fixtures/b5/lifecycle-http.json";
+import history from "./fixtures/b5/request-history-isolation-http.json";
+import visibility from "./fixtures/b5/request-visibility-http.json";
+import application from "./fixtures/b5/single-application-http.json";
+import { selectClanApplications } from "./clanApplications";
 import openapi from "./fixtures/b5/openapi.json";
 import * as c from "./b5Schemas";
 import { clanApi, ClanApiError } from "./b5";
@@ -54,4 +58,19 @@ it("parses the published authority and lifecycle handoff without clearing indepe
   c.InviteOut.parse(lifecycle.uncertain_invite);
   for (const row of lifecycle.unsafe_cancellation_retained) c.OwnRequestOut.parse(row);
   expect((openapi.paths as Record<string, any>)["/api/v1/clans/recovery/verify"].post).toBeTruthy();
+});
+
+it("preserves actual metadata, global blocking paths and deferred Season 2 from the corrected pin", () => {
+  const rows = history.default_response.map(row => c.OwnRequestOut.parse(row));
+  expect(history.newer_terminal_count).toBe(26); expect(selectClanApplications(rows).activeRequest?.state).toBe("ACCEPTED");
+  const overlap = visibility.all_active_despite_history_offset.map(row => c.OwnRequestOut.parse(row));
+  expect(selectClanApplications(overlap)).toMatchObject({ ambiguous: true, activeRequest: null });
+  expect(selectClanApplications(overlap.filter(row => !row.is_current_season))).toMatchObject({ operatorRequired: true, activeRequest: null });
+  expect(fixture.state.owner_decisions_pending).toEqual([]);
+  expect(fixture.trophies.find(row => row.key === "banner-raised")).toMatchObject({ available: false, blocked_reason: "SEASON_2_DEFERRED", current: null, target: null, unlocked: false });
+});
+it("uses the actual single-application conflict envelope without exposing backend detail", async () => {
+  c.RequestOut.parse(application.first_request);
+  vi.mocked(apiRequest).mockResolvedValueOnce(new Response(JSON.stringify(application.second_clan_conflict), { status: 409 }));
+  await expect(clanApi("synthetic-auth").join(2)).rejects.toMatchObject({ code: "CLAN_STATE_CONFLICT", status: 409, retryable: false });
 });

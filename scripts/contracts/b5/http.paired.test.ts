@@ -128,7 +128,7 @@ it.each([false, true])("a single application (accepted=%s) blocks another Clan w
 it("retains accepted reservations until confirmed revocation, then activates only verified membership", async () => {
   const a = await world(0), b = await world(0), soldier = await actor(); await soldier.api.role({ role: "SOLDIER" });
   const request = await soldier.api.join(a.clan.id); await a.captain.api.decision(request.id, { accept: true });
-  await control({ action: "b5-request-history", player: soldier.player, clan: b.clan.id, count: 25 });
+  await control({ action: "b5-request-history", player: soldier.player, clan: b.clan.id, count: 26 });
   const rows = await soldier.api.ownRequests();
   expect(rows.some(row => row.id > request.id && row.state === "CANCELLED")).toBe(true);
   expect(selectClanApplications(rows).activeRequest).toMatchObject({ id: request.id, state: "ACCEPTED", clan_id: a.clan.id });
@@ -167,6 +167,33 @@ it("selects an older accepted application rather than newer cancelled and declin
 it("keeps every active application discoverable beyond the ordinary terminal history limit", async () => {
   const a = await world(0), b = await world(0), soldier = await actor(); await soldier.api.role({ role: "SOLDIER" });
   const request = await soldier.api.join(a.clan.id); await a.captain.api.decision(request.id, { accept: true });
-  await control({ action: "b5-request-history", player: soldier.player, clan: b.clan.id, count: 25 });
+  await control({ action: "b5-request-history", player: soldier.player, clan: b.clan.id, count: 26 });
   expect(selectClanApplications(await soldier.api.ownRequests()).activeRequest?.id).toBe(request.id);
+}, 30_000);
+
+it.each(["older", "terminal"])("keeps %s operator-required paths blocking until actual authorized proof", async kind => {
+  const a = await world(0), b = await world(0), soldier = await actor(); await soldier.api.role({ role: "SOLDIER" });
+  const legacy = await control({ action: "b5-legacy-path", player: soldier.player, clan: a.clan.id, kind });
+  const rows = await soldier.api.ownRequests(); const row = rows.find(row => row.id === legacy.request)!;
+  expect(row).toMatchObject({ handling: "OPERATOR_REQUIRED", blocks_new_application: true, credential_unresolved: true, is_current_season: kind !== "older", is_active: kind === "older", season_id: legacy.season_id, clan_season_id: legacy.clan_season_id });
+  expect(selectClanApplications(rows)).toMatchObject({ activeRequest: null, operatorRequest: row, blocksNewApplication: true });
+  await expect(soldier.api.join(b.clan.id)).rejects.toMatchObject({ status: 409 });
+  if (kind === "older") await expect(soldier.api.invite()).rejects.toMatchObject({ status: 409 });
+  expect((await control({ action: "b5-resolve-proof", player: soldier.player, request: legacy.request })).state).toBe("REVOKED");
+  expect(selectClanApplications(await soldier.api.ownRequests()).blocksNewApplication).toBe(false);
+  expect((await soldier.api.join(b.clan.id)).state).toBe("PENDING");
+}, 30_000);
+it("detects a current active path plus an unresolved terminal credential before selecting any action", async () => {
+  const a = await world(0), b = await world(0), soldier = await actor(); await soldier.api.role({ role: "SOLDIER" });
+  const active = await soldier.api.join(a.clan.id);
+  const legacy = await control({ action: "b5-legacy-path", player: soldier.player, clan: b.clan.id, kind: "terminal" });
+  const blocked = selectClanApplications(await soldier.api.ownRequests());
+  expect(blocked).toMatchObject({ ambiguous: true, activeRequest: null, blocksNewApplication: true }); expect(blocked.blockingRequests).toHaveLength(2);
+  expect(blocked.blockingRequests.filter(row => row.is_active)).toHaveLength(1);
+  await expect(soldier.api.join(b.clan.id)).rejects.toMatchObject({ status: 409 });
+  await control({ action: "b5-resolve-proof", player: soldier.player, request: legacy.request });
+  expect(selectClanApplications(await soldier.api.ownRequests()).activeRequest?.id).toBe(active.id);
+  await soldier.api.cancelRequest(active.id);
+  expect(selectClanApplications(await soldier.api.ownRequests()).blocksNewApplication).toBe(false);
+  expect((await soldier.api.join(b.clan.id)).state).toBe("PENDING");
 }, 30_000);
