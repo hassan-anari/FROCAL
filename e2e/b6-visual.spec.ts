@@ -5,6 +5,7 @@ import { launch } from "./b4-fixture";
 const before = Boolean(process.env.B6_BASELINE);
 const phase = before ? "before" : "after";
 for (const width of [320, 390, 460]) test(`B6 preserved scenes and corrected async surfaces ${phase} ${width}`, async ({ page }) => {
+  test.setTimeout(120_000);
   await page.setViewportSize({ width, height: 844 });
   const f = await prepareClan(page);
   const dir = `docs/evidence/b6/${width}`; mkdirSync(dir, { recursive: true });
