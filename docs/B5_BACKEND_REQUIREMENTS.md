@@ -4,9 +4,13 @@ One FROCAL Draft [PR #6](https://github.com/hassan-anari/FROCAL/pull/6); backend
 
 The planning-only backend commit `75a43e5e0aa7f0a17092218237da7c88b8996909` was never used as a runtime pin. The actual implementation, OpenAPI and PostgreSQL-generated HTTP fixtures are now pinned at **`c38a7a65ba9bacce53a04bec6c10dfbeb71ed008`** in `scripts/contracts/b5-pin.json`. Historical B2/B3/B4 pins remain unchanged.
 
+## Active-application review coordination
+
+The owner confirms one global PENDING/ACCEPTED application. The frontend now selects explicitly by state, preserves read-only history and accepted access, and fails safely on overlaps without choosing a Clan or credential. The bounded/current-Season own-request read in runtime `70f27ec` still omits active records. The owner [confirmed this backend correctness blocker](https://github.com/hassan-anari/WEDCAL/pull/30#issuecomment-6227580941). Await the corrected exact runtime and handoff before updating the pin or running final paired tests. [Current correction and regression report](B5_ACTIVE_APPLICATION_REVIEW.md).
+
 ## Owner-approved surfaces
 
-The owner explicitly answered **“Approve reuse of existing ClanModal for these required states”** for request cancellation, accepted-invite/Telegram verification, leave confirmation, voting/removal, and recovery/dissolution. `ClanStatusSheet` now reuses that modal, footer/buttons, focus/scroll behavior and hierarchy. The existing Clan status action opens it. No further approval is pending for these surfaces. The resolved PH-045 policy and still-unresolved PH-048 predicate are described below.
+The owner explicitly answered **“Approve reuse of existing ClanModal for these required states”** for request cancellation, accepted-invite/Telegram verification, leave confirmation, voting/removal, and recovery/dissolution. `ClanStatusSheet` now reuses that modal, footer/buttons, focus/scroll behavior and hierarchy. The existing Clan status action opens it. No further approval is pending for these surfaces. The resolved PH-045 policy and owner-confirmed PH-048 Season 2 deferral are described below.
 
 ## Concrete frontend needs mapped to actual endpoints
 
@@ -32,7 +36,7 @@ All paths below are under authenticated `/api/v1`; Clan IDs and candidate IDs ar
 ## Deliberate server boundaries
 
 - **PH-045 resolved in this handoff:** same-season Captain recreation remains blocked with `CLAN_RECREATION_BLOCKED`; confirmed original-Captain Telegram authority loss enters RECOVERY. Only fresh original-Captain and bot permission verification can clear that cause. Independent inactivity/bot/governance causes remain visible and cannot be cleared by local UI or mere activity. No new deadline, succession or penalty.
-- **PH-048:** `banner-raised` remains unavailable with null progress/target and no reward. The Trophy Hall renders that state instead of a simulated first milestone.
+- **PH-048 owner-decided:** `banner-raised` is deferred to Season 2, after the first officially confirmed Clan War victory, at most once per ClanSeason (documentation decision `b171fd9b5ecaa750288281e3ec7c5c09ba1a87c2`). Season 1 remains UNAVAILABLE with null progress/target and no reward; no Season 2 behavior is implemented.
 - Candidate member count/image, Arena rank, match percentage, applicant active days/medals/contribution forecast, and facility count are not all supplied by this contract. Unknown values remain absent/dashes; artwork/layout is preserved.
 - Captain applicant inbox is the published pending-only list. The frontend does not invent an accepted-request management endpoint or infer another player's credential. Applicant cancellation covers accepted credential revocation; current credential state and cancellation-pending are server-authoritative.
 - No API exists for user-driven mission settlement/claim: completion is automatic. Reads never trigger a simulated reward reveal or credit local XP.

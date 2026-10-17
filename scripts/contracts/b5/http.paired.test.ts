@@ -1,5 +1,6 @@
 import { beforeAll, expect, it, vi } from "vitest";
 import { clanApi, ClanApiError } from "../../../src/integrations/api/b5";
+import { selectClanApplications } from "../../../src/integrations/api/clanApplications";
 const origin = "http://127.0.0.1:8792";
 const nativeFetch = globalThis.fetch;
 beforeAll(() => {
@@ -16,7 +17,7 @@ async function world(soldiers = 1) {
   const group = await control({ action: "b5-group", player: captain.player });
   expect((await captain.api.eligibleGroups()).some(row => row.id === group.id)).toBe(true);
   await captain.api.verifyGroup(group.id);
-  const clan = await captain.api.create({ telegram_group_id: group.id, name: "HTTP paired Clan", tag: crypto.randomUUID().slice(0, 4), motto: "Actual isolated API" });
+  const clan = await captain.api.create({ telegram_group_id: group.id, name: "HTTP paired Clan", tag: crypto.randomUUID().slice(0, 8), motto: "Actual isolated API" });
   const members = [];
   for (let i = 0; i < soldiers; i++) {
     const soldier = await actor(); await soldier.api.role({ role: "SOLDIER" });
@@ -117,4 +118,55 @@ it("keeps independent Captain/bot authority causes until fresh original-Captain 
   expect(partial.reasons).toContain("BOT_ADMIN_LOSS"); expect(partial.home_integrity_available).toBe(false);
   await control({ action: "b5-bot-admin", player: captain.player, admin: true });
   expect(await captain.api.verifyAuthority()).toMatchObject({ state: "ACTIVE", reasons: [], home_integrity_available: true });
+}, 30_000);
+it.each([false, true])("a single application (accepted=%s) blocks another Clan without replacing the original", async accepted => {
+  const a = await world(0), b = await world(0), soldier = await actor(); await soldier.api.role({ role: "SOLDIER" });
+  const request = await soldier.api.join(a.clan.id); if (accepted) await a.captain.api.decision(request.id, { accept: true });
+  await expect(soldier.api.join(b.clan.id)).rejects.toMatchObject({ status: 409, code: "CLAN_STATE_CONFLICT" });
+  expect(selectClanApplications(await soldier.api.ownRequests()).activeRequest).toMatchObject({ id: request.id, clan_id: a.clan.id, state: accepted ? "ACCEPTED" : "PENDING" }); expect(await soldier.api.membership()).toBeNull();
+}, 30_000);
+it("retains accepted reservations until confirmed revocation, then activates only verified membership", async () => {
+  const a = await world(0), b = await world(0), soldier = await actor(); await soldier.api.role({ role: "SOLDIER" });
+  const request = await soldier.api.join(a.clan.id); await a.captain.api.decision(request.id, { accept: true });
+  await control({ action: "b5-request-history", player: soldier.player, clan: b.clan.id, count: 25 });
+  const rows = await soldier.api.ownRequests();
+  expect(rows.some(row => row.id > request.id && row.state === "CANCELLED")).toBe(true);
+  expect(selectClanApplications(rows).activeRequest).toMatchObject({ id: request.id, state: "ACCEPTED", clan_id: a.clan.id });
+  expect((await soldier.api.invite()).state).toBe("ACTIVE"); expect(await soldier.api.membership()).toBeNull();
+  await control({ action: "b5-transport", mode: "revoke-unavailable" });
+  try {
+    await soldier.api.cancelRequest(request.id); await control({ action: "b5-revoke-worker", player: soldier.player, request: request.id });
+    expect(selectClanApplications(await soldier.api.ownRequests()).activeRequest).toMatchObject({ id: request.id, state: "ACCEPTED", cancellation_pending: true });
+    await expect(soldier.api.join(b.clan.id)).rejects.toMatchObject({ status: 409 });
+  } finally { await control({ action: "b5-transport", mode: "ok" }); }
+  await control({ action: "advance", seconds: 120 });
+  expect((await control({ action: "b5-revoke-worker", player: soldier.player, request: request.id })).state).toBe("REVOKED");
+  expect(selectClanApplications(await soldier.api.ownRequests()).activeRequest).toBeNull();
+  const next = await soldier.api.join(b.clan.id); await b.captain.api.decision(next.id, { accept: true }); expect(await soldier.api.membership()).toBeNull();
+  await control({ action: "b5-presence", player: soldier.player, group: b.group.id });
+  expect((await soldier.api.membership())?.clan_id).toBe(b.clan.id);
+  const activated = selectClanApplications(await soldier.api.ownRequests()); expect(activated.activeRequest).toBeNull(); expect(activated.history.some(row => row.id === next.id && row.state === "ACTIVATED")).toBe(true);
+}, 30_000);
+it("serializes concurrent applications to different Clans without replacing or cancelling the winner", async () => {
+  const a = await world(0), b = await world(0), soldier = await actor(); await soldier.api.role({ role: "SOLDIER" });
+  const results = await Promise.allSettled([soldier.api.join(a.clan.id), soldier.api.join(b.clan.id)]);
+  expect(results.filter(row => row.status === "fulfilled")).toHaveLength(1); expect(results.find(row => row.status === "rejected")).toMatchObject({ reason: { status: 409 } });
+  const selection = selectClanApplications(await soldier.api.ownRequests()); expect(selection.ambiguous).toBe(false); expect(selection.activeRequest?.state).toBe("PENDING"); expect(selection.history).toHaveLength(0);
+  await soldier.api.cancelRequest(selection.activeRequest!.id); expect(selectClanApplications(await soldier.api.ownRequests()).activeRequest).toBeNull();
+  const other = selection.activeRequest!.clan_id === a.clan.id ? b : a; expect((await soldier.api.join(other.clan.id)).state).toBe("PENDING");
+}, 30_000);
+it("selects an older accepted application rather than newer cancelled and declined database history", async () => {
+  const a = await world(0), b = await world(0), soldier = await actor(); await soldier.api.role({ role: "SOLDIER" });
+  const request = await soldier.api.join(a.clan.id); await a.captain.api.decision(request.id, { accept: true });
+  await control({ action: "b5-request-history", player: soldier.player, clan: b.clan.id, state: "CANCELLED" }); await control({ action: "b5-request-history", player: soldier.player, clan: b.clan.id, state: "DECLINED" });
+  const rows = await soldier.api.ownRequests(); expect(rows.some(row => row.id > request.id && row.state === "DECLINED")).toBe(true);
+  const selection = selectClanApplications(rows); expect(selection.activeRequest).toMatchObject({ id: request.id, clan_id: a.clan.id, state: "ACCEPTED" }); expect(selection.history.map(row => row.state).sort()).toEqual(["CANCELLED", "DECLINED"]);
+  expect(selectClanApplications([...rows].sort((left, right) => right.id - left.id)).activeRequest?.id).toBe(request.id);
+  expect((await soldier.api.invite()).state).toBe("ACTIVE"); expect(await soldier.api.membership()).toBeNull();
+}, 30_000);
+it("keeps every active application discoverable beyond the ordinary terminal history limit", async () => {
+  const a = await world(0), b = await world(0), soldier = await actor(); await soldier.api.role({ role: "SOLDIER" });
+  const request = await soldier.api.join(a.clan.id); await a.captain.api.decision(request.id, { accept: true });
+  await control({ action: "b5-request-history", player: soldier.player, clan: b.clan.id, count: 25 });
+  expect(selectClanApplications(await soldier.api.ownRequests()).activeRequest?.id).toBe(request.id);
 }, 30_000);

@@ -21,7 +21,7 @@ def install(world):
         return TelegramResult(ok=True, result={"user": {"id": user}, "status": status, "can_invite_users": status == "administrator"})
     bot_api.get_chat_member = member
     bot_api.create_chat_invite_link = lambda *_a, **_k: TelegramResult(ok=True, result={"invite_link": "https://t.me/+" + uuid4().hex})
-    bot_api.revoke_chat_invite_link = lambda *_a, **_k: TelegramResult(ok=True, result=True)
+    bot_api.revoke_chat_invite_link = lambda *_a, **_k: TelegramResult(ok=False, category="unavailable") if mode == "revoke-unavailable" else TelegramResult(ok=True, result=True)
     bot_api.send_message = lambda *_a, **_k: TelegramResult(ok=True, result={"message_id": 1})
 
 
@@ -47,6 +47,21 @@ def control(data, world):
         roles[group.telegram_chat_id, player.telegram_user_id] = "member" if data.get("present", True) else "left"
         reconcile_telegram_membership(player=player, group=group, present=data.get("present", True), telegram_update_id=int(uuid4().hex[:10], 16), observed_at=now, fresh_verified_at=now)
         return {"ok": True}
+    if action == "b5-request-history":
+        # Isolated legacy database setup only. HTTP reads still use the real API.
+        from apps.clans.models import ClanJoinRequest, ClanSeason
+        clan_season = ClanSeason.objects.get(clan_id=data["clan"], season=world["season"])
+        state = data.get("state", "CANCELLED")
+        if state not in {"CANCELLED", "DECLINED", "PENDING"}:
+            raise ValueError("Unsupported isolated legacy state")
+        rows = [ClanJoinRequest.objects.create(clan_season=clan_season, applicant=player, state=state, decided_at=None if state == "PENDING" else now) for _ in range(min(int(data.get("count", 1)), 30))]
+        return {"ids": [row.pk for row in rows]}
+    if action == "b5-revoke-worker":
+        from apps.clans.models import ClanInvite
+        from apps.clans.services import revoke_invite_remote
+        invite = ClanInvite.objects.get(join_request_id=data["request"], join_request__applicant=player)
+        result = revoke_invite_remote(invite.pk)
+        return {"state": result.state}
     member = ClanMembership.objects.select_related("clan_season").get(player=player, ended_at__isnull=True)
     if action == "b5-mission":
         from apps.clans.models import ClanMissionDefinition

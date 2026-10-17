@@ -212,3 +212,12 @@ Compared with merged main `ef6f1fca4de541e6eb45c9b8bf3e114bbd163cfb`. Includes e
 - `docs/evidence/b5/clan/460/before-approved-role-confirmation.png`
 - `docs/evidence/b5/clan/baseline-provenance.json`
 - `docs/evidence/b5/validation-manifest.json`
+
+## Independent-review correction additions
+
+Existing listed Clan views/hooks and paired harness/tests are updated in scope. Additional files:
+
+- `src/integrations/api/clanApplications.ts`
+- `src/integrations/api/clanApplications.test.ts`
+- `src/integrations/api/useClanRemote.test.tsx`
+- `docs/B5_ACTIVE_APPLICATION_REVIEW.md`

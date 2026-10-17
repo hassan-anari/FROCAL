@@ -54,7 +54,7 @@ for (const width of [320, 390, 460]) test(`actual Captain/Soldier lifecycle, eco
   await other.getByLabel("Clan name or tag").fill(name);
   await other.getByRole("button").filter({ hasText: name }).first().click();
   await snapshot(other, width, "soldier-preview");
-  await other.getByRole("button", { name: "Request to join", exact: true }).click();
+  await other.getByRole("button", { name: /^(Request to join|One request already active)$/ }).click();
   await expect(other.getByRole("dialog", { name: "Clan status" })).toContainText("PENDING");
   await snapshot(other, width, "request-pending");
   await page.bringToFront();
@@ -151,7 +151,7 @@ test("approved governance sheet uses real roster targets, reason codes, electora
   await api(captain, "/clans/role", "POST", { role: "CAPTAIN" });
   const group = await control({ action: "b5-group", player: captain.player });
   await api(captain, `/clans/eligible-groups/${group.id}/verify`, "POST");
-  const clan = await api(captain, "/clans/", "POST", { telegram_group_id: group.id, name: "Governance paired", tag: crypto.randomUUID().slice(0, 4), motto: "Server governed" });
+  const clan = await api(captain, "/clans/", "POST", { telegram_group_id: group.id, name: "Governance paired", tag: crypto.randomUUID().slice(0, 8), motto: "Server governed" });
   const members = [];
   for (let i = 0; i < 3; i++) {
     const soldier = await control({ action: "player", points: 2500 });
@@ -183,7 +183,7 @@ test("server item effect units retain the approved shop sheet at every mobile wi
   await api(captain, "/clans/role", "POST", { role: "CAPTAIN" });
   const group = await control({ action: "b5-group", player: captain.player });
   await api(captain, `/clans/eligible-groups/${group.id}/verify`, "POST");
-  await api(captain, "/clans/", "POST", { telegram_group_id: group.id, name: "Equipment paired", tag: crypto.randomUUID().slice(0, 4), motto: "Confirmed equipment" });
+  await api(captain, "/clans/", "POST", { telegram_group_id: group.id, name: "Equipment paired", tag: crypto.randomUUID().slice(0, 8), motto: "Confirmed equipment" });
   await control({ action: "b5-reward", player: captain.player });
   const rule = (await api(captain, "/clans/equipment")).items.find((item: any) => item.item_id === "rally-beacon");
   expect(rule.effects).toContainEqual({ category: "HQ_XP_RATE_BONUS_BPS", value: 2000 });
@@ -194,4 +194,55 @@ test("server item effect units retain the approved shop sheet at every mobile wi
   await expect(page.getByRole("dialog")).toContainText("+20% HQ XP generation");
   await expect(page.getByRole("dialog")).not.toContainText("BPS");
   for (const width of [320, 390, 460]) { await page.setViewportSize({ width, height: 844 }); await snapshot(page, width, "server-price-purchase"); }
+});
+async function requestWorld() {
+  const captain = await control({ action: "player", points: 2500 }); await api(captain, "/clans/role", "POST", { role: "CAPTAIN" });
+  const group = await control({ action: "b5-group", player: captain.player }); await api(captain, `/clans/eligible-groups/${group.id}/verify`, "POST");
+  const name = `Review ${crypto.randomUUID().slice(0, 8)}`;
+  const clan = await api(captain, "/clans/", "POST", { telegram_group_id: group.id, name, tag: crypto.randomUUID().slice(0, 8), motto: "Actual request lifecycle" });
+  return { captain, group, clan, name };
+}
+async function preview(page: Page, name: string) {
+  await page.getByRole("button", { name: "Search", exact: true }).click(); await page.getByLabel("Clan name or tag").fill(name);
+  await page.getByRole("button").filter({ hasText: name }).first().click(); await expect(page.getByRole("dialog")).toBeVisible();
+}
+const joinButton = (page: Page) => page.getByRole("button", { name: /^(Request to join|One request already active)$/ });
+for (const width of [320, 390, 460]) test(`one active request and older accepted invitation survive terminal history at ${width}`, async ({ page }) => {
+  test.setTimeout(120_000); await page.setViewportSize({ width, height: 844 });
+  const a = await requestWorld(), b = await requestWorld(); const soldier = await control({ action: "player", points: 2500 }); await api(soldier, "/clans/role", "POST", { role: "SOLDIER" });
+  const request = await api(soldier, `/clans/${a.clan.id}/join-requests`, "POST"); await enter(page, soldier); await preview(page, b.name);
+  await expect(joinButton(page)).toBeDisabled(); await snapshot(page, width, "review-pending-blocks-other-clan"); await close(page);
+  await api(a.captain, `/clans/join-requests/${request.id}/decision`, "POST", { accept: true });
+  await control({ action: "b5-request-history", player: soldier.player, clan: b.clan.id, count: 25 }); await page.reload();
+  await page.getByRole("button", { name: "Clan status", exact: true }).click();
+  await expect(page.getByRole("dialog")).toContainText(a.name); await expect(page.getByRole("dialog")).toContainText("ACCEPTED"); await expect(page.getByLabel("Clan request history")).toContainText("CANCELLED");
+  await page.getByRole("button", { name: "Check invite and access", exact: true }).click(); await expect(page.getByRole("button", { name: "Open Telegram group", exact: true })).toBeVisible(); await snapshot(page, width, "review-accepted-behind-cancelled-history");
+  await close(page); await preview(page, b.name); await expect(joinButton(page)).toBeDisabled(); await close(page); await page.getByRole("button", { name: "Clan status", exact: true }).click();
+  await control({ action: "b5-transport", mode: "revoke-unavailable" });
+  try {
+    await page.getByRole("button", { name: "Cancel request", exact: true }).click(); await control({ action: "b5-revoke-worker", player: soldier.player, request: request.id }); await page.getByRole("button", { name: "Refresh status", exact: true }).click();
+    await expect(page.getByRole("dialog")).toContainText("Revocation pending"); await expect(page.getByRole("button", { name: "Cancel request", exact: true })).toBeDisabled(); await expect(page.getByRole("button", { name: "Open Telegram group", exact: true })).toHaveCount(0); await snapshot(page, width, "review-revocation-pending");
+  } finally { await control({ action: "b5-transport", mode: "ok" }); }
+  await control({ action: "advance", seconds: 120 }); await control({ action: "b5-revoke-worker", player: soldier.player, request: request.id });
+  await page.getByRole("button", { name: "Refresh status", exact: true }).click(); await expect(page.getByRole("button", { name: "Cancel request", exact: true })).toHaveCount(0);
+  await close(page); await preview(page, b.name); await expect(joinButton(page)).toBeEnabled(); await joinButton(page).click(); await expect(page.getByRole("dialog", { name: "Clan status" })).toContainText("PENDING");
+  const active = (await api(soldier, "/clans/join-requests/current")).find((row: any) => row.state === "PENDING");
+  await api(b.captain, `/clans/join-requests/${active.id}/decision`, "POST", { accept: true }); await control({ action: "b5-presence", player: soldier.player, group: b.group.id });
+  await page.getByRole("button", { name: "Refresh status", exact: true }).click(); await close(page); await expect(page.getByRole("navigation", { name: "Clan headquarters sections" })).toBeVisible(); await snapshot(page, width, "review-verified-membership");
+});
+test("an application made on another device returns conflict feedback and refreshes the real reservation", async ({ page }) => {
+  const a = await requestWorld(), b = await requestWorld(), soldier = await control({ action: "player", points: 2500 }); await api(soldier, "/clans/role", "POST", { role: "SOLDIER" });
+  await enter(page, soldier); await preview(page, b.name); await expect(joinButton(page)).toBeEnabled(); await api(soldier, `/clans/${a.clan.id}/join-requests`, "POST"); await joinButton(page).click();
+  await expect(page.getByRole("alert")).toBeVisible(); await expect(joinButton(page)).toBeDisabled(); await close(page); await page.getByRole("button", { name: "Clan status", exact: true }).click(); await expect(page.getByRole("dialog")).toContainText(a.name); await expect(page.getByRole("dialog")).toContainText("PENDING");
+});
+test("unexpected legacy overlapping active requests expose no Clan credential or arbitrary action", async ({ page }) => {
+  const a = await requestWorld(), b = await requestWorld(), soldier = await control({ action: "player", points: 2500 }); await api(soldier, "/clans/role", "POST", { role: "SOLDIER" });
+  const request = await api(soldier, `/clans/${a.clan.id}/join-requests`, "POST"); await api(a.captain, `/clans/join-requests/${request.id}/decision`, "POST", { accept: true });
+  await control({ action: "b5-request-history", player: soldier.player, clan: b.clan.id, state: "PENDING" });
+  const credentials: string[] = []; page.on("request", request => { if (request.url().includes("/invite/current")) credentials.push(request.url()); });
+  await enter(page, soldier); await expect(page.getByRole("status")).toContainText("More than one active Clan request"); await page.getByRole("button", { name: "Clan status", exact: true }).click(); await expect(page.getByRole("button", { name: "Refresh status", exact: true })).toBeVisible();
+  for (const label of ["Check invite and access", "Open Telegram group", "Cancel request"]) await expect(page.getByRole("button", { name: label, exact: true })).toHaveCount(0);
+  for (const width of [320, 390, 460]) { await page.setViewportSize({ width, height: 844 }); await snapshot(page, width, "review-overlap-safe"); }
+  await page.getByRole("button", { name: "Refresh status", exact: true }).click(); await expect(page.getByRole("dialog")).toContainText("More than one active Clan request"); expect(credentials).toEqual([]);
+  await close(page); await preview(page, b.name); await expect(joinButton(page)).toBeDisabled();
 });

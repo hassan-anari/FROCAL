@@ -5,6 +5,7 @@ import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import { isRemoteDataSource } from "./bootstrap";
 import { queryKeys } from "./queryKeys";
 import { clanApi, ClanApiError } from "./b5";
+import { selectClanApplications } from "./clanApplications";
 import { clanEconomicIntent } from "./clanIntent";
 import { showFeedback } from "@/design-system/components/TransientFeedback";
 import type { ClanOut } from "./b5Schemas";
@@ -40,8 +41,17 @@ export function useClanRemote() {
   const discovery = useInfiniteQuery({ queryKey: [...root, "discovery", search], queryFn: ({ pageParam, signal }) => api.discover(search, pageParam, signal), initialPageParam: 0, getNextPageParam: (page, _pages, offset) => page.length === 20 ? offset + page.length : undefined, enabled: eligible && state.data?.role === "SOLDIER" && membership.data === null, retry: false, staleTime: 5_000 });
   const [previewId, setPreviewId] = useState<number | null>(null);
   const preview = read(`preview:${previewId}`, signal => api.preview(previewId!, signal), eligible && previewId !== null);
-  const currentRequest = requests.data?.[0] ?? null;
-  const pendingIdentity = read(`request-clan:${currentRequest?.clan_id}`, signal => api.preview(currentRequest!.clan_id, signal), eligible && Boolean(currentRequest));
+  const applicationSelection = selectClanApplications(requests.data ?? []);
+  const applicationProblem: "loading" | "error" | "overlap" | null = state.isError ? "error" : !state.isSuccess ? "loading" : state.data.role !== "SOLDIER" ? null
+    : requests.isError || membership.isError ? "error"
+    : !requests.isSuccess || !membership.isSuccess ? "loading"
+    : applicationSelection.ambiguous ? "overlap" : null;
+  const activeRequest = member ? null : applicationSelection.activeRequest;
+  const requestHistory = applicationSelection.history;
+  const lastHistoricalRequest = requestHistory[0] ?? null; // Display only; never an action target.
+  const requestDisplay = activeRequest ?? (lastHistoricalRequest?.state === "DECLINED" ? lastHistoricalRequest : null);
+  const requestIdentity = read(`request-clan:${requestDisplay?.clan_id}`, signal => api.preview(requestDisplay!.clan_id, signal), eligible && applicationProblem === null && Boolean(requestDisplay));
+  const applicationsBlocked = applicationProblem !== null || Boolean(activeRequest) || Boolean(member);
   const [pending, setPending] = useState<string | null>(null);
   const locks = useRef(new Set<string>());
   const refresh = useCallback(async () => {
@@ -63,6 +73,6 @@ export function useClanRemote() {
   const serverNow = () => clock.at + Math.max(0, performance.now() - clock.tick);
   const rows = <T extends { id?: number; membership_id?: number },>(pages: { items: T[] }[] | undefined) => Array.from(new Map((pages ?? []).flatMap(page => page.items).map(row => [row.membership_id ?? row.id, row])).values());
   const clans = Array.from(new Map((discovery.data?.pages.flat() ?? []).map((row: ClanOut) => [row.id, row])).values());
-  return { scope, scopeKey: JSON.stringify(scope), remote, enabled, api, state, eligible, membership, member, requests, currentRequest, groups, home, roster, rosterRows: rows(roster.data?.pages), treasury, equipment, missions, trophies, applicants, governance, recovery, identity, discovery, clans, search, setSearch, previewId, setPreviewId, preview, pendingIdentity, pending, run, economic, refresh, serverNow };
+  return { scope, scopeKey: JSON.stringify(scope), remote, enabled, api, state, eligible, membership, member, requests, activeRequest, requestHistory, lastHistoricalRequest, applicationProblem, applicationsBlocked, groups, home, roster, rosterRows: rows(roster.data?.pages), treasury, equipment, missions, trophies, applicants, governance, recovery, identity, discovery, clans, search, setSearch, previewId, setPreviewId, preview, requestIdentity, pending, run, economic, refresh, serverNow };
 }
 export type ClanRemote = ReturnType<typeof useClanRemote>;

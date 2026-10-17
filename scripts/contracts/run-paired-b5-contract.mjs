@@ -8,6 +8,10 @@ if (head.status !== 0 || head.stdout.trim() !== pin.commit) throw new Error("B5 
 if (spawnSync("git", ["-C", backend, "diff", "--quiet", "HEAD"]).status !== 0) throw new Error("B5 backend checkout has unreviewed tracked changes");
 for (const [target, source] of Object.entries(pin.files)) if (!readFileSync(target).equals(readFileSync(resolve(backend, source.path)))) throw new Error(`B5 paired source drift: ${target}`);
 if (!process.env.POSTGRES_DB?.startsWith("frocal_b5_") || process.env.POSTGRES_HOST !== "127.0.0.1") throw new Error("Isolated local frocal_b5_ database required");
+// Refuse to pair with a stale local server from another backend checkout.
+let occupied = false;
+try { await fetch("http://127.0.0.1:8792/__ready__", { signal: AbortSignal.timeout(1_000) }); occupied = true; } catch {}
+if (occupied) throw new Error("B5 HTTP harness port is already occupied; stop the previous isolated harness before pairing");
 const output = resolve("work/b5-paired"); mkdirSync(output, { recursive: true });
 const fixtureNames = ["clan-http.json", "authority-http.json", "lifecycle-http.json"];
 const originals = new Map(fixtureNames.map(name => [resolve(backend, "docs/fixtures/b5", name), readFileSync(resolve(backend, "docs/fixtures/b5", name))]));
@@ -31,7 +35,11 @@ try {
       await new Promise(done => setTimeout(done, 250));
     }
     if (!ready) throw new Error("B5 HTTP readiness failed");
-    await run("npx", ["vitest", "run", "--config", "vitest.b5-paired.config.ts"], { env: environment });
-    await run("npx", ["playwright", "test", "--config", "playwright.b5-paired.config.ts"], { env: environment });
+    // Collect both suites' evidence without suppressing either failure.
+    const failures = [];
+    for (const args of [["vitest", "run", "--config", "vitest.b5-paired.config.ts"], ["playwright", "test", "--config", "playwright.b5-paired.config.ts"]]) {
+      try { await run("npx", args, { env: environment }); } catch (error) { failures.push(error); }
+    }
+    if (failures.length) throw new AggregateError(failures, "B5 paired acceptance failed; inspect API and browser results");
   } finally { server.kill("SIGTERM"); }
 } finally { for (const [path, bytes] of originals) writeFileSync(path, bytes); }

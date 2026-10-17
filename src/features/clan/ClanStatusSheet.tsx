@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ClanModal } from "./ClanOverlays";
 import { Button } from "@/design-system/primitives/Button";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
+import { applicationStatusMessage } from "@/integrations/api/clanApplications";
 import { safeDestination } from "@/integrations/api/safeNavigation";
 import type { ClanRemote } from "@/integrations/api/useClanRemote";
 import type { InviteOut } from "@/integrations/api/b5Schemas";
@@ -16,16 +17,19 @@ export function ClanStatusSheet({ live, onClose }: { live: ClanRemote; onClose: 
   const [target, setTarget] = useState("");
   const [reason, setReason] = useState("");
   // Disposable credentials are deliberately excluded from Query/localStorage/sessionStorage.
-  const [invite, setInvite] = useState<InviteOut | null>(null);
+  const [invite, setInvite] = useState<{ owner: string; credential: InviteOut } | null>(null);
   const state = live.state.data;
   const member = live.membership.data;
-  const request = live.currentRequest;
+  const request = live.activeRequest;
   const captain = member?.role === "CAPTAIN";
   const busy = live.pending !== null;
   const leaveAllowed = member?.role === "SOLDIER" && state !== undefined && state.voluntary_leave_count < state.max_voluntary_leaves;
-  const activeRequest = request && ["PENDING", "ACCEPTED"].includes(request.state);
-  const needsInvite = request?.state === "ACCEPTED" || member?.access_state === "ACCESS_LOST";
-  const destination = invite?.state === "ACTIVE" ? safeDestination(invite.invite_link) : null;
+  const activeRequest = request !== null && live.applicationProblem === null;
+  const needsInvite = live.applicationProblem === null && (request?.state === "ACCEPTED" || member?.access_state === "ACCESS_LOST");
+  const inviteOwner = needsInvite ? `${live.scopeKey}:${request ? `request:${request.id}:${request.clan_id}:${request.invite_state}:${request.cancellation_pending}` : `member:${member!.membership_id}:${member!.clan_id}`}` : null;
+  const credential = invite?.owner === inviteOwner ? invite.credential : null;
+  const destination = credential?.state === "ACTIVE" && !request?.cancellation_pending ? safeDestination(credential.invite_link) : null;
+  useEffect(() => { setInvite(null); }, [inviteOwner]);
   const complete = async (action: string, operation: () => Promise<unknown>) => { if (await live.run(action, operation) !== undefined) { setInvite(null); setMode("status"); } };
   if (mode !== "status") return (
     <ClanModal eyebrow="Clan governance" title={mode === "leave" ? "Leave Clan" : mode === "dissolve" ? "Request dissolution" : "Propose member removal"} onClose={onClose} footer={
@@ -55,10 +59,11 @@ export function ClanStatusSheet({ live, onClose }: { live: ClanRemote; onClose: 
         {member?.access_rejoin_deadline ? <div><span>Access recovery deadline</span><strong>{time(member.access_rejoin_deadline)}</strong></div> : null}
         {live.recovery.data ? <><div><span>Clan state</span><strong>{words(live.recovery.data.state)}</strong></div><div><span>Recovery</span><strong>{live.recovery.data.reasons.map(words).join(" · ") || "—"}</strong></div><div><span>Group access</span><strong>{live.recovery.data.home_integrity_available ? "Available" : "Admin recovery required"}</strong></div>{live.recovery.data.captain_authority_lost_at ? <div><span>Captain authority lost</span><strong>{time(live.recovery.data.captain_authority_lost_at)}</strong></div> : null}{live.recovery.data.started_at ? <div><span>Recovery started</span><strong>{time(live.recovery.data.started_at)}</strong></div> : null}{live.recovery.data.bot_admin_restore_deadline ? <div><span>Admin recovery deadline</span><strong>{time(live.recovery.data.bot_admin_restore_deadline)}</strong></div> : null}</> : null}
       </div>
+      {live.applicationProblem ? <p role="status">{applicationStatusMessage[live.applicationProblem]}</p> : null}
       {request?.state === "ACCEPTED" && !member ? <p className={styles.note}>Acceptance reserves a place. Membership activates after your Telegram group membership is verified.</p> : null}
       {needsInvite ? <div className={`${styles.detailList} ${styles.statusControls}`}>
-        <Button size="sm" tone="secondary" disabled={busy} onClick={() => { setInvite(null); void live.run("invite", () => live.api.invite()).then(value => { if (value) setInvite(value); }); }}>Check invite and access</Button>
-        {invite ? <div><span>Current credential</span><strong>{words(invite.state)} · {words(invite.delivery_state)}</strong></div> : null}
+        <Button size="sm" tone="secondary" disabled={busy} onClick={() => { setInvite(null); void live.run("invite", () => live.api.invite()).then(value => { if (value && inviteOwner) setInvite({ owner: inviteOwner, credential: value }); }); }}>Check invite and access</Button>
+        {credential ? <div><span>Current credential</span><strong>{words(credential.state)} · {words(credential.delivery_state)}</strong></div> : null}
         {destination?.kind === "telegram" ? <Button size="sm" onClick={() => adapter.openTelegramLink(destination.url)}>Open Telegram group</Button> : null}
       </div> : null}
       <div className={styles.doubleActions}>
@@ -68,6 +73,10 @@ export function ClanStatusSheet({ live, onClose }: { live: ClanRemote; onClose: 
         {member?.role === "SOLDIER" ? <Button size="sm" tone="secondary" disabled={busy || !leaveAllowed} onClick={() => setMode("leave")}>Leave Clan</Button> : null}
         {captain ? <><Button size="sm" tone="secondary" disabled={busy || live.rosterRows.filter(row => row.role === "SOLDIER").length === 0} onClick={() => setMode("removal")}>Propose removal</Button><Button size="sm" tone="secondary" disabled={busy || live.recovery.data?.state !== "ACTIVE"} onClick={() => setMode("dissolve")}>Request dissolution</Button></> : null}
       </div>
+      {live.requestHistory.length ? <div className={styles.detailList} aria-label="Clan request history">
+        <div><span>Request history</span><strong>{live.requestHistory.length}</strong></div>
+        {live.requestHistory.map(row => <div key={row.id}><span>{row.clan_name}</span><strong>{words(row.state)} · {time(row.decided_at ?? row.created_at)}</strong></div>)}
+      </div> : null}
       {(live.governance.data ?? []).map(governance => <section key={governance.id} className={styles.detailList}>
         <div><span>{words(governance.case_type)}</span><strong>{words(governance.status)}</strong></div>
         <p>{governance.reason}</p>
