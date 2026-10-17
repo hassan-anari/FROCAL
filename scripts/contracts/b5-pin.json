@@ -1,7 +1,7 @@
 {
   "repository": "hassan-anari/WEDCAL",
   "commit": "65a2c45810c0d5f721c662f3d4681967829ef242",
-  "status": "Final independently reviewed B5 runtime with authoritative blocking/Season/credential metadata; exact source/schema/HTTP fixtures, paired validation required.",
+  "status": "Final independently reviewed B5 runtime with authoritative blocking/Season/credential metadata; exact source/schema/HTTP blobs verified, fresh paired PostgreSQL/API/mobile and final-head CI evidence published in Draft PR #6.",
   "files": {
     "scripts/contracts/b5/source/docs/B5_BACKEND_CONTRACT.md": {
       "path": "docs/B5_BACKEND_CONTRACT.md",

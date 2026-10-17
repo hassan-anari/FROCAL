@@ -4,9 +4,9 @@ One coordinated FROCAL Draft [PR #6](https://github.com/hassan-anari/FROCAL/pull
 
 The approved Clan P-10/P-11/P-12 UI now consumes the actual WEDCAL B5 APIs. The owner explicitly approved **reuse of existing ClanModal** for the missing cancellation, accepted-invite/verification, leave, removal/voting and recovery/dissolution states. That approval is implemented; it is no longer a blocker.
 
-## Independent-review correction in progress
+## Final active-application integration
 
-The active-application correction supersedes the previous green snapshot below. Explicit state selection, safe overlap/read-error guards, accepted-invite memory fencing and authoritative refresh are implemented. The owner-confirmed backend read-contract blocker must be fixed before the new pin and final exact-pin/CI acceptance. [Current correction report](B5_ACTIVE_APPLICATION_REVIEW.md).
+The reviewed runtime `65a2c45810c0d5f721c662f3d4681967829ef242` resolves the prior read/write blockers. The frontend consumes all authoritative blocking, credential and original Season metadata before selecting one current-Season actionable request. Terminal-labelled unresolved credentials and older-Season paths require read-only operator status; multiple blocking paths fail closed. [Correction policy and evidence](B5_ACTIVE_APPLICATION_REVIEW.md).
 
 ## Implemented behavior
 
@@ -28,7 +28,7 @@ The active-application correction supersedes the previous green snapshot below. 
 | B2 | `34328c76ba3377396660b1549bf8e370ac514a71` |
 | B3 | `c3f8f27d18fda66b62e22c6cadd1480e1f0f4370` |
 | B4 | `75992805c1df2235a7513ddd6aa5864df65dd5c3` |
-| B5 | **`c38a7a65ba9bacce53a04bec6c10dfbeb71ed008`** |
+| B5 | **`65a2c45810c0d5f721c662f3d4681967829ef242`** |
 
 Historical B2/B3/B4 pin/source/fixture bytes are preserved. The separate B5 pin records actual source/fixture Git blobs; Zod schemas are generated from its actual OpenAPI with a drift gate. The planning-only SHA was never an implementation pin. WEDCAL [Draft #30](https://github.com/hassan-anari/WEDCAL/pull/30) owns backend implementation and independent final backend review; this consumer binds and tests the published implemented runtime above.
 
@@ -36,16 +36,13 @@ Historical B2/B3/B4 pin/source/fixture bytes are preserved. The separate B5 pin 
 
 ## Validation and evidence
 
-Local verified snapshot:
+Local verified components against the exact pin:
 
-- `npm run check`: **41 files / 265 unit tests**, TypeScript, structure/assets/import/motion validators, **12 production-policy checks**, all four contract pins/schema drift, release build and production bundle exclusion passed. Repository has no standalone ESLint command; these are its configured static/lint checks.
-- `npm run validate:telegram-sdk`: official SDK hash/SRI unchanged and verified.
-- Approved B5 corrections/data browser suite: **12 passed**, including image pending/success/failure, 320/390/460 evidence, notification continuation, authenticated history loading/error/retry/pagination/shared cache, real Base missions/rewards and Telegram external banner opener.
-- Exact pinned backend on isolated PostgreSQL: **204 Clan tests passed**, covering API/domain, source ordering, governance/recovery, invitations, mission settlement, authorization, concurrency and idempotency. Fresh actual HTTP fixtures validate through frontend schemas.
-- Real frontend client/API pairing: **8 passed** (5 live HTTP scenarios plus 3 fresh schema/evidence scenarios), including unlock/immutable role/fresh group authority, private request lifecycle, shop/activation concurrency and replay, role negatives, immutable voting, admin recovery, leave cooldown and historical contribution retention.
-- Actual mobile Captain/Soldier flows at **320/390/460 passed** (five paired browser scenarios total): founding, discovery/preview/request/inbox/acceptance, personal invite, Telegram presence, HQ, settled mission, shop purchase, inventory activation, effect, recovery and leave. The 390 case drops a successful purchase response and verifies the exact same retry key.
-- The approved governance modal passes real roster target selection, removal reasons, immutable voting and dissolution confirmation. Authority verification is exercised at all three widths, including independent Captain/bot causes. Equipment effect units preserve the approved sheet while displaying server basis points as exact percentages and keeping HQ XP distinct from player XP. [Validation manifest](evidence/b5/validation-manifest.json) records exact screenshot hashes/source commits/backend pin and the required final-head hosted checks; the final run URL is published in the PR description.
-- Historical compatibility: preceding hosted run [38982936354](https://github.com/hassan-anari/FROCAL/actions/runs/38982936354) passed unit/build and all B2/B3/B4 paired jobs. The required final-head workflow reruns those jobs and broad browser/Profile/Network/Arena/visual checks; completion is linked from the PR description. A previous B2 wall-clock timeout was fixed by allowing 15 seconds for real PostgreSQL API/controller tests, preserving assertions and historical backend pin.
+- `npm run check`: **43 files / 293 unit tests**, TypeScript, structure/assets/import/motion validators, 12 production-policy checks, all historical/current pin/schema drift checks, release build and production bundle exclusion passed. There is no standalone ESLint command; these are the configured static/lint checks. Official Telegram SDK hash/SRI and actual backend OpenAPI export check passed.
+- **267 actual backend Clan PostgreSQL tests** passed, including the complete active/unsafe visibility and independent governance/recovery/economy/concurrency cases.
+- **19 real client/API and fresh-schema paired checks** passed, including 26 newer terminal records, older-Season active reservations, terminal credential risk, mixed blockers, explicit authorized proof, legacy overlap, actual membership and credential cleanup, permissions and economic idempotency.
+- **13 actual mobile Clan scenarios** passed at 320/390/460, retaining Captain/Soldier founding through economy/governance and adding metadata-driven operator/ambiguous/resolution cases. **75 Clan screenshots**, including **24 targeted correction screenshots**, record exact source hashes, backend pin and viewports in [the validation manifest](evidence/b5/validation-manifest.json).
+- The complete final paired command and all six final-head CI jobs are required. The PR description publishes the final frontend SHA, exact run URL and job conclusions. The hosted browser job retains 134 broad app regressions, 17 B4 and 12 B5 browser/visual checks; dedicated B2/B3/B4 pairing preserves compatibility. Previous green heads are not substituted for final acceptance.
 
 `docs/evidence/b5/{320,390,460}/` contains matching approved-main before/after A corrections, real photographic fixture and fallback cases, computed dimensions and provenance. The photo is an unmodified public-domain NASA image used as a deterministic real-image fixture, not an owner group photo. `docs/evidence/b5/clan/` contains immutable approved-source diagnostic design references and actual pinned-runtime mobile states. Historical diagnostic numbers are explicitly baseline samples; production screenshots use actual isolated API responses. Paired credentials/launch URLs are excluded from traces/screenshots; no real Telegram send occurs.
 

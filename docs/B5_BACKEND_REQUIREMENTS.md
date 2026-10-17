@@ -2,11 +2,11 @@
 
 One FROCAL Draft [PR #6](https://github.com/hassan-anari/FROCAL/pull/6); backend implementation belongs to WEDCAL Draft [PR #30](https://github.com/hassan-anari/WEDCAL/pull/30). Starting frontend main: `ef6f1fca4de541e6eb45c9b8bf3e114bbd163cfb`.
 
-The planning-only backend commit `75a43e5e0aa7f0a17092218237da7c88b8996909` was never used as a runtime pin. The actual implementation, OpenAPI and PostgreSQL-generated HTTP fixtures are now pinned at **`c38a7a65ba9bacce53a04bec6c10dfbeb71ed008`** in `scripts/contracts/b5-pin.json`. Historical B2/B3/B4 pins remain unchanged.
+The planning-only backend commit `75a43e5e0aa7f0a17092218237da7c88b8996909` was never used as a runtime pin. The actual implementation, OpenAPI and PostgreSQL-generated HTTP fixtures are now pinned at **`65a2c45810c0d5f721c662f3d4681967829ef242`** in `scripts/contracts/b5-pin.json`. Historical B2/B3/B4 pins remain unchanged.
 
-## Active-application review coordination
+## Resolved active-application review coordination
 
-The owner confirms one global PENDING/ACCEPTED application. The frontend now selects explicitly by state, preserves read-only history and accepted access, and fails safely on overlaps without choosing a Clan or credential. The bounded/current-Season own-request read in runtime `70f27ec` still omits active records. The owner [confirmed this backend correctness blocker](https://github.com/hassan-anari/WEDCAL/pull/30#issuecomment-6227580941). Await the corrected exact runtime and handoff before updating the pin or running final paired tests. [Current correction and regression report](B5_ACTIVE_APPLICATION_REVIEW.md).
+The owner-confirmed [visibility blocker](https://github.com/hassan-anari/WEDCAL/pull/30#issuecomment-6227580941) is resolved by runtime `65a2c45810c0d5f721c662f3d4681967829ef242`. The list root is retained: all global active/unsafe records precede bounded safe-terminal current-Season history. The client consumes `is_active`, `is_current_season`, `credential_unresolved`, `blocks_new_application`, `handling`, and original ClanSeason/Season identity. It counts all blockers before selecting a single current-Season path, keeps terminal unsafe/older-Season paths operator-only, and fails closed on ambiguity. No credential or resolution privilege is inferred from visibility. [Final correction and paired evidence](B5_ACTIVE_APPLICATION_REVIEW.md).
 
 ## Owner-approved surfaces
 
@@ -21,7 +21,7 @@ All paths below are under authenticated `/api/v1`; Clan IDs and candidate IDs ar
 | Unlock and permanent seasonal role | GET `/clans/state`, POST `/clans/role`: server eligibility, configured Level 5 default, immutable CAPTAIN/SOLDIER, leave limits/cooldown |
 | Known eligible groups and registration | GET `/clans/eligible-groups`, POST `/clans/eligible-groups/{id}/verify`, POST `/clans/`: verify fresh authority before selecting; registration rechecks it. No manual chat ID input |
 | Discovery and preview | GET `/clans/?q=&offset=&limit=20`, GET `/clans/{id}`: server identity, count/capacity/HQ level/score. Unknown rank/match/freshness are not fabricated |
-| Own request persistence and cancellation | GET `/clans/join-requests/current`, POST `/clans/{id}/join-requests`, DELETE `/clans/join-requests/{id}`: pending/declined/accepted/cancellation-pending survive refresh |
+| Own request persistence and cancellation | GET `/clans/join-requests/current`, POST `/clans/{id}/join-requests`, DELETE `/clans/join-requests/{id}`: all global active/unsafe metadata and original Season identity survive refresh; safe terminal history is bounded separately |
 | Applicant review | GET `/clans/applicants`, POST `/clans/join-requests/{id}/decision`: actual request IDs, safe identity, level and Season Points. Unsupported statistics display a dash |
 | Credential/access lifecycle | GET `/clans/invite/current`, GET `/clans/membership/current`: only the authenticated owner obtains an active credential; memory only; safe Telegram opener. Actual Telegram membership events/verification activate membership. Acceptance alone never activates local HQ |
 | HQ and roster | GET `/clans/home`, GET `/clans/{id}`, GET `/clans/roster?offset=&limit=50`: exact HQ thresholds/progress/max state, roster membership IDs, Captain/Soldier access, own contribution. Roster continuation also supports removal-target selection |

@@ -1,6 +1,6 @@
 # B5 changed-file inventory
 
-Compared with merged main `ef6f1fca4de541e6eb45c9b8bf3e114bbd163cfb`. Includes every changed tracked file and the B5 deliverables added in this branch. Historical B2/B3/B4 pin and source/fixture bytes remain unchanged.
+Complete 231-file batch compared with merged main `ef6f1fca4de541e6eb45c9b8bf3e114bbd163cfb`. Historical B2/B3/B4 pin/source/fixture bytes remain unchanged. Includes the final metadata integration and exact-pin mobile evidence.
 
 ## Runtime, view models, hooks and scoped styles
 
@@ -16,6 +16,7 @@ Compared with merged main `ef6f1fca4de541e6eb45c9b8bf3e114bbd163cfb`. Includes e
 - `src/integrations/api/baseObjectives.ts`
 - `src/integrations/api/canonical.ts`
 - `src/integrations/api/clanAppearance.ts`
+- `src/integrations/api/clanApplications.ts`
 - `src/integrations/api/clanIntent.ts`
 - `src/integrations/api/clanViews.ts`
 - `src/integrations/api/queryKeys.ts`
@@ -35,9 +36,11 @@ Compared with merged main `ef6f1fca4de541e6eb45c9b8bf3e114bbd163cfb`. Includes e
 - `src/integrations/api/b5.contract.test.ts`
 - `src/integrations/api/baseObjectives.test.ts`
 - `src/integrations/api/canonical.test.ts`
+- `src/integrations/api/clanApplications.test.ts`
 - `src/integrations/api/clanViews.test.ts`
 - `src/integrations/api/rewardHistory.test.ts`
 - `src/integrations/api/safeNavigation.test.ts`
+- `src/integrations/api/useClanRemote.test.tsx`
 - `src/integrations/api/useRewardHistory.test.tsx`
 
 ## Pinned backend schema, fixtures and source
@@ -50,16 +53,22 @@ Compared with merged main `ef6f1fca4de541e6eb45c9b8bf3e114bbd163cfb`. Includes e
 - `scripts/contracts/b5/source/apps/clans/models.py`
 - `scripts/contracts/b5/source/apps/clans/recovery.py`
 - `scripts/contracts/b5/source/apps/clans/services.py`
+- `scripts/contracts/b5/source/apps/clans/tests/test_b5_request_visibility.py`
 - `scripts/contracts/b5/source/apps/content/services.py`
 - `scripts/contracts/b5/source/apps/rewards/api.py`
 - `scripts/contracts/b5/source/apps/telegram/services.py`
 - `scripts/contracts/b5/source/docs/B5_BACKEND_CONTRACT.md`
 - `scripts/contracts/b5/source/docs/B5_BACKEND_HANDOFF.md`
+- `scripts/contracts/b5/source/docs/evidence/B5_REQUEST_VISIBILITY.md`
+- `scripts/contracts/b5/source/docs/evidence/B5_SINGLE_APPLICATION.md`
 - `scripts/contracts/b5/source/docs/fixtures/b5/README.md`
 - `src/integrations/api/fixtures/b5/authority-http.json`
 - `src/integrations/api/fixtures/b5/clan-http.json`
 - `src/integrations/api/fixtures/b5/lifecycle-http.json`
 - `src/integrations/api/fixtures/b5/openapi.json`
+- `src/integrations/api/fixtures/b5/request-history-isolation-http.json`
+- `src/integrations/api/fixtures/b5/request-visibility-http.json`
+- `src/integrations/api/fixtures/b5/single-application-http.json`
 
 ## Contract pairing, browser tests, checks and CI
 
@@ -91,6 +100,7 @@ Compared with merged main `ef6f1fca4de541e6eb45c9b8bf3e114bbd163cfb`. Includes e
 
 ## Implementation reports and preservation evidence
 
+- `docs/B5_ACTIVE_APPLICATION_REVIEW.md`
 - `docs/B5_BACKEND_REQUIREMENTS.md`
 - `docs/B5_CHANGED_FILES.md`
 - `docs/B5_FRONTEND_REPORT.md`
@@ -146,6 +156,31 @@ Compared with merged main `ef6f1fca4de541e6eb45c9b8bf3e114bbd163cfb`. Includes e
 - `docs/evidence/b5/460/before-group-expansion.png`
 - `docs/evidence/b5/460/before-notifications.png`
 - `docs/evidence/b5/460/before-profile.png`
+- `docs/evidence/b5/active-application-review/320/review-accepted-behind-cancelled-history.png`
+- `docs/evidence/b5/active-application-review/320/review-mixed-blockers.png`
+- `docs/evidence/b5/active-application-review/320/review-operator-older.png`
+- `docs/evidence/b5/active-application-review/320/review-operator-terminal.png`
+- `docs/evidence/b5/active-application-review/320/review-overlap-safe.png`
+- `docs/evidence/b5/active-application-review/320/review-pending-blocks-other-clan.png`
+- `docs/evidence/b5/active-application-review/320/review-revocation-pending.png`
+- `docs/evidence/b5/active-application-review/320/review-verified-membership.png`
+- `docs/evidence/b5/active-application-review/390/review-accepted-behind-cancelled-history.png`
+- `docs/evidence/b5/active-application-review/390/review-mixed-blockers.png`
+- `docs/evidence/b5/active-application-review/390/review-operator-older.png`
+- `docs/evidence/b5/active-application-review/390/review-operator-terminal.png`
+- `docs/evidence/b5/active-application-review/390/review-overlap-safe.png`
+- `docs/evidence/b5/active-application-review/390/review-pending-blocks-other-clan.png`
+- `docs/evidence/b5/active-application-review/390/review-revocation-pending.png`
+- `docs/evidence/b5/active-application-review/390/review-verified-membership.png`
+- `docs/evidence/b5/active-application-review/460/review-accepted-behind-cancelled-history.png`
+- `docs/evidence/b5/active-application-review/460/review-mixed-blockers.png`
+- `docs/evidence/b5/active-application-review/460/review-operator-older.png`
+- `docs/evidence/b5/active-application-review/460/review-operator-terminal.png`
+- `docs/evidence/b5/active-application-review/460/review-overlap-safe.png`
+- `docs/evidence/b5/active-application-review/460/review-pending-blocks-other-clan.png`
+- `docs/evidence/b5/active-application-review/460/review-revocation-pending.png`
+- `docs/evidence/b5/active-application-review/460/review-verified-membership.png`
+- `docs/evidence/b5/active-application-review/manifest.json`
 - `docs/evidence/b5/baseline-provenance.json`
 - `docs/evidence/b5/clan/320/after-accepted-invite.png`
 - `docs/evidence/b5/clan/320/after-admin-recovery.png`
@@ -212,31 +247,3 @@ Compared with merged main `ef6f1fca4de541e6eb45c9b8bf3e114bbd163cfb`. Includes e
 - `docs/evidence/b5/clan/460/before-approved-role-confirmation.png`
 - `docs/evidence/b5/clan/baseline-provenance.json`
 - `docs/evidence/b5/validation-manifest.json`
-
-## Independent-review correction additions
-
-Existing listed Clan views/hooks and paired harness/tests are updated in scope. Additional files:
-
-- `src/integrations/api/clanApplications.ts`
-- `src/integrations/api/clanApplications.test.ts`
-- `src/integrations/api/useClanRemote.test.tsx`
-- `docs/B5_ACTIVE_APPLICATION_REVIEW.md`
-
-Targeted local pre-handoff evidence additions:
-
-- `docs/evidence/b5/active-application-review/manifest.json`
-- `docs/evidence/b5/active-application-review/320/review-accepted-behind-cancelled-history.png`
-- `docs/evidence/b5/active-application-review/320/review-overlap-safe.png`
-- `docs/evidence/b5/active-application-review/320/review-pending-blocks-other-clan.png`
-- `docs/evidence/b5/active-application-review/320/review-revocation-pending.png`
-- `docs/evidence/b5/active-application-review/320/review-verified-membership.png`
-- `docs/evidence/b5/active-application-review/390/review-accepted-behind-cancelled-history.png`
-- `docs/evidence/b5/active-application-review/390/review-overlap-safe.png`
-- `docs/evidence/b5/active-application-review/390/review-pending-blocks-other-clan.png`
-- `docs/evidence/b5/active-application-review/390/review-revocation-pending.png`
-- `docs/evidence/b5/active-application-review/390/review-verified-membership.png`
-- `docs/evidence/b5/active-application-review/460/review-accepted-behind-cancelled-history.png`
-- `docs/evidence/b5/active-application-review/460/review-overlap-safe.png`
-- `docs/evidence/b5/active-application-review/460/review-pending-blocks-other-clan.png`
-- `docs/evidence/b5/active-application-review/460/review-revocation-pending.png`
-- `docs/evidence/b5/active-application-review/460/review-verified-membership.png`

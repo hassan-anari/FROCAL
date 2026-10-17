@@ -1,70 +1,94 @@
 {
   "backend_repository": "hassan-anari/WEDCAL",
-  "backend_sha": "c38a7a65ba9bacce53a04bec6c10dfbeb71ed008",
+  "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242",
+  "frontend_ui_source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+  "acceptance_tests_commit": "ec76aedb24ae922bf496b9307256e2579d59891e",
   "approved_baseline": "ef6f1fca4de541e6eb45c9b8bf3e114bbd163cfb",
   "owner_modal_approval": "Approve reuse of existing ClanModal for these required states",
   "local": {
     "frontend_check": {
       "result": "passed",
-      "unit_files": 41,
-      "unit_tests": 265,
+      "unit_files": 43,
+      "unit_tests": 293,
       "production_policy_checks": 12
     },
+    "focused_selector_hook_contract_tests": 33,
     "backend_clan_pytest": {
       "result": "passed",
-      "tests": 204,
+      "tests": 267,
       "postgres": "16.2",
       "python": "3.13"
     },
     "live_api_and_fresh_schemas": {
       "result": "passed",
-      "tests": 8
+      "tests": 19
     },
     "clan_browser": {
       "result": "passed",
-      "tests": 5,
-      "details": "4 lifecycle/governance scenarios in full exact-pin paired run; equipment-unit scenario verified after its display-unit refinement"
+      "tests": 13,
+      "viewports": [
+        320,
+        390,
+        460
+      ]
     },
-    "corrections_browser": {
-      "result": "passed",
-      "tests": 12
-    },
-    "official_telegram_sdk": "hash/SRI verified unchanged"
+    "openapi_export_check": "passed",
+    "sdk_hash_check": "passed"
   },
-  "hosted_ci": {
-    "checks_url": "https://github.com/hassan-anari/FROCAL/pull/6/checks",
-    "workflow": ".github/workflows/b1-frontend.yml",
-    "required_jobs": [
-      "unit-build",
-      "browser",
-      "paired-b2",
-      "paired-b3",
-      "paired-b4",
-      "paired-b5-contract"
-    ],
-    "postgres_major": 17,
-    "note": "Final-head completion and exact run URL are published in the PR description. Local results are not a substitute for these jobs."
-  },
+  "required_final_head_hosted_jobs": [
+    "unit-build",
+    "browser",
+    "paired-b2",
+    "paired-b3",
+    "paired-b4",
+    "paired-b5-contract"
+  ],
+  "hosted_acceptance": "Exact final frontend SHA, run URL and all six job conclusions are published in Draft PR #6. Earlier green heads are not substituted.",
+  "pull_request": "https://github.com/hassan-anari/FROCAL/pull/6",
   "screenshots": [
     {
-      "path": "docs/evidence/b5/clan/320/after-role-choice.png",
-      "sha256": "231710ee195b70e460db6394534094c1cfbbfef79b0c182b01af326208443938",
+      "path": "docs/evidence/b5/clan/320/after-accepted-invite.png",
+      "sha256": "17e681cbd1fda30ca078a4b833f4220044d0dd5567c95beb6dae48fa01d9b061",
       "viewport": {
         "width": 320,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
-      "path": "docs/evidence/b5/clan/320/after-verified-founding.png",
-      "sha256": "ad7f1d9b2c9b8053dac66cb79f80ad5e2a6e2a3d9dfaf80fccbc81e38c5a9c06",
+      "path": "docs/evidence/b5/clan/320/after-admin-recovery.png",
+      "sha256": "aaa5586ae4ff74e64684e1ea09d5609592751b48723fed85634ba5c774b1707a",
       "viewport": {
         "width": 320,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/clan/320/after-captain-authority-loss.png",
+      "sha256": "f886d6b6919abdcbe362cff5f4990915b169c9c3ba88648170f47ee45eeb7536",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/clan/320/after-captain-authority-restored.png",
+      "sha256": "9a2bddb7bd7aa2e59332a5f8b365d1f50945ee3876ea8085ed077f655357a04a",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
       "path": "docs/evidence/b5/clan/320/after-captain-headquarters.png",
@@ -74,57 +98,173 @@
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
-      "path": "docs/evidence/b5/clan/320/after-soldier-preview.png",
-      "sha256": "0b224082c8f12f0a0f5636340f9ad6e5115017a1ff7e11ba5025350f9bc8f3df",
+      "path": "docs/evidence/b5/clan/320/after-dissolution-confirmation.png",
+      "sha256": "cb976a2e11470c9c83a32b30f3bb8c3e0ce311fc89e80d4982273a845c76848b",
       "viewport": {
         "width": 320,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/clan/320/after-governance-status.png",
+      "sha256": "ddb328b0fd269717c7ab74b8eb6f26573b3141254eaa6dbf84a933da83fcf18f",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/clan/320/after-immutable-vote.png",
+      "sha256": "7bc438dc6574d052293f72ce4eba59af8cd91cd04b93989bfc129ed255d0358f",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/clan/320/after-leave-confirmation.png",
+      "sha256": "8a438b171b3b3496f71e5f52be57fc140db0aa4c9816283d82a0bdbc3179420d",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/clan/320/after-removal-confirmation.png",
+      "sha256": "5a9c015c6127f41a05d76d724a2d0094b96e0b7fbaa7ddf86b8151a9c75c7481",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
       "path": "docs/evidence/b5/clan/320/after-request-pending.png",
-      "sha256": "16f011d87cd3d6f7cd2d8e23643fdb509515c1b0c2a8ebe02cd5104ccd1dba5f",
+      "sha256": "9c5988dfbe2eb31f5f2190cf72f9b0387766d6fe03f5a59ab9cdfca75c43779d",
       "viewport": {
         "width": 320,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
-      "path": "docs/evidence/b5/clan/320/after-accepted-invite.png",
-      "sha256": "cd06bcbaf62cb5cfaa43bf8c113ff45ba9c2418f172b72797cf518274b72b868",
+      "path": "docs/evidence/b5/active-application-review/320/review-accepted-behind-cancelled-history.png",
+      "sha256": "68376417d595fed82d94f076a758c85a601e758ac5a94c20c0147610c33698dd",
       "viewport": {
         "width": 320,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
-      "path": "docs/evidence/b5/clan/320/after-soldier-headquarters.png",
-      "sha256": "58381e2e619600b95e1cb9c38b3cd186ad715502d949e935b7a91b1089823d81",
+      "path": "docs/evidence/b5/active-application-review/320/review-mixed-blockers.png",
+      "sha256": "882fbf337244cb97bc598783eb63c6a03370a3ff3302d2a4df399e12d3bc3a6d",
       "viewport": {
         "width": 320,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
-      "path": "docs/evidence/b5/clan/320/after-settled-mission.png",
-      "sha256": "f942f68a34cc641b4a83005d2c28fc10d0fc55f685bf0fb2b7ecd10f03a41d3c",
+      "path": "docs/evidence/b5/active-application-review/320/review-operator-older.png",
+      "sha256": "8c2fa3b0d93deb36556625fdafbf825809287e34ac075f6db4df11c1694336ba",
       "viewport": {
         "width": 320,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/320/review-operator-terminal.png",
+      "sha256": "9a7bcdea6af5cec329781b666aba3fa189d02ccb426e32df24246cd471a36c3e",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/320/review-overlap-safe.png",
+      "sha256": "1f94bd41d24a7961cb6612c59bd2e06fd12ebeee4336c49d0646aebaf59bf09d",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/320/review-pending-blocks-other-clan.png",
+      "sha256": "322b7a6870a58a8eab9bfbaffb7226dd257f924e1184cffc1f5cf59dc80daaeb",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/320/review-revocation-pending.png",
+      "sha256": "644c34cf45d54c9bdb1be43a8a4bb097162e69d6dd77068ef39d2ef5e3f0199b",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/320/review-verified-membership.png",
+      "sha256": "50ff8e8f2d6d9cddecc42b5c9c41a24aa377ce0d7f1a20dd929c13920dd71d7f",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/clan/320/after-role-choice.png",
+      "sha256": "45beebf6b7c078167799c31d64de000f705fab27acff769365580c9ee49e1601",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
       "path": "docs/evidence/b5/clan/320/after-server-price-purchase.png",
@@ -134,337 +274,547 @@
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "c1050505606fe4b2884b5f9f65d140698dd2b164"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
-      "path": "docs/evidence/b5/clan/320/after-governance-status.png",
-      "sha256": "df8b1539b75da793d6f8621a85950b4d38a55904278fe28430368dec407236a0",
+      "path": "docs/evidence/b5/clan/320/after-settled-mission.png",
+      "sha256": "ff7213c446f036a82f72a88562a75858148d997c882c69307562e341949d782c",
       "viewport": {
         "width": 320,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
-      "path": "docs/evidence/b5/clan/320/after-admin-recovery.png",
-      "sha256": "70fd39560c1184dd1696ec9bd1bc7d25fef614d38552a437200ff40ddc24e49c",
+      "path": "docs/evidence/b5/clan/320/after-soldier-headquarters.png",
+      "sha256": "da6ae5c9939071309aa10b6c7a3786dab05b370f502450b1beb8c7df89a216da",
       "viewport": {
         "width": 320,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
-      "path": "docs/evidence/b5/clan/320/after-captain-authority-loss.png",
-      "sha256": "2b5f772b332e14416312a0339618b5ceccd1bd12c0a70092479df28ddd43e1e5",
+      "path": "docs/evidence/b5/clan/320/after-soldier-preview.png",
+      "sha256": "b38827b9a3d6e883e386af686d982ff327af19419b17f48af50e0dfecb05b4ac",
       "viewport": {
         "width": 320,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
-      "path": "docs/evidence/b5/clan/320/after-captain-authority-restored.png",
-      "sha256": "1d3f0ece7a297946623b140475e0aae59fd4346081d21e4ed9f9b8f86e73f1d3",
+      "path": "docs/evidence/b5/clan/320/after-verified-founding.png",
+      "sha256": "470d40c2af8f42c3c3e1fe21839d07d0fae8e03f37f538d36d2885e0ae5b284b",
       "viewport": {
         "width": 320,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
-    },
-    {
-      "path": "docs/evidence/b5/clan/320/after-leave-confirmation.png",
-      "sha256": "7534283c4e625529c94a1d2777a33d8e222f06ab5a840daecfa980b834fc42f0",
-      "viewport": {
-        "width": 320,
-        "height": 844
-      },
-      "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
-    },
-    {
-      "path": "docs/evidence/b5/clan/320/after-removal-confirmation.png",
-      "sha256": "3752c8bf8cb2fc0fcf38bce352433917211763d397ba2821b624871fd1e7714d",
-      "viewport": {
-        "width": 320,
-        "height": 844
-      },
-      "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
-    },
-    {
-      "path": "docs/evidence/b5/clan/320/after-immutable-vote.png",
-      "sha256": "d86bd389cc52f9898c7706fe240598341d098a836a3a16fc98f5e5303507a65f",
-      "viewport": {
-        "width": 320,
-        "height": 844
-      },
-      "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
-    },
-    {
-      "path": "docs/evidence/b5/clan/320/after-dissolution-confirmation.png",
-      "sha256": "fb7207339308aaa704b127d8b37a40f85aba11c577aacdeed0231749f61fe89f",
-      "viewport": {
-        "width": 320,
-        "height": 844
-      },
-      "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
-    },
-    {
-      "path": "docs/evidence/b5/clan/390/after-role-choice.png",
-      "sha256": "1d26c7d654571be71b649af281c8ae8ffdd166e4885173bcfd15dd0a14a86718",
-      "viewport": {
-        "width": 390,
-        "height": 844
-      },
-      "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
-    },
-    {
-      "path": "docs/evidence/b5/clan/390/after-verified-founding.png",
-      "sha256": "b48f22c29ba0b3caaad4e43c817120c335826401bb0dcd36d2f074de5bcdc81b",
-      "viewport": {
-        "width": 390,
-        "height": 844
-      },
-      "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
-    },
-    {
-      "path": "docs/evidence/b5/clan/390/after-captain-headquarters.png",
-      "sha256": "3cfb8a1a954a41bb6892c4a58be7d23127f85910ac443295ff6586382b3ac0d8",
-      "viewport": {
-        "width": 390,
-        "height": 844
-      },
-      "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
-    },
-    {
-      "path": "docs/evidence/b5/clan/390/after-soldier-preview.png",
-      "sha256": "149f7f51680a88d7c56b5885e991192c5fd818cc540ea69947c2beb51772d4db",
-      "viewport": {
-        "width": 390,
-        "height": 844
-      },
-      "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
-    },
-    {
-      "path": "docs/evidence/b5/clan/390/after-request-pending.png",
-      "sha256": "7db3e033f0717b8859a389a6ec5ddffee64cbe28c51c7a6e20417e6c1f5b3fe8",
-      "viewport": {
-        "width": 390,
-        "height": 844
-      },
-      "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
       "path": "docs/evidence/b5/clan/390/after-accepted-invite.png",
-      "sha256": "ee3a8f7d63e9329be79f97dff53b97f8a11109343c575ed37a1fa8f173ab5f75",
+      "sha256": "10adabacab6535389411e3b5edf8407f4334e6a65a0b9c20d334f41faff5fa36",
       "viewport": {
         "width": 390,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
-    },
-    {
-      "path": "docs/evidence/b5/clan/390/after-soldier-headquarters.png",
-      "sha256": "ac5779fcc3500dabb707d48df4a5280ec3d4148e183e53fea7c78830ee689e08",
-      "viewport": {
-        "width": 390,
-        "height": 844
-      },
-      "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
-    },
-    {
-      "path": "docs/evidence/b5/clan/390/after-settled-mission.png",
-      "sha256": "20880be769b20284ea8b563640eadd0f5ebade6c15c7a8ca92c715f7e57fe6aa",
-      "viewport": {
-        "width": 390,
-        "height": 844
-      },
-      "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
-    },
-    {
-      "path": "docs/evidence/b5/clan/390/after-server-price-purchase.png",
-      "sha256": "6c9727253d477816aee8e29e90c8aca21feac16548e3be86dec5f305ba7d2959",
-      "viewport": {
-        "width": 390,
-        "height": 844
-      },
-      "device_scale_factor": 1,
-      "source_commit": "c1050505606fe4b2884b5f9f65d140698dd2b164"
-    },
-    {
-      "path": "docs/evidence/b5/clan/390/after-governance-status.png",
-      "sha256": "bb9f8f386ac6266fe360783e2c4501b3e76c0569e006372b76f2c985655550d0",
-      "viewport": {
-        "width": 390,
-        "height": 844
-      },
-      "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
       "path": "docs/evidence/b5/clan/390/after-admin-recovery.png",
-      "sha256": "36acee0904c2b1d27a33ab5cb3bbe96ff3f16c4843d01ac741d02b406b920062",
+      "sha256": "e11cacbcfa027a1c0fe1a5843e8e98ae2c00011b9e9b4a062cb9818fdfcc7343",
       "viewport": {
         "width": 390,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
       "path": "docs/evidence/b5/clan/390/after-captain-authority-loss.png",
-      "sha256": "5ff63023a9a3b3aab05789d90b5f8156dc1aff025f3ec6a3d9f1d981ec3e9213",
+      "sha256": "96231eec3a4ed70d074c4396d15d570efff80d5d8d6fd8a7ca8705fee16c6e69",
       "viewport": {
         "width": 390,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
       "path": "docs/evidence/b5/clan/390/after-captain-authority-restored.png",
-      "sha256": "5aeaa1a0906ecc6d648872a1524f300d470fe66c7dc9613f0e9f94ccdf7f4302",
+      "sha256": "5724a640710407dfce1018ddb0441472b32cec1582b6efd771f78b283a6b2b66",
       "viewport": {
         "width": 390,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
-      "path": "docs/evidence/b5/clan/390/after-leave-confirmation.png",
-      "sha256": "c596edd11bd49417d1c4606e8347a1859d52a43fe94b8ac6687c5416d7e9118e",
+      "path": "docs/evidence/b5/clan/390/after-captain-headquarters.png",
+      "sha256": "86bb7340197cd0895701e68c6397b9c0c41906d2b6203a544efe240a3c35bbb6",
       "viewport": {
         "width": 390,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
-    },
-    {
-      "path": "docs/evidence/b5/clan/390/after-removal-confirmation.png",
-      "sha256": "134c754efea86deb4bcb770240440836a6969a757fc617aa230fb6537e7f2e06",
-      "viewport": {
-        "width": 390,
-        "height": 844
-      },
-      "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
-    },
-    {
-      "path": "docs/evidence/b5/clan/390/after-immutable-vote.png",
-      "sha256": "4ae6f21d534a75f47ee5877752ba00d0f64e5a348afc49451b810ba155b7ed00",
-      "viewport": {
-        "width": 390,
-        "height": 844
-      },
-      "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
       "path": "docs/evidence/b5/clan/390/after-dissolution-confirmation.png",
-      "sha256": "d31a7fa473c519e57d7133ff12be39fc88e6f3687e30f9bac43fb5e09b273813",
+      "sha256": "37e64068a6901e0a51e72f9c37a9b81aaeb38e125438098e28ca969e6e1cab29",
       "viewport": {
         "width": 390,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
-      "path": "docs/evidence/b5/clan/460/after-role-choice.png",
-      "sha256": "3b5a54213e6a4e4d89e094f0c53269e59578f86f256d00bdce619fcee85b579c",
+      "path": "docs/evidence/b5/clan/390/after-governance-status.png",
+      "sha256": "bdff853d536afc47e424805addf595b297ef2cb93a88f7a2359723f6cd6155ce",
       "viewport": {
-        "width": 460,
+        "width": 390,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
-      "path": "docs/evidence/b5/clan/460/after-verified-founding.png",
-      "sha256": "00861096c3dc075b8c911105dd0a1426d1f79afd0545be3134a4253dc054fc4e",
+      "path": "docs/evidence/b5/clan/390/after-immutable-vote.png",
+      "sha256": "43d794ca255ce268913b12f4de468154312ccc20b75ad47f4fd0b20594300b8f",
       "viewport": {
-        "width": 460,
+        "width": 390,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
-      "path": "docs/evidence/b5/clan/460/after-captain-headquarters.png",
-      "sha256": "7e3266cbea97cbac3e24d91b85d2c298687ac19e1162f3f7bc7dd022d9199792",
+      "path": "docs/evidence/b5/clan/390/after-leave-confirmation.png",
+      "sha256": "f86fc5828fd94bec541e94a8ce1f4774abf0240bf4b60c3486638ae25a6a97ed",
       "viewport": {
-        "width": 460,
+        "width": 390,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
-      "path": "docs/evidence/b5/clan/460/after-soldier-preview.png",
-      "sha256": "396110784e0111f33fa0cd431005d467ea98d1b16c4cb1f44c647eb7207eb3e4",
+      "path": "docs/evidence/b5/clan/390/after-removal-confirmation.png",
+      "sha256": "c0695f11f16120ff36c5c249310ade0db1c427436e8aebea3bd0597891222151",
       "viewport": {
-        "width": 460,
+        "width": 390,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
-      "path": "docs/evidence/b5/clan/460/after-request-pending.png",
-      "sha256": "d6064246887c70eee0126baa12b173502a20e9b09d2ffebb177d7593770562af",
+      "path": "docs/evidence/b5/clan/390/after-request-pending.png",
+      "sha256": "e410fa8c7511dc172279454a5064c9694bb70243a35974844405672fa1eaf6a1",
       "viewport": {
-        "width": 460,
+        "width": 390,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/390/review-accepted-behind-cancelled-history.png",
+      "sha256": "0d2b26d013f8d717d4d35a758985354d4cd3d2eefda3152c158dbf9d43a6fb85",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/390/review-mixed-blockers.png",
+      "sha256": "454eaa8b84d50788dd750223f371e3358815e4aec4bcebc4786b31cf80569f0f",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/390/review-operator-older.png",
+      "sha256": "4e190cf010fff442423862d2b424afc311f1e8298f51ee89a096b847c23fe2cb",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/390/review-operator-terminal.png",
+      "sha256": "7e4ec713f535563ecf6ab23b045e27cd96b01ed522d244057acece5350a4e7b9",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/390/review-overlap-safe.png",
+      "sha256": "17418c1856a1c74002216752e8d5a6532c42de0cad39c9ffa3ba78db21aae8e2",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/390/review-pending-blocks-other-clan.png",
+      "sha256": "e46e651c3585f6000c9bf46e5c3f27e02b9f70002636c0b6300aaf39a7d90e7a",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/390/review-revocation-pending.png",
+      "sha256": "0c54039524c0407af95df30017e04eaf42f46e77830fe57df1cce35ca5ae5f8b",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/390/review-verified-membership.png",
+      "sha256": "a09e22a38704ae444be6c0a757c5f4f162da2749f94c6349c16f19aae2c3730a",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/clan/390/after-role-choice.png",
+      "sha256": "13318240d4836eea919db608b76bf7810bd1ddfdb75f59f75e1a5cde0e17c5d8",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/clan/390/after-server-price-purchase.png",
+      "sha256": "2ab6f37ebb1a3bcf46536b36792fd986c50dd1ac2278364e741dab79b9e43c4d",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/clan/390/after-settled-mission.png",
+      "sha256": "8bc2dbb57e7daa83fdfa5cd456bd51c0f9a9ec52f34d10cec7dd4eaba86a7356",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/clan/390/after-soldier-headquarters.png",
+      "sha256": "6af80e8bc853389b7d03a7e476fe045c898e612b4ead39ab577127485c9fbf45",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/clan/390/after-soldier-preview.png",
+      "sha256": "018c8dff8c19c51acaad59be00e81bf732770e9e26e5c313e748460087b3ecc9",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/clan/390/after-verified-founding.png",
+      "sha256": "f89444508a6726237b4bb6c318b2cee6d3d7d70b72b90f4bcdb8a6135507b8fc",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
       "path": "docs/evidence/b5/clan/460/after-accepted-invite.png",
-      "sha256": "f831fb45265018c79280362cf5735a17a411c89dad88891e84a945e3c5adb530",
+      "sha256": "51e387572ff840e0ea74c4f1c772c4ade20c9804342fe2b30c88a425420c7d61",
       "viewport": {
         "width": 460,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
-      "path": "docs/evidence/b5/clan/460/after-soldier-headquarters.png",
-      "sha256": "bb056f67c7ddbb880deb847e7e56b3a0b62a41b3d8ce9b2247fdaa13c469ebae",
+      "path": "docs/evidence/b5/clan/460/after-admin-recovery.png",
+      "sha256": "7d8e8233273d45f6d6b5e572a2f8fcc3b710fbbed65e1327cb30ea344f85945d",
       "viewport": {
         "width": 460,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
-      "path": "docs/evidence/b5/clan/460/after-settled-mission.png",
-      "sha256": "84623fc7e4e6644e31012e8cff41a90bb23fe7cd4bfb895dcc17092ea1b100e2",
+      "path": "docs/evidence/b5/clan/460/after-captain-authority-loss.png",
+      "sha256": "266fa6ca2000fbc8e6783e2d24f3bc48e6000a1b9d5d1e0b40b492691f687f20",
       "viewport": {
         "width": 460,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/clan/460/after-captain-authority-restored.png",
+      "sha256": "52d6f38056d7f2d675ad8b0ae5a6ffc5627bed3ebea95af13a7e9a0c317a189f",
+      "viewport": {
+        "width": 460,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/clan/460/after-captain-headquarters.png",
+      "sha256": "2e29514be8f6766c3e995250eabaad2ce61d71130c7e84789ccaca0238a49e4c",
+      "viewport": {
+        "width": 460,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/clan/460/after-dissolution-confirmation.png",
+      "sha256": "8d2479ad228879fe91fdc5473170908959fda81bf674e35ba7c80273d59707cc",
+      "viewport": {
+        "width": 460,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/clan/460/after-governance-status.png",
+      "sha256": "2451eae0f6ed0acb1c403d7180e40c62b655649b6c15fc7bf17e878ae370dba6",
+      "viewport": {
+        "width": 460,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/clan/460/after-immutable-vote.png",
+      "sha256": "4056df594cc699978d4d672c6077bc65748315a85b1304902cf13691d0d37303",
+      "viewport": {
+        "width": 460,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/clan/460/after-leave-confirmation.png",
+      "sha256": "d8b67cf4213bc6207c43e6c6bff3b9ef6b8d7b51c820e194c65cafa864f99de5",
+      "viewport": {
+        "width": 460,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/clan/460/after-removal-confirmation.png",
+      "sha256": "74fe02e53806c84886989b5741ad6814b16057e3efb9467050affd8c8b1fbedb",
+      "viewport": {
+        "width": 460,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/clan/460/after-request-pending.png",
+      "sha256": "e7486a1e3aa04c2f85d2fdb85c90ed66b6df2dbd08e2957b3fde0c5101b59d14",
+      "viewport": {
+        "width": 460,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/460/review-accepted-behind-cancelled-history.png",
+      "sha256": "98213c7f004fc64fb362828fe79d5acb722b6ecb53f661d3d0f30cfdc986b473",
+      "viewport": {
+        "width": 460,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/460/review-mixed-blockers.png",
+      "sha256": "d74840c6ade598977aa0d724d1f9bafa3978a8fa03ee4857f6650d23850a6d8c",
+      "viewport": {
+        "width": 460,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/460/review-operator-older.png",
+      "sha256": "c7bd9238f77bfac4955d464872ca7fb9aa6328394e136c1cf5f5f4596fc7b2b2",
+      "viewport": {
+        "width": 460,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/460/review-operator-terminal.png",
+      "sha256": "eaac806036a053a65bd746bb0ab9e589cdd586d837a3f0009b8565649a56edce",
+      "viewport": {
+        "width": 460,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/460/review-overlap-safe.png",
+      "sha256": "4b3ba92588d83334e3c1238b8b34cab2136e6c7f1f691dcc089add8ad340622d",
+      "viewport": {
+        "width": 460,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/460/review-pending-blocks-other-clan.png",
+      "sha256": "4f9b58400ba03737a8d2ef996bf27ca2f9df14ab46548f3934e5a9302decb13c",
+      "viewport": {
+        "width": 460,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/460/review-revocation-pending.png",
+      "sha256": "f1cd10ce7c28c0310b3b2e8bb1ee72de2183eaa7623d02e3e38121794f9656bf",
+      "viewport": {
+        "width": 460,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/460/review-verified-membership.png",
+      "sha256": "500917bf19741acbc5508c40d771549ea9790bf75a1f8c9ff43b37607220c739",
+      "viewport": {
+        "width": 460,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/clan/460/after-role-choice.png",
+      "sha256": "653ed99fb454ee96e6446d37c32ba320941c6e2b9cc4fd49a159d3eba211cb43",
+      "viewport": {
+        "width": 460,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
       "path": "docs/evidence/b5/clan/460/after-server-price-purchase.png",
@@ -474,88 +824,53 @@
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "c1050505606fe4b2884b5f9f65d140698dd2b164"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
-      "path": "docs/evidence/b5/clan/460/after-governance-status.png",
-      "sha256": "e48cfd93170b3e9ecfe6bff84420af7ae7cb42e063feef87c67ac1c35d530686",
+      "path": "docs/evidence/b5/clan/460/after-settled-mission.png",
+      "sha256": "f5b600501c7ea42406c7f8e6b962419ea4858cd95eb6c19c3335ad81d8353bc0",
       "viewport": {
         "width": 460,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
-      "path": "docs/evidence/b5/clan/460/after-admin-recovery.png",
-      "sha256": "b33e5f6bfb1b08576ac1ce3d7fd0ee6fbdce3020639080bc64c6ace0ceaef3ca",
+      "path": "docs/evidence/b5/clan/460/after-soldier-headquarters.png",
+      "sha256": "bfdd13f49e7491037e00587e86d2b2a5c982be387de520ff6f98eb12b71f85c3",
       "viewport": {
         "width": 460,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
-      "path": "docs/evidence/b5/clan/460/after-captain-authority-loss.png",
-      "sha256": "4aff977f69c2cae881cf79a4c29179da455cf6054452166bdd1c0126523bbebc",
+      "path": "docs/evidence/b5/clan/460/after-soldier-preview.png",
+      "sha256": "01ea8aeba2d2b277c7ff0bc24ca027fcc70c9e21d8538d2f17c77ab2e49c23f7",
       "viewport": {
         "width": 460,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     },
     {
-      "path": "docs/evidence/b5/clan/460/after-captain-authority-restored.png",
-      "sha256": "e72462bc801f910e6b3157e8d6b67586b79103c8b9454e6fa2858a859b00422b",
+      "path": "docs/evidence/b5/clan/460/after-verified-founding.png",
+      "sha256": "4c5557bbc3c1e442c8e33c296f197344b60c73c67fbf18985c89e5ef52f64115",
       "viewport": {
         "width": 460,
         "height": 844
       },
       "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
-    },
-    {
-      "path": "docs/evidence/b5/clan/460/after-leave-confirmation.png",
-      "sha256": "631f12d85d7dd3fa56f6ec98387c97e7bfbd1fd031b606cbfcf2ec17256308b3",
-      "viewport": {
-        "width": 460,
-        "height": 844
-      },
-      "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
-    },
-    {
-      "path": "docs/evidence/b5/clan/460/after-removal-confirmation.png",
-      "sha256": "d5f070d3ef16b87f79d866edf3387fa630630901d4906058f66fa5a99def1e5f",
-      "viewport": {
-        "width": 460,
-        "height": 844
-      },
-      "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
-    },
-    {
-      "path": "docs/evidence/b5/clan/460/after-immutable-vote.png",
-      "sha256": "e1228b6494437ff5892fd716e97526571fcc13ac0a90130bc64279bcf10af38f",
-      "viewport": {
-        "width": 460,
-        "height": 844
-      },
-      "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
-    },
-    {
-      "path": "docs/evidence/b5/clan/460/after-dissolution-confirmation.png",
-      "sha256": "4ee4c38d4441eaaeb447b59db454462979cb268e2d9d561cbf9795544701a6be",
-      "viewport": {
-        "width": 460,
-        "height": 844
-      },
-      "device_scale_factor": 1,
-      "source_commit": "4301b1e1eb53fddc5075c88b9652cc9b1fe17591"
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
     }
   ],
-  "credentials": "No real Telegram sends; isolated synthetic users/transport only. Authenticated launch URLs and invite links are not recorded in images or traces."
+  "credentials": "Synthetic isolated users/Telegram boundary only; no live sends, credential URLs, authenticated launch URLs or traces recorded in screenshots."
 }
