@@ -6,8 +6,8 @@ const config = JSON.parse(readFileSync(new URL("../vercel.json", import.meta.url
 const origin = "https://api.dalexio.com";
 const apiRules = config.rewrites.slice(0, -1);
 
-// Lightweight route intent and ordering checks using documented named path
-// parameters. A Vercel Preview smoke test must still validate the actual edge.
+// Local contract guard; it does not simulate Vercel's edge deployment.
+// Named parameters follow Vercel path-to-regexp rewrite syntax.
 function routeApi(path) {
   for (const rule of apiRules) {
     const params = [];
@@ -26,29 +26,39 @@ function routeApi(path) {
   return null;
 }
 
-test("API rewrite rules precede the SPA fallback and preserve the backend origin", () => {
+test("API rewrites precede SPA and explicitly separate Clan root from other roots", () => {
   assert.deepEqual(config.rewrites.map(rule => rule.source), [
-    "/api/v1/", "/api/v1", "/api/v1/:section/", "/api/v1/:section",
-    "/api/v1/:section/:path*/", "/api/v1/:path*", "/(.*)",
+    "/api/v1/clans/", "/api/v1/clans", "/api/v1/", "/api/v1",
+    "/api/v1/:section/", "/api/v1/:section", "/api/v1/:section/:path*/",
+    "/api/v1/:path*", "/(.*)",
   ]);
   assert.deepEqual(config.rewrites.at(-1), { source: "/(.*)", destination: "/index.html" });
   for (const rule of apiRules) assert.ok(rule.destination.startsWith(origin + "/api/v1/"));
 });
 
-test("API roots work with and without trailing slash without redirecting POST", () => {
-  for (const path of ["/api/v1", "/api/v1/"]) assert.equal(routeApi(path), origin + "/api/v1/");
+test("both forms of Clan root reach its exact Django Ninja /clans/ route", () => {
+  for (const path of ["/api/v1/clans", "/api/v1/clans/"]) {
+    assert.equal(routeApi(path), origin + "/api/v1/clans/", path);
+  }
+});
+
+test("other API roots preserve their distinct no-slash Django Ninja routes", () => {
   for (const domain of [
-    "clans", "network", "bootstrap", "daily", "missions", "typing", "referrals",
+    "network", "bootstrap", "daily", "missions", "typing", "referrals",
     "notifications", "rewards", "profile", "arena", "content", "base", "telegram",
   ]) {
     for (const ending of ["", "/"]) {
       const path = "/api/v1/" + domain + ending;
-      assert.equal(routeApi(path), origin + "/api/v1/" + domain + "/", path);
+      assert.equal(routeApi(path), origin + "/api/v1/" + domain, path);
     }
+  }
+  // API namespace root is not a Clan operation and should remain unchanged.
+  for (const path of ["/api/v1", "/api/v1/"]) {
+    assert.equal(routeApi(path), origin + "/api/v1/", path);
   }
 });
 
-test("nested API URLs of any depth preserve path, with optional final slash", () => {
+test("arbitrarily deep subpaths keep their backend canonical path without trailing slash", () => {
   for (const path of [
     "/api/v1/clans/state", "/api/v1/clans/eligible-groups",
     "/api/v1/clans/eligible-groups/4/verify", "/api/v1/clans/4/join-requests",
