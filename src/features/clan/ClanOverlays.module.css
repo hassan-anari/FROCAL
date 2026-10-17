@@ -298,3 +298,10 @@
 @media (max-width: 520px) {
   .sheet { box-shadow: 0 16px 36px rgba(0, 0, 0, .42), inset 0 1px 0 rgba(255,255,255,.045); }
 }
+
+/* Approved governance fields reuse the existing Clan identity form treatment. */
+.governanceForm label { display: grid; gap: .32rem; color: rgba(188, 204, 234, .57); font-size: .67rem; }
+.governanceForm select { width: 100%; min-height: 46px; padding: 0 .72rem; border: 1px solid rgba(124, 180, 248, .13); border-radius: 14px; color: #f0f7ff; background: rgba(3, 8, 21, .78); font: inherit; font-size: .78rem; }
+.governanceForm select:focus-visible { outline: 2px solid rgba(87, 221, 255, .36); outline-offset: 2px; }
+
+.statusControls button span { color: inherit; font-size: inherit; }

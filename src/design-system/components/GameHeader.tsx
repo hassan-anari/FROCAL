@@ -270,7 +270,7 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
                   {notificationItems.length === 0 ? (
                     <div className={styles.notificationEmpty}>No notifications yet.</div>
                   ) : (
-                    notificationItems.map((item) => {
+                    notificationItems.map((item, index) => {
                       const tone = notificationTone(item.type);
                       return (
                         <button
@@ -279,7 +279,7 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
                           className={`${styles.notificationItem} ${item.unread ? "" : styles.notificationRead}`}
                           onClick={() => void openNotification(item)}
                         >
-                          <span className={`${styles.notificationGlyph} ${styles[tone]}`}>{tone.slice(0, 1).toUpperCase()}</span>
+                          <span className={`${styles.notificationGlyph} ${styles[tone]}`}>{String(index + 1).padStart(2, "0")}</span>
                           <span className={styles.notificationCopy}>
                             <span>{item.title}</span>
                             <strong>{item.body}</strong>

@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import assert from "node:assert/strict";
-for (const batch of ["b2", "b3", "b4"]) {
+for (const batch of ["b2", "b3", "b4", "b5"]) {
 const pin = JSON.parse(readFileSync(`scripts/contracts/${batch}-pin.json`, "utf8"));
 for (const [file, expected] of Object.entries(pin.files)) {
   const bytes = readFileSync(file);

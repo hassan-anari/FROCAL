@@ -1,0 +1,12 @@
+{
+  "source_commit": "ef6f1fca4de541e6eb45c9b8bf3e114bbd163cfb",
+  "source": "approved local dev diagnostic UI; values are historical samples, not backend fixtures",
+  "viewports": [
+    320,
+    390,
+    460
+  ],
+  "height": 844,
+  "device_scale_factor": 1,
+  "browser": "154.0.8037.57"
+}

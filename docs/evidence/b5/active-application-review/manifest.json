@@ -1,0 +1,316 @@
+{
+  "backend_repository": "hassan-anari/WEDCAL",
+  "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242",
+  "frontend_ui_source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+  "acceptance_tests_commit": "ec76aedb24ae922bf496b9307256e2579d59891e",
+  "approved_baseline": "ef6f1fca4de541e6eb45c9b8bf3e114bbd163cfb",
+  "owner_modal_approval": "Approve reuse of existing ClanModal for these required states",
+  "local": {
+    "frontend_check": {
+      "result": "passed",
+      "unit_files": 43,
+      "unit_tests": 293,
+      "production_policy_checks": 12
+    },
+    "focused_selector_hook_contract_tests": 33,
+    "backend_clan_pytest": {
+      "result": "passed",
+      "tests": 267,
+      "postgres": "16.2",
+      "python": "3.13"
+    },
+    "live_api_and_fresh_schemas": {
+      "result": "passed",
+      "tests": 19
+    },
+    "clan_browser": {
+      "result": "passed",
+      "tests": 13,
+      "viewports": [
+        320,
+        390,
+        460
+      ]
+    },
+    "openapi_export_check": "passed",
+    "sdk_hash_check": "passed"
+  },
+  "required_final_head_hosted_jobs": [
+    "unit-build",
+    "browser",
+    "paired-b2",
+    "paired-b3",
+    "paired-b4",
+    "paired-b5-contract"
+  ],
+  "hosted_acceptance": "Exact final frontend SHA, run URL and all six job conclusions are published in Draft PR #6. Earlier green heads are not substituted.",
+  "pull_request": "https://github.com/hassan-anari/FROCAL/pull/6",
+  "credentials": "Synthetic isolated users/Telegram boundary only; no live sends, credential URLs, authenticated launch URLs or traces recorded in screenshots.",
+  "status": "exact corrected-runtime local mobile evidence; complete final-head paired and CI results are linked from Draft PR #6",
+  "screenshots": [
+    {
+      "path": "docs/evidence/b5/active-application-review/320/review-accepted-behind-cancelled-history.png",
+      "sha256": "68376417d595fed82d94f076a758c85a601e758ac5a94c20c0147610c33698dd",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/320/review-mixed-blockers.png",
+      "sha256": "882fbf337244cb97bc598783eb63c6a03370a3ff3302d2a4df399e12d3bc3a6d",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/320/review-operator-older.png",
+      "sha256": "8c2fa3b0d93deb36556625fdafbf825809287e34ac075f6db4df11c1694336ba",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/320/review-operator-terminal.png",
+      "sha256": "9a7bcdea6af5cec329781b666aba3fa189d02ccb426e32df24246cd471a36c3e",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/320/review-overlap-safe.png",
+      "sha256": "1f94bd41d24a7961cb6612c59bd2e06fd12ebeee4336c49d0646aebaf59bf09d",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/320/review-pending-blocks-other-clan.png",
+      "sha256": "322b7a6870a58a8eab9bfbaffb7226dd257f924e1184cffc1f5cf59dc80daaeb",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/320/review-revocation-pending.png",
+      "sha256": "644c34cf45d54c9bdb1be43a8a4bb097162e69d6dd77068ef39d2ef5e3f0199b",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/320/review-verified-membership.png",
+      "sha256": "50ff8e8f2d6d9cddecc42b5c9c41a24aa377ce0d7f1a20dd929c13920dd71d7f",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/390/review-accepted-behind-cancelled-history.png",
+      "sha256": "0d2b26d013f8d717d4d35a758985354d4cd3d2eefda3152c158dbf9d43a6fb85",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/390/review-mixed-blockers.png",
+      "sha256": "454eaa8b84d50788dd750223f371e3358815e4aec4bcebc4786b31cf80569f0f",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/390/review-operator-older.png",
+      "sha256": "4e190cf010fff442423862d2b424afc311f1e8298f51ee89a096b847c23fe2cb",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/390/review-operator-terminal.png",
+      "sha256": "7e4ec713f535563ecf6ab23b045e27cd96b01ed522d244057acece5350a4e7b9",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/390/review-overlap-safe.png",
+      "sha256": "17418c1856a1c74002216752e8d5a6532c42de0cad39c9ffa3ba78db21aae8e2",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/390/review-pending-blocks-other-clan.png",
+      "sha256": "e46e651c3585f6000c9bf46e5c3f27e02b9f70002636c0b6300aaf39a7d90e7a",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/390/review-revocation-pending.png",
+      "sha256": "0c54039524c0407af95df30017e04eaf42f46e77830fe57df1cce35ca5ae5f8b",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/390/review-verified-membership.png",
+      "sha256": "a09e22a38704ae444be6c0a757c5f4f162da2749f94c6349c16f19aae2c3730a",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/460/review-accepted-behind-cancelled-history.png",
+      "sha256": "98213c7f004fc64fb362828fe79d5acb722b6ecb53f661d3d0f30cfdc986b473",
+      "viewport": {
+        "width": 460,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/460/review-mixed-blockers.png",
+      "sha256": "d74840c6ade598977aa0d724d1f9bafa3978a8fa03ee4857f6650d23850a6d8c",
+      "viewport": {
+        "width": 460,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/460/review-operator-older.png",
+      "sha256": "c7bd9238f77bfac4955d464872ca7fb9aa6328394e136c1cf5f5f4596fc7b2b2",
+      "viewport": {
+        "width": 460,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/460/review-operator-terminal.png",
+      "sha256": "eaac806036a053a65bd746bb0ab9e589cdd586d837a3f0009b8565649a56edce",
+      "viewport": {
+        "width": 460,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/460/review-overlap-safe.png",
+      "sha256": "4b3ba92588d83334e3c1238b8b34cab2136e6c7f1f691dcc089add8ad340622d",
+      "viewport": {
+        "width": 460,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/460/review-pending-blocks-other-clan.png",
+      "sha256": "4f9b58400ba03737a8d2ef996bf27ca2f9df14ab46548f3934e5a9302decb13c",
+      "viewport": {
+        "width": 460,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/460/review-revocation-pending.png",
+      "sha256": "f1cd10ce7c28c0310b3b2e8bb1ee72de2183eaa7623d02e3e38121794f9656bf",
+      "viewport": {
+        "width": 460,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    },
+    {
+      "path": "docs/evidence/b5/active-application-review/460/review-verified-membership.png",
+      "sha256": "500917bf19741acbc5508c40d771549ea9790bf75a1f8c9ff43b37607220c739",
+      "viewport": {
+        "width": 460,
+        "height": 844
+      },
+      "device_scale_factor": 1,
+      "source_commit": "440903db787ea6c366991ca91fa1c5bda2ad6469",
+      "backend_sha": "65a2c45810c0d5f721c662f3d4681967829ef242"
+    }
+  ]
+}

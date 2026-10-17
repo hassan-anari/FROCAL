@@ -14,9 +14,11 @@ for (const viewport of [{ width: 320, height: 700 }, { width: 390, height: 844 }
       await page.waitForTimeout(1000);
       await page.evaluate(async () => { await document.fonts.ready; await Promise.race([Promise.all(Array.from(document.images).filter(img => { const box = img.getBoundingClientRect(); return img.complete || (box.top < innerHeight && box.bottom > 0); }).map(img => img.decode().catch(() => undefined))), new Promise(done => setTimeout(done, 2000))]); });
       await page.screenshot({ path: `${dir}/${phase}-${name}.png`, animations: "disabled" });
-      // These full screens have identical data and no authorized visual changes.
+      // B5 explicitly changes Base objectives/rewards and Network History/CTA.
+      // Their scoped comparisons and evidence now live in b5-ui.spec.ts.
+      // These remaining full screens have no authorized visual changes.
       // Compare against the saved pre-edit release, never an auto-approved after image.
-      if (phase === "after" && ["base-header", "profile-overview", "network", "arena-warfront"].includes(name)) {
+      if (phase === "after" && ["profile-overview", "arena-warfront"].includes(name)) {
         await expect(page).toHaveScreenshot([String(viewport.width), `before-${name}.png`], { animations: "disabled", maxDiffPixelRatio: 0.002 });
       }
     };

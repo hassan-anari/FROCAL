@@ -406,12 +406,10 @@
   background: #0a1025;
 }
 
-.objectiveActive .objectiveNode {
-  color: white;
-  border-color: rgba(148, 202, 255, .28);
-  background: linear-gradient(145deg, #8d56ff, #4fd8ff);
-  box-shadow: 0 0 20px rgba(126, 83, 255, .36);
-}
+.objectiveItem:nth-child(1) .objectiveNode { background: var(--color-cyan); }
+.objectiveItem:nth-child(2) .objectiveNode { background: #f6a24a; }
+.objectiveItem:nth-child(3) .objectiveNode { background: var(--color-warning); }
+.objectiveNode { color: var(--color-bg-850); border: 0; box-shadow: none; }
 
 .objectiveItem > div {
   display: grid;

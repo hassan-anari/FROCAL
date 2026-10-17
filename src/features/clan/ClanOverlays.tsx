@@ -144,10 +144,12 @@ export function RoleConfirmSheet({
   role,
   onClose,
   onConfirm,
+  pending = false,
 }: {
   role: ClanRole;
   onClose: () => void;
   onConfirm: () => void;
+  pending?: boolean;
 }) {
   const captain = role === "captain";
   return (
@@ -158,7 +160,7 @@ export function RoleConfirmSheet({
       footer={
         <div className={styles.doubleActions}>
           <Button type="button" tone="secondary" size="sm" onClick={onClose}>Go back</Button>
-          <Button type="button" tone="primary" size="sm" className={styles.primary} data-clan-primary onClick={onConfirm}>
+          <Button type="button" tone="primary" size="sm" className={styles.primary} data-clan-primary disabled={pending} onClick={onConfirm}>
             Confirm path
           </Button>
         </div>
@@ -188,11 +190,13 @@ export function ClanPreviewSheet({
   pendingClanId,
   onClose,
   onJoin,
+  pending = false,
 }: {
   clan: ClanSummary;
   pendingClanId: string | null;
   onClose: () => void;
   onJoin: () => void;
+  pending?: boolean;
 }) {
   const full = clan.members >= clan.capacity || clan.status === "Full";
   const hasPending = pendingClanId !== null;
@@ -215,7 +219,7 @@ export function ClanPreviewSheet({
           size="sm"
           className={styles.primary}
           data-clan-primary
-          disabled={full || hasPending}
+          disabled={full || hasPending || pending}
           onClick={onJoin}
         >
           {label}
@@ -233,7 +237,7 @@ export function ClanPreviewSheet({
             <AssetImage assetKey={getClanEmblemAssetKey()} className={styles.clanMarkFrame} />
           </div>
           <div>
-            <span>#{clan.rank} SEASON</span>
+            <span>{clan.rank === null ? "—" : `#${clan.rank}`} SEASON</span>
             <h3>{clan.name}</h3>
             <p>{clan.summary}</p>
           </div>
@@ -246,7 +250,7 @@ export function ClanPreviewSheet({
       </div>
       <div className={styles.detailList}>
         <div><span>Status</span><strong>{clan.status}</strong></div>
-        <div><span>Match</span><strong>{clan.match ?? 80}%</strong></div>
+        <div><span>Match</span><strong>{clan.match === undefined ? "—" : `${clan.match}%`}</strong></div>
         <div><span>Request rule</span><strong>One active request</strong></div>
       </div>
     </ClanModal>
@@ -263,6 +267,7 @@ export function ClanItemSheet({
   onClose,
   onPurchase,
   onActivate,
+  purchaseAllowed, activationAllowed, pending = false, blockedLabel,
 }: {
   item: ClanInventoryItem;
   quantity: number;
@@ -273,10 +278,14 @@ export function ClanItemSheet({
   onClose: () => void;
   onPurchase: () => void;
   onActivate: () => void;
+  purchaseAllowed?: boolean;
+  activationAllowed?: boolean;
+  pending?: boolean;
+  blockedLabel?: string;
 }) {
-  const canBuy = captain && treasury >= item.price;
+  const canBuy = captain && (purchaseAllowed ?? treasury >= item.price) && !pending;
   const active = activeUntil !== null && activeUntil > Date.now();
-  const canActivate = captain && source === "inventory" && item.activationMode === "timed" && quantity > 0 && !active;
+  const canActivate = captain && source === "inventory" && (activationAllowed ?? (item.activationMode === "timed" && quantity > 0 && !active)) && !pending;
   const durationLabel = item.durationMinutes ? `${item.durationMinutes >= 60 ? `${item.durationMinutes / 60}h` : `${item.durationMinutes}m`}` : null;
 
   let footer: ReactNode;
@@ -291,10 +300,10 @@ export function ClanItemSheet({
         disabled={!canBuy}
         onClick={onPurchase}
       >
-        {canBuy ? `Buy +1 · ${item.price.toLocaleString()}` : "Not enough Treasury"}
+        {pending ? "Please wait…" : canBuy ? `Buy +1 · ${item.price.toLocaleString()}` : purchaseAllowed === false ? treasury < item.price ? "Not enough Treasury" : "Unavailable" : "Not enough Treasury"}
       </Button>
     );
-  } else if (captain && item.activationMode === "timed") {
+  } else if (captain && (item.activationMode === "timed" || activationAllowed !== undefined)) {
     footer = (
       <Button
         type="button"
@@ -305,7 +314,7 @@ export function ClanItemSheet({
         disabled={!canActivate}
         onClick={onActivate}
       >
-        {active ? "Effect already active" : quantity <= 0 ? "No item stored" : `${item.activationVerb}${durationLabel ? ` · ${durationLabel}` : ""}`}
+        {pending ? "Please wait…" : activationAllowed === false ? blockedLabel ?? "Unavailable" : activationAllowed === undefined && active ? "Effect already active" : quantity <= 0 ? "No item stored" : `${item.activationVerb}${durationLabel ? ` · ${durationLabel}` : ""}`}
       </Button>
     );
   } else {
@@ -353,12 +362,12 @@ export function ClanAchievementsSheet({
       </div>
       <div className={styles.achievementList}>
         {achievements.map((achievement) => {
-          const ratio = Math.min(1, achievement.current / Math.max(1, achievement.target));
+          const ratio = achievement.current === null || achievement.target === null ? null : Math.min(1, achievement.current / Math.max(1, achievement.target));
           return (
             <article key={achievement.id} className={achievement.unlocked ? styles.achievementUnlocked : ""}>
-              <div><span>{achievement.unlocked ? "UNLOCKED" : "IN PROGRESS"}</span><strong>{achievement.name}</strong><p>{achievement.description}</p></div>
-              <b>{Math.round(ratio * 100)}%</b>
-              <i><em style={{ transform: `scaleX(${ratio})` }} /></i>
+              <div><span>{achievement.available === false ? "UNAVAILABLE" : achievement.unlocked ? "UNLOCKED" : "IN PROGRESS"}</span><strong>{achievement.name}</strong><p>{achievement.description}</p></div>
+              <b>{ratio === null ? "—" : `${Math.round(ratio * 100)}%`}</b>
+              <i><em style={{ transform: `scaleX(${ratio ?? 0})` }} /></i>
             </article>
           );
         })}
@@ -372,11 +381,13 @@ export function JoinRequestsSheet({
   onClose,
   onAccept,
   onReject,
+  pendingAction = false,
 }: {
   applicants: ClanJoinApplicant[];
   onClose: () => void;
   onAccept: (id: string) => void;
   onReject: (id: string) => void;
+  pendingAction?: boolean;
 }) {
   const pending = applicants.filter((applicant) => applicant.status === "pending");
 
@@ -398,18 +409,18 @@ export function JoinRequestsSheet({
               <div className={styles.requestStats}>
                 <span><b>LVL</b>{applicant.level}</span>
                 <span><b>SCORE</b>{applicant.seasonScore.toLocaleString()}</span>
-                <span><b>RANK</b>#{applicant.globalRank.toLocaleString()}</span>
-                <span><b>ACTIVE</b>{applicant.activeDays}d</span>
+                <span><b>RANK</b>{applicant.globalRank === null ? "—" : `#${applicant.globalRank.toLocaleString()}`}</span>
+                <span><b>ACTIVE</b>{applicant.activeDays === null ? "—" : `${applicant.activeDays}d`}</span>
               </div>
               <div className={styles.requestMeta}>
-                <span>Contribution {applicant.contributionPreview.toLocaleString()}</span>
+                <span>Contribution {applicant.contributionPreview?.toLocaleString() ?? "—"}</span>
                 {applicant.medals.slice(0, 2).map((medal) => <em key={medal}>{medal}</em>)}
               </div>
             </div>
             {applicant.status === "pending" ? (
               <div className={styles.requestActions}>
-                <button type="button" onClick={() => onReject(applicant.id)}>Reject</button>
-                <button type="button" className={styles.accept} onClick={() => onAccept(applicant.id)}>Accept</button>
+                <button type="button" disabled={pendingAction} onClick={() => onReject(applicant.id)}>Reject</button>
+                <button type="button" disabled={pendingAction} className={styles.accept} onClick={() => onAccept(applicant.id)}>Accept</button>
               </div>
             ) : <em className={styles[applicant.status]}>{applicant.status}</em>}
           </article>

@@ -18,7 +18,7 @@ export interface ClanSummary {
   level: number;
   members: number;
   capacity: number;
-  rank: number;
+  rank: number | null;
   score: number;
   status: "Recruiting" | "Focused" | "Full";
   summary: string;
@@ -32,7 +32,7 @@ export interface ClanSummary {
 export interface ClanMember {
   id: string;
   name: string;
-  level: number;
+  level: number | null;
   contribution: number;
   role: "Captain" | "Soldier";
   initial: string;
@@ -56,8 +56,9 @@ export interface ClanAchievement {
   id: string;
   name: string;
   description: string;
-  current: number;
-  target: number;
+  current: number | null;
+  target: number | null;
+  available?: boolean;
   unlocked: boolean;
 }
 
@@ -90,9 +91,9 @@ export interface ClanJoinApplicant {
   username: string | null;
   level: number;
   seasonScore: number;
-  globalRank: number;
-  activeDays: number;
-  contributionPreview: number;
+  globalRank: number | null;
+  activeDays: number | null;
+  contributionPreview: number | null;
   medals: string[];
   initial: string;
   avatarUrl?: string | null;
@@ -103,7 +104,7 @@ export interface ClanEligibleGroup {
   id: string;
   title: string;
   username: string | null;
-  memberCount: number;
+  memberCount: number | null;
   botIsAdmin: boolean;
   userIsAdmin: boolean;
   userIsOwner: boolean;

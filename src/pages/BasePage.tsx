@@ -1,5 +1,8 @@
+import { baseObjectives, missionStateLabel } from "@/integrations/api/baseObjectives";
+import { useRewardHistory } from "@/integrations/api/useRewardHistory";
+import { rewardHistoryView, formatXp, rewardTimestamp } from "@/integrations/api/rewardHistory";
 import { BasePromoBanner } from "@/design-system/components/BasePromoBanner";
-import { useB3, missionView } from "@/integrations/api/useB3";
+import { useB3 } from "@/integrations/api/useB3";
 import { useGameplayAvailability } from "@/integrations/api/useGameplayAvailability";
 import { useBootstrap } from "@/integrations/api/BootstrapProvider";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
@@ -40,12 +43,6 @@ const reactionLibrary: Record<ReactionKey, { asset: AssetKey; scale: number }> =
 };
 
 const reactionOrder: ReactionKey[] = ["curious", "happy", "focused", "surprised", "victory"];
-
-const activityFeed = [
-  { id: "missions", tone: "cyan", title: "12 completed missions updated your progress.", time: "2m ago", status: "Ready" },
-  { id: "clan-xp", tone: "violet", title: "NovaGuard gained 340 Clan XP.", time: "18m ago", status: "Synced" },
-  { id: "fragment", tone: "gold", title: "A Rare Season Fragment is now available.", time: "1h ago", status: "New" },
-] as const;
 
 function getLevelAsset(level: number): AssetKey {
   if (level >= 30) return "dexo.level30";
@@ -101,7 +98,9 @@ export function BasePage() {
   const live = useB3();
   const streak = live.remote ? live.daily.data?.current_streak ?? 0 : localStreak;
   const localMissions = useEarnStore((state) => state.missions);
-  const missions = live.remote ? Object.fromEntries((live.missions.data ?? []).map(m => [m.key, missionView(m)])) : localMissions;
+  const history = useRewardHistory();
+  const recentRewards = history.items.filter(item => item.player_amount !== 0).slice(0, 3).map(rewardHistoryView);
+  const objectives = live.remote ? baseObjectives(live.missions.data).map(m => ({ id: m.key, title: m.title, rewardXp: m.reward_amount, label: missionStateLabel(m.state) })) : Object.values(localMissions).filter(m => m.status !== "claimed").slice(0, 3).map(m => ({ ...m, label: m.status === "completed" ? "Reward ready" : m.status === "in-progress" ? "In progress" : "Available" }));
   const { adapter } = useTelegram();
   const initData = adapter.getInitData();
   const remoteData = isRemoteDataSource();
@@ -204,13 +203,6 @@ export function BasePage() {
   const displayedScale = activeReaction
     ? reactionLibrary[activeReaction].scale
     : getLevelScale(presentationLevel);
-  const missionList = Object.values(missions);
-  const claimedMissionCount = missionList.filter((mission) => mission.status === "claimed").length;
-  const starterProgress = (missionList.length ? Math.round((claimedMissionCount / missionList.length) * 100) : 0);
-  const currentMission = missionList.find((mission) => mission.status !== "claimed");
-  const currentMissionProgress =
-    live.remote ? (currentMission?.status === "completed" ? 100 : 0) : currentMission?.status === "completed" ? 90 : currentMission?.status === "in-progress" ? 45 : 0;
-
   const growthLabel = remoteData
     ? liveProgression?.nextThreshold === null && liveProgression
       ? "MAX LEVEL"
@@ -347,66 +339,39 @@ export function BasePage() {
           </header>
 
           <div className={styles.objectiveTimeline}>
-            <article className={`${styles.objectiveItem} ${styles.objectiveActive}`}>
-              <span className={styles.objectiveNode}>01</span>
-              <div>
-                <div className={styles.objectiveEyebrow}>
-                  <span>Current objective</span>
-                  <strong>{currentMission ? `${currentMissionProgress}%` : "100%"}</strong>
+            {objectives.map((mission, index) => (
+              <article key={mission.id} className={styles.objectiveItem}>
+                <span className={styles.objectiveNode}>{String(index + 1).padStart(2, "0")}</span>
+                <div>
+                  <div className={styles.objectiveEyebrow}>
+                    <span>{mission.label}</span>
+                    <strong>{mission.rewardXp} XP</strong>
+                  </div>
+                  <h3>{mission.title}</h3>
                 </div>
-                <h3>
-                  {currentMission
-                    ? currentMission.status === "completed"
-                      ? `Claim ${currentMission.title}`
-                      : currentMission.title
-                    : "Starter Protocol complete"}
-                </h3>
-                <div className={styles.objectiveTrack}>
-                  <i style={{ width: `${currentMission ? currentMissionProgress : 100}%` }} />
-                </div>
-              </div>
-            </article>
-            <article className={styles.objectiveItem}>
-              <span className={styles.objectiveNode}>02</span>
-              <div>
-                <div className={styles.objectiveEyebrow}>
-                  <span>Starter pathway</span>
-                  <strong>{starterProgress}%</strong>
-                </div>
-                <h3>{claimedMissionCount < 2 ? "Accuracy Protocol" : "Season Access"}</h3>
-              </div>
-            </article>
-            <article className={styles.objectiveItem}>
-              <span className={styles.objectiveNode}>03</span>
-              <div>
-                <div className={styles.objectiveEyebrow}>
-                  <span>Milestone</span>
-                  <strong>→</strong>
-                </div>
-                <h3>Operator Medal · Tier II</h3>
-              </div>
-            </article>
+              </article>
+            ))}
           </div>
         </section>
 
         <DeferredMount minHeight={220}>
-          <section className={styles.lastVisit} aria-label="Since your last visit">
+          {recentRewards.length > 0 ? <section className={styles.lastVisit} aria-label="Recent rewards">
             <header className={styles.sectionHeader}>
-              <h2>Since Your Last Visit</h2>
+              <h2>Recent Rewards</h2>
             </header>
             <div className={styles.activityList}>
-              {activityFeed.map((item) => (
+              {recentRewards.map((item, index) => (
                 <article key={item.id} className={styles.activityItem}>
-                  <i className={styles[item.tone]} />
+                  <i className={styles[(["cyan", "violet", "gold"] as const)[index]]} />
                   <div>
-                    <strong>{item.title}</strong>
-                    <small>{item.time}</small>
+                    <strong>{item.title}{item.description ? ` · ${item.description}` : ""}</strong>
+                    <small>{rewardTimestamp(item.createdAt)}</small>
                   </div>
-                  <span>{item.status}</span>
+                  <span>{formatXp(item.xp!)}</span>
                 </article>
               ))}
             </div>
-          </section>
+          </section> : null}
 
           <section className={styles.quickStats} aria-label="Base status">
             <div>

@@ -17,7 +17,7 @@
     "validate:assets": "node scripts/validate-assets.mjs",
     "validate:structure": "node scripts/validate-structure.mjs",
     "check": "npm run validate:structure && npm run validate:assets && npm run validate:imports && npm run validate:motion && npm run validate:production && npm run validate:contracts && npm run typecheck && npm run test && npm run build && npm run validate:production-bundle",
-    "validate:contracts": "node scripts/contracts/check-b2-contract.mjs",
+    "validate:contracts": "node scripts/contracts/check-b2-contract.mjs && node scripts/contracts/generate-b5-schemas.mjs --check",
     "test:paired": "node scripts/contracts/run-paired.mjs",
     "validate:production": "node --test scripts/production-policy.test.mjs",
     "validate:production-bundle": "node scripts/validate-production-bundle.mjs",
@@ -25,7 +25,11 @@
     "validate:motion": "node scripts/validate-motion.mjs",
     "validate:telegram-sdk": "node scripts/validate-telegram-sdk.mjs",
     "test:paired:b3": "node scripts/contracts/run-paired-b3.mjs",
-    "test:paired:b4": "node scripts/contracts/run-paired-b4.mjs"
+    "test:paired:b4": "node scripts/contracts/run-paired-b4.mjs",
+    "test:e2e:b5": "playwright test --config playwright.b5.config.ts",
+    "test:visual:b5-baseline": "node scripts/capture-b5-baseline.mjs",
+    "test:paired:b5-contract": "node scripts/contracts/run-paired-b5-contract.mjs",
+    "test:visual:b5-clan-baseline": "node scripts/capture-b5-clan-baseline.mjs"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.6",

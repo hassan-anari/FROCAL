@@ -21,3 +21,16 @@ it("routes validated URLs through existing Telegram/external adapters and intern
   expect(adapter.openExternalLink).toHaveBeenCalledWith("https://dalexio.com/season");
   expect(navigate).toHaveBeenCalledWith("/earn");
 });
+
+it.each([
+  "https://partner.example.org/campaign?utm_source=telegram&next=%2Foffer%3Fa%3D1#details",
+  "https://another-domain.example.net/offer?q=hello%20world&campaign=a%26b",
+])("preserves approved external domains and query strings: %s", value => {
+  const adapter = { openTelegramLink: vi.fn(), openExternalLink: vi.fn() }; const navigate = vi.fn();
+  expect(navigateSafely(value, adapter, navigate)).toBe(true);
+  expect(adapter.openExternalLink).toHaveBeenCalledWith(value);
+  expect(adapter.openTelegramLink).not.toHaveBeenCalled(); expect(navigate).not.toHaveBeenCalled();
+});
+it.each(["https://evil.test:444/path", "https://good.test@evil.test/", "https://evil.test/%0d%0aLocation:bad", "https://evil.test/\\x", "https://evil.test/\u0000", "//evil.test/path", "http://evil.test/path"])("retains strict external URL rejection: %s", value => {
+  expect(safeDestination(value)).toBeNull();
+});

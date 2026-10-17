@@ -1,3 +1,5 @@
+import { QueryContinuation } from "@/design-system/performance/QueryContinuation";
+import { formatXp } from "@/integrations/api/rewardHistory";
 import { ArrowRight01Icon, Wallet01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion } from "motion/react";
@@ -63,6 +65,12 @@ interface HistorySheetProps {
   open: boolean;
   onClose: () => void;
   history: EarnHistoryEntry[];
+  remote?: boolean;
+  loading?: boolean;
+  error?: boolean;
+  fetching?: boolean;
+  hasNext?: boolean;
+  loadMore?: () => unknown;
 }
 
 function formatTime(value: string): string {
@@ -70,7 +78,7 @@ function formatTime(value: string): string {
   return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(date);
 }
 
-export function HistorySheet({ open, onClose, history }: HistorySheetProps) {
+export function HistorySheet({ open, onClose, history, remote = false, loading = false, error = false, fetching = false, hasNext = false, loadMore }: HistorySheetProps) {
   return (
     <OverlayShell open={open} onClose={onClose} ariaLabel="Earn history">
       <header className={styles.sheetHeader}>
@@ -78,7 +86,8 @@ export function HistorySheet({ open, onClose, history }: HistorySheetProps) {
         <h2>Your recent progress.</h2>
         <p>Daily claims, missions, network growth and Typing Arena results are stored here.</p>
       </header>
-      <div className={styles.historyList}>
+      <div className={styles.historyList} data-reward-history aria-busy={loading || fetching}>
+        {remote && !history.length ? <span role="status">{loading || fetching ? "Loading rewards…" : error ? "Rewards couldn't load. Please try again later." : "No rewards yet."}</span> : null}
         {history.map((item) => (
           <article key={item.id}>
             <i className={styles[`history_${item.type}`]} />
@@ -87,9 +96,12 @@ export function HistorySheet({ open, onClose, history }: HistorySheetProps) {
               <span>{item.description}</span>
               <small>{formatTime(item.createdAt)}</small>
             </div>
-            {item.xp ? <em>+{item.xp} XP</em> : null}
+            {item.xp !== undefined ? <em>{formatXp(item.xp)}</em> : null}
           </article>
         ))}
+        {remote && history.length > 0 && error ? <span role="status">More rewards couldn't load. Please try again later.</span> : null}
+        {remote && history.length > 0 && fetching ? <span role="status">Loading rewards…</span> : null}
+        {open && remote && loadMore ? <QueryContinuation selector="[data-reward-history] > article:last-of-type" hasNext={hasNext} fetching={fetching} load={loadMore} /> : null}
       </div>
     </OverlayShell>
   );

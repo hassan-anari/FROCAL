@@ -3,7 +3,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: ['ai/b1-frontend-*', 'ai/b2-frontend-*', 'ai/b3-frontend-*', 'ai/b4-*']
+    branches: ['ai/b1-frontend-*', 'ai/b2-frontend-*', 'ai/b3-frontend-*', 'ai/b4-*', 'ai/b5-*']
   workflow_dispatch:
 permissions:
   contents: read
@@ -40,6 +40,9 @@ jobs:
       - run: npm run test:e2e
       - run: npm run test:visual:b4-baseline
       - run: npm run test:e2e:b4
+      - run: npm run test:visual:b5-baseline
+      - run: npm run test:visual:b5-clan-baseline
+      - run: npm run test:e2e:b5
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -49,6 +52,8 @@ jobs:
             test-results/
             test-results-b4/
             docs/evidence/b4/
+            docs/evidence/b5/
+            work/test-results-b5/
           retention-days: 14
   paired-b2:
     runs-on: ubuntu-latest
@@ -210,4 +215,52 @@ jobs:
             test-results-paired/results.json
             test-results-paired/session-measurements.json
             test-results-paired/session-browser-measurements.json
+          retention-days: 14
+
+  paired-b5-contract:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: frocal_b5_ci
+          POSTGRES_USER: b5_test
+          POSTGRES_PASSWORD: isolated-test-only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U b5_test -d frocal_b5_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      POSTGRES_DB: frocal_b5_ci
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: '5432'
+      POSTGRES_USER: b5_test
+      POSTGRES_PASSWORD: isolated-test-only
+      B5_BACKEND_ROOT: work/backend-b5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: hassan-anari/WEDCAL
+          ref: 65a2c45810c0d5f721c662f3d4681967829ef242
+          path: work/backend-b5
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.8.22'
+      - run: uv sync --frozen --python 3.13
+        working-directory: work/backend-b5
+      - run: npm ci
+      - run: npm run validate:contracts
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:paired:b5-contract
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: b5-paired-contract-results
+          path: work/b5-paired/
           retention-days: 14

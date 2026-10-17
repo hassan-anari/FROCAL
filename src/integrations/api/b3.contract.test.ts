@@ -129,3 +129,26 @@ it("accepts the published nullable additive Bootstrap and ownership fields for c
     tapStateSchema.parse({ ...session.initial, ownership: null }).ownership,
   ).toBeNull();
 });
+
+it.each([
+  "https://campaign.example.org/welcome?utm_source=miniapp&target=%2Fseason%3Fid%3D5",
+  "https://new-owner-approved-domain.example/offer?q=one%20two",
+])("keeps arbitrary approved HTTPS banner destinations including queries: %s", destination => {
+  const banner = { ...banners.active.banner, destination_type: "HTTPS" as const, destination };
+  expect(validBanner(c.bannerSchema.parse({ ...banners.active, banner }).banner)).toEqual(banner);
+});
+it.each([
+  "javascript:alert(1)", "data:text/html,bad", "http://external.example", "//external.example",
+  "https://user:pass@external.example/", "https://external.example:8443/", "https://external.example/%0aevil", "https://external.example/\\evil",
+  "https://external.example/#fragment", "https://external.example/%252e%252e/x", "https://external.example/%ZZ", "https://external.example/a/../b", "https://external.example//path", "https://-invalid.example/path", "https://external.example/?q=%22script%22",
+])("rejects malicious HTTPS-type banner destinations: %s", destination => {
+  expect(validBanner({ ...banners.active.banner, width: 1200, height: 260, destination_type: "HTTPS", destination })).toBeNull();
+});
+
+it("follows the server banner destination type without broadening general navigation", () => {
+  const b = c.bannerSchema.parse(banners.active).banner!;
+  expect(validBanner({ ...b, destination_type: "HTTPS", destination: "https://telegram.me/community" })).not.toBeNull();
+  expect(validBanner({ ...b, destination_type: "TELEGRAM", destination: "https://telegram.me/community" })).toBeNull();
+  expect(validBanner({ ...b, destination_type: "HTTPS", destination: "https://t.me/community" })).toBeNull();
+  expect(validBanner({ ...b, destination_type: "HTTPS", destination: "/earn" })).not.toBeNull();
+});
