@@ -1,6 +1,5 @@
-import type { ClanActivityOut, ClanActivityPage } from "./b6Schemas";
+import type { ClanActivityOut, ClanActivityPage, ItemRuleOut } from "./b6Schemas";
 import type { ClanRankStatus } from "@/game/clan/types";
-import { clanShopItems } from "@/game/clan/clanCatalog";
 
 export function clanRankLabel(rank: number | null, status?: ClanRankStatus): string {
   if ((status === "RANKED" || status === undefined) && rank !== null && rank > 0) return `#${rank.toLocaleString("en-US")}`;
@@ -16,9 +15,9 @@ export function clanActivityRows(pages: ClanActivityPage[] = []): ClanActivityOu
   return [...rows.values()];
 }
 
-export function clanActivityView(row: ClanActivityOut) {
+export function clanActivityView(row: ClanActivityOut, items: readonly Pick<ItemRuleOut, "item_id" | "name">[] = []) {
   const actor = row.actor_name || "A member";
-  const item = clanShopItems.find(item => item.id === row.item_id)?.name ?? "Clan equipment";
+  const item = items.find(item => item.item_id === row.item_id)?.name ?? "Clan equipment";
   switch (row.event_type) {
     case "MEMBER_JOINED": return { title: `${actor} joined the Clan`, description: "Telegram membership verified." };
     case "MISSION_COMPLETED": return { title: "Clan mission completed", description: row.actor_name ? `${actor}'s individual mission completed.` : "Group mission completed." };

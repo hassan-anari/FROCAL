@@ -30,6 +30,9 @@ it("uses stable event identities and original source timestamps without duplicat
     expect(row.occurred_at).not.toBe(pages[0].as_of);
     expect(JSON.stringify(clanActivityView(row))).not.toMatch(/https:|telegram_user_id|reward:/i);
   }
+  const purchase = rows.find(row => row.event_type === "ITEM_PURCHASED")!;
+  expect(clanActivityView(purchase, [{ item_id: purchase.item_id!, name: "Server-published equipment name" }]).title).toBe("Server-published equipment name purchased");
+  expect(clanActivityView(purchase).title).toBe("Clan equipment purchased");
   expect(rows.some(row => row.event_type === "MEMBER_JOINED")).toBe(true);
   expect(rows.filter(row => row.event_type === "CLAN_REWARD_SETTLED")).toHaveLength(1);
 });
