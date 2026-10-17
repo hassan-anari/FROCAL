@@ -1,24 +1,24 @@
 {
   "reviewed_baseline_commit": "a0c0d4802b4554320b6f225a1b07eff51b82d4a5",
-  "implementation_code_commit": "a1788d22c7dc280ff702277d7848b09a2d635b72",
-  "backend_checkout": "28a6b8805db5f9a8c70b78c5eadf5c6276dbccd1",
-  "backend_runtime_schema": "13e7b1988181980b6ad80b69a8e9f28347e31802",
+  "implementation_code_commit": "f3f7472c90c14fef5fa89556513039f7f1877c33",
+  "backend_checkout": "589210a8e28436c2110fa60b1ee9e12ddb05ccc8",
+  "backend_runtime_schema": "e99aa45474f7a9f372738a95eb96c2716b06b1d4",
   "source_sha256": {
     "src/features/clan/ClanRecentActivity.test.tsx": "c8f7e9a7ada228768c9244f7750e32fdcb41948de8f3f5b9a5a6d409de4aff7c",
     "src/integrations/api/clanActivity.ts": "fdc15e459a14e2a11b4f5303ddc7aa4027def628ed87fdefe0f08aefcc905b1c"
   },
   "evidence_sha256": {
-    "docs/evidence/b6-zero-net/320/after-recent-activity.png": "6caf31b80c8d92428d6cebbd85522581a065ad58d57633da126a56f02eb6e53e",
+    "docs/evidence/b6-zero-net/320/after-recent-activity.png": "e21b35305c1795480d68d8391ca81711d2b842acfa4741395204857f44a96730",
     "docs/evidence/b6-zero-net/320/before-geometry.json": "f5f37dceea5bdedad7b91e50891e66e596b74e42bea1019562242b2e3f6f0a7e",
-    "docs/evidence/b6-zero-net/320/before-recent-activity.png": "c55e999fb22774ac3da7823ee5978e05108ae8fceefd4ed8f0fda5b425804645",
-    "docs/evidence/b6-zero-net/390/after-recent-activity.png": "06785038c6a5f580d524f08d8a40248f7316baf484cb839507a90c264ed3521c",
+    "docs/evidence/b6-zero-net/320/before-recent-activity.png": "a78ffd32ae0a7b874479ea28f7b3bf5f41846f7779e496e596a62033be6a978d",
+    "docs/evidence/b6-zero-net/390/after-recent-activity.png": "22c5ac304f71232eb49ca051310bd9bea47b84cb2d0591cc885e27a03945457f",
     "docs/evidence/b6-zero-net/390/before-geometry.json": "b2699f74aec30f843c66e250215f6d385886ebf5e5e76f001c5bbfdb925e085f",
-    "docs/evidence/b6-zero-net/390/before-recent-activity.png": "2b2cd389a8aac6fe6d9df026c5271384c213e2da4510f7b64e542e0bdc4fb8a5",
-    "docs/evidence/b6-zero-net/460/after-recent-activity.png": "83d969ab95abe1a4a8c77acbb476c748916dab609f5d45eb199eb4bd9607f594",
+    "docs/evidence/b6-zero-net/390/before-recent-activity.png": "e43e3b6e23dac6217fb6ab38b9ca9b0f5efb98cdcbfa5aca9a2cf9491fcf14f4",
+    "docs/evidence/b6-zero-net/460/after-recent-activity.png": "16d26c1a0f4f2e1b7d1492d0b80528d804dac8db5812ef2d9672561f3e43b380",
     "docs/evidence/b6-zero-net/460/before-geometry.json": "6fbaed8a03d3043abe4043ed9d401beb28a337d693c1cce341ea634d33d342ad",
-    "docs/evidence/b6-zero-net/460/before-recent-activity.png": "f17529dfd87b6a20ef22ee87465d7cd5f9e37f7a4f9b9b2072e33028e9e708e6",
+    "docs/evidence/b6-zero-net/460/before-recent-activity.png": "0cde2f18b467d777fe22b62f599a7e8e05fe472bcc6823b258cc903193534031",
     "docs/evidence/b6-zero-net/baseline-provenance.json": "ea062d365e2a74bc11b91e801b908eb7e483bf960affb5c6af72f8c196d72304",
-    "docs/evidence/b6-zero-net/zero-net-activity-http.json": "fc15e3346fd619d12e51e35ce1f27472954c09ddfe35870443d63d3d7272e104"
+    "docs/evidence/b6-zero-net/zero-net-activity-http.json": "0151b97dae1c713ea762995fa7dfd991424c9f4d63ceae12d9ae8859d46df52f"
   },
   "fixture_provenance": {
     "producer": "scripts/contracts/b6/integration.paired.test.ts: real zero-net rollover test",

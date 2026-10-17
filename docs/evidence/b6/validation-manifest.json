@@ -1,8 +1,8 @@
 {
   "baseline_commit": "f7324b07cda2ede8d55679457699ad376d03447d",
-  "implementation_code_commit": "a1788d22c7dc280ff702277d7848b09a2d635b72",
-  "backend_pin": "28a6b8805db5f9a8c70b78c5eadf5c6276dbccd1",
-  "backend_runtime": "13e7b1988181980b6ad80b69a8e9f28347e31802",
+  "implementation_code_commit": "f3f7472c90c14fef5fa89556513039f7f1877c33",
+  "backend_pin": "589210a8e28436c2110fa60b1ee9e12ddb05ccc8",
+  "backend_runtime": "e99aa45474f7a9f372738a95eb96c2716b06b1d4",
   "backend_contract": "Final acknowledged B6 contract",
   "viewports": [
     320,
@@ -398,10 +398,10 @@
         390,
         844
       ],
-      "pixels_changed_above_10": 106447,
-      "changed_ratio": 0.3233898408069024,
+      "pixels_changed_above_10": 106233,
+      "changed_ratio": 0.3227397010572366,
       "before_sha256": "db8abbab741bd609a45dbeadd7e3e8943259b73148d29a671dd4472c63efccca",
-      "after_sha256": "b38462f220921bc094b5e6fda790a5afd12bb815b8ef89733ac2e6b5d5598dc3"
+      "after_sha256": "b66baff06b2c86dd398effc30ac0b1897223f9c05ce199b6eaa9a68e4743cbf3"
     },
     {
       "width": 390,
