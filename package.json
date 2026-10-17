@@ -29,7 +29,9 @@
     "test:e2e:b5": "playwright test --config playwright.b5.config.ts",
     "test:visual:b5-baseline": "node scripts/capture-b5-baseline.mjs",
     "test:paired:b5-contract": "node scripts/contracts/run-paired-b5-contract.mjs",
-    "test:visual:b5-clan-baseline": "node scripts/capture-b5-clan-baseline.mjs"
+    "test:visual:b5-clan-baseline": "node scripts/capture-b5-clan-baseline.mjs",
+    "test:e2e:b6": "playwright test --config playwright.b6.config.ts",
+    "test:visual:b6-baseline": "node scripts/capture-b6-baseline.mjs"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.6",

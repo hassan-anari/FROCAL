@@ -8,12 +8,13 @@ import { ClanApiError } from "./b5";
 import { OwnRequestOut } from "./b5Schemas";
 import fixture from "./fixtures/b5/clan-http.json";
 import lifecycle from "./fixtures/b5/lifecycle-http.json";
-const api = vi.hoisted(() => Object.fromEntries(["state", "membership", "ownRequests", "discover", "preview", "home", "roster", "treasury", "equipment", "missions", "trophies", "governance", "recovery", "invite", "cancelRequest", "join"].map(key => [key, vi.fn()])));
+const api = vi.hoisted(() => Object.fromEntries(["state", "membership", "ownRequests", "discover", "preview", "home", "roster", "treasury", "equipment", "missions", "trophies", "governance", "recovery", "invite", "cancelRequest", "join", "applicants", "eligibleGroups"].map(key => [key, vi.fn()])));
+const native = vi.hoisted(() => ({ resume: null as null | (() => void) }));
 const feedback = vi.hoisted(() => vi.fn());
 const scope = { session: 1, player: "9001", season: "s1", config: "v1" };
 vi.mock("./BootstrapProvider", () => ({ useBootstrap: () => ({ scope, bootstrap: { data: { featureFlags: { clan: true }, serverTime: "2026-10-16T10:00:00Z" } } }) }));
 vi.mock("./bootstrap", () => ({ isRemoteDataSource: () => true }));
-vi.mock("@/integrations/telegram/TelegramProvider", () => ({ useTelegram: () => ({ adapter: { isTelegram: true, getInitData: () => "synthetic-auth", openTelegramLink: vi.fn() } }) }));
+vi.mock("@/integrations/telegram/TelegramProvider", () => ({ useTelegram: () => ({ adapter: { isTelegram: true, getInitData: () => "synthetic-auth", openTelegramLink: vi.fn(), subscribe: (_event: string, handler: () => void) => { native.resume = handler; return () => { native.resume = null; }; } } }) }));
 vi.mock("./b5", async original => ({ ...(await original<typeof import("./b5")>()), clanApi: () => api }));
 vi.mock("@/design-system/components/TransientFeedback", () => ({ showFeedback: feedback }));
 const accepted = OwnRequestOut.parse({ ...lifecycle.pending_request[0], id: 1, clan_id: 1, clan_name: "Accepted Clan", state: "ACCEPTED", invite_state: "ACTIVE", credential_unresolved: true });
@@ -32,9 +33,10 @@ beforeEach(() => {
   api.ownRequests.mockImplementation(async () => rows); api.discover.mockResolvedValue([]); api.preview.mockResolvedValue({ id: 1 });
   for (const name of ["home", "roster", "treasury", "equipment", "missions", "trophies", "governance", "recovery"]) api[name].mockResolvedValue((fixture as any)[name]);
   api.invite.mockResolvedValue({ state: "ACTIVE", invite_link: "https://t.me/+PRIVATE_TEST_CREDENTIAL", delivery_state: "PENDING" });
+  api.applicants.mockResolvedValue([]); api.eligibleGroups.mockResolvedValue([]);
   localStorage.clear(); sessionStorage.clear();
 });
-afterEach(() => client?.clear());
+afterEach(() => { client?.clear(); vi.restoreAllMocks(); });
 it("blocks joins until the authenticated request read succeeds and selects the older accepted record rather than newer history", async () => {
   let finish!: (value: typeof rows) => void;
   api.ownRequests.mockImplementationOnce(() => new Promise(done => { finish = done; }));
@@ -47,13 +49,13 @@ it("blocks joins until the authenticated request read succeeds and selects the o
 });
 it("keeps accepted invite access in the existing modal, then hides credentials and all application actions on a legacy overlap", async () => {
   const { wrapper } = setup(); render(<Status />, { wrapper });
-  await waitFor(() => expect(screen.getByRole("dialog")).toHaveTextContent("ACCEPTED"));
-  expect(screen.getByLabelText("Clan request history")).toHaveTextContent("Historical Clan"); expect(screen.getByLabelText("Clan request history")).toHaveTextContent("CANCELLED");
+  await waitFor(() => expect(screen.getByRole("dialog")).toHaveTextContent("Accepted · verify Telegram membership"));
+  expect(screen.getByLabelText("Clan request history")).toHaveTextContent("Historical Clan"); expect(screen.getByLabelText("Clan request history")).toHaveTextContent("Cancelled");
   fireEvent.click(screen.getByRole("button", { name: "Check invite and access" })); await screen.findByRole("button", { name: "Open Telegram group" });
   expect(JSON.stringify(client.getQueryCache().getAll().map(query => query.state.data))).not.toContain("PRIVATE_TEST_CREDENTIAL"); expect(JSON.stringify(localStorage)).not.toContain("PRIVATE_TEST_CREDENTIAL");
   rows = [cancelled, accepted, { ...accepted, id: 3, clan_id: 3, clan_name: "Overlapping Clan", state: "PENDING" }];
   await act(async () => { await client.invalidateQueries(); });
-  await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("More than one blocking Clan application"));
+  await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("Your Clan requests need review"));
   for (const name of ["Open Telegram group", "Check invite and access", "Cancel request"]) expect(screen.queryByRole("button", { name })).not.toBeInTheDocument();
   expect(api.invite).toHaveBeenCalledTimes(1);
 });
@@ -82,7 +84,7 @@ it("hides a late credential response after the application becomes ambiguous", a
   const { wrapper } = setup(); render(<Status />, { wrapper });
   await screen.findByRole("button", { name: "Check invite and access" }); fireEvent.click(screen.getByRole("button", { name: "Check invite and access" })); await waitFor(() => expect(api.invite).toHaveBeenCalledOnce());
   rows = [accepted, { ...accepted, id: 3, clan_id: 3, state: "PENDING" }]; await act(async () => { await client.invalidateQueries(); });
-  await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("More than one blocking Clan application"));
+  await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("Your Clan requests need review"));
   await act(async () => { finish({ state: "ACTIVE", invite_link: "https://t.me/+STALE_PRIVATE_CREDENTIAL", delivery_state: "PENDING" }); });
   await waitFor(() => expect(screen.getByRole("button", { name: "Refresh status" })).toBeEnabled());
   expect(screen.queryByRole("button", { name: "Open Telegram group" })).not.toBeInTheDocument(); expect(screen.getByRole("dialog")).not.toHaveTextContent("STALE_PRIVATE_CREDENTIAL");
@@ -101,7 +103,7 @@ it.each(["older", "terminal"])("keeps %s operator-required reservations read-onl
   const operator = kind === "older" ? { ...accepted, is_current_season: false, season_id: 77, clan_season_id: 88, season_code: "older-season", handling: "OPERATOR_REQUIRED" as const }
     : { ...cancelled, credential_unresolved: true, blocks_new_application: true, handling: "OPERATOR_REQUIRED" as const };
   rows = [operator]; const { wrapper } = setup(); render(<Status />, { wrapper });
-  await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("authorized operator handling"));
+  await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("help from support"));
   for (const name of ["Open Telegram group", "Check invite and access", "Cancel request"]) expect(screen.queryByRole("button", { name })).not.toBeInTheDocument();
   if (kind === "older") expect(screen.getByRole("dialog")).toHaveTextContent("older-season");
   expect(api.invite).not.toHaveBeenCalled(); expect(api.cancelRequest).not.toHaveBeenCalled();
@@ -111,4 +113,81 @@ it("counts an unresolved terminal credential before selecting a current pending 
   const { wrapper } = setup(); const hook = renderHook(() => useClanRemote(), { wrapper });
   await waitFor(() => expect(hook.result.current.applicationProblem).toBe("overlap"));
   expect(hook.result.current.activeRequest).toBeNull(); expect(hook.result.current.applicationsBlocked).toBe(true); expect(hook.result.current.blockingRequests).toHaveLength(2);
+});
+
+it("returns the committed mutation result when subsequent query refreshes fail", async () => {
+  const { wrapper } = setup(); const hook = renderHook(() => useClanRemote(), { wrapper });
+  await waitFor(() => expect(hook.result.current.activeRequest?.id).toBe(1));
+  api.ownRequests.mockRejectedValue(new Error("refresh unavailable"));
+  const operation = vi.fn().mockResolvedValue({ id: 9, replayed: false });
+  let result: unknown;
+  await act(async () => { result = await hook.result.current.run("committed", operation); });
+  expect(result).toEqual({ id: 9, replayed: false }); expect(operation).toHaveBeenCalledOnce();
+  expect(feedback).toHaveBeenCalledWith(expect.stringContaining("Clan updated"), "info");
+  expect(hook.result.current.pending).toBeNull(); expect(hook.result.current.applicationsBlocked).toBe(true);
+});
+it("preserves a successful write even if Query invalidation itself rejects", async () => {
+  const { wrapper } = setup(); const hook = renderHook(() => useClanRemote(), { wrapper });
+  await waitFor(() => expect(hook.result.current.activeRequest?.id).toBe(1));
+  vi.spyOn(client, "invalidateQueries").mockRejectedValue(new Error("query observer failed"));
+  let result: unknown;
+  await act(async () => { result = await hook.result.current.run("committed", async () => ({ id: 9 })); });
+  expect(result).toEqual({ id: 9 }); expect(feedback).toHaveBeenCalledWith(expect.stringContaining("Clan updated"), "info");
+});
+it("retains confirmed membership through a background failure without enabling application actions", async () => {
+  member = fixture["membership/current"];
+  const { wrapper } = setup(); const hook = renderHook(() => useClanRemote(), { wrapper });
+  await waitFor(() => expect(hook.result.current.member).toBe(true));
+  api.membership.mockRejectedValue(new Error("membership refresh unavailable"));
+  await act(async () => { await hook.result.current.refresh(); });
+  await waitFor(() => expect(hook.result.current.membership.isError).toBe(true)); expect(hook.result.current.member).toBe(true);
+  expect(hook.result.current.applicationsBlocked).toBe(true);
+});
+it("coalesces visibility and focus resume events and never issues a write", async () => {
+  const { wrapper } = setup(); const hook = renderHook(() => useClanRemote(), { wrapper });
+  await waitFor(() => expect(hook.result.current.activeRequest?.id).toBe(1));
+  const before = api.state.mock.calls.length;
+  expect(native.resume).toBeTypeOf("function");
+  await act(async () => { native.resume?.(); window.dispatchEvent(new Event("focus")); document.dispatchEvent(new Event("visibilitychange")); window.dispatchEvent(new Event("focus")); });
+  await waitFor(() => expect(api.state.mock.calls.length).toBe(before + 1));
+  expect(api.join).not.toHaveBeenCalled(); expect(api.invite).not.toHaveBeenCalled();
+  hook.unmount(); expect(native.resume).toBeNull();
+  window.dispatchEvent(new Event("focus")); expect(api.state.mock.calls.length).toBe(before + 1);
+});
+it("holds the mutation lock through reconciliation and rejects duplicate writes", async () => {
+  const { wrapper } = setup(); const hook = renderHook(() => useClanRemote(), { wrapper });
+  await waitFor(() => expect(hook.result.current.activeRequest?.id).toBe(1));
+  let finish!: (value: unknown) => void;
+  const send = vi.fn(() => new Promise(done => { finish = done; }));
+  let first!: Promise<unknown>;
+  act(() => { first = hook.result.current.run("one", send); });
+  await act(async () => { expect(await hook.result.current.run("two", send)).toBeUndefined(); });
+  expect(send).toHaveBeenCalledOnce();
+  await act(async () => { finish({ id: 1 }); await first; });
+  expect(hook.result.current.pending).toBeNull();
+});
+it("polls fast membership/applicant changes and slower roster/HQ changes without writes", async () => {
+  member = fixture["membership/current"]; api.state.mockResolvedValue(fixture.state);
+  vi.useFakeTimers();
+  const { wrapper } = setup(); const hook = renderHook(() => useClanRemote(), { wrapper });
+  try {
+    await act(async () => { await vi.advanceTimersByTimeAsync(100); });
+    expect(hook.result.current.applicants.isSuccess).toBe(true);
+    const counts = () => Object.fromEntries(["membership", "applicants", "home", "roster"].map(key => [key, api[key].mock.calls.length]));
+    const initial = counts();
+    await act(async () => { await vi.advanceTimersByTimeAsync(15_000); });
+    expect(counts()).toEqual({ membership: initial.membership + 1, applicants: initial.applicants + 1, home: initial.home, roster: initial.roster });
+    await act(async () => { await vi.advanceTimersByTimeAsync(15_000); });
+    expect(counts()).toEqual({ membership: initial.membership + 2, applicants: initial.applicants + 2, home: initial.home + 1, roster: initial.roster + 1 });
+    expect(api.join).not.toHaveBeenCalled(); expect(api.invite).not.toHaveBeenCalled();
+  } finally { hook.unmount(); vi.useRealTimers(); }
+});
+it.each([401, 403])("hides stale membership after definitive authorization denial %s", async status => {
+  member = fixture["membership/current"];
+  const { wrapper } = setup(); const hook = renderHook(() => useClanRemote(), { wrapper });
+  await waitFor(() => expect(hook.result.current.member).toBe(true));
+  api.membership.mockRejectedValue(new ClanApiError("CLAN_FORBIDDEN", status));
+  await act(async () => { await hook.result.current.refresh(); });
+  await waitFor(() => expect(hook.result.current.membershipDenied).toBe(true));
+  expect(hook.result.current.member).toBe(false); expect(hook.result.current.applicationsBlocked).toBe(true);
 });

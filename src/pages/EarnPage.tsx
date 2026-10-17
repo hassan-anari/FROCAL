@@ -1,5 +1,7 @@
+import { AppLoader } from "@/design-system/components/AppLoader";
+import { configuredBotUrl, clanAddBotUrl } from "@/integrations/telegram/botLinks";
 import { useRewardHistory } from "@/integrations/api/useRewardHistory";
-import { rewardHistoryView } from "@/integrations/api/rewardHistory";
+import { networkRewardHistory, rewardHistoryView } from "@/integrations/api/rewardHistory";
 import { useQueryFeedback } from "@/design-system/components/TransientFeedback";
 import { readSessionPreference, writeSessionPreference } from "@/app/storageRelease";
 import { useB3, missionView } from "@/integrations/api/useB3";
@@ -186,9 +188,10 @@ export function EarnPage() {
   const typingRemaining = live.remote ? live.typing.data?.attempts_remaining ?? 0 : getTypingAttemptsRemaining(earn.typingAttemptDate, earn.typingAttempts);
   const telegramUser = adapter.getUser();
   const referralCode = telegramUser?.id ?? "explorer";
-  const referralLink = live.remote ? (live.referrals.data?.enabled && safeDestination(live.referrals.data.link)?.kind === "telegram" ? live.referrals.data.link ?? "" : "") : `https://t.me/DalexioBot?start=dexoairdrop_${referralCode}`;
-  const groupLink = "https://t.me/DalexioBot?startgroup=dexoairdrop";
-  const networkHistory = earn.history.filter((entry) => entry.type === "referral" || entry.type === "group").slice(0, 5);
+  const referralLink = live.remote ? (live.referrals.data?.enabled && safeDestination(live.referrals.data.link)?.kind === "telegram" ? live.referrals.data.link ?? "" : "") : (() => { const url = configuredBotUrl(); if (!url) return ""; const link = new URL(url); link.searchParams.set("start", `dexoairdrop_${referralCode}`); return link.href; })();
+  const groupLink = clanAddBotUrl();
+  const networkEarnings = networkRewardHistory(rewardHistory.items).map(rewardHistoryView);
+  const networkHistory = (live.remote ? networkEarnings : earn.history.filter(entry => entry.type === "group")).slice(0, 5);
   const tier = live.remote ? live.referrals.data?.current_tier ?? "No tier yet" : referralTier(earn.verifiedReferrals);
 
   useEffect(() => {
@@ -320,7 +323,7 @@ export function EarnPage() {
   const addToGroup = () => {
     adapter.hapticImpact("light");
     if (live.remote) { void live.registerGroup().then(result => { if (result) navigateSafely(result.startgroup_url, adapter, to => { void navigate({ to }); }); }); }
-    else adapter.openTelegramLink(groupLink);
+    else if (groupLink) adapter.openTelegramLink(groupLink);
   };
 
   const renderMission = (mission: EarnMission, index: number, compact = false) => (
@@ -566,8 +569,8 @@ export function EarnPage() {
                 <section className={styles.networkHistory}>
                   <header className={styles.sectionHeader}><div><span>RECENT ACTIVITY</span><h2>Network History</h2></div></header>
                   {networkHistory.length ? networkHistory.map((entry) => (
-                    <article key={entry.id}><i /><div><strong>{entry.title}</strong><span>{entry.description}</span></div>{entry.xp ? <em>+{entry.xp} XP</em> : null}</article>
-                  )) : <div className={styles.emptyState}><strong>{live.remote ? "Network history is unavailable." : "No network activity yet."}</strong><span>{live.remote ? "Your confirmed totals appear above." : "Referral and group events will appear here."}</span></div>}
+                    <article key={entry.id}><i /><div><strong>{entry.title}</strong><span>{entry.description}</span></div>{entry.xp ? <em>{entry.xp > 0 ? "+" : ""}{entry.xp} XP</em> : null}</article>
+                  )) : live.remote && rewardHistory.isPending ? <AppLoader compact label="Loading Network earnings…" /> : <div className={styles.emptyState} role="status"><strong>{live.remote ? rewardHistory.isError ? "Network history couldn't load." : "No Network earnings in recent records" : "No network activity yet."}</strong><span>Network and Speaker earnings appear here.</span>{live.remote && rewardHistory.isError ? <Button size="sm" tone="secondary" onClick={() => void rewardHistory.refetch()}>Retry</Button> : null}</div>}
                 </section>
               </>
             ) : null}
@@ -630,7 +633,7 @@ export function EarnPage() {
         </DeferredMount>
       </main>
 
-      <HistorySheet open={historyOpen} onClose={() => setHistoryOpen(false)} history={live.remote ? rewardHistory.items.map(rewardHistoryView) : earn.history} remote={live.remote} loading={live.remote && rewardHistory.isPending} error={live.remote && rewardHistory.isError} fetching={rewardHistory.isFetching} hasNext={rewardHistory.hasNextPage && !rewardHistory.isFetchNextPageError} loadMore={rewardHistory.fetchNextPage} />
+      <HistorySheet open={historyOpen} onClose={() => setHistoryOpen(false)} history={live.remote ? networkEarnings : earn.history.filter(entry => entry.type === "group")} remote={live.remote} loading={live.remote && rewardHistory.isPending} error={live.remote && rewardHistory.isError} fetching={rewardHistory.isFetching} hasNext={rewardHistory.hasNextPage && !rewardHistory.isFetchNextPageError} loadMore={() => rewardHistory.fetchNextPage({ cancelRefetch: false })} retry={() => rewardHistory.isFetchNextPageError ? rewardHistory.fetchNextPage({ cancelRefetch: false }) : rewardHistory.refetch({ cancelRefetch: false })} />
       <NetworkGuideSheet kind={guideOpen} onClose={() => setGuideOpen(null)} />
       <RewardReveal reward={earn.rewardEvent} onClose={earn.dismissReward} />
       <LevelUpReveal event={earn.rewardEvent ? null : earn.levelUpEvent} onClose={earn.dismissLevelUp} />

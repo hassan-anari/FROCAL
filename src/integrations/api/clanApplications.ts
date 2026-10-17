@@ -21,6 +21,6 @@ export function selectClanApplications(requests: readonly OwnRequestOut[]) {
 export const applicationStatusMessage = {
   loading: "Loading Clan requests…",
   error: "Clan requests couldn't load. Refresh status to try again.",
-  overlap: "More than one blocking Clan application was returned. Refresh status before continuing.",
-  operator: "This Clan application requires authorized operator handling. Refresh status after it is resolved.",
+  overlap: "Your Clan requests need review before you can continue. Refresh your status or contact support.",
+  operator: "This request needs help from support before you can continue. Refresh your status after it is resolved.",
 } as const;

@@ -1,3 +1,4 @@
+import { configuredBotUrl } from "@/integrations/telegram/botLinks";
 import type { ReactNode } from "react";
 import { useRef, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
@@ -96,7 +97,7 @@ export function InitialApplicationState({ children }: { children: ReactNode }) {
         onClick={() => setConfirmSwitch(true)}>Switch to This Device</Button> : null}
       {retrying || (tapRecovery && tap?.view.recovering) ? <p role="status" aria-live="polite">Trying to reconnect…</p> : null}
       {tapRecovery && tap?.view.error === "COOLDOWN" ? <p role="status">Please wait a moment before trying again.</p> : null}
-      {reopen ? <Button tone="secondary" onClick={() => adapter.openTelegramLink(import.meta.env.VITE_TELEGRAM_BOT_URL ?? "https://t.me/DalexioBot?start=dexoairdrop")}>Open Telegram</Button> : null}
+      {reopen && configuredBotUrl() ? <Button tone="secondary" onClick={() => adapter.openTelegramLink(configuredBotUrl()!)}>Open Telegram</Button> : null}
     </section>
     {confirmSwitch ? <OverlayFrame eyebrow="SWITCH DEVICE" title="Continue on this device?" onClose={() => setConfirmSwitch(false)} footer={
       <Button disabled={retrying} onClick={async () => {

@@ -3,7 +3,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: ['ai/b1-frontend-*', 'ai/b2-frontend-*', 'ai/b3-frontend-*', 'ai/b4-*', 'ai/b5-*']
+    branches: ['ai/b1-frontend-*', 'ai/b2-frontend-*', 'ai/b3-frontend-*', 'ai/b4-*', 'ai/b5-*', 'ai/b6-*']
   workflow_dispatch:
 permissions:
   contents: read
@@ -43,6 +43,8 @@ jobs:
       - run: npm run test:visual:b5-baseline
       - run: npm run test:visual:b5-clan-baseline
       - run: npm run test:e2e:b5
+      - run: npm run test:visual:b6-baseline
+      - run: npm run test:e2e:b6
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -53,6 +55,8 @@ jobs:
             test-results-b4/
             docs/evidence/b4/
             docs/evidence/b5/
+            docs/evidence/b6/
+            work/test-results-b6/
             work/test-results-b5/
           retention-days: 14
   paired-b2:

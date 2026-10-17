@@ -1,3 +1,4 @@
+import { AppLoader } from "@/design-system/components/AppLoader";
 import { QueryContinuation } from "@/design-system/performance/QueryContinuation";
 import { formatXp } from "@/integrations/api/rewardHistory";
 import { ArrowRight01Icon, Wallet01Icon } from "@hugeicons/core-free-icons";
@@ -71,6 +72,7 @@ interface HistorySheetProps {
   fetching?: boolean;
   hasNext?: boolean;
   loadMore?: () => unknown;
+  retry?: () => unknown;
 }
 
 function formatTime(value: string): string {
@@ -78,16 +80,17 @@ function formatTime(value: string): string {
   return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(date);
 }
 
-export function HistorySheet({ open, onClose, history, remote = false, loading = false, error = false, fetching = false, hasNext = false, loadMore }: HistorySheetProps) {
+export function HistorySheet({ open, onClose, history, remote = false, loading = false, error = false, fetching = false, hasNext = false, loadMore, retry }: HistorySheetProps) {
   return (
     <OverlayShell open={open} onClose={onClose} ariaLabel="Earn history">
       <header className={styles.sheetHeader}>
         <span>ACTIVITY ARCHIVE</span>
         <h2>Your recent progress.</h2>
-        <p>Daily claims, missions, network growth and Typing Arena results are stored here.</p>
+        <p>Network and Speaker earnings are stored here.</p>
       </header>
       <div className={styles.historyList} data-reward-history aria-busy={loading || fetching}>
-        {remote && !history.length ? <span role="status">{loading || fetching ? "Loading rewards…" : error ? "Rewards couldn't load. Please try again later." : "No rewards yet."}</span> : null}
+        {remote && (loading || fetching) ? <AppLoader compact label="Loading earnings…" /> : null}
+        {remote && !history.length && !loading && !fetching && !error ? <div className={styles.historyState} role="status"><strong>{hasNext ? "No Network earnings in these records" : "No Network earnings yet"}</strong><span>{hasNext ? "Continue through earlier history to find Network and Speaker earnings." : "Your confirmed Network and Speaker earnings will appear here."}</span></div> : null}
         {history.map((item) => (
           <article key={item.id}>
             <i className={styles[`history_${item.type}`]} />
@@ -99,8 +102,8 @@ export function HistorySheet({ open, onClose, history, remote = false, loading =
             {item.xp !== undefined ? <em>{formatXp(item.xp)}</em> : null}
           </article>
         ))}
-        {remote && history.length > 0 && error ? <span role="status">More rewards couldn't load. Please try again later.</span> : null}
-        {remote && history.length > 0 && fetching ? <span role="status">Loading rewards…</span> : null}
+        {remote && error ? <div className={styles.historyState} role="status"><strong>{history.length ? "More earnings couldn't load." : "Earnings couldn't load."}</strong><span>Your confirmed history is safe. Retry to continue.</span>{retry ? <Button size="sm" tone="secondary" disabled={fetching} onClick={() => void retry()}>Retry</Button> : null}</div> : null}
+        {remote && hasNext && !error && loadMore ? <Button size="sm" tone="secondary" disabled={fetching} onClick={() => void loadMore()}>Load more</Button> : null}
         {open && remote && loadMore ? <QueryContinuation selector="[data-reward-history] > article:last-of-type" hasNext={hasNext} fetching={fetching} load={loadMore} /> : null}
       </div>
     </OverlayShell>

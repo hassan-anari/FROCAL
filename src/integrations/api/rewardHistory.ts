@@ -12,6 +12,10 @@ export const rewardHistorySchema = z.object({
 });
 export type RewardHistoryPage = z.infer<typeof rewardHistorySchema>;
 export type RewardHistoryItem = RewardHistoryPage["items"][number];
+// Verified in pinned WEDCAL apps/network/services.py: canonical creator and Speaker settlements.
+export function networkRewardHistory(items: readonly RewardHistoryItem[]): RewardHistoryItem[] {
+  return items.filter(item => item.source_type === "CREATOR" || item.source_type === "NETWORK_SPEAKER");
+}
 export async function loadRewardHistory(initData: string | null, cursor: number | null, signal?: AbortSignal): Promise<RewardHistoryPage> {
   const response = await apiRequest(`/rewards/history?limit=20${cursor === null ? "" : `&cursor=${cursor}`}`, { initData, signal, cache: "no-store" });
   const result = rewardHistorySchema.safeParse(await response.json());

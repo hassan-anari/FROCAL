@@ -32,3 +32,11 @@ it("maps actual catalog prices/effects and roster contribution, keeping unresolv
   for (const row of fixture.roster.items) expect(clanMember(RosterMemberOut.parse(row))).toMatchObject({ id: String(row.membership_id), level: row.level, contribution: row.contribution });
   expect(clanTrophy(fixture.trophies[0])).toMatchObject({ available: false, current: null, target: null, unlocked: false });
 });
+
+it("does not turn an unsupported requirement key into editorial mission instructions", async () => {
+  const { clanMission } = await import("./clanViews");
+  const row = { key: "private-admin-mission-key", version: 1, kind: "GROUP", target_units: 5, reward_band: "SMALL", starts_at: "2026-10-16T00:00:00Z", ends_at: "2026-10-17T00:00:00Z", progress_units: 0, completed: false, requirement: "UNSUPPORTED_INTERNAL_KEY", availability: "UNAVAILABLE" as const, blocked_reason: "UNSUPPORTED_REQUIREMENT", participant_gross_points: null, direct_hq_xp: null, reward_state: "UNAVAILABLE", own_player_reward: null };
+  const view = clanMission(row);
+  expect(view.title).toBe("Clan mission"); expect(view.description).toBe("This mission is unavailable.");
+  expect(JSON.stringify(view)).not.toContain("UNSUPPORTED INTERNAL KEY"); expect(view.rewardLabel).toBe("Unavailable");
+});

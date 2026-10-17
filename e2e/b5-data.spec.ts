@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { auth, launch, prepareB4 } from "./b4-fixture";
 import { mkdirSync } from "node:fs";
 // Synthetic responses for existing WEDCAL APIs; not a B5 backend handoff/fixture.
-const reward = (id: number) => ({ id, source_type: id % 2 ? "MISSION" : "DAILY", context: "PLAYER", player_amount: id + 7, occurred_at: "2026-10-16T10:10:00Z" });
+const reward = (id: number) => ({ id, source_type: id % 3 === 0 ? "CREATOR" : id % 3 === 1 ? "NETWORK_SPEAKER" : id % 2 ? "MISSION" : "DAILY", context: "PLAYER", player_amount: id + 7, occurred_at: "2026-10-16T10:10:00Z" });
 for (const width of [320, 390, 460]) {
   test(`real data presentation and shared history ${width}`, async ({ page }) => {
     await page.setViewportSize({ width, height: 844 });
@@ -37,8 +37,8 @@ for (const width of [320, 390, 460]) {
     // Navigation within the app observes the same fresh query, without a second first-page read.
     expect(historyReads).toBe(1);
     const rows = sheet.locator("article");
-    await rows.nth(19).scrollIntoViewIfNeeded();
-    await expect(rows).toHaveCount(22);
+    await rows.last().scrollIntoViewIfNeeded();
+    await expect(rows).toHaveCount(15);
     expect(historyReads).toBe(2);
     await expect(rows.last()).toContainText("+86 XP");
     await rows.first().scrollIntoViewIfNeeded();
@@ -55,17 +55,17 @@ test("empty and error history never fabricate recent rewards; fewer missions sta
   await expect(page.getByRole("region", { name: "Recent rewards" })).toHaveCount(0);
   await page.getByRole("button", { name: "All missions" }).click();
   await page.getByRole("button", { name: "History", exact: true }).click();
-  await expect(page.getByRole("dialog", { name: "Earn history" })).toContainText("No rewards yet.");
+  await expect(page.getByRole("dialog", { name: "Earn history" })).toContainText("No Network earnings yet");
   failed = true;
   await page.reload();
   await page.getByRole("button", { name: "History", exact: true }).click();
-  await expect(page.getByRole("dialog", { name: "Earn history" })).toContainText("Rewards couldn't load.");
+  await expect(page.getByRole("dialog", { name: "Earn history" })).toContainText("Earnings couldn't load.");
   await expect(page.getByRole("dialog", { name: "Earn history" })).not.toContainText("private backend diagnostic");
   failed = false;
   await page.getByRole("dialog", { name: "Earn history" }).evaluate(el => el.parentElement!.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true })));
   await expect(page.getByRole("dialog", { name: "Earn history" })).toHaveCount(0);
   await page.getByRole("button", { name: "History", exact: true }).click();
-  await expect(page.getByRole("dialog", { name: "Earn history" })).toContainText("No rewards yet.");
+  await expect(page.getByRole("dialog", { name: "Earn history" })).toContainText("No Network earnings yet");
 });
 test("Notification Center numbering follows the flattened page order while mutations use ledger-independent notification IDs", async ({ page }) => {
   const state = await prepareB4(page);
@@ -106,12 +106,12 @@ test("history displays pending and continuation-error states without a replaceme
   await page.goto(launch("/earn"));
   await page.getByRole("button", { name: "History", exact: true }).click();
   const sheet = page.getByRole("dialog", { name: "Earn history" });
-  await expect(sheet).toContainText("Loading rewards…");
+  await expect(sheet).toContainText("Loading earnings…");
   finish();
-  await expect(sheet.locator("article")).toHaveCount(20);
+  await expect(sheet.locator("article")).toHaveCount(14);
   await sheet.locator("article").last().scrollIntoViewIfNeeded();
-  await expect(sheet).toContainText("More rewards couldn't load.");
-  await expect(sheet.locator("article")).toHaveCount(20);
+  await expect(sheet).toContainText("More earnings couldn't load.");
+  await expect(sheet.locator("article")).toHaveCount(14);
   await expect(sheet).not.toContainText("private diagnostic");
 });
 test("external HTTPS banner uses Telegram openLink with its full query string", async ({ page }) => {
