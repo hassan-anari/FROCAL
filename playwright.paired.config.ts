@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   testDir: "./scripts/contracts/browser",
-  testIgnore: ["**/*-b5.spec.ts", ...(process.env.B3_BACKEND_ROOT ? [] : ["**/*-b3.spec.ts"]), ...(process.env.B4_BACKEND_ROOT ? [] : ["**/*-b4.spec.ts"])], workers: 1, fullyParallel: false, retries: 0,
+  testIgnore: ["**/*-b5.spec.ts", "**/*-b6.spec.ts", ...(process.env.B3_BACKEND_ROOT ? [] : ["**/*-b3.spec.ts"]), ...(process.env.B4_BACKEND_ROOT ? [] : ["**/*-b4.spec.ts"])], workers: 1, fullyParallel: false, retries: 0,
   outputDir: "test-results-paired/artifacts",
   reporter: [["list"], ["json", { outputFile: "test-results-paired/results.json" }]],
   use: {
