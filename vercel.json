@@ -40,6 +40,14 @@
   ],
   "rewrites": [
     {
+      "source": "/api/v1/clans/",
+      "destination": "https://api.dalexio.com/api/v1/clans/"
+    },
+    {
+      "source": "/api/v1/clans",
+      "destination": "https://api.dalexio.com/api/v1/clans/"
+    },
+    {
       "source": "/api/v1/",
       "destination": "https://api.dalexio.com/api/v1/"
     },
@@ -49,11 +57,11 @@
     },
     {
       "source": "/api/v1/:section/",
-      "destination": "https://api.dalexio.com/api/v1/:section/"
+      "destination": "https://api.dalexio.com/api/v1/:section"
     },
     {
       "source": "/api/v1/:section",
-      "destination": "https://api.dalexio.com/api/v1/:section/"
+      "destination": "https://api.dalexio.com/api/v1/:section"
     },
     {
       "source": "/api/v1/:section/:path*/",
