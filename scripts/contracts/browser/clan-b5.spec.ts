@@ -178,3 +178,20 @@ test("approved governance sheet uses real roster targets, reason codes, electora
   await page.getByRole("button", { name: "Confirm", exact: true }).click();
   await expect(page.getByRole("dialog")).toContainText("CAPTAIN DISSOLUTION");
 });
+test("server item effect units retain the approved shop sheet at every mobile width", async ({ page }) => {
+  const captain = await control({ action: "player", points: 2500 });
+  await api(captain, "/clans/role", "POST", { role: "CAPTAIN" });
+  const group = await control({ action: "b5-group", player: captain.player });
+  await api(captain, `/clans/eligible-groups/${group.id}/verify`, "POST");
+  await api(captain, "/clans/", "POST", { telegram_group_id: group.id, name: "Equipment paired", tag: crypto.randomUUID().slice(0, 4), motto: "Confirmed equipment" });
+  await control({ action: "b5-reward", player: captain.player });
+  const rule = (await api(captain, "/clans/equipment")).items.find((item: any) => item.item_id === "rally-beacon");
+  expect(rule.effects).toContainEqual({ category: "HQ_XP_RATE_BONUS_BPS", value: 2000 });
+  await enter(page, captain);
+  await page.getByRole("button", { name: "Inventory", exact: true }).click();
+  await page.getByRole("button", { name: "Shop", exact: true }).click();
+  await page.getByRole("button").filter({ hasText: rule.name }).first().click();
+  await expect(page.getByRole("dialog")).toContainText("+20% HQ XP generation");
+  await expect(page.getByRole("dialog")).not.toContainText("BPS");
+  for (const width of [320, 390, 460]) { await page.setViewportSize({ width, height: 844 }); await snapshot(page, width, "server-price-purchase"); }
+});

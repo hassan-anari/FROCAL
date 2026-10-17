@@ -27,6 +27,8 @@ it("maps actual catalog prices/effects and roster contribution, keeping unresolv
   for (const item of fixture.equipment.items) {
     expect(clanItem(item)).toMatchObject({ id: item.item_id, name: item.name, price: item.price });
   }
+  expect(clanItem(fixture.equipment.items.find(item => item.item_id === "rally-beacon")!)?.effect).toBe("+20% HQ XP generation");
+  expect(clanItem(fixture.equipment.items.find(item => item.item_id === "command-relay")!)?.effect).toBe("+2,000 HQ XP");
   for (const row of fixture.roster.items) expect(clanMember(RosterMemberOut.parse(row))).toMatchObject({ id: String(row.membership_id), level: row.level, contribution: row.contribution });
   expect(clanTrophy(fixture.trophies[0])).toMatchObject({ available: false, current: null, target: null, unlocked: false });
 });
