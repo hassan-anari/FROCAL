@@ -28,8 +28,8 @@ it("keeps cancellation-pending accepted reservations active until a confirmed te
   expect(selectClanApplications([])).toMatchObject({ activeRequest: null, history: [], ambiguous: false });
 });
 
-it("uses authoritative unresolved-credential metadata even for terminal-labelled requests", () => {
-  const unsafe = OwnRequestOut.parse({ ...row(1, "CANCELLED"), credential_unresolved: true, blocks_new_application: true, handling: "OPERATOR_REQUIRED" });
+it.each(["CANCELLED", "ACTIVATED", "DECLINED"])("uses authoritative unresolved-credential metadata for terminal-labelled %s requests", state => {
+  const unsafe = OwnRequestOut.parse({ ...row(1, state), credential_unresolved: true, blocks_new_application: true, handling: "OPERATOR_REQUIRED" });
   const single = selectClanApplications([row(5, "DECLINED"), unsafe]);
   expect(single).toMatchObject({ activeRequest: null, operatorRequest: unsafe, operatorRequired: true, blocksNewApplication: true, ambiguous: false });
   expect(single.history).toHaveLength(1);

@@ -145,7 +145,11 @@ it("retains accepted reservations until confirmed revocation, then activates onl
   const next = await soldier.api.join(b.clan.id); await b.captain.api.decision(next.id, { accept: true }); expect(await soldier.api.membership()).toBeNull();
   await control({ action: "b5-presence", player: soldier.player, group: b.group.id });
   expect((await soldier.api.membership())?.clan_id).toBe(b.clan.id);
-  const activated = selectClanApplications(await soldier.api.ownRequests()); expect(activated.activeRequest).toBeNull(); expect(activated.history.some(row => row.id === next.id && row.state === "ACTIVATED")).toBe(true);
+  const activated = selectClanApplications(await soldier.api.ownRequests()); expect(activated.activeRequest).toBeNull();
+  expect(activated.operatorRequest).toMatchObject({ id: next.id, state: "ACTIVATED", blocks_new_application: true, credential_unresolved: true });
+  // Actual membership is already active; the committed credential-revocation obligation is separate.
+  expect((await control({ action: "b5-revoke-worker", player: soldier.player, request: next.id })).state).toBe("USED");
+  expect(selectClanApplications(await soldier.api.ownRequests()).history.some(row => row.id === next.id && row.state === "ACTIVATED" && !row.blocks_new_application)).toBe(true);
 }, 30_000);
 it("serializes concurrent applications to different Clans without replacing or cancelling the winner", async () => {
   const a = await world(0), b = await world(0), soldier = await actor(); await soldier.api.role({ role: "SOLDIER" });
