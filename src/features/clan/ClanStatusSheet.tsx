@@ -35,12 +35,12 @@ export function ClanStatusSheet({ live, onClose }: { live: ClanRemote; onClose: 
       </div>
     }>
       <div className={styles.centerCopy}>
-        <strong>{mode === "leave" ? "Your historical contribution stays with this Clan." : mode === "dissolve" ? "The server determines whether a member vote is required." : "A proposal opens a governed removal case. It does not immediately remove a member."}</strong>
+        <strong>{mode === "leave" ? "Your historical contribution stays with this Clan." : mode === "dissolve" ? "Dissolution may require a member vote. Your Clan remains active until the request is resolved." : "A proposal opens a governed removal case. It does not immediately remove a member."}</strong>
         {mode === "leave" ? <p>Join cooldown: {state?.leave_cooldown_hours ?? "—"} hours. Leaves used: {state?.voluntary_leave_count ?? "—"} / {state?.max_voluntary_leaves ?? "—"}.</p> : null}
       </div>
       {mode === "removal" ? <div className={`${styles.detailList} ${styles.governanceForm}`}>
-        <label>Member <select value={target} onChange={event => setTarget(event.target.value)}><option value="">Select a member</option>{live.rosterRows.filter(row => row.role === "SOLDIER" && !row.own).map(row => <option key={row.membership_id} value={row.membership_id}>{row.first_name || row.username}</option>)}</select></label>
-        <label>Reason <select value={reason} onChange={event => setReason(event.target.value)}><option value="">Select a reason</option>{removalReasons.map(value => <option key={value} value={value}>{words(value)}</option>)}</select></label>
+        <label>Member <select aria-label="Member" value={target} onChange={event => setTarget(event.target.value)}><option value="">Select a member</option>{live.rosterRows.filter(row => row.role === "SOLDIER" && !row.own).map(row => <option key={row.membership_id} value={row.membership_id}>{row.first_name || row.username}</option>)}</select></label>
+        <label>Reason <select aria-label="Reason" value={reason} onChange={event => setReason(event.target.value)}><option value="">Select a reason</option>{removalReasons.map(value => <option key={value} value={value}>{words(value)}</option>)}</select></label>
         {live.roster.hasNextPage ? <Button size="sm" tone="secondary" disabled={live.roster.isFetching} onClick={() => void live.roster.fetchNextPage()}>Load more members</Button> : null}
       </div> : null}
     </ClanModal>
@@ -53,16 +53,17 @@ export function ClanStatusSheet({ live, onClose }: { live: ClanRemote; onClose: 
         {request ? <><div><span>Join request</span><strong>{words(request.state)}</strong></div><div><span>Clan</span><strong>{request.clan_name}</strong></div><div><span>Invite</span><strong>{words(request.invite_state)}</strong></div><div><span>Delivery</span><strong>{words(request.delivery_state)}</strong></div>{request.cancellation_pending ? <div><span>Cancellation</span><strong>Revocation pending</strong></div> : null}</> : null}
         {state?.cooldown_until ? <div><span>Join cooldown until</span><strong>{time(state.cooldown_until)}</strong></div> : null}
         {member?.access_rejoin_deadline ? <div><span>Access recovery deadline</span><strong>{time(member.access_rejoin_deadline)}</strong></div> : null}
-        {live.recovery.data ? <><div><span>Clan state</span><strong>{words(live.recovery.data.state)}</strong></div><div><span>Recovery</span><strong>{words(live.recovery.data.reason)}</strong></div><div><span>Group access</span><strong>{live.recovery.data.home_integrity_available ? "Available" : "Admin recovery required"}</strong></div>{live.recovery.data.started_at ? <div><span>Recovery started</span><strong>{time(live.recovery.data.started_at)}</strong></div> : null}{live.recovery.data.bot_admin_restore_deadline ? <div><span>Admin recovery deadline</span><strong>{time(live.recovery.data.bot_admin_restore_deadline)}</strong></div> : null}</> : null}
+        {live.recovery.data ? <><div><span>Clan state</span><strong>{words(live.recovery.data.state)}</strong></div><div><span>Recovery</span><strong>{live.recovery.data.reasons.map(words).join(" · ") || "—"}</strong></div><div><span>Group access</span><strong>{live.recovery.data.home_integrity_available ? "Available" : "Admin recovery required"}</strong></div>{live.recovery.data.captain_authority_lost_at ? <div><span>Captain authority lost</span><strong>{time(live.recovery.data.captain_authority_lost_at)}</strong></div> : null}{live.recovery.data.started_at ? <div><span>Recovery started</span><strong>{time(live.recovery.data.started_at)}</strong></div> : null}{live.recovery.data.bot_admin_restore_deadline ? <div><span>Admin recovery deadline</span><strong>{time(live.recovery.data.bot_admin_restore_deadline)}</strong></div> : null}</> : null}
       </div>
-      {request?.state === "ACCEPTED" && !member ? <p className={styles.note}>Acceptance reserves a place. Membership activates after the backend verifies your Telegram presence.</p> : null}
-      {needsInvite ? <div className={styles.detailList}>
+      {request?.state === "ACCEPTED" && !member ? <p className={styles.note}>Acceptance reserves a place. Membership activates after your Telegram group membership is verified.</p> : null}
+      {needsInvite ? <div className={`${styles.detailList} ${styles.statusControls}`}>
         <Button size="sm" tone="secondary" disabled={busy} onClick={() => { setInvite(null); void live.run("invite", () => live.api.invite()).then(value => { if (value) setInvite(value); }); }}>Check invite and access</Button>
         {invite ? <div><span>Current credential</span><strong>{words(invite.state)} · {words(invite.delivery_state)}</strong></div> : null}
         {destination?.kind === "telegram" ? <Button size="sm" onClick={() => adapter.openTelegramLink(destination.url)}>Open Telegram group</Button> : null}
       </div> : null}
       <div className={styles.doubleActions}>
         <Button size="sm" tone="secondary" disabled={busy} onClick={() => { setInvite(null); void live.refresh(); }}>Refresh status</Button>
+        {captain && live.recovery.data?.can_verify_authority && !live.recovery.data.home_integrity_available ? <Button size="sm" tone="secondary" disabled={busy} onClick={() => void complete("verify-authority", () => live.api.verifyAuthority())}>Verify Telegram authority</Button> : null}
         {activeRequest && !member ? <Button size="sm" tone="secondary" disabled={busy || request.cancellation_pending} onClick={() => void complete("cancel", () => live.api.cancelRequest(request.id))}>Cancel request</Button> : null}
         {member?.role === "SOLDIER" ? <Button size="sm" tone="secondary" disabled={busy || !leaveAllowed} onClick={() => setMode("leave")}>Leave Clan</Button> : null}
         {captain ? <><Button size="sm" tone="secondary" disabled={busy || live.rosterRows.filter(row => row.role === "SOLDIER").length === 0} onClick={() => setMode("removal")}>Propose removal</Button><Button size="sm" tone="secondary" disabled={busy || live.recovery.data?.state !== "ACTIVE"} onClick={() => setMode("dissolve")}>Request dissolution</Button></> : null}

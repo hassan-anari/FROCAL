@@ -17,7 +17,7 @@ def install(world):
     def member(chat, user):
         if mode == "unavailable":
             return TelegramResult(ok=False, category="unavailable")
-        status = "administrator" if user == 123456 else roles.get((chat, user), "left")
+        status = roles.get((chat, user), "administrator" if user == 123456 else "left")
         return TelegramResult(ok=True, result={"user": {"id": user}, "status": status, "can_invite_users": status == "administrator"})
     bot_api.get_chat_member = member
     bot_api.create_chat_invite_link = lambda *_a, **_k: TelegramResult(ok=True, result={"invite_link": "https://t.me/+" + uuid4().hex})
@@ -64,8 +64,16 @@ def control(data, world):
         from apps.clans.economy import settle_clan_reward
         result, created = settle_clan_reward(membership=member, source_type="CLAN_ACTIVITY", source_id="isolated-paired-source", gross_amount=100000, idempotency_key="paired-source:" + str(member.pk), occurred_at=now, resolved_config=world["resolve_effective_game_config"](now))
         return {"id": result.pk, "created": created}
+    if action == "b5-captain-authority":
+        from apps.clans.recovery import observe_captain_authority
+        group = member.clan_season.clan.telegram_group
+        roles[group.telegram_chat_id, player.telegram_user_id] = "administrator" if data["admin"] else "member"
+        if not data["admin"]:
+            observe_captain_authority(member.clan_season_id, has_authority=False, authoritative=True, observed_at=now)
+        return {"ok": True}
     if action == "b5-bot-admin":
         from apps.clans.governance import observe_bot_admin_state
+        roles[member.clan_season.clan.telegram_group.telegram_chat_id, 123456] = "administrator" if data["admin"] else "member"
         cs = observe_bot_admin_state(member.clan_season_id, is_admin=data["admin"], authoritative=True, observed_at=now)
         return {"state": cs.state}
     if action == "b5-finalize":

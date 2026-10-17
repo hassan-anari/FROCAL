@@ -1,5 +1,6 @@
 import { useClanRemote, type ClanRemote } from "@/integrations/api/useClanRemote";
 import { clanSummary, clanMember, clanApplicant, clanItem, clanMission, clanTrophy } from "@/integrations/api/clanViews";
+import { clanTone, saveClanTone } from "@/integrations/api/clanAppearance";
 import { ClanStatusSheet } from "@/features/clan/ClanStatusSheet";
 import { QueryContinuation } from "@/design-system/performance/QueryContinuation";
 import { useBootstrap } from "@/integrations/api/BootstrapProvider";
@@ -906,8 +907,7 @@ function DemoClanPage() {
   const { level: earnLevel } = usePlayerProgression();
   const { bootstrap } = useBootstrap();
   const minLevel = isRemoteDataSource() ? bootstrap.data?.remote?.config.progression?.clan_min_level ?? 5 : 5;
-  // Historical Clan scenarios must never become remote production authority.
-  // Replace this closed gate only with the published, pinned B5 read/mutation adapter.
+  // This component is local diagnostics only; authenticated production uses RemoteClanPage.
   const clanAvailable = !isRemoteDataSource() && earnLevel >= minLevel;
   const clan = useClanStore();
   const { adapter } = useTelegram();
@@ -1078,7 +1078,7 @@ function RemoteClanPage() {
   const home = live.home.data;
   const hqReady = member && identity && home && live.equipment.data && live.trophies.data && live.missions.data && live.treasury.data && live.roster.data;
   const hqError = member && [live.identity, live.home, live.equipment, live.trophies, live.missions, live.treasury, live.roster].some(query => query.isError);
-  const clan = identity && home ? { ...clanSummary(identity), level: home.hq_level, members: home.used_capacity, capacity: home.effective_capacity, score: home.competitive_score, hqState: (home.state === "RECOVERY" || live.membership.data?.access_state === "ACCESS_LOST" ? "recovery" : home.max_level ? "max" : "normal") as ClanSummary["hqState"] } : null;
+  const clan = identity && home ? { ...clanSummary(identity), accent: clanTone(live.scope.player, identity.id), level: home.hq_level, members: home.used_capacity, capacity: home.effective_capacity, score: home.competitive_score, hqState: (home.state === "RECOVERY" || live.membership.data?.access_state === "ACCESS_LOST" ? "recovery" : home.max_level ? "max" : "normal") as ClanSummary["hqState"] } : null;
   const current = live.currentRequest;
   const hasRequest = current && ["PENDING", "ACCEPTED"].includes(current.state);
   const effects: ClanActiveEffect[] = (live.equipment.data?.active_effects ?? []).filter(effect => effect.effective).map(effect => ({ id: String(effect.id), itemId: effect.item_id, startedAt: Date.parse(effect.starts_at), endsAt: Date.parse(effect.expires_at) }));
@@ -1100,11 +1100,11 @@ function RemoteClanPage() {
     </header>
     {locked ? <LockedClan level={level} minLevel={minLevel} /> : null}
     {!locked && (live.state.isPending || (state?.role && live.membership.isPending)) ? <p role="status">Loading Clan…</p> : null}
-    {!locked && (live.state.isError || live.membership.isError || (state?.role && !role)) ? <><p role="status">Clan couldn't load. Please try again.</p><Button tone="secondary" size="sm" onClick={() => void live.refresh()}>Refresh Clan</Button></> : null}
+    {!locked && (live.state.isError || live.membership.isError || (state?.role && !role)) ? <><p role="status">Clan couldn't load. Please try again.</p></> : null}
     {ready && role === null && state?.role === null ? <RoleChoice onChoose={value => setOverlay({ type: "role", role: value })} /> : null}
     {ready && role === "soldier" && live.membership.data === null ? <SoldierNetwork live={live} pendingClanId={hasRequest ? String(current.clan_id) : null} requestState={requestState} onOpenClan={openClan} /> : null}
-    {ready && role === "captain" && live.membership.data === null ? <CaptainFounding live={live} onCreate={input => { void after("create", () => live.api.create({ telegram_group_id: Number(input.telegramGroupId), name: input.name, tag: input.tag, motto: input.motto })); }} onAddGroup={() => adapter.openTelegramLink("https://t.me/DalexioBot?startgroup=dexoairdrop")} /> : null}
-    {member && (!hqReady || hqError) ? <><p role="status">{hqError ? "Headquarters couldn't load fully." : "Loading headquarters…"}</p>{hqError ? <Button tone="secondary" size="sm" onClick={() => void live.refresh()}>Refresh Clan</Button> : null}</> : null}
+    {ready && role === "captain" && live.membership.data === null ? <CaptainFounding live={live} onCreate={input => { void after("create", () => live.api.create({ telegram_group_id: Number(input.telegramGroupId), name: input.name, tag: input.tag, motto: input.motto }).then(value => { saveClanTone(live.scope.player, value.id, input.accent); return value; })); }} onAddGroup={() => adapter.openTelegramLink("https://t.me/DalexioBot?startgroup=dexoairdrop")} /> : null}
+    {member && (!hqReady || hqError) ? <><p role="status">{hqError ? "Headquarters couldn't load fully." : "Loading headquarters…"}</p></> : null}
     {hqReady && !hqError && clan ? <Headquarters live={live} clan={clan} captain={live.membership.data?.role === "CAPTAIN"} treasury={home.treasury_balance} ownedItemIds={[]} activeEffects={effects} applicants={applicants} onOpenItem={(itemId, source) => setOverlay({ type: "item", itemId, source })} onOpenRequests={() => setOverlay({ type: "requests" })} onOpenTrophies={() => setOverlay({ type: "trophies" })} /> : null}
     <AnimatePresence>
       {overlay?.type === "role" ? <RoleConfirmSheet role={overlay.role} pending={live.pending !== null} onClose={close} onConfirm={() => void after("role", () => live.api.role({ role: overlay.role === "captain" ? "CAPTAIN" : "SOLDIER" }))} /> : null}

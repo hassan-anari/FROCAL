@@ -18,7 +18,7 @@ async function enter(page: Page, actor: any, path = "/clan") {
   await page.route("**/*", route => new URL(route.request().url()).hostname === "127.0.0.1" ? route.fallback() : route.abort());
   await page.goto(`${path}#tgWebAppData=${encodeURIComponent(actor.initData)}&tgWebAppPlatform=android&tgWebAppVersion=8.0`);
 }
-const close = async (page: Page) => { await page.getByRole("dialog").getByRole("button", { name: "Close", exact: true }).click(); await expect(page.getByRole("dialog")).toHaveCount(0); };
+const close = async (page: Page) => { await page.bringToFront(); await page.keyboard.press("Escape"); await expect(page.getByRole("dialog")).toHaveCount(0); };
 async function snapshot(page: Page, width: number, name: string) {
   const folder = `work/b5-paired/mobile/${width}`; mkdirSync(folder, { recursive: true });
   await page.evaluate(() => document.activeElement instanceof HTMLElement && document.activeElement.blur());
@@ -57,17 +57,20 @@ for (const width of [320, 390, 460]) test(`actual Captain/Soldier lifecycle, eco
   await other.getByRole("button", { name: "Request to join", exact: true }).click();
   await expect(other.getByRole("dialog", { name: "Clan status" })).toContainText("PENDING");
   await snapshot(other, width, "request-pending");
+  await page.bringToFront();
   await page.reload();
   await page.getByRole("navigation", { name: "Clan headquarters sections" }).scrollIntoViewIfNeeded();
   await page.getByRole("button", { name: /recruits waiting/ }).click();
   await page.getByRole("button", { name: "Accept", exact: true }).click();
   await close(page);
+  await other.bringToFront();
   await other.getByRole("button", { name: "Refresh status", exact: true }).click();
   await expect(other.getByRole("dialog", { name: "Clan status" })).toContainText("ACCEPTED");
   await other.getByRole("button", { name: "Check invite and access", exact: true }).click();
   await expect(other.getByRole("button", { name: "Open Telegram group", exact: true })).toBeVisible();
   await snapshot(other, width, "accepted-invite");
   await control({ action: "b5-presence", player: soldier.player, group: group.id });
+  await other.bringToFront();
   await other.getByRole("button", { name: "Refresh status", exact: true }).click(); await close(other);
   await expect(other.getByRole("navigation", { name: "Clan headquarters sections" })).toBeVisible();
   await snapshot(other, width, "soldier-headquarters");
@@ -79,6 +82,7 @@ for (const width of [320, 390, 460]) test(`actual Captain/Soldier lifecycle, eco
   await other.getByRole("button", { name: "Completed", exact: true }).click();
   await expect(other.getByText(mission.key.replaceAll("-", " "), { exact: true })).toBeVisible();
   await snapshot(other, width, "settled-mission");
+  await page.bringToFront();
   await page.reload();
   await page.getByRole("button", { name: "Inventory", exact: true }).click();
   await page.getByRole("button", { name: "Shop", exact: true }).click();
@@ -109,11 +113,27 @@ for (const width of [320, 390, 460]) test(`actual Captain/Soldier lifecycle, eco
   await snapshot(page, width, "governance-status");
   await close(page);
   await control({ action: "b5-bot-admin", player: captain.player, admin: false });
+  await page.bringToFront();
   await page.reload();
   await page.getByRole("button", { name: "Clan status", exact: true }).click();
   await expect(page.getByRole("dialog")).toContainText("Admin recovery required");
   await snapshot(page, width, "admin-recovery");
+  await control({ action: "b5-captain-authority", player: captain.player, admin: false });
+  await page.getByRole("button", { name: "Refresh status", exact: true }).click();
+  await expect(page.getByRole("dialog")).toContainText("CAPTAIN AUTHORITY LOSS");
+  await snapshot(page, width, "captain-authority-loss");
+  await page.getByRole("button", { name: "Verify Telegram authority", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Verify Telegram authority", exact: true })).toBeEnabled();
+  await expect(page.getByRole("dialog")).toContainText("CAPTAIN AUTHORITY LOSS");
+  await control({ action: "b5-captain-authority", player: captain.player, admin: true });
+  await page.getByRole("button", { name: "Verify Telegram authority", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Verify Telegram authority", exact: true })).toBeEnabled();
+  await expect(page.getByRole("dialog")).toContainText("BOT ADMIN LOSS");
   await control({ action: "b5-bot-admin", player: captain.player, admin: true });
+  await page.getByRole("button", { name: "Verify Telegram authority", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Verify Telegram authority", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("dialog")).toContainText("Available");
+  await snapshot(page, width, "captain-authority-restored");
   await close(page);
   await other.reload();
   await other.getByRole("button", { name: "Clan status", exact: true }).click();

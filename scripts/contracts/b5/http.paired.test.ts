@@ -102,3 +102,19 @@ it("uses real governance electorate, immutable voting, recovery restrictions, le
   // Home group ID remains internal and is never used as a Telegram identity assertion.
   expect(group.id).toBeGreaterThan(0);
 }, 30_000);
+it("keeps independent Captain/bot authority causes until fresh original-Captain verification and denies Soldier verification", async () => {
+  const { captain, members: [soldier] } = await world();
+  await control({ action: "b5-captain-authority", player: captain.player, admin: false });
+  expect((await captain.api.recovery()).reasons).toContain("CAPTAIN_AUTHORITY_LOSS");
+  await expect(soldier.api.verifyAuthority()).rejects.toMatchObject({ status: 403 });
+  await control({ action: "b5-transport", mode: "unavailable" });
+  await expect(captain.api.verifyAuthority()).rejects.toMatchObject({ status: 409 });
+  await control({ action: "b5-transport", mode: "ok" });
+  expect((await captain.api.recovery()).state).toBe("RECOVERY");
+  await control({ action: "b5-bot-admin", player: captain.player, admin: false });
+  await control({ action: "b5-captain-authority", player: captain.player, admin: true });
+  const partial = await captain.api.verifyAuthority();
+  expect(partial.reasons).toContain("BOT_ADMIN_LOSS"); expect(partial.home_integrity_available).toBe(false);
+  await control({ action: "b5-bot-admin", player: captain.player, admin: true });
+  expect(await captain.api.verifyAuthority()).toMatchObject({ state: "ACTIVE", reasons: [], home_integrity_available: true });
+}, 30_000);

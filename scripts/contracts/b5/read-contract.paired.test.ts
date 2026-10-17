@@ -17,3 +17,15 @@ it("retains backend replay, permission, quantity/effect and member identity evid
   expect(purchased.quantity).toBe(0); expect(purchased.uses_this_season).toBe(1);
   expect(actual.trophies.find((row: any) => row.key === "banner-raised")).toMatchObject({ available: false, current: null, target: null, unlocked: false });
 });
+it("validates fresh authority loss/recovery and governance/access/unsafe-credential lifecycle evidence", () => {
+  const authority = JSON.parse(readFileSync(process.env.B5_AUTHORITY_FIXTURE!, "utf8"));
+  const lifecycle = JSON.parse(readFileSync(process.env.B5_LIFECYCLE_FIXTURE!, "utf8"));
+  for (const value of Object.values(authority)) c.RecoveryOut.parse(value);
+  expect(authority.authority_lost).toMatchObject({ reasons: ["CAPTAIN_AUTHORITY_LOSS"], home_integrity_available: false });
+  expect(authority.authority_restored).toMatchObject({ reasons: [], home_integrity_available: true });
+  for (const key of ["governance_open", "governance_final"]) c.GovernanceOut.parse(lifecycle[key]);
+  for (const key of ["access_lost", "access_recovered"]) c.MembershipOut.parse(lifecycle[key]);
+  c.InviteOut.parse(lifecycle.uncertain_invite);
+  for (const key of ["pending_request", "unsafe_cancellation_retained"]) for (const row of lifecycle[key]) c.OwnRequestOut.parse(row);
+  expect(lifecycle.unsafe_cancellation_retained[0]).toMatchObject({ state: "ACCEPTED", invite_state: "UNCERTAIN", cancellation_pending: true });
+});

@@ -1,5 +1,7 @@
 import { expect, it, vi } from "vitest";
 import fixture from "./fixtures/b5/clan-http.json";
+import authority from "./fixtures/b5/authority-http.json";
+import lifecycle from "./fixtures/b5/lifecycle-http.json";
 import openapi from "./fixtures/b5/openapi.json";
 import * as c from "./b5Schemas";
 import { clanApi, ClanApiError } from "./b5";
@@ -41,4 +43,15 @@ it("uses documented route names and two published roles; rejects client Telegram
   expect(c.RoleIn.safeParse({ role: "OFFICER" }).success).toBe(false);
   expect(c.ClanCreateIn.safeParse({ telegram_group_id: -100123, name: "Clan", tag: "CC" }).success).toBe(false);
   expect(c.ClanCreateIn.parse({ telegram_group_id: 12, name: "Clan", tag: "CC" })).toEqual({ telegram_group_id: 12, name: "Clan", tag: "CC" });
+});
+
+it("parses the published authority and lifecycle handoff without clearing independent recovery or unsafe credentials", () => {
+  for (const value of Object.values(authority)) c.RecoveryOut.parse(value);
+  expect(authority.authority_lost.reasons).toContain("CAPTAIN_AUTHORITY_LOSS");
+  expect(authority.authority_restored.reasons).toEqual([]);
+  c.GovernanceOut.parse(lifecycle.governance_open); c.GovernanceOut.parse(lifecycle.governance_final);
+  c.MembershipOut.parse(lifecycle.access_lost); c.MembershipOut.parse(lifecycle.access_recovered);
+  c.InviteOut.parse(lifecycle.uncertain_invite);
+  for (const row of lifecycle.unsafe_cancellation_retained) c.OwnRequestOut.parse(row);
+  expect((openapi.paths as Record<string, any>)["/api/v1/clans/recovery/verify"].post).toBeTruthy();
 });

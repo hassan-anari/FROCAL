@@ -4,7 +4,7 @@ import * as c from "./b5Schemas";
 const errorSchema = z.object({ code: z.string(), retryable: z.boolean().optional(), retry_after_seconds: z.number().nullable().optional() });
 export class ClanApiError extends Error {
   constructor(readonly code: string, readonly status: number, readonly retryable = false, readonly retryAfter: number | null = null) {
-    super(status === 403 ? "This Clan action isn't available to your account." : code === "CLAN_OWNER_DECISION_REQUIRED" ? "This Clan action is awaiting a product decision." : "Your Clan couldn't be updated. Please refresh and try again.");
+    super(status === 403 ? "This Clan action isn't available to your account." : code === "CLAN_RECREATION_BLOCKED" ? "A Captain cannot found another Clan in the same Season." : code === "CLAN_OWNER_DECISION_REQUIRED" ? "This Clan action is awaiting a product decision." : "Your Clan couldn't be updated. Please refresh and try again.");
   }
 }
 async function request<T>(initData: string | null, path: string, schema: z.ZodType<T>, options: { method?: "GET" | "POST" | "DELETE"; body?: unknown; signal?: AbortSignal } = {}): Promise<T> {
@@ -52,6 +52,7 @@ export function clanApi(initData: string | null) {
     trophies: (signal?: AbortSignal) => get("/trophies", z.array(c.TrophyOut), signal),
     governance: (signal?: AbortSignal) => get("/governance", z.array(c.GovernanceOut), signal),
     recovery: (signal?: AbortSignal) => get("/recovery", c.RecoveryOut, signal),
+    verifyAuthority: () => post("/recovery/verify", c.RecoveryOut),
     leave: () => post("/leave", z.null()),
     removalCase: (body: c.RemovalCaseIn) => post("/removal-cases", c.GovernanceOut, c.RemovalCaseIn.parse(body)),
     vote: (id: number, body: c.VoteIn) => post(`/governance/${reference(id)}/vote`, c.GovernanceOut, c.VoteIn.parse(body)),

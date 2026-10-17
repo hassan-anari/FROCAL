@@ -9,7 +9,6 @@
     "max_voluntary_leaves": 3,
     "leave_cooldown_hours": 48,
     "owner_decisions_pending": [
-      "PH-045",
       "PH-048"
     ]
   },
@@ -43,7 +42,7 @@
         "role": "SOLDIER",
         "access_state": "ACTIVE",
         "contribution": 100000,
-        "started_at": "2026-10-16T18:14:56.451Z",
+        "started_at": "2026-10-16T23:40:22.518Z",
         "own": false
       },
       {
@@ -56,7 +55,7 @@
         "role": "CAPTAIN",
         "access_state": "ACTIVE",
         "contribution": 0,
-        "started_at": "2026-10-16T18:14:56.451Z",
+        "started_at": "2026-10-16T23:40:22.518Z",
         "own": true
       }
     ],
@@ -85,13 +84,13 @@
         "direction": "CREDIT",
         "amount": 10000,
         "source_type": "CLAN_ACTIVITY",
-        "occurred_at": "2026-10-16T18:14:56.504Z"
+        "occurred_at": "2026-10-16T23:40:22.585Z"
       }
     ]
   },
   "equipment": {
     "config_version": "phase7-domain",
-    "server_time": "2026-10-16T18:14:56.742Z",
+    "server_time": "2026-10-16T23:40:23.229Z",
     "items": [
       {
         "item_id": "rally-beacon",
@@ -301,7 +300,7 @@
       "current": 100000,
       "target": 25000,
       "unlocked": true,
-      "unlocked_at": "2026-10-16T18:14:56.504Z",
+      "unlocked_at": "2026-10-16T23:40:22.585Z",
       "available": true,
       "blocked_reason": null
     },
@@ -317,6 +316,9 @@
   ],
   "governance": [],
   "recovery": {
+    "reasons": [],
+    "captain_authority_lost_at": null,
+    "can_verify_authority": true,
     "state": "ACTIVE",
     "reason": "",
     "started_at": null,
@@ -331,12 +333,12 @@
     "clan_name": "Clan 2",
     "role": "CAPTAIN",
     "access_state": "ACTIVE",
-    "started_at": "2026-10-16T18:14:56.451Z"
+    "started_at": "2026-10-16T23:40:22.518Z"
   },
   "join-requests/current": [],
   "equipment_after_activation": {
     "config_version": "phase7-domain",
-    "server_time": "2026-10-16T18:14:57.062Z",
+    "server_time": "2026-10-16T23:40:23.621Z",
     "items": [
       {
         "item_id": "rally-beacon",
@@ -482,8 +484,8 @@
         "item_id": "rally-beacon",
         "category": "HQ_XP_RATE_BONUS_BPS",
         "value": 2000,
-        "starts_at": "2026-10-16T18:14:57.033Z",
-        "expires_at": "2026-10-16T20:14:57.033Z",
+        "starts_at": "2026-10-16T23:40:23.580Z",
+        "expires_at": "2026-10-17T01:40:23.580Z",
         "effective": true
       }
     ]

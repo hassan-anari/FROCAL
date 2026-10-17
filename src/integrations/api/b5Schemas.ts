@@ -252,6 +252,9 @@ export const GovernanceOut = z.object({
 export type GovernanceOut = z.infer<typeof GovernanceOut>;
 
 export const RecoveryOut = z.object({
+  "reasons": z.array(z.string()),
+  "captain_authority_lost_at": z.union([z.iso.datetime({ offset: true }), z.null()]),
+  "can_verify_authority": z.boolean(),
   "state": z.string(),
   "reason": z.string(),
   "started_at": z.union([z.iso.datetime({ offset: true }), z.null()]),

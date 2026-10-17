@@ -1,35 +1,35 @@
 {
   "repository": "hassan-anari/WEDCAL",
-  "commit": "af72edee1ea4ffb3fc6443f24dfa5fa1ab372518",
-  "status": "Initial implemented B5 runtime/schema/fixture candidate; backend final validation and independent review pending. Not the planning-only commit.",
+  "commit": "c38a7a65ba9bacce53a04bec6c10dfbeb71ed008",
+  "status": "Implemented B5 runtime and generated schema/HTTP fixtures; exact source bytes and paired PostgreSQL checks verified. Backend and frontend PRs remain Draft for independent review.",
   "files": {
     "scripts/contracts/b5/source/docs/B5_BACKEND_CONTRACT.md": {
       "path": "docs/B5_BACKEND_CONTRACT.md",
-      "blob": "2584d482831e81b41178803838e07198c8262879"
+      "blob": "f269573f830ba6ac9f0885191278acbd59014780"
     },
     "scripts/contracts/b5/source/docs/B5_BACKEND_HANDOFF.md": {
       "path": "docs/B5_BACKEND_HANDOFF.md",
-      "blob": "cdf3500110c17de88150ba4f5070dd556ca76d41"
+      "blob": "de6f042b9366b8406afa05eb775d4f2d13efc14f"
     },
     "src/integrations/api/fixtures/b5/openapi.json": {
       "path": "docs/fixtures/b5/openapi.json",
-      "blob": "81c95e369c7e1edb379d69ae3a1811b0ddac4774"
+      "blob": "dcd6c9e4b5d2c8f3d69418960f0e48cb832f5e15"
     },
     "src/integrations/api/fixtures/b5/clan-http.json": {
       "path": "docs/fixtures/b5/clan-http.json",
-      "blob": "504b65d0a17fe0fa75b9c28a4e7118dd98593e26"
+      "blob": "137bb8fd2bf72d32af725455058d55cd80130922"
     },
     "scripts/contracts/b5/source/apps/clans/api.py": {
       "path": "apps/clans/api.py",
-      "blob": "e9bd8378b351fc0a629f6fb6fe3f6b6dbbd9994e"
+      "blob": "18beb2abd91677eaf3a9e70521f8780150487b88"
     },
     "scripts/contracts/b5/source/apps/clans/services.py": {
       "path": "apps/clans/services.py",
-      "blob": "e2c945e81f243f0c80b74fb3ef4b280778e49603"
+      "blob": "96de800c711bd500f1f420002967d9efa7515c1e"
     },
     "scripts/contracts/b5/source/apps/clans/governance.py": {
       "path": "apps/clans/governance.py",
-      "blob": "7d690bae508b29a440f955f15f1b88c7f551b5f6"
+      "blob": "5b5c39b2de4ad4d3828c411f350f1998c92fa385"
     },
     "scripts/contracts/b5/source/apps/clans/economy.py": {
       "path": "apps/clans/economy.py",
@@ -41,7 +41,7 @@
     },
     "scripts/contracts/b5/source/apps/clans/models.py": {
       "path": "apps/clans/models.py",
-      "blob": "1dfc3492ae17b4ab064fb9248db40e1e8adbdd21"
+      "blob": "dabc27ee9005aa827d1d5251eb50256fef6c0e96"
     },
     "scripts/contracts/b5/source/apps/rewards/api.py": {
       "path": "apps/rewards/api.py",
@@ -50,6 +50,30 @@
     "scripts/contracts/b5/source/apps/content/services.py": {
       "path": "apps/content/services.py",
       "blob": "04d696b50347a1441cf0ba7bb2a2bfb56fc5e5a5"
+    },
+    "scripts/contracts/b5/source/apps/clans/recovery.py": {
+      "path": "apps/clans/recovery.py",
+      "blob": "53e91cab347696a028bc43d6d1d9fdb6d0ba542d"
+    },
+    "scripts/contracts/b5/source/apps/clans/activity.py": {
+      "path": "apps/clans/activity.py",
+      "blob": "550e8808ccbc6b10abc302e38eaa804107516e66"
+    },
+    "scripts/contracts/b5/source/apps/telegram/services.py": {
+      "path": "apps/telegram/services.py",
+      "blob": "e5df783537225d358fb123f3be7dacbdb8d0f1b2"
+    },
+    "scripts/contracts/b5/source/docs/fixtures/b5/README.md": {
+      "path": "docs/fixtures/b5/README.md",
+      "blob": "21e02b386d26d9d7765cee247db15c07e099fc32"
+    },
+    "src/integrations/api/fixtures/b5/authority-http.json": {
+      "path": "docs/fixtures/b5/authority-http.json",
+      "blob": "5d411553e9fc8359313f42c7908fa2f1e0f4f384"
+    },
+    "src/integrations/api/fixtures/b5/lifecycle-http.json": {
+      "path": "docs/fixtures/b5/lifecycle-http.json",
+      "blob": "b5bd4edeeddbf216bcbf63d421dc743b059a740c"
     }
   }
 }

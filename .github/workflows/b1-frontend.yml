@@ -41,6 +41,7 @@ jobs:
       - run: npm run test:visual:b4-baseline
       - run: npm run test:e2e:b4
       - run: npm run test:visual:b5-baseline
+      - run: npm run test:visual:b5-clan-baseline
       - run: npm run test:e2e:b5
       - uses: actions/upload-artifact@v4
         if: always()
@@ -241,7 +242,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: hassan-anari/WEDCAL
-          ref: af72edee1ea4ffb3fc6443f24dfa5fa1ab372518
+          ref: c38a7a65ba9bacce53a04bec6c10dfbeb71ed008
           path: work/backend-b5
           persist-credentials: false
       - uses: actions/setup-node@v4
