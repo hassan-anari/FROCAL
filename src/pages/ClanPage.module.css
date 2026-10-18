@@ -1326,13 +1326,18 @@
 .rankingList > * { contain-intrinsic-size: auto 68px; }
 
 /* Production WebView header: compact rhythm and full, wrapping Clan names. */
-.pageHeader:has(.headerTop) { margin: .9rem 0 .72rem; gap: .22rem .52rem; min-width: 0; grid-template-columns: minmax(0, 1fr) auto; align-items: end; }
-.pageHeader .headerTop,
-.pageHeader:has(.headerTop) h1 { grid-column: 1 / -1; }
+/* Match Earn's tight copy stack; the action spans both text rows without adding a tall subtitle row. */
+.pageHeader:has(.headerTop) { margin: .9rem 0 .72rem; gap: .22rem .52rem; min-width: 0; grid-template-columns: minmax(0, 1fr) auto; align-items: start; }
+.pageHeader .headerTop { grid-column: 1 / -1; }
+.pageHeader:has(.headerTop) h1 { grid-column: 1; }
 .headerTop { min-width: 0; gap: .4rem; }
 .headerTop > span { font-size: clamp(.5rem, 2.1vw, .6rem); letter-spacing: .12em; line-height: 1.2; }
 /* Earn History is the visual reference; keep these values in sync. */
 .pageHeader > .statusButton {
+  grid-column: 2;
+  grid-row: 2 / 4;
+  align-self: end;
+  justify-self: end;
   display: inline-flex;
   align-items: center;
   gap: .24rem;
@@ -1347,6 +1352,5 @@
   white-space: nowrap;
 }
 .pageHeader:has(.headerTop) h1 { white-space: normal; overflow-wrap: anywhere; text-wrap: balance; font-size: clamp(1.4rem, 6vw, 1.9rem); line-height: 1.1; letter-spacing: -.045em; }
-/* The 38px status button must not pull the shorter subtitle down in its grid row. */
-.pageHeader:has(.headerTop) > p { margin: 0; line-height: 1.35; align-self: start; }
+.pageHeader:has(.headerTop) > p { grid-column: 1; margin: 0; line-height: 1.35; align-self: start; }
 .homeHeroMetrics strong { min-width: 0; overflow-wrap: anywhere; }
