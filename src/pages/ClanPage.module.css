@@ -1326,7 +1326,7 @@
 .rankingList > * { contain-intrinsic-size: auto 68px; }
 
 /* Production WebView header: compact rhythm and full, wrapping Clan names. */
-.pageHeader:has(.headerTop) { margin: .3rem 0 .65rem; gap: .22rem .52rem; min-width: 0; grid-template-columns: minmax(0, 1fr) auto; align-items: end; }
+.pageHeader:has(.headerTop) { margin: .9rem 0 .72rem; gap: .22rem .52rem; min-width: 0; grid-template-columns: minmax(0, 1fr) auto; align-items: end; }
 .pageHeader .headerTop,
 .pageHeader:has(.headerTop) h1 { grid-column: 1 / -1; }
 .headerTop { min-width: 0; gap: .4rem; }
