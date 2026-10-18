@@ -21,3 +21,12 @@ Each width also includes before/after equipment and protected Base/Profile/Arena
 [Ranking responses](paired/successor-rankings-http.json) verify removal, compact ranks, counts, page boundaries, null former-Captain standing, cold rebuild and immutable archived score. [Authorization responses](paired/successor-qa-http.json) show the default, explicitly authorized and consumed states; command replay cannot replenish the grant.
 
 The actual-backend captures and final paired results use **7c09f8f7e715339ac98e68b7b001bfe724a25a61**: 374 backend, 31 HTTP/client and 36 browser tests passed locally. Source provenance and artifact hashes are in the manifest; hosted CI results are linked on Draft #10. No production operation or physical-device certification is claimed. The earlier 07876b3 baseline is retained in Git history and is not presented as final acceptance.
+
+
+| Width | History button: official icon on left | Complete global reward ledger |
+| --- | --- | --- |
+| 320 | [Button](320/earn-history-button.png) | [History](320/global-history-mixed.png) |
+| 390 | [Button](390/earn-history-button.png) | [History](390/global-history-mixed.png) |
+| 460 | [Button](460/earn-history-button.png) | [History](460/global-history-mixed.png) |
+
+Global History keeps mixed server sources, signed amounts and backend cursor order; the Network preview keeps its independent filtered query. [Actual successor ledger](paired/390/global-history-ledger.png) and [raw ledger pages/request parameters](paired/global-history-http.json) come from an additional focused passing browser test against the exact same successor. Final expanded-scope hosted acceptance is linked on PR #10.

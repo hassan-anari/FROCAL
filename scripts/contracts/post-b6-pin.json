@@ -2,7 +2,7 @@
   "repository": "hassan-anari/WEDCAL",
   "commit": "7c09f8f7e715339ac98e68b7b001bfe724a25a61",
   "runtime_commit": "7c09f8f7e715339ac98e68b7b001bfe724a25a61",
-  "status": "Exact successor acknowledged in FROCAL Issue #8; all six backend checks green. Local paired acceptance passed: 374 backend, 31 HTTP/client, 36 browser tests. Final frontend CI is reported on Draft PR #10. Historical B2\u2013B6 pins unchanged.",
+  "status": "Exact successor acknowledged in FROCAL Issue #8; all six backend checks green. Local paired acceptance passed: 374 backend, 31 HTTP/client, 36 browser tests, plus focused actual-backend complete-ledger browser acceptance. Final frontend CI is reported on Draft PR #10. Historical B2\u2013B6 pins unchanged.",
   "files": {
     "scripts/contracts/post-b6/source/docs/POST_B6_HOTFIX_CONTRACT.md": {
       "path": "docs/POST_B6_HOTFIX_CONTRACT.md",
