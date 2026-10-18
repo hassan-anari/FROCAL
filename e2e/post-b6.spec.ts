@@ -30,8 +30,22 @@ for (const width of [320, 390, 460]) test(`Soldier leave succeeds without old-sc
 test("FACILITIES updates from equipment after activation, expiry, refresh and foreground resume", async ({ page }) => {
   const f = await prepareClan(page);
   f.data.equipment.items.forEach((item: any) => { item.quantity = 0; }); f.data.equipment.active_effects = [];
+  let failFirst = true, release!: () => void;
+  const pending = new Promise<void>(done => { release = done; });
+  await page.route("**/api/v1/clans/equipment", async route => {
+    if (!failFirst) return route.fulfill({ json: f.data.equipment });
+    await pending; return route.fulfill({ status: 503, json: { detail: "Equipment unavailable" } });
+  });
   await page.goto(launch("/clan"));
   const metric = page.locator("article").filter({ has: page.getByText("FACILITIES", { exact: true }) });
+  await expect(page.getByRole("status", { name: "Preparing your headquarters…" })).toBeVisible();
+  await expect(metric).toHaveCount(0);
+  const failed = page.waitForResponse(response => response.url().endsWith("/clans/equipment") && response.status() === 503);
+  release(); await failed; await expect(page.getByText("Headquarters couldn't load fully.", { exact: true })).toBeVisible();
+  await expect(metric).toHaveCount(0);
+  await expect(page.getByText("3 online", { exact: true })).toHaveCount(0);
+  failFirst = false;
+  await page.getByRole("button", { name: "Retry", exact: true }).click();
   await expect(metric).toContainText("0 items");
   await metric.scrollIntoViewIfNeeded();
   await page.screenshot({ path: "docs/evidence/post-b6/390/facilities-empty.png", animations: "disabled" });

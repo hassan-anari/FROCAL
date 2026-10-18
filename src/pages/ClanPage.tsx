@@ -150,7 +150,7 @@ function formatRemaining(ms: number): string {
   return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
-function RoomHero({ tab, shop = false, effects = 0, hqStateLabel = "ONLINE", facilities = "3 online" }: { tab: HeadquartersTab; shop?: boolean; effects?: number; hqStateLabel?: string; facilities?: string }) {
+function RoomHero({ tab, shop = false, effects = 0, hqStateLabel = "ONLINE", facilities = "—" }: { tab: HeadquartersTab; shop?: boolean; effects?: number; hqStateLabel?: string; facilities?: string }) {
   if (tab === "home") {
     return (
       <section className={styles.homeHero}>
