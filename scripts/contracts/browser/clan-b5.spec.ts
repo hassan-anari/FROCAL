@@ -176,9 +176,9 @@ test("approved governance sheet uses real roster targets, reason codes, electora
     await page.getByRole("button", { name: "Refresh status", exact: true }).click();
     await expect(page.getByRole("dialog")).toContainText("Soldier removal");
     await page.getByRole("button", { name: "Vote yes", exact: true }).click();
+    await expect.poll(async () => (await api(captain, "/clans/governance")).find((row: any) => row.id === existing.id).own_vote).toBe("YES");
     await expect(page.getByRole("button", { name: "Vote yes", exact: true })).toBeDisabled();
     await expect(page.getByRole("button", { name: "Vote no", exact: true })).toBeDisabled();
-    expect((await api(captain, "/clans/governance")).find((row: any) => row.id === existing.id).own_vote).toBe("YES");
     return;
   }
   await page.getByRole("button", { name: "Propose removal", exact: true }).click();

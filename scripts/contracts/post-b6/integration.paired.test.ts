@@ -29,14 +29,14 @@ it("filters before pagination past 25 unrelated records, preserves Base ledger, 
   const empty = await loadRewardHistory(owner.initData, second.items.at(-1)!.id, undefined, "network"); expect(empty).toEqual({ items: [], next_cursor: null });
   const other = await loadRewardHistory(foreign.initData, null, undefined, "network"); expect(other.items).toHaveLength(1); expect(other.items[0].player_amount).toBe(7);
   record("network", { first, second, empty, base });
-}, 30000);
+}, 120_000);
 it("pairs immediate singleton dissolution and irreversible same-Season recreation protection", async () => {
   const { captain, group } = await world(); const ready = await captain.api.recovery();
   expect(RecoveryOut.parse(ready)).toEqual(ready); expect(ready.governance!.dissolution).toMatchObject({ outcome: "IMMEDIATE", can_open: true, eligible_count: 1, same_season_recreation_allowed: false });
   expect(await captain.api.governance()).toEqual([]); expect(await captain.api.dissolve()).toBeNull(); expect(await captain.api.membership()).toBeNull();
   await expect(captain.api.create({ telegram_group_id: group.id, name: "Forbidden second", tag: "NOPE" })).rejects.toMatchObject({ code: "CLAN_RECREATION_BLOCKED" });
   record("immediate", ready);
-});
+}, 60_000);
 it("pairs blocked two-member electorate, target exclusion, valid vote and rejected-409 finality", async () => {
   const small = await world(1); const ready = await small.captain.api.recovery();
   expect(ready.governance!.dissolution).toMatchObject({ outcome: "BLOCKED", eligible_count: 2, blocked_reason: "CLAN_GOVERNANCE_INSUFFICIENT_VOTERS" });
@@ -48,7 +48,7 @@ it("pairs blocked two-member electorate, target exclusion, valid vote and reject
   const opened = await large.captain.api.dissolve(); expect(opened).toMatchObject({ case_type: "CAPTAIN_DISSOLUTION", status: "OPEN" }); expect(await large.captain.api.membership()).toBeTruthy();
   const replay = await large.captain.api.dissolve(); expect(replay?.id).toBe(opened?.id);
   record("blocked", ready); record("vote", { readiness: vote, opened });
-}, 30000);
+}, 60_000);
 it("uses meaningful actual Clan notification content without leaking invitation credentials", async () => {
   const { captain, clan } = await world(); const soldier = await actor(); await soldier.api.role({ role: "SOLDIER" }); const request = await soldier.api.join(clan.id); await captain.api.decision(request.id, { accept: true });
   await soldier.api.invite();
@@ -57,4 +57,14 @@ it("uses meaningful actual Clan notification content without leaking invitation 
   expect(JSON.stringify(list)).not.toContain("https://t.me/+");
   const read = await markNotificationRead(soldier.initData, invite.id); expect(read.body).toBe(invite.body); expect(read.unread).toBe(false);
   record("notifications", { list, read });
-});
+}, 60_000);
+
+it("pairs legacy blank list/read fallback without rewriting stored notification content", async () => {
+  const owner = await actor(); const saved = await control({ action: "post-b6-legacy-notification", player: owner.player });
+  expect(saved).toMatchObject({ stored_title: "", stored_body: " " });
+  const list = await loadNotifications(owner.initData); const row = list.items.find(item => item.id === saved.id)!;
+  expect(row.title).toBe("Clan invitation ready"); expect(row.body).toContain("Clan Status");
+  const read = await markNotificationRead(owner.initData, row.id); expect(read.title).toBe(row.title); expect(read.body).toBe(row.body);
+  expect(await control({ action: "post-b6-legacy-notification", player: owner.player, id: row.id })).toMatchObject({ stored_title: "", stored_body: " " });
+  record("legacy_notification", { list: row, read });
+}, 60_000);

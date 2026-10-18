@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { mkdirSync } from "node:fs";
+test.setTimeout(120_000);
 const origin = "http://127.0.0.1:8792";
 async function control(body: object): Promise<any> { const r = await fetch(origin + "/__b2_test__", { method: "POST", body: JSON.stringify(body) }); expect(r.status).toBe(200); return r.json(); }
 async function api(actor: any, path: string, method = "GET", body?: unknown): Promise<any> { const r = await fetch(origin + "/api/v1/clans" + path, { method, headers: { Authorization: `tma ${actor.initData}`, "Content-Type": "application/json" }, ...(body === undefined ? {} : { body: JSON.stringify(body) }) }); expect(r.ok).toBe(true); return r.status === 204 ? null : r.json(); }

@@ -28,8 +28,8 @@ export default defineConfig({
     },
   ],
   projects: [
-    { name: "mobile-chrome", testIgnore: ["**/b1.spec.ts", "**/b3-client.spec.ts", "**/b4*.spec.ts", "**/b5*.spec.ts", "**/b6*.spec.ts"], use: { ...devices["Pixel 7"] } },
-    { name: "desktop-chrome", testIgnore: ["**/b1.spec.ts", "**/b3-client.spec.ts", "**/b4*.spec.ts", "**/b5*.spec.ts", "**/b6*.spec.ts"], use: { ...devices["Desktop Chrome"] } },
+    { name: "mobile-chrome", testIgnore: ["**/post-b6*.spec.ts", "**/b1.spec.ts", "**/b3-client.spec.ts", "**/b4*.spec.ts", "**/b5*.spec.ts", "**/b6*.spec.ts"], use: { ...devices["Pixel 7"] } },
+    { name: "desktop-chrome", testIgnore: ["**/post-b6*.spec.ts", "**/b1.spec.ts", "**/b3-client.spec.ts", "**/b4*.spec.ts", "**/b5*.spec.ts", "**/b6*.spec.ts"], use: { ...devices["Desktop Chrome"] } },
     { name: "b1-mobile", testMatch: ["**/b1.spec.ts", "**/b3-client.spec.ts"], use: { ...devices["Pixel 7"], baseURL: "http://127.0.0.1:4174" } },
     { name: "b1-desktop", testMatch: ["**/b1.spec.ts", "**/b3-client.spec.ts"], use: { ...devices["Desktop Chrome"], baseURL: "http://127.0.0.1:4174" } },
   ],

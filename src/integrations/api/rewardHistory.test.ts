@@ -25,3 +25,7 @@ it("preserves server order and removes overlap by ledger identity only", () => {
 it.each([{ ...item, player_amount: "71" }, { ...item, occurred_at: "invalid" }, { ...item, id: Number.MAX_SAFE_INTEGER + 1 }])("rejects malformed ledger evidence", row => {
   expect(rewardHistorySchema.safeParse({ items: [row], next_cursor: null }).success).toBe(false);
 });
+it("rejects an incompatible unfiltered Network response instead of mixing feeds or scanning unrelated pages", async () => {
+  vi.mocked(apiRequest).mockResolvedValue(new Response(JSON.stringify({ items: [item], next_cursor: 41 })));
+  await expect(loadRewardHistory("synthetic-launch", null, undefined, "network")).rejects.toMatchObject({ code: "RESPONSE_INVALID" });
+});

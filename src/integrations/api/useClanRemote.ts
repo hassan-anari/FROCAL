@@ -115,6 +115,8 @@ export function useClanRemote() {
         setLeftMembership(departed);
         await client.cancelQueries({ queryKey: root }).catch(() => {});
         client.setQueryData([...root, "membership"], null);
+        // Discard the complete stale live Clan ranking snapshot; the server owns every row/rank/count.
+        void client.resetQueries({ queryKey: [...queryKeys.player(scope), "arena", "rankings", "clans"] }).catch(() => {});
         client.removeQueries({ queryKey: root, predicate: query => {
           const name = query.queryKey[root.length];
           return typeof name === "string" && !["state", "membership", "requests", "discovery", "groups"].includes(name);

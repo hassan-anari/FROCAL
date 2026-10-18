@@ -15,7 +15,7 @@ export type RewardHistoryItem = RewardHistoryPage["items"][number];
 export async function loadRewardHistory(initData: string | null, cursor: number | null, signal?: AbortSignal, category?: "network"): Promise<RewardHistoryPage> {
   const response = await apiRequest(`/rewards/history?limit=20${category === "network" ? "&category=network" : ""}${cursor === null ? "" : `&cursor=${cursor}`}`, { initData, signal, cache: "no-store" });
   const result = rewardHistorySchema.safeParse(await response.json());
-  if (!result.success) throw new ApiError(0, "RESPONSE_INVALID");
+  if (!result.success || (category === "network" && result.data.items.some(item => item.source_type !== "CREATOR" && item.source_type !== "NETWORK_SPEAKER"))) throw new ApiError(0, "RESPONSE_INVALID");
   return result.data;
 }
 export function historyRows(pages: readonly RewardHistoryPage[] | undefined): RewardHistoryItem[] {

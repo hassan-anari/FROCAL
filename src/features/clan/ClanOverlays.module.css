@@ -312,3 +312,5 @@
 .destructiveWarning input { flex: 0 0 auto; width: 18px; height: 18px; margin: .1rem 0 0; accent-color: #ef7596; }
 button.destructiveAction { border-color: rgba(255, 115, 146, .55); color: #fff0f4; background: linear-gradient(135deg, #8d254c, #642341); }
 button.destructiveAction::before, button.destructiveAction::after { display: none; }
+
+.governanceNote { margin: .2rem 0; color: rgba(198, 217, 239, .8); font-size: .72rem; line-height: 1.5; overflow-wrap: anywhere; }

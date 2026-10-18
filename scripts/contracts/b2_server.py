@@ -147,6 +147,21 @@ if B6:
 def control(data):
     global offset, config, season
     action = data.get("action", "player")
+    if B6 and os.environ.get("POST_B6_BACKEND_ROOT") and action == "post-b6-legacy-notification":
+        from apps.notifications.models import Notification
+        owner = Player.objects.get(telegram_user_id=int(data["player"]))
+        if data.get("id"):
+            row = Notification.objects.get(recipient=owner, public_id=data["id"])
+        else:
+            row = Notification.objects.create(recipient=owner, event_key="CLAN_INVITE_READY", source_domain="clans", source_type="ISOLATED_LEGACY", source_id=uuid4().hex, idempotency_key="isolated-legacy:" + uuid4().hex, title="", body=" ", payload={"path": "/clan"})
+        return {"id": str(row.public_id), "stored_title": row.title, "stored_body": row.body}
+    if B6 and os.environ.get("POST_B6_BACKEND_ROOT") and action == "post-b6-ranking-projections":
+        from apps.arena.services import consume_pending_events, rebuild_ranking
+        consumed = consume_pending_events()
+        if data.get("cold"):
+            ranking_redis.flushdb()  # Dedicated isolated harness DB 15 only.
+            rebuild_ranking(season, "CLAN")
+        return {"consumed": consumed}
     if B6 and action.startswith("b6-"):
         return b6_control(data, globals())
     if B5 and action.startswith("b5-"):

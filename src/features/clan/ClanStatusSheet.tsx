@@ -84,8 +84,8 @@ export function ClanStatusSheet({ live, onClose }: { live: ClanRemote; onClose: 
         {!readinessAvailable ? <ClanQueryState loading={live.recovery.isFetching} title={live.recovery.isFetching ? "Checking governance readiness…" : "Governance readiness is unavailable."} retry={() => live.recovery.refetch({ cancelRefetch: false })} busy={live.recovery.isFetching} /> : <>
           <div><span>Required eligible voters</span><strong>{readiness!.minimum_eligible_voters}</strong></div>
           <div><span>Current eligible voters</span><strong>{currentAction?.eligible_count ?? "Select a member"}</strong></div>
-          {mode === "dissolve" && dissolution?.outcome === "IMMEDIATE" ? <p className={styles.note}>The server permits immediate dissolution without a vote; the voter minimum applies to voting cases.</p> : null}
-          {currentAction?.blocked_reason ? <p role="status" className={styles.note}>{governanceReason(currentAction.blocked_reason) ?? "This action is currently unavailable. Refresh Clan Status."}</p> : null}
+          {mode === "dissolve" && dissolution?.outcome === "IMMEDIATE" ? <p className={styles.governanceNote}>This immediate action does not require a voting electorate.</p> : null}
+          {currentAction?.blocked_reason ? <p role="status" className={styles.governanceNote}>{governanceReason(currentAction.blocked_reason) ?? "This action is currently unavailable. Refresh Clan Status."}</p> : null}
           {currentAction?.existing_case_id ? <Button size="sm" tone="secondary" onClick={() => setMode("status")}>View existing case</Button> : null}
         </>}
       </div> : null}
@@ -121,11 +121,11 @@ export function ClanStatusSheet({ live, onClose }: { live: ClanRemote; onClose: 
         {captain ? <><Button size="sm" tone="secondary" disabled={busy || stale || live.roster.isError || !readinessAvailable || !readiness?.removal_targets.some(row => row.can_open)} onClick={() => openGovernance("removal")}>Propose removal</Button><Button size="sm" tone="secondary" disabled={busy || stale || !readinessAvailable || dissolution?.can_open !== true} onClick={() => openGovernance("dissolve")}>Request dissolution</Button></> : null}
       </div>
       {captain ? <div className={styles.detailList} aria-label="Governance prerequisites">
-        {!readinessAvailable ? <p role="status" className={styles.note}>Governance readiness is unavailable. Refresh Clan Status before taking a governance action.</p> : <>
+        {!readinessAvailable ? <p role="status" className={styles.governanceNote}>Governance readiness is unavailable. Refresh Clan Status before taking a governance action.</p> : <>
           <div><span>Required eligible voters</span><strong>{readiness!.minimum_eligible_voters}</strong></div>
           <div><span>Dissolution electorate</span><strong>{dissolution!.eligible_count}</strong></div>
-          {dissolution?.blocked_reason ? <p role="status" className={styles.note}>{governanceReason(dissolution.blocked_reason) ?? "This action is currently unavailable. Refresh Clan Status."}</p> : null}
-          {readiness!.removal_targets.filter(row => !row.can_open).map(row => <p key={row.target_membership_id} className={styles.note}>{live.rosterRows.find(member => member.membership_id === row.target_membership_id)?.first_name || "Soldier"}: {governanceReason(row.blocked_reason)} Eligible voters: {row.eligible_count} / {readiness!.minimum_eligible_voters}.</p>)}
+          {dissolution?.blocked_reason ? <p role="status" className={styles.governanceNote}>{governanceReason(dissolution.blocked_reason) ?? "This action is currently unavailable. Refresh Clan Status."}</p> : null}
+          {readiness!.removal_targets.filter(row => !row.can_open).map(row => <p key={row.target_membership_id} className={styles.governanceNote}>{live.rosterRows.find(member => member.membership_id === row.target_membership_id)?.first_name || "Soldier"}: {governanceReason(row.blocked_reason)} Eligible voters: {row.eligible_count} / {readiness!.minimum_eligible_voters}.</p>)}
         </>}
       </div> : null}
       {live.requestHistory.length ? <div className={styles.detailList} aria-label="Clan request history">

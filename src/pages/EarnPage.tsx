@@ -569,8 +569,8 @@ export function EarnPage() {
                 <section className={styles.networkHistory}>
                   <header className={styles.sectionHeader}><div><span>RECENT ACTIVITY</span><h2>Network History</h2></div></header>
                   {networkHistory.length ? networkHistory.map((entry) => (
-                    <article key={entry.id}><i /><div><strong>{entry.title}</strong><span>{entry.description}</span></div>{entry.xp ? <em>{entry.xp > 0 ? "+" : ""}{entry.xp} XP</em> : null}</article>
-                  )) : live.remote && rewardHistory.isPending ? <AppLoader compact label="Loading Network earnings…" /> : <div className={styles.emptyState} role="status"><strong>{live.remote ? rewardHistory.isError ? "Network history couldn't load." : "No Network earnings in recent records" : "No network activity yet."}</strong><span>Network and Speaker earnings appear here.</span>{live.remote && rewardHistory.isError ? <Button size="sm" tone="secondary" onClick={() => void rewardHistory.refetch()}>Retry</Button> : null}</div>}
+                    <article key={entry.id}><i /><div><strong>{entry.title}</strong><span>{entry.description}</span></div>{entry.xp !== undefined ? <em>{entry.xp > 0 ? "+" : ""}{entry.xp} XP</em> : null}</article>
+                  )) : live.remote && rewardHistory.isPending ? <AppLoader compact label="Loading Network earnings…" /> : <div className={styles.emptyState} role="status"><strong>{live.remote ? rewardHistory.isError ? "Network history couldn't load." : "No Network earnings yet" : "No network activity yet."}</strong><span>Network and Speaker earnings appear here.</span>{live.remote && rewardHistory.isError ? <Button size="sm" tone="secondary" onClick={() => void rewardHistory.refetch()}>Retry</Button> : null}</div>}
                 </section>
               </>
             ) : null}

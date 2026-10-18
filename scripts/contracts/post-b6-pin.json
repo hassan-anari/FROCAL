@@ -2,7 +2,7 @@
   "repository": "hassan-anari/WEDCAL",
   "commit": "07876b3ebfa7ef4ede8d354682ae49add7a23150",
   "runtime_commit": "07876b3ebfa7ef4ede8d354682ae49add7a23150",
-  "status": "Formal handoff acknowledged in FROCAL Issue #8; paired acceptance pending final backend CI. Historical B2\u2013B6 pins unchanged.",
+  "status": "Original post-B6 baseline acknowledged in FROCAL Issue #8. Final acceptance awaits a NEW successor SHA for live ENDED-Clan rankings and the account-scoped single-use QA recreation permit. Historical B2\u2013B6 pins unchanged.",
   "files": {
     "scripts/contracts/post-b6/source/docs/POST_B6_HOTFIX_CONTRACT.md": {
       "path": "docs/POST_B6_HOTFIX_CONTRACT.md",
