@@ -83,7 +83,7 @@ test("Notification Center numbering follows the flattened page order while mutat
   await expect(list.locator(":scope > button")).toHaveCount(20);
   await list.locator(":scope > button").last().scrollIntoViewIfNeeded();
   await expect(list.locator(":scope > button")).toHaveCount(22);
-  await expect(list.locator(":scope > button > span:first-child")).toHaveText(Array.from({ length: 34 }, (_, i) => String(i + 1).padStart(2, "0")));
+  await expect(list.locator(":scope > button > span:first-child")).toHaveText(Array.from({ length: 22 }, (_, i) => String(i + 1).padStart(2, "0")));
   await list.locator(":scope > button").last().click();
   expect(readPath).toBe("/api/v1/notifications/00000000-0000-4000-8000-000000000022/read");
   await expect(page.getByRole("button", { name: "Customize", exact: true })).toBeVisible();
