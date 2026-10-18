@@ -305,3 +305,10 @@
 .governanceForm select:focus-visible { outline: 2px solid rgba(87, 221, 255, .36); outline-offset: 2px; }
 
 .statusControls button span { color: inherit; font-size: inherit; }
+
+.destructiveWarning { display: grid; gap: .8rem; margin-top: .85rem; padding: .8rem; border: 1px solid rgba(255, 115, 146, .3); border-radius: 14px; background: rgba(110, 22, 53, .16); text-align: left; }
+.destructiveWarning > strong { color: #ffc1ce; font-size: .78rem; line-height: 1.5; }
+.destructiveWarning label { display: flex; align-items: flex-start; gap: .55rem; color: #e5eaf8; font-size: .73rem; line-height: 1.5; }
+.destructiveWarning input { flex: 0 0 auto; width: 18px; height: 18px; margin: .1rem 0 0; accent-color: #ef7596; }
+button.destructiveAction { border-color: rgba(255, 115, 146, .55); color: #fff0f4; background: linear-gradient(135deg, #8d254c, #642341); }
+button.destructiveAction::before, button.destructiveAction::after { display: none; }

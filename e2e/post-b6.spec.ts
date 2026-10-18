@@ -32,10 +32,16 @@ test("FACILITIES updates from equipment after activation, expiry, refresh and fo
   await page.goto(launch("/clan"));
   const metric = page.locator("article").filter({ has: page.getByText("FACILITIES", { exact: true }) });
   await expect(metric).toContainText("0 items");
+  await metric.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: "docs/evidence/post-b6/390/facilities-empty.png", animations: "disabled" });
   f.data.equipment.items[0].quantity = 3;
   await page.getByRole("button", { name: "Clan status", exact: true }).click();
   await page.getByRole("button", { name: "Refresh status", exact: true }).click();
   await expect(metric).toContainText("3 items");
+  await page.getByRole("button", { name: "Close", exact: true }).click();
+  await metric.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: "docs/evidence/post-b6/390/facilities-owned.png", animations: "disabled" });
+  await page.getByRole("button", { name: "Clan status", exact: true }).click();
   const timed = f.data.equipment.items.filter((item: any) => item.activation === "TIMED");
   const at = Date.parse(f.data.equipment.server_time);
   f.data.equipment.active_effects = [0, 1, 2].map((id: number) => ({ id: id + 1, item_id: timed[id === 2 ? 1 : 0].item_id, category: "HQ_XP_RATE_BONUS_BPS", value: 2000, starts_at: new Date(at - 1000).toISOString(), expires_at: new Date(at + 5000).toISOString(), effective: true }));
@@ -44,6 +50,7 @@ test("FACILITIES updates from equipment after activation, expiry, refresh and fo
   await expect(page.locator("article").filter({ has: page.getByText("EFFECTS", { exact: true }) })).toContainText("3 active");
   await expect(metric).toContainText("3 items", { timeout: 8000 });
   f.data.equipment.items[0].quantity = 4;
+  f.data.equipment.server_time = new Date(at + 10_000).toISOString();
   await page.waitForTimeout(1001); await page.evaluate(() => window.dispatchEvent(new Event("focus")));
   await expect(metric).toContainText("4 items");
 });
@@ -55,4 +62,46 @@ test("blank invite notifications explain the next action and navigate without cr
   await expect(panel).toContainText("Clan invitation ready"); await expect(panel).toContainText("Open Clan Status");
   await panel.getByRole("button").filter({ hasText: "Clan invitation ready" }).click();
   await expect(page).toHaveURL(/\/clan$/); await expect(page.getByRole("button", { name: "Clan status", exact: true })).toBeVisible();
+});
+
+test("History preserves row nodes during foreground refresh and duplicate pagination", async ({ page }) => {
+  await prepareClan(page);
+  const row = (id: number) => ({ id, source_type: "CREATOR", context: "NETWORK_GROUP", player_amount: 20, occurred_at: "2026-10-16T10:10:00Z" });
+  let release: (() => void) | undefined;
+  let held: Promise<void> | undefined;
+  let pageTwoCalls = 0;
+  await page.route("**/api/v1/rewards/history?*", async route => {
+    const cursor = new URL(route.request().url()).searchParams.get("cursor");
+    if (cursor) pageTwoCalls++;
+    await held;
+    return route.fulfill({ json: { items: cursor ? [row(19)] : [row(20)], next_cursor: cursor ? null : 20 } });
+  });
+  await page.goto(launch("/earn")); await page.getByRole("button", { name: "History", exact: true }).click();
+  const sheet = page.getByRole("dialog", { name: "Earn history" });
+  await expect(sheet.locator("article")).toHaveCount(2); // Intersection continuation may finish immediately.
+  const first = sheet.locator("article").first(); await first.evaluate(el => { (el as HTMLElement).dataset.confirmedRow = "retained"; });
+  held = new Promise(done => { release = done; });
+  await page.waitForTimeout(1001); await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  await expect(sheet.getByRole("status", { name: "Loading earnings…" })).toHaveCount(0);
+  await expect(sheet.locator("article[data-confirmed-row=retained]")).toBeVisible();
+  release!(); await expect(sheet.locator("article")).toHaveCount(2);
+  expect(pageTwoCalls).toBeLessThanOrEqual(2); // one continuation plus one refetch of the loaded page
+  await page.screenshot({ path: "docs/evidence/post-b6/390/history-preserved.png", animations: "disabled" });
+});
+
+for (const width of [320, 390, 460]) test(`dissolution warning defaults to cancellation at ${width}`, async ({ page }) => {
+  await page.setViewportSize({ width, height: 640 });
+  const f = await prepareClan(page);
+  await page.goto(launch("/clan")); await page.getByRole("button", { name: "Clan status", exact: true }).click();
+  await page.getByRole("button", { name: "Request dissolution", exact: true }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toContainText("you cannot create another Clan as Captain during the current Season");
+  await expect(dialog.getByRole("button", { name: "Confirm", exact: true })).toBeDisabled();
+  await expect(dialog.getByRole("checkbox")).not.toBeChecked();
+  await expect(dialog.getByRole("button", { name: "Cancel", exact: true })).toBeEnabled();
+  await page.screenshot({ path: `docs/evidence/post-b6/${width}/dissolution-warning.png`, animations: "disabled" });
+  await dialog.getByRole("checkbox").check();
+  await expect(dialog.getByRole("button", { name: "Confirm", exact: true })).toBeEnabled();
+  await dialog.getByRole("button", { name: "Cancel", exact: true }).click();
+  expect(f.calls.every(call => call.method === "GET")).toBe(true);
 });

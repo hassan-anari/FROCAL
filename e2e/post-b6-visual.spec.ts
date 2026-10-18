@@ -22,8 +22,10 @@ for (const width of [320, 390, 460]) test(`post-B6 mobile visual comparison ${wi
   });
   writeFileSync(`${dir}/${before ? "before" : "after"}-header.json`, JSON.stringify(dimensions, null, 2));
   if (!before) { expect(dimensions.buttonHeight).toBe(32); expect(dimensions.overflow).toBe(false); }
+  await page.getByText("FACILITIES", { exact: true }).scrollIntoViewIfNeeded();
+  await shot("clan-equipment");
   f.identity.name = "Intercontinental Clan Headquarters and Expedition Command";
-  await page.reload(); await expect(header.locator("h1")).toHaveText(f.identity.name);
+  await page.reload(); await expect(header.locator("h1")).toHaveText(f.identity.name); await header.scrollIntoViewIfNeeded();
   if (!before) { expect(await header.locator("h1").evaluate(el => el.scrollWidth <= el.clientWidth + 1)).toBe(true); expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true); }
   await shot("clan-long-title");
   for (const path of ["/base", "/profile", "/arena"]) {

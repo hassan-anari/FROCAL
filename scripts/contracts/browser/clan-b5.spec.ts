@@ -179,6 +179,8 @@ test("approved governance sheet uses real roster targets, reason codes, electora
   for (const width of [320, 390, 460]) { await page.setViewportSize({ width, height: 844 }); await snapshot(page, width, "immutable-vote"); }
   await page.getByRole("button", { name: "Request dissolution", exact: true }).click();
   for (const width of [320, 390, 460]) { await page.setViewportSize({ width, height: 844 }); await snapshot(page, width, "dissolution-confirmation"); }
+  await expect(page.getByRole("button", { name: "Confirm", exact: true })).toBeDisabled();
+  await page.getByRole("checkbox", { name: "I understand the current-Season recreation restriction." }).check();
   await page.getByRole("button", { name: "Confirm", exact: true }).click();
   await expect(page.getByRole("dialog")).toContainText("Captain dissolution");
 });

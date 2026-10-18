@@ -240,3 +240,29 @@ it("shows a refresh warning only when essential new status fails after the leave
   expect(hook.result.current.member).toBe(false);
   expect(feedback).toHaveBeenCalledWith("You left the Clan. Current status couldn't refresh. Retry from Clan status.", "info");
 });
+it.each([401, 403])("accepts obsolete membership denial %s after a confirmed departure", async status => {
+  rows = []; member = { ...fixture["membership/current"], role: "SOLDIER" };
+  const { wrapper } = setup(); const hook = renderHook(() => useClanRemote(), { wrapper });
+  await waitFor(() => expect(hook.result.current.member).toBe(true));
+  api.leave.mockImplementationOnce(async () => {
+    api.membership.mockRejectedValue(new ClanApiError("CLAN_FORBIDDEN", status));
+    api.state.mockResolvedValue({ ...fixture.state, role: "SOLDIER", cooldown_until: "2026-10-18T10:00:00Z" });
+    return null;
+  });
+  await act(async () => { await hook.result.current.run("leave", () => hook.result.current.api.leave()); });
+  expect(hook.result.current.membership.isError).toBe(false); expect(hook.result.current.member).toBe(false);
+  expect(feedback).toHaveBeenCalledWith("You left the Clan.", "success");
+});
+it("defaults dissolution to cancellation and requires acknowledgement of the Season restriction", async () => {
+  rows = []; member = fixture["membership/current"]; api.state.mockResolvedValue(fixture.state);
+  const { wrapper } = setup(); render(<Status />, { wrapper });
+  const start = await screen.findByRole("button", { name: "Request dissolution" });
+  await waitFor(() => expect(start).toBeEnabled()); fireEvent.click(start);
+  expect(screen.getByRole("dialog")).toHaveTextContent("you cannot create another Clan as Captain during the current Season");
+  expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
+  fireEvent.click(screen.getByRole("checkbox", { name: "I understand the current-Season recreation restriction." }));
+  expect(screen.getByRole("button", { name: "Confirm" })).toBeEnabled();
+  fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+  fireEvent.click(await screen.findByRole("button", { name: "Request dissolution" }));
+  expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
+});

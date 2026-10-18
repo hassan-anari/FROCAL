@@ -70,3 +70,14 @@ it("blocks duplicate manual/intersection pagination and retains rows through an 
   await waitFor(() => expect(hook.result.current.items.map(item => item.id)).toEqual([50, 49]));
   hook.unmount(); client.clear();
 });
+it("coalesces foreground refresh and keeps confirmed rows during that refresh", async () => {
+  load.mockResolvedValueOnce({ items: [row], next_cursor: null });
+  const { client, wrapper } = setup(); const hook = renderHook(() => useRewardHistory(), { wrapper });
+  await waitFor(() => expect(hook.result.current.items).toEqual([row]));
+  let finish!: (value: any) => void;
+  load.mockImplementationOnce(() => new Promise(done => { finish = done; }));
+  act(() => { window.dispatchEvent(new Event("focus")); document.dispatchEvent(new Event("visibilitychange")); });
+  expect(load).toHaveBeenCalledTimes(2); expect(hook.result.current.items).toEqual([row]);
+  await act(async () => { finish({ items: [row], next_cursor: null }); });
+  hook.unmount(); client.clear();
+});

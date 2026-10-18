@@ -27,8 +27,16 @@ export function useClanRemote() {
   const state = read("state", signal => api.state(signal));
   const eligible = enabled && state.data?.enabled === true && state.data.eligible;
   const membership = read("membership", async signal => {
-    const value = await api.membership(signal);
-    return value?.membership_id === departedMembership.current ? null : value;
+    try {
+      const value = await api.membership(signal);
+      return value?.membership_id === departedMembership.current ? null : value;
+    } catch (error) {
+      // Some obsolete membership reads deny access after the confirmed departure.
+      // State/requests still have to refresh; a new confirmed membership keeps normal denial handling.
+      if (departedMembership.current !== null && client.getQueryData([...root, "membership"]) === null
+        && (error instanceof ClanApiError || error instanceof ApiError) && [401, 403].includes(error.status)) return null;
+      throw error;
+    }
   }, eligible && Boolean(state.data?.role), 15_000);
   // Retain confirmed content through failed background reads. Actions still fail closed.
   const membershipDenied = (membership.error instanceof ClanApiError || membership.error instanceof ApiError) && [401, 403].includes(membership.error.status);

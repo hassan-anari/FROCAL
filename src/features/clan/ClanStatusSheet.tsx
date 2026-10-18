@@ -15,6 +15,8 @@ const time = (value: string | null | undefined) => value ? new Date(value).toLoc
 export function ClanStatusSheet({ live, onClose }: { live: ClanRemote; onClose: () => void }) {
   const { adapter } = useTelegram();
   const [mode, setMode] = useState<"status" | "leave" | "dissolve" | "removal">("status");
+  const [dissolutionAcknowledged, setDissolutionAcknowledged] = useState(false);
+  useEffect(() => { setDissolutionAcknowledged(false); }, [mode, live.membership.data?.membership_id]);
   const [target, setTarget] = useState("");
   const [reason, setReason] = useState("");
   // Disposable credentials are deliberately excluded from Query/localStorage/sessionStorage.
@@ -37,12 +39,16 @@ export function ClanStatusSheet({ live, onClose }: { live: ClanRemote; onClose: 
   if (mode !== "status") return (
     <ClanModal eyebrow="Clan governance" title={mode === "leave" ? "Leave Clan" : mode === "dissolve" ? "Request dissolution" : "Propose member removal"} onClose={onClose} footer={
       <div className={styles.doubleActions}>
-        <Button size="sm" tone="secondary" onClick={() => setMode("status")} disabled={busy}>Go back</Button>
-        <Button size="sm" disabled={busy || (mode === "leave" && !leaveAllowed) || (mode === "removal" && (!target || !reason.trim()))} onClick={() => void complete(mode, () => mode === "leave" ? live.api.leave() : mode === "dissolve" ? live.api.dissolve() : live.api.removalCase({ target_membership_id: Number(target), reason: reason.trim() }))}>Confirm</Button>
+        <Button size="sm" tone="secondary" onClick={() => setMode("status")} disabled={busy}>{mode === "dissolve" ? "Cancel" : "Go back"}</Button>
+        <Button size="sm" className={mode === "dissolve" ? styles.destructiveAction : undefined} disabled={busy || (mode === "dissolve" && !dissolutionAcknowledged) || (mode === "leave" && !leaveAllowed) || (mode === "removal" && (!target || !reason.trim()))} onClick={() => void complete(mode, () => mode === "leave" ? live.api.leave() : mode === "dissolve" ? live.api.dissolve() : live.api.removalCase({ target_membership_id: Number(target), reason: reason.trim() }))}>Confirm</Button>
       </div>
     }>
       <div className={styles.centerCopy}>
-        <strong>{mode === "leave" ? "Your historical contribution stays with this Clan." : mode === "dissolve" ? "Dissolution may require a member vote. Your Clan remains active until the request is resolved." : "A proposal opens a governed removal case. It does not immediately remove a member."}</strong>
+        <strong>{mode === "leave" ? "Your historical contribution stays with this Clan." : mode === "dissolve" ? "Your Clan may dissolve immediately without voting. If a vote is required, confirmation opens a governance case." : "A proposal opens a governed removal case. It does not immediately remove a member."}</strong>
+        {mode === "dissolve" ? <div className={styles.destructiveWarning}>
+          <strong>If your Clan dissolves, you cannot create another Clan as Captain during the current Season.</strong>
+          <label><input type="checkbox" checked={dissolutionAcknowledged} onChange={event => setDissolutionAcknowledged(event.target.checked)} />I understand the current-Season recreation restriction.</label>
+        </div> : null}
         {mode === "leave" ? <p>Join cooldown: {state?.leave_cooldown_hours ?? "—"} hours. Leaves used: {state?.voluntary_leave_count ?? "—"} / {state?.max_voluntary_leaves ?? "—"}.</p> : null}
       </div>
       {mode === "removal" ? <div className={`${styles.detailList} ${styles.governanceForm}`}>
