@@ -49,7 +49,8 @@
     "paired_browser_flakes": 0,
     "focused_qa_capture_tests": 3,
     "focused_global_history_paired_browser_tests": 1,
-    "focused_demo_browser_tests": 12
+    "focused_demo_browser_tests": 12,
+    "focused_equipment_boundary_browser_tests": 1
   },
   "provenance": {
     "before-*": "Immutable latest-main worktree, synthetic authenticated fixtures",
@@ -63,7 +64,8 @@
     "scripts/contracts/post-b6/arena-successor.paired.test.ts": "ced6732706bfee339a819dafe0ad50d716a10032da26d5905b53493b85e1a68a",
     "e2e/post-b6-history.spec.ts": "ac7f2bc563d8c20ddf907119f92df94388b6d40cde1a1fa606e8dd4dd77a750a",
     "src/integrations/api/useRewardHistory.ts": "b661b5668e1bf3f1a1053ea20dfcc87c833d76a0d43bab1c243f7629314a01be",
-    "src/pages/EarnPage.tsx": "ca09f40c82f36e200689142eb50984e3178812d5e8c4cc4ad981581edf905c82"
+    "src/pages/EarnPage.tsx": "ca09f40c82f36e200689142eb50984e3178812d5e8c4cc4ad981581edf905c82",
+    "e2e/post-b6.spec.ts": "550f7ca63d05a48663a1b5f0c23e60a00c4c1fef139f7ad39ef6e4b671212151"
   },
   "files": {
     "320/after-clan-equipment.png": {
@@ -411,5 +413,6 @@
       "bytes": 2925
     }
   },
-  "additional_global_history_source_commit": "552fab7e07e1a877ceab02c918acd0f4a66becd6"
+  "additional_global_history_source_commit": "552fab7e07e1a877ceab02c918acd0f4a66becd6",
+  "focused_equipment_boundary_source_commit": "3ae5968d6a9f7cc76fd10f8b1d59e809d5de6ca8"
 }
