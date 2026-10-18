@@ -8,7 +8,7 @@ vi.mock("@/integrations/api/BootstrapProvider", () => ({ useBootstrap: () => ({ 
 vi.mock("@/integrations/telegram/TelegramProvider", () => ({ useTelegram: () => ({ adapter: { isTelegram: gate.telegram }, launchState: "ready" }) }));
 vi.mock("./analytics", async original => {
   const m = await original<typeof import("./analytics")>();
-  return { ...m, analytics: m.createAnalytics({ enabled: true, key: "test", host: "https://ingest.test", replay: true }, { hash: async () => "hashed", load: async () => { throw new Error("should not load from UI"); } }) };
+  return { ...m, analytics: m.createAnalytics({ enabled: true, key: "test", host: "https://ingest.test", replay: true, requireConsent: true }, { hash: async () => "hashed", load: async () => { throw new Error("should not load from UI"); } }) };
 });
 import { AnalyticsConsent } from "./AnalyticsConsent";
 import { analytics, CONSENT_KEY } from "./analytics";
