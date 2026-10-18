@@ -44,8 +44,8 @@ describe("configuration and identity", () => {
     expect(id).not.toContain("9001");
     for (const invalid of ["unverified", "mock-player", "0", "-1", "09001", "9.1", "9007199254740992"]) expect(await playerPseudonym(invalid)).toBeNull();
   });
-  it("never imports/initializes/captures before consent, verification or when disabled", async () => {
-    const { a, load, hash, sdk } = harness();
+  it("never imports/initializes/captures before explicit consent, verification or when disabled", async () => {
+    const { a, load, hash, sdk } = harness({ ...config, requireConsent: true });
     a.page("base"); a.setPlayer("9001", 1); a.feature("earn_history_opened"); await settle();
     expect(load).not.toHaveBeenCalled(); expect(hash).not.toHaveBeenCalled();
     a.setPlayer(null, 2); a.setConsent("replay"); await settle();
