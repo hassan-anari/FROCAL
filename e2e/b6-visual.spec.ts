@@ -27,7 +27,7 @@ for (const width of [320, 390, 460]) test(`B6 preserved scenes and corrected asy
   const status = page.getByRole("button", { name: "Clan status", exact: true });
   const dimensions = await status.evaluate(el => ({ height: el.getBoundingClientRect().height, width: el.getBoundingClientRect().width, right: el.getBoundingClientRect().right, headerRight: el.closest("header")!.getBoundingClientRect().right, iconCount: el.querySelectorAll("svg").length }));
   writeFileSync(`${dir}/${phase}-computed.json`, JSON.stringify(dimensions, null, 2) + "\n");
-  if (!before) { expect(dimensions.height).toBe(36); expect(dimensions.width).toBeLessThan(150); expect(dimensions.iconCount).toBe(1); expect(Math.abs(dimensions.right - dimensions.headerRight)).toBeLessThan(3); }
+  if (!before) { expect(dimensions.height).toBe(32); expect(dimensions.width).toBeLessThan(150); expect(dimensions.iconCount).toBe(1); expect(Math.abs(dimensions.right - dimensions.headerRight)).toBeLessThan(3); }
   await shot("captain-hq");
   // Crop the immutable HQ scene to prove header/status changes do not alter the approved scene.
   await page.locator('section').filter({ has: page.locator('h2').filter({ hasText: f.identity.name }) }).first().screenshot({ path: `${dir}/${phase}-hq-scene.png`, animations: "disabled" });

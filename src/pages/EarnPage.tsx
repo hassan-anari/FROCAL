@@ -633,7 +633,7 @@ export function EarnPage() {
         </DeferredMount>
       </main>
 
-      <HistorySheet open={historyOpen} onClose={() => setHistoryOpen(false)} history={live.remote ? networkEarnings : earn.history.filter(entry => entry.type === "group")} remote={live.remote} loading={live.remote && rewardHistory.isPending} error={live.remote && rewardHistory.isError} fetching={rewardHistory.isFetching} hasNext={rewardHistory.hasNextPage && !rewardHistory.isFetchNextPageError} loadMore={() => rewardHistory.fetchNextPage({ cancelRefetch: false })} retry={() => rewardHistory.isFetchNextPageError ? rewardHistory.fetchNextPage({ cancelRefetch: false }) : rewardHistory.refetch({ cancelRefetch: false })} />
+      <HistorySheet open={historyOpen} onClose={() => setHistoryOpen(false)} history={live.remote ? networkEarnings : earn.history.filter(entry => entry.type === "group")} remote={live.remote} loading={live.remote && rewardHistory.isPending} error={live.remote && rewardHistory.isError} fetching={rewardHistory.isFetching} fetchingMore={rewardHistory.isFetchingNextPage} hasNext={rewardHistory.hasNextPage && !rewardHistory.isFetchNextPageError} loadMore={() => rewardHistory.fetchNextPage()} retry={() => rewardHistory.isFetchNextPageError ? rewardHistory.fetchNextPage() : rewardHistory.refetch({ cancelRefetch: false })} />
       <NetworkGuideSheet kind={guideOpen} onClose={() => setGuideOpen(null)} />
       <RewardReveal reward={earn.rewardEvent} onClose={earn.dismissReward} />
       <LevelUpReveal event={earn.rewardEvent ? null : earn.levelUpEvent} onClose={earn.dismissLevelUp} />

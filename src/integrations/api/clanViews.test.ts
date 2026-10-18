@@ -40,3 +40,27 @@ it("does not turn an unsupported requirement key into editorial mission instruct
   expect(view.title).toBe("Clan mission"); expect(view.description).toBe("This mission is unavailable.");
   expect(JSON.stringify(view)).not.toContain("UNSUPPORTED INTERNAL KEY"); expect(view.rewardLabel).toBe("Unavailable");
 });
+
+it("uses real distinct timed equipment names and counts effect rows separately", async () => {
+  const { clanEquipmentMetrics } = await import("./clanViews");
+  const now = Date.parse(fixture.equipment.server_time);
+  const timed = fixture.equipment.items.filter(item => item.activation === "TIMED");
+  const effect = (item_id: string, id: number) => ({ id, item_id, category: "HQ_XP_RATE_BONUS_BPS", value: 2000, starts_at: new Date(now - 1000).toISOString(), expires_at: new Date(now + 1000).toISOString(), effective: true });
+  const equipment = { ...fixture.equipment, active_effects: [effect(timed[0].item_id, 1), effect(timed[0].item_id, 2)] };
+  expect(clanEquipmentMetrics(equipment, now)).toEqual({ facilities: timed[0].name, effects: 2 });
+  equipment.active_effects.push(effect(timed[1].item_id, 3));
+  expect(clanEquipmentMetrics(equipment, now)).toEqual({ facilities: `${timed[0].name} +1`, effects: 3 });
+  expect(clanEquipmentMetrics(equipment, now + 1000)).toEqual({ facilities: `${equipment.items.reduce((n, item) => n + item.quantity, 0)} items`, effects: 0 });
+});
+it("excludes expired, future, ineffective and consumed context effects and unowned shop products", async () => {
+  const { clanEquipmentMetrics } = await import("./clanViews");
+  const now = Date.parse(fixture.equipment.server_time);
+  const items = fixture.equipment.items.map(item => ({ ...item, quantity: 0 }));
+  const timed = items.find(item => item.activation === "TIMED")!;
+  const context = items.find(item => item.activation === "CONTEXT")!;
+  const base = { id: 1, item_id: timed.item_id, category: "HQ_XP_RATE_BONUS_BPS", value: 1, starts_at: new Date(now - 1000).toISOString(), expires_at: new Date(now + 1000).toISOString(), effective: true };
+  const active_effects = [{ ...base, effective: false }, { ...base, expires_at: new Date(now).toISOString() }, { ...base, starts_at: new Date(now + 500).toISOString() }, { ...base, item_id: context.item_id }];
+  expect(clanEquipmentMetrics({ ...fixture.equipment, items, active_effects }, now)).toEqual({ facilities: "0 items", effects: 0 });
+  items[0].quantity = 3;
+  expect(clanEquipmentMetrics({ ...fixture.equipment, items, active_effects }, now).facilities).toBe("3 items");
+});

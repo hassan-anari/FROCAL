@@ -21,12 +21,18 @@ export function useClanRemote() {
   const client = useQueryClient();
   const root = [...queryKeys.player(scope), "clan"];
   const read = <T,>(name: string, get: (signal: AbortSignal) => Promise<T>, available = enabled, interval = 30_000) => useQuery({ queryKey: [...root, name], queryFn: ({ signal }) => get(signal), enabled: available, retry: false, staleTime: 5_000, refetchOnWindowFocus: false, refetchInterval: available ? interval : false });
+  // Fence a confirmed departed membership before any asynchronous reconciliation.
+  const departedMembership = useRef<number | null>(null);
+  const [leftMembership, setLeftMembership] = useState<number | null>(null);
   const state = read("state", signal => api.state(signal));
   const eligible = enabled && state.data?.enabled === true && state.data.eligible;
-  const membership = read("membership", signal => api.membership(signal), eligible && Boolean(state.data?.role), 15_000);
+  const membership = read("membership", async signal => {
+    const value = await api.membership(signal);
+    return value?.membership_id === departedMembership.current ? null : value;
+  }, eligible && Boolean(state.data?.role), 15_000);
   // Retain confirmed content through failed background reads. Actions still fail closed.
   const membershipDenied = (membership.error instanceof ClanApiError || membership.error instanceof ApiError) && [401, 403].includes(membership.error.status);
-  const member = eligible && Boolean(membership.data) && !membershipDenied;
+  const member = eligible && Boolean(membership.data) && membership.data?.membership_id !== leftMembership && !membershipDenied;
   const memberKey = membership.data?.membership_id ?? "none";
   const requests = read("requests", signal => api.ownRequests(signal), eligible && state.data?.role === "SOLDIER", 15_000);
   const groups = read("groups", signal => api.eligibleGroups(signal), eligible && state.data?.role === "CAPTAIN" && membership.data === null);
@@ -94,8 +100,30 @@ export function useClanRemote() {
         showFeedback(error instanceof ClanApiError ? error.message : "Your Clan couldn't be updated. Please refresh and try again.");
         await refresh(); return undefined;
       }
-      // The write is committed. A read failure cannot turn it into a failed action.
-      if (!await refresh()) showFeedback("Clan updated. Some details couldn't refresh. Retry from Clan status.", "info");
+      // A successful leave is final, including 204/null. Old Clan reads are obsolete.
+      if (action === "leave") {
+        const departed = membership.data?.membership_id ?? null;
+        departedMembership.current = departed;
+        setLeftMembership(departed);
+        await client.cancelQueries({ queryKey: root }).catch(() => {});
+        client.setQueryData([...root, "membership"], null);
+        client.removeQueries({ queryKey: root, predicate: query => {
+          const name = query.queryKey[root.length];
+          return typeof name === "string" && !["state", "membership", "requests", "discovery", "groups"].includes(name);
+        } });
+        const essential = await Promise.allSettled([
+          client.invalidateQueries({ queryKey: [...root, "state"], exact: true }, { throwOnError: true }),
+          client.invalidateQueries({ queryKey: [...root, "membership"], exact: true }, { throwOnError: true }),
+          client.invalidateQueries({ queryKey: [...root, "requests"], exact: true }, { throwOnError: true }),
+        ]);
+        // Nonessential account projections must not taint the committed leave outcome.
+        void Promise.allSettled([
+          client.invalidateQueries({ queryKey: queryKeys.profileOverview(scope) }),
+          client.invalidateQueries({ queryKey: ["bootstrap", scope.session] }),
+        ]);
+        const recovered = essential.every(result => result.status === "fulfilled");
+        showFeedback(recovered ? "You left the Clan." : "You left the Clan. Current status couldn't refresh. Retry from Clan status.", recovered ? "success" : "info");
+      } else if (!await refresh()) showFeedback("Clan updated. Some details couldn't refresh. Retry from Clan status.", "info");
       return value;
     }
     finally { locks.current.delete(action); setPending(null); }

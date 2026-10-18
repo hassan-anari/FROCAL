@@ -71,6 +71,7 @@ interface HistorySheetProps {
   error?: boolean;
   fetching?: boolean;
   hasNext?: boolean;
+  fetchingMore?: boolean;
   loadMore?: () => unknown;
   retry?: () => unknown;
 }
@@ -80,7 +81,7 @@ function formatTime(value: string): string {
   return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(date);
 }
 
-export function HistorySheet({ open, onClose, history, remote = false, loading = false, error = false, fetching = false, hasNext = false, loadMore, retry }: HistorySheetProps) {
+export function HistorySheet({ open, onClose, history, remote = false, loading = false, error = false, fetching = false, hasNext = false, fetchingMore = false, loadMore, retry }: HistorySheetProps) {
   return (
     <OverlayShell open={open} onClose={onClose} ariaLabel="Earn history">
       <header className={styles.sheetHeader}>
@@ -88,8 +89,8 @@ export function HistorySheet({ open, onClose, history, remote = false, loading =
         <h2>Your recent progress.</h2>
         <p>Network and Speaker earnings are stored here.</p>
       </header>
-      <div className={styles.historyList} data-reward-history aria-busy={loading || fetching}>
-        {remote && (loading || fetching) ? <AppLoader compact label="Loading earnings…" /> : null}
+      <div className={styles.historyList} data-reward-history aria-busy={loading && !history.length}>
+        {remote && loading && !history.length ? <AppLoader compact label="Loading earnings…" /> : null}
         {remote && !history.length && !loading && !fetching && !error ? <div className={styles.historyState} role="status"><strong>{hasNext ? "No Network earnings in these records" : "No Network earnings yet"}</strong><span>{hasNext ? "Continue through earlier history to find Network and Speaker earnings." : "Your confirmed Network and Speaker earnings will appear here."}</span></div> : null}
         {history.map((item) => (
           <article key={item.id}>
@@ -103,8 +104,8 @@ export function HistorySheet({ open, onClose, history, remote = false, loading =
           </article>
         ))}
         {remote && error ? <div className={styles.historyState} role="status"><strong>{history.length ? "More earnings couldn't load." : "Earnings couldn't load."}</strong><span>Your confirmed history is safe. Retry to continue.</span>{retry ? <Button size="sm" tone="secondary" disabled={fetching} onClick={() => void retry()}>Retry</Button> : null}</div> : null}
-        {remote && hasNext && !error && loadMore ? <Button size="sm" tone="secondary" disabled={fetching} onClick={() => void loadMore()}>Load more</Button> : null}
-        {open && remote && loadMore ? <QueryContinuation selector="[data-reward-history] > article:last-of-type" hasNext={hasNext} fetching={fetching} load={loadMore} /> : null}
+        {remote && hasNext && !error && loadMore ? <Button size="sm" tone="secondary" disabled={fetching} onClick={() => void loadMore()}>{fetchingMore ? "Loading more…" : "Load more"}</Button> : null}
+        {open && remote && loadMore ? <QueryContinuation selector="[data-reward-history] > article:last-of-type" hasNext={hasNext && !error} fetching={fetching} load={loadMore} /> : null}
       </div>
     </OverlayShell>
   );

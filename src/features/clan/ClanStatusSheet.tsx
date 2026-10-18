@@ -20,7 +20,7 @@ export function ClanStatusSheet({ live, onClose }: { live: ClanRemote; onClose: 
   // Disposable credentials are deliberately excluded from Query/localStorage/sessionStorage.
   const [invite, setInvite] = useState<{ owner: string; credential: InviteOut } | null>(null);
   const state = live.state.data;
-  const member = live.membershipDenied ? null : live.membership.data;
+  const member = live.member ? live.membership.data : null;
   const request = live.activeRequest;
   const displayRequest = request ?? live.operatorRequest;
   const captain = member?.role === "CAPTAIN";
@@ -80,7 +80,7 @@ export function ClanStatusSheet({ live, onClose }: { live: ClanRemote; onClose: 
         <div><span>Request history</span><strong>{live.requestHistory.length}</strong></div>
         {live.requestHistory.map(row => <div key={row.id}><span>{row.clan_name}</span><strong>{words(row.state)} · {time(row.decided_at ?? row.created_at)}</strong></div>)}
       </div> : null}
-      {(live.governance.data ?? []).map(governance => <section key={governance.id} className={styles.detailList}>
+      {(member ? live.governance.data ?? [] : []).map(governance => <section key={governance.id} className={styles.detailList}>
         <div><span>{words(governance.case_type)}</span><strong>{words(governance.status)}</strong></div>
         <p className={styles.note}>{/^[A-Z_]+$/.test(governance.reason) ? words(governance.reason) : governance.reason}</p>
         {governance.target_membership_id !== null ? <div><span>Member</span><strong>{governance.target_first_name || governance.target_username || "—"}</strong></div> : null}
@@ -94,7 +94,7 @@ export function ClanStatusSheet({ live, onClose }: { live: ClanRemote; onClose: 
         {governance.result ? <div><span>Result</span><strong>{words(governance.result)}</strong></div> : null}
         {governance.status === "OPEN" ? <div className={styles.doubleActions}>{(["YES", "NO"] as const).map(choice => <Button key={choice} size="sm" tone="secondary" disabled={busy || stale || live.governance.isError || !governance.is_eligible_voter || Boolean(governance.own_vote)} onClick={() => void complete(`vote:${governance.id}`, () => live.api.vote(governance.id, { choice }))}>Vote {choice.toLowerCase()}</Button>)}</div> : null}
       </section>)}
-      {live.governance.isError || live.recovery.isError || stale ? <ClanQueryState title="Clan status couldn't load fully." description="Retry before taking another action." retry={live.refresh} busy={live.governance.isFetching || live.recovery.isFetching || live.membership.isFetching} /> : member && (live.governance.isPending || live.recovery.isPending) ? <ClanQueryState loading title="Checking Clan status…" /> : null}
+      {(member && (live.governance.isError || live.recovery.isError)) || stale ? <ClanQueryState title="Clan status couldn't load fully." description="Retry before taking another action." retry={live.refresh} busy={live.governance.isFetching || live.recovery.isFetching || live.membership.isFetching} /> : member && (live.governance.isPending || live.recovery.isPending) ? <ClanQueryState loading title="Checking Clan status…" /> : null}
     </ClanModal>
   );
 }

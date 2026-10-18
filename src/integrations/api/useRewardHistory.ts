@@ -1,4 +1,5 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useRef } from "react";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useBootstrap } from "./BootstrapProvider";
 import { isRemoteDataSource } from "./bootstrap";
 import { queryKeys } from "./queryKeys";
@@ -10,6 +11,8 @@ export function useRewardHistory() {
   const { scope, bootstrap } = useBootstrap();
   const { adapter } = useTelegram();
   const initData = adapter.getInitData();
+  const client = useQueryClient();
+  const nextPageLock = useRef(false);
   const history = useInfiniteQuery({
     queryKey: queryKeys.rewardHistory(scope),
     queryFn: ({ pageParam, signal }) => loadRewardHistory(initData, pageParam, signal),
@@ -18,5 +21,11 @@ export function useRewardHistory() {
     enabled: isRemoteDataSource() && adapter.isTelegram && Boolean(initData) && scope.player !== "unverified" && Boolean(bootstrap.data),
     staleTime: 15_000, refetchOnWindowFocus: true, retry: false,
   });
-  return { ...history, items: historyRows(history.data?.pages) };
+  const fetchNextPage = async () => {
+    if (nextPageLock.current || !history.hasNextPage || client.isFetching({ queryKey: queryKeys.rewardHistory(scope), exact: true })) return;
+    nextPageLock.current = true;
+    try { return await history.fetchNextPage({ cancelRefetch: false }); }
+    finally { nextPageLock.current = false; }
+  };
+  return { ...history, fetchNextPage, items: historyRows(history.data?.pages) };
 }

@@ -57,3 +57,16 @@ it("exposes errors without local rewards and prevents repeated or increasing cur
   await waitFor(() => expect(hook.result.current.isError).toBe(true));
   expect(hook.result.current.items).toHaveLength(1); hook.unmount(); client.clear();
 });
+it("blocks duplicate manual/intersection pagination and retains rows through an in-flight next page", async () => {
+  load.mockResolvedValueOnce({ items: [row], next_cursor: 50 });
+  const { client, wrapper } = setup(); const hook = renderHook(() => useRewardHistory(), { wrapper });
+  await waitFor(() => expect(hook.result.current.items).toHaveLength(1));
+  let finish!: (value: any) => void;
+  load.mockImplementationOnce(() => new Promise(done => { finish = done; }));
+  let first!: Promise<unknown>;
+  act(() => { first = hook.result.current.fetchNextPage(); void hook.result.current.fetchNextPage(); });
+  expect(load).toHaveBeenCalledTimes(2); expect(hook.result.current.items).toEqual([row]);
+  await act(async () => { finish({ items: [{ ...row, id: 49 }], next_cursor: null }); await first; });
+  await waitFor(() => expect(hook.result.current.items.map(item => item.id)).toEqual([50, 49]));
+  hook.unmount(); client.clear();
+});

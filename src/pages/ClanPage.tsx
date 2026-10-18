@@ -5,7 +5,7 @@ import { clanAddBotUrl } from "@/integrations/telegram/botLinks";
 import { showFeedback } from "@/design-system/components/TransientFeedback";
 import { applicationStatusMessage } from "@/integrations/api/clanApplications";
 import { useClanRemote, type ClanRemote } from "@/integrations/api/useClanRemote";
-import { clanSummary, clanMember, clanApplicant, clanItem, clanMission, clanTrophy, clanItemBlockedLabel } from "@/integrations/api/clanViews";
+import { clanSummary, clanMember, clanApplicant, clanItem, clanEquipmentMetrics, clanMission, clanTrophy, clanItemBlockedLabel } from "@/integrations/api/clanViews";
 import { clanTone, saveClanTone } from "@/integrations/api/clanAppearance";
 import { ClanStatusSheet } from "@/features/clan/ClanStatusSheet";
 import { QueryContinuation } from "@/design-system/performance/QueryContinuation";
@@ -22,7 +22,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { AssetImage } from "@/design-system/components/AssetImage";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
 import { Button } from "@/design-system/primitives/Button";
@@ -150,7 +150,7 @@ function formatRemaining(ms: number): string {
   return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
-function RoomHero({ tab, shop = false, effects = 0, hqStateLabel = "ONLINE", remote = false }: { tab: HeadquartersTab; shop?: boolean; effects?: number; hqStateLabel?: string; remote?: boolean }) {
+function RoomHero({ tab, shop = false, effects = 0, hqStateLabel = "ONLINE", facilities = "3 online" }: { tab: HeadquartersTab; shop?: boolean; effects?: number; hqStateLabel?: string; facilities?: string }) {
   if (tab === "home") {
     return (
       <section className={styles.homeHero}>
@@ -160,7 +160,7 @@ function RoomHero({ tab, shop = false, effects = 0, hqStateLabel = "ONLINE", rem
         </div>
         <div className={styles.homeHeroMetrics}>
           <article><span>STATUS</span><strong>{hqStateLabel}</strong></article>
-          <article><span>FACILITIES</span><strong>{remote ? "—" : "3 online"}</strong></article>
+          <article><span>FACILITIES</span><strong>{facilities}</strong></article>
           <article><span>EFFECTS</span><strong>{effects} active</strong></article>
         </div>
       </section>
@@ -680,11 +680,17 @@ function Headquarters({
   const [inventoryMode, setInventoryMode] = useState<"owned" | "shop">("owned");
   const [hqClock, setHqClock] = useState(() => live?.serverNow() ?? Date.now());
 
+  const serverNowRef = useRef(live?.serverNow ?? Date.now);
+  serverNowRef.current = live?.serverNow ?? Date.now;
   useEffect(() => {
-    if (live) setHqClock(live.serverNow());
-    const timer = window.setInterval(() => setHqClock(live?.serverNow() ?? Date.now()), 10_000);
-    return () => window.clearInterval(timer);
+    const update = () => { if (!document.hidden) setHqClock(serverNowRef.current()); };
+    update();
+    const timer = window.setInterval(update, 1_000);
+    window.addEventListener("focus", update);
+    document.addEventListener("visibilitychange", update);
+    return () => { window.clearInterval(timer); window.removeEventListener("focus", update); document.removeEventListener("visibilitychange", update); };
   }, []);
+  const equipmentMetrics = live?.equipment.data ? clanEquipmentMetrics(live.equipment.data, live.serverNow()) : null;
 
   const itemDefinitions = live ? (live.equipment.data?.items ?? []).map(clanItem).filter((item): item is ClanInventoryItem => item !== null) : clanShopItems;
   const tasks: readonly ClanTask[] = live ? (live.missions.data ?? []).map(clanMission) : clanTasks;
@@ -777,7 +783,7 @@ function Headquarters({
           exit={{ opacity: .98 }}
           transition={mobileMotion.tab}
         >
-          <RoomHero tab={tab} shop={tab === "inventory" && inventoryMode === "shop"} effects={activeEffectCount} hqStateLabel={hqStateLabel} remote={Boolean(live)} />
+          <RoomHero tab={tab} shop={tab === "inventory" && inventoryMode === "shop"} effects={equipmentMetrics?.effects ?? activeEffectCount} hqStateLabel={hqStateLabel} facilities={equipmentMetrics?.facilities} />
 
           {tab === "home" ? (
             <>

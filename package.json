@@ -30,6 +30,7 @@
     "test:visual:b5-baseline": "node scripts/capture-b5-baseline.mjs",
     "test:paired:b5-contract": "node scripts/contracts/run-paired-b5-contract.mjs",
     "test:visual:b5-clan-baseline": "node scripts/capture-b5-clan-baseline.mjs",
+    "test:e2e:post-b6": "playwright test --config playwright.post-b6.config.ts",
     "test:e2e:b6": "playwright test --config playwright.b6.config.ts",
     "test:visual:b6-baseline": "node scripts/capture-b6-baseline.mjs",
     "test:visual:b6-activity-baseline": "node scripts/capture-b6-activity-review.mjs",

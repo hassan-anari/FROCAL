@@ -46,6 +46,9 @@ jobs:
       - run: npm run test:visual:b6-baseline
       - run: npm run test:visual:b6-activity-baseline
       - run: npm run test:e2e:b6
+      - run: git worktree add --detach work/post-b6-main e481ffa7e14b980b7e1922cc2d71e64374014596
+      - run: POST_B6_BASELINE=1 npx playwright test --config playwright.post-b6.config.ts
+      - run: npm run test:e2e:post-b6
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -58,6 +61,10 @@ jobs:
             docs/evidence/b5/
             docs/evidence/b6/
             docs/evidence/b6-zero-net/
+            docs/evidence/post-b6/
+            work/post-b6-before-results.json
+            work/post-b6-after-results.json
+            work/test-results-post-b6/
             work/test-results-b6/
             work/test-results-b5/
           retention-days: 14
