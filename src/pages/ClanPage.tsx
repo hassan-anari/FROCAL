@@ -1128,7 +1128,7 @@ function RemoteClanPage() {
   return <main className={styles.page}>
     <header className={`${styles.pageHeader} ${member ? styles.pageHeaderCompact : ""} ${ready && !role ? styles.pageHeaderWrap : ""}`}>
       <div className={styles.headerTop}><span>{role === "captain" && member ? "CAPTAIN COMMAND" : "CLAN NETWORK"}</span>
-      </div><h1>{title}</h1><p>{subtitle}</p>
+      </div><div className={styles.headerCopy}><h1>{title}</h1><p>{subtitle}</p></div>
       {ready && role ? <button type="button" className={styles.statusButton} onClick={() => { analytics.feature("clan_status_opened"); setOverlay({ type: "status" }); }}><HugeiconsIcon icon={SquareActivityIcon} size={14} strokeWidth={1.7} />Clan status</button> : null}
     </header>
     {locked ? <LockedClan level={level} minLevel={minLevel} /> : null}
