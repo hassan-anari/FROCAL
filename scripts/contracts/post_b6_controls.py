@@ -53,5 +53,5 @@ def control(data, world):
                                       actor=operator, reason="Synthetic archive", idempotency_key=uuid4().hex)
         historical = archive_closed_season(historical, actor=operator, reason="Synthetic paired archive")
         rebuild_ranking(historical, "CLAN")
-        return {"season": historical.code, "clan_id": str(original.clan_id), "score": 123}
+        return {"season": historical.code, "clan_id": str(old.pk), "score": 123}
     raise ValueError("Unknown isolated successor control")

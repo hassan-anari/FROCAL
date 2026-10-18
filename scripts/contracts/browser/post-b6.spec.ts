@@ -12,7 +12,7 @@ async function soldier(captain: any, clan: any, group: any, activate = true) {
 async function world(count: number, name = "Actual hotfix Clan") {
   const captain = await control({ action: "player", points: 2500 }); await api(captain, "/role", "POST", { role: "CAPTAIN" }); const group = await control({ action: "b5-group", player: captain.player }); await api(captain, `/eligible-groups/${group.id}/verify`, "POST");
   const clan = await api(captain, "/", "POST", { telegram_group_id: group.id, name, tag: crypto.randomUUID().slice(0, 8) });
-  for (let i = 0; i < count; i++) await soldier(captain, clan, group); return { captain, clan, group };
+  for (let i = 0; i < count; i++) await soldier(captain, clan, group); return { captain, clan, group, rankId: (await api(captain, "/membership/current")).clan_season_id };
 }
 async function launch(page: Page, captain: any, path = "/clan") {
   await page.addInitScript(player => localStorage.setItem(`dalexio-onboarding-v1:player:${player}`, JSON.stringify({ version: 1, state: { status: "completed", step: "ready", guideIndex: 3, completedAt: "2026-01-01T00:00:00Z" } })), captain.player);
@@ -31,16 +31,26 @@ for (const width of [320, 390, 460]) {
       await control({ action: "b6-settle", player: owner.captain.player, gross, key: crypto.randomUUID() });
     await control({ action: "b6-rankings", player: leader.captain.player });
     const ranks = async () => { const r = await fetch(origin + "/api/v1/arena/rankings/clans", { headers: { Authorization: `tma ${leader.captain.initData}` } }); expect(r.ok).toBe(true); return r.json(); };
-    const before = await ranks(); expect(before.items[0]).toMatchObject({ clan_id: leader.clan.id, rank: 1 });
+    const before = await ranks(); expect(before.items[0]).toMatchObject({ clan_id: leader.rankId, rank: 1 });
     await launch(page, leader.captain, "/arena");
     const open = async () => { await page.getByRole("button", { name: "Rankings", exact: true }).click(); await page.getByRole("button", { name: "Clans", exact: true }).click(); };
     await open(); await expect(page.getByText(`Ended leader ${width}`, { exact: true }).first()).toBeVisible();
-    await api(leader.captain, "/dissolution", "POST"); await control({ action: "post-b6-ranking-projections" });
+    await api(leader.captain, "/dissolution", "POST");
+    let reconciled = false;
+    await page.route("**/api/v1/arena/rankings/clans?*", async route => {
+      const response = await route.fetch(); // Forward the real pending-projection 503, then let the normal client retry.
+      if (response.status() === 503) {
+        expect((await response.json()).code).toBe("RANKING_RECONCILING");
+        await control({ action: "post-b6-ranking-projections" }); reconciled = true;
+      }
+      await route.fulfill({ response });
+    });
     await page.evaluate(() => window.dispatchEvent(new Event("focus")));
     await expect(page.getByText(`Ended leader ${width}`, { exact: true })).toHaveCount(0);
     await expect(page.getByText("No clan standing yet", { exact: true })).toBeVisible();
+    expect(reconciled).toBe(true);
     const after = await ranks(); expect(after.total_count).toBe(before.total_count - 1); expect(after.own_standing).toBeNull();
-    expect(after.items[0]).toMatchObject({ clan_id: survivor.clan.id, rank: 1 });
+    expect(after.items[0]).toMatchObject({ clan_id: survivor.rankId, rank: 1 });
     expect(after.items.map((row: any) => row.rank)).toEqual(after.items.map((_: any, i: number) => i + 1));
     await page.reload(); await open(); await expect(page.getByText(`Ended leader ${width}`, { exact: true })).toHaveCount(0);
     await expect(page.getByText(`Surviving Clan ${width}`, { exact: true })).toBeVisible(); await shot(page, width, "successor-live-rankings");

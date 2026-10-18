@@ -108,6 +108,9 @@ export function useClanRemote() {
         showFeedback(error instanceof ClanApiError ? error.message : "Your Clan couldn't be updated. Please refresh and try again.");
         await refresh(); return undefined;
       }
+      if (action === "create") {
+        void client.resetQueries({ queryKey: [...queryKeys.player(scope), "arena", "rankings", "clans"] }).catch(() => {});
+      }
       // A successful leave is final, including 204/null. Old Clan reads are obsolete.
       if (action === "leave" || (action === "dissolve" && value === null)) {
         const departed = membership.data?.membership_id ?? null;

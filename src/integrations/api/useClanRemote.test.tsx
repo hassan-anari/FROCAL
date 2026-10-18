@@ -295,13 +295,12 @@ it("revalidates changed readiness at submit and never posts an immediate dissolu
   expect(screen.getByRole("checkbox")).not.toBeChecked();
   expect(feedback).toHaveBeenCalledWith(expect.stringContaining("Clan status changed"), "info");
 });
-it("discards the complete stale Clan ranking cache after a confirmed departure without filtering rows", async () => {
+it.each(["leave", "create"])("discards the complete stale Clan ranking cache after confirmed %s without filtering rows", async action => {
   rows = []; member = { ...fixture["membership/current"], role: "SOLDIER" };
   const { wrapper } = setup(); const hook = renderHook(() => useClanRemote(), { wrapper });
   await waitFor(() => expect(hook.result.current.member).toBe(true));
   const key = ["player", scope.session, scope.player, scope.season, scope.config, "arena", "rankings", "clans"];
   client.setQueryData(key, { pages: [{ items: [{ clan_id: 1, rank: 1 }], own_standing: { rank: 1 }, total_count: 1 }] });
-  api.leave.mockImplementationOnce(async () => { member = null; return null; });
-  await act(async () => { await hook.result.current.run("leave", () => hook.result.current.api.leave()); });
+  await act(async () => { await hook.result.current.run(action, async () => { if (action === "leave") member = null; return action === "leave" ? null : { id: 2 }; }); });
   expect(client.getQueryData(key)).toBeUndefined();
 });

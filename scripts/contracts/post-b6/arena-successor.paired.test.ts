@@ -9,7 +9,7 @@ async function control(body: object): Promise<any> { const r = await nativeFetch
 async function world(score: number) {
   const owner: { player: string; initData: string } = await control({ action: "player", points: 2500 }); const api = clanApi(owner.initData); await api.role({ role: "CAPTAIN" });
   const group = await control({ action: "b5-group", player: owner.player }); await api.verifyGroup(group.id); const clan = await api.create({ telegram_group_id: group.id, name: "Successor live ranking", tag: crypto.randomUUID().slice(0, 8) });
-  await control({ action: "b6-settle", player: owner.player, gross: score, key: crypto.randomUUID() }); return { ...owner, api, clan, group };
+  await control({ action: "b6-settle", player: owner.player, gross: score, key: crypto.randomUUID() }); return { ...owner, api, clan, group, rankId: (await api.membership())!.clan_season_id };
 }
 async function page(owner: { initData: string }, offset = 0, limit = 30, season?: string) {
   const r = await nativeFetch(`${origin}/api/v1/arena/rankings/clans?offset=${offset}&limit=${limit}${season ? `&season=${encodeURIComponent(season)}` : ""}`, { headers: { Authorization: `tma ${owner.initData}` } }); expect(r.status).toBe(200); return clanRankPageSchema.parse(await r.json());
@@ -17,12 +17,12 @@ async function page(owner: { initData: string }, offset = 0, limit = 30, season?
 it("removes a dissolved #1 through projection consumption and preserves ranks/counts/pagination/own standing through cold rebuild", async () => {
   const leader = await world(10_000_000), second = await world(9_000_000), third = await world(8_000_000);
   await control({ action: "b6-rankings", player: leader.player });
-  const before = await page(leader, 0, 1); expect(before.items[0]).toMatchObject({ clan_id: String(leader.clan.id), rank: 1 }); expect(before.own_standing?.rank).toBe(1);
+  const before = await page(leader, 0, 1); expect(before.items[0]).toMatchObject({ clan_id: String(leader.rankId), rank: 1 }); expect(before.own_standing?.rank).toBe(1);
   await leader.api.dissolve(); await control({ action: "post-b6-ranking-projections" }); // No rebuilding or client filtering to hide a missing REMOVE event.
   const first = await page(leader, 0, 1), next = await page(leader, 1, 1);
-  expect(first.items[0]).toMatchObject({ clan_id: String(second.clan.id), rank: 1 }); expect(next.items[0]).toMatchObject({ clan_id: String(third.clan.id), rank: 2 });
+  expect(first.items[0]).toMatchObject({ clan_id: String(second.rankId), rank: 1 }); expect(next.items[0]).toMatchObject({ clan_id: String(third.rankId), rank: 2 });
   expect(first.total_count).toBe(before.total_count! - 1); expect(first.own_standing).toBeNull(); expect(first.next_offset).toBe(1);
-  const all = await page(leader); expect(all.items.some(row => row.clan_id === String(leader.clan.id))).toBe(false);
+  const all = await page(leader); expect(all.items.some(row => row.clan_id === String(leader.rankId))).toBe(false);
   await control({ action: "post-b6-ranking-projections", cold: true });
   const rebuilt = await page(leader, 0, 1); expect(rebuilt.items).toEqual(first.items); expect(rebuilt.total_count).toBe(first.total_count); expect(rebuilt.own_standing).toBeNull();
   const archive = await control({ action: "post-b6-archive", player: leader.player });
