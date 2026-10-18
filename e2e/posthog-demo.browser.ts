@@ -201,11 +201,27 @@ for (const width of [320, 390, 460]) test(`Clan header matches Earn History at $
       const button = el.querySelector("button")!, title = el.querySelector("h1")!, subtitle = el.querySelector("p")!;
       const b = button.getBoundingClientRect(), t = title.getBoundingClientRect(), p = subtitle.getBoundingClientRect(), h = el.getBoundingClientRect();
       const icon = button.querySelector("svg")!.getBoundingClientRect();
-      return { header: h.toJSON(), button: b.toJSON(), title: t.toJSON(), subtitle: p.toJSON(), iconLeft: icon.left, titleFits: title.scrollWidth <= title.clientWidth + 1, overflow: document.documentElement.scrollWidth > innerWidth };
+      const copy = title.parentElement!.getBoundingClientRect();
+      const next = el.nextElementSibling?.getBoundingClientRect();
+      return {
+        header: h.toJSON(), button: b.toJSON(), title: t.toJSON(), subtitle: p.toJSON(),
+        copy: copy.toJSON(), iconLeft: icon.left,
+        titleFits: title.scrollWidth <= title.clientWidth + 1,
+        nextCardGap: next ? next.top - h.bottom : null,
+        overflow: document.documentElement.scrollWidth > innerWidth,
+      };
     });
     expect(geometry.overflow).toBe(false); expect(geometry.titleFits).toBe(true);
-    expect(geometry.button.top).toBeGreaterThanOrEqual(geometry.title.bottom - 1);
-    expect(geometry.button.bottom).toBeCloseTo(geometry.header.bottom, 0);
+    // The copy and action now occupy independent columns. Do not require the
+    // button to start below the title: it must sit bottom-right, not under it.
+    expect(geometry.copy.right).toBeLessThanOrEqual(geometry.button.left - 1);
+    expect(geometry.subtitle.top - geometry.title.bottom).toBeGreaterThanOrEqual(0);
+    expect(geometry.subtitle.top - geometry.title.bottom).toBeLessThanOrEqual(10);
+    expect(Math.abs(geometry.button.bottom - geometry.header.bottom)).toBeLessThanOrEqual(2);
+    expect(Math.abs(geometry.button.right - geometry.header.right)).toBeLessThanOrEqual(4);
+    expect(geometry.nextCardGap).not.toBeNull();
+    expect(geometry.nextCardGap!).toBeGreaterThanOrEqual(0);
+    expect(geometry.nextCardGap!).toBeLessThanOrEqual(25);
     expect(geometry.iconLeft).toBeLessThan(geometry.button.right - 40);
     await page.screenshot({ path: `${dir}/clan-${state}.png`, animations: "disabled" });
     writeFileSync(`${dir}/${state}-geometry.json`, JSON.stringify(geometry, null, 2));
