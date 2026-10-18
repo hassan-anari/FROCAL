@@ -1,6 +1,6 @@
 import { AppLoader } from "@/design-system/components/AppLoader";
 import { configuredBotUrl, clanAddBotUrl } from "@/integrations/telegram/botLinks";
-import { useNetworkRewardHistory } from "@/integrations/api/useRewardHistory";
+import { useRewardHistory, useNetworkRewardHistory } from "@/integrations/api/useRewardHistory";
 import { rewardHistoryView } from "@/integrations/api/rewardHistory";
 import { useQueryFeedback } from "@/design-system/components/TransientFeedback";
 import { readSessionPreference, writeSessionPreference } from "@/app/storageRelease";
@@ -14,6 +14,7 @@ import { navigateSafely } from "@/integrations/api/safeNavigation";
 import { usePlayerProgression } from "@/integrations/api/usePlayerProgression";
 import {
   ArrowRight01Icon,
+  TransactionHistoryIcon,
   CheckmarkCircle02Icon,
   InformationCircleIcon,
   CoinsDollarIcon,
@@ -152,7 +153,9 @@ export function EarnPage() {
   const { adapter } = useTelegram();
   const localEarn = useEarnStore();
   const live = useB3();
-  const rewardHistory = useNetworkRewardHistory();
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const globalHistory = useRewardHistory(undefined, historyOpen);
+  const networkRewards = useNetworkRewardHistory();
   const earn = live.remote ? { ...localEarn,
     missions: Object.fromEntries((live.missions.data ?? []).map(m => [m.key, missionView(m)])) as Record<string, EarnMission>,
     streak: live.daily.data?.current_streak ?? 0,
@@ -173,7 +176,6 @@ export function EarnPage() {
   });
   useQueryFeedback(live.remote ? activeTab === "earn" ? live.daily.error ?? live.missions.error : activeTab === "typing" ? live.typing.error : live.referrals.error ?? live.invitees.error ?? live.network.error ?? live.groups.error : null,
     activeTab === "earn" ? "Rewards couldn't load. Please try again." : activeTab === "typing" ? "Typing Arena couldn't load. Please try again." : "Your network couldn't load. Please try again.");
-  const [historyOpen, setHistoryOpen] = useState(false);
   const [guideOpen, setGuideOpen] = useState<NetworkGuideKind | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -190,7 +192,8 @@ export function EarnPage() {
   const referralCode = telegramUser?.id ?? "explorer";
   const referralLink = live.remote ? (live.referrals.data?.enabled && safeDestination(live.referrals.data.link)?.kind === "telegram" ? live.referrals.data.link ?? "" : "") : (() => { const url = configuredBotUrl(); if (!url) return ""; const link = new URL(url); link.searchParams.set("start", `dexoairdrop_${referralCode}`); return link.href; })();
   const groupLink = clanAddBotUrl();
-  const networkEarnings = rewardHistory.items.map(rewardHistoryView);
+  const globalEarnings = globalHistory.items.map(rewardHistoryView);
+  const networkEarnings = networkRewards.items.map(rewardHistoryView);
   const networkHistory = (live.remote ? networkEarnings : earn.history.filter(entry => entry.type === "group")).slice(0, 5);
   const tier = live.remote ? live.referrals.data?.current_tier ?? "No tier yet" : referralTier(earn.verifiedReferrals);
 
@@ -364,9 +367,9 @@ export function EarnPage() {
             <h1>Grow your journey.</h1>
             <p>Claim daily rewards, complete missions, expand your network and sharpen your skills.</p>
           </div>
-          <button type="button" onClick={() => { setHistoryOpen(true); if (live.remote && rewardHistory.isError) void rewardHistory.refetch(); }}>
+          <button type="button" onClick={() => setHistoryOpen(true)}>
+            <HugeiconsIcon icon={TransactionHistoryIcon} size={14} strokeWidth={1.7} />
             History
-            <HugeiconsIcon icon={ArrowRight01Icon} size={14} strokeWidth={1.7} />
           </button>
         </header>
 
@@ -570,7 +573,7 @@ export function EarnPage() {
                   <header className={styles.sectionHeader}><div><span>RECENT ACTIVITY</span><h2>Network History</h2></div></header>
                   {networkHistory.length ? networkHistory.map((entry) => (
                     <article key={entry.id}><i /><div><strong>{entry.title}</strong><span>{entry.description}</span></div>{entry.xp !== undefined ? <em>{entry.xp > 0 ? "+" : ""}{entry.xp} XP</em> : null}</article>
-                  )) : live.remote && rewardHistory.isPending ? <AppLoader compact label="Loading Network earnings…" /> : <div className={styles.emptyState} role="status"><strong>{live.remote ? rewardHistory.isError ? "Network history couldn't load." : "No Network earnings yet" : "No network activity yet."}</strong><span>Network and Speaker earnings appear here.</span>{live.remote && rewardHistory.isError ? <Button size="sm" tone="secondary" onClick={() => void rewardHistory.refetch()}>Retry</Button> : null}</div>}
+                  )) : live.remote && networkRewards.isPending ? <AppLoader compact label="Loading Network earnings…" /> : <div className={styles.emptyState} role="status"><strong>{live.remote ? networkRewards.isError ? "Network history couldn't load." : "No Network earnings yet" : "No network activity yet."}</strong><span>Network and Speaker earnings appear here.</span>{live.remote && networkRewards.isError ? <Button size="sm" tone="secondary" onClick={() => void networkRewards.refetch()}>Retry</Button> : null}</div>}
                 </section>
               </>
             ) : null}
@@ -633,7 +636,7 @@ export function EarnPage() {
         </DeferredMount>
       </main>
 
-      <HistorySheet open={historyOpen} onClose={() => setHistoryOpen(false)} history={live.remote ? networkEarnings : earn.history.filter(entry => entry.type === "group")} remote={live.remote} loading={live.remote && rewardHistory.isPending} error={live.remote && rewardHistory.isError} fetching={rewardHistory.isFetching} fetchingMore={rewardHistory.isFetchingNextPage} hasNext={rewardHistory.hasNextPage && !rewardHistory.isFetchNextPageError} loadMore={() => rewardHistory.fetchNextPage()} retry={() => rewardHistory.isFetchNextPageError ? rewardHistory.fetchNextPage() : rewardHistory.refetch({ cancelRefetch: false })} />
+      <HistorySheet open={historyOpen} onClose={() => setHistoryOpen(false)} history={live.remote ? globalEarnings : earn.history} remote={live.remote} loading={live.remote && globalHistory.isPending} error={live.remote && globalHistory.isError} fetching={globalHistory.isFetching} fetchingMore={globalHistory.isFetchingNextPage} hasNext={globalHistory.hasNextPage && !globalHistory.isFetchNextPageError} loadMore={() => globalHistory.fetchNextPage()} retry={() => globalHistory.isFetchNextPageError ? globalHistory.fetchNextPage() : globalHistory.refetch({ cancelRefetch: false })} />
       <NetworkGuideSheet kind={guideOpen} onClose={() => setGuideOpen(null)} />
       <RewardReveal reward={earn.rewardEvent} onClose={earn.dismissReward} />
       <LevelUpReveal event={earn.rewardEvent ? null : earn.levelUpEvent} onClose={earn.dismissLevelUp} />

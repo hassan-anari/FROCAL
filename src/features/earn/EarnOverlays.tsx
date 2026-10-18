@@ -87,11 +87,11 @@ export function HistorySheet({ open, onClose, history, remote = false, loading =
       <header className={styles.sheetHeader}>
         <span>ACTIVITY ARCHIVE</span>
         <h2>Your recent progress.</h2>
-        <p>Network and Speaker earnings are stored here.</p>
+        <p>Your confirmed XP and reward history is stored here.</p>
       </header>
       <div className={styles.historyList} data-reward-history aria-busy={loading && !history.length}>
         {remote && loading && !history.length ? <AppLoader compact label="Loading earnings…" /> : null}
-        {remote && !history.length && !loading && !fetching && !error ? <div className={styles.historyState} role="status"><strong>No Network earnings yet</strong><span>Your confirmed Network and Speaker earnings will appear here.</span></div> : null}
+        {!history.length && !loading && !fetching && !error ? <div className={styles.historyState} role="status"><strong>No rewards yet</strong><span>Your confirmed XP and rewards will appear here.</span></div> : null}
         {history.map((item) => (
           <article key={item.id}>
             <i className={styles[`history_${item.type}`]} />

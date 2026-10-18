@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { mkdirSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 test.setTimeout(120_000);
 const origin = "http://127.0.0.1:8792";
 async function control(body: object): Promise<any> { const r = await fetch(origin + "/__b2_test__", { method: "POST", body: JSON.stringify(body) }); expect(r.status).toBe(200); return r.json(); }
@@ -119,4 +119,39 @@ test("a real 409 race after preflight never pretends that a case or dissolution 
   await page.route("**/api/v1/clans/dissolution", async route => { await control({ action: "b5-presence", player: pending.player, group: group.id }); await route.continue(); });
   await page.getByRole("button", { name: "Dissolve now", exact: true }).click(); await expect(page.getByRole("dialog")).toContainText("not enough eligible voters");
   expect(await api(captain, "/membership/current")).toBeTruthy(); expect(await api(captain, "/governance")).toEqual([]); await expect(page.getByText(/Your Clan dissolved/)).toHaveCount(0);
+});
+
+test("global Earn History uses the actual complete ledger while Network keeps its own filtered preview", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 740 });
+  const owner = await control({ action: "player", points: 2500 });
+  const sources = ["DAILY", "MISSION", "TYPING", "REFERRAL", "CREATOR", "NETWORK_SPEAKER", "CLAN_ACTIVITY", "OTHER_CONFIRMED"];
+  for (let i = 0; i < 24; i++) await control({ action: "reward", player: owner.player, source: sources[i % sources.length], amount: i + 1 });
+  const read = async (cursor?: number) => {
+    const response = await fetch(`${origin}/api/v1/rewards/history?limit=20${cursor === undefined ? "" : `&cursor=${cursor}`}`, { headers: { Authorization: `tma ${owner.initData}` } });
+    expect(response.status).toBe(200); return response.json();
+  };
+  const first = await read(), second = await read(first.next_cursor);
+  expect(first.items).toHaveLength(20); expect(second.next_cursor).toBeNull();
+  const expected = [...first.items, ...second.items];
+  for (const source of sources) expect(expected.some((row: any) => row.source_type === source)).toBe(true);
+  await control({ action: "b6-rankings", player: owner.player });
+  const requests: URLSearchParams[] = [];
+  page.on("request", request => { if (new URL(request.url()).pathname === "/api/v1/rewards/history") requests.push(new URL(request.url()).searchParams); });
+  await launch(page, owner, "/earn");
+  await page.getByRole("button", { name: "Network", exact: true }).click();
+  const preview = page.locator("section").filter({ has: page.getByRole("heading", { name: "Network History", exact: true }) });
+  await expect(preview.locator("article")).toHaveCount(5);
+  expect((await preview.locator("article strong").allTextContents()).every(title => ["CREATOR", "NETWORK SPEAKER"].includes(title))).toBe(true);
+  expect(requests.filter(params => !params.has("category"))).toHaveLength(0);
+  await page.getByRole("button", { name: "History", exact: true }).click();
+  const sheet = page.getByRole("dialog", { name: "Earn history" });
+  await expect(sheet.locator("article strong")).toHaveText(first.items.map((row: any) => row.source_type.replaceAll("_", " ")));
+  await sheet.locator("article").last().scrollIntoViewIfNeeded();
+  await expect(sheet.locator("article strong")).toHaveText(expected.map((row: any) => row.source_type.replaceAll("_", " ")));
+  await expect(sheet.locator("article em")).toHaveText(expected.map((row: any) => `${row.player_amount > 0 ? "+" : ""}${row.player_amount} XP`));
+  await expect(sheet.getByRole("button", { name: "Load more", exact: true })).toHaveCount(0);
+  expect(requests.filter(params => !params.has("category")).map(params => params.get("cursor"))).toEqual([null, String(first.next_cursor)]);
+  expect(requests.filter(params => params.has("category")).every(params => params.get("category") === "network")).toBe(true);
+  await sheet.locator("article").first().scrollIntoViewIfNeeded(); await shot(page, 390, "global-history-ledger");
+  writeFileSync("work/post-b6-paired/global-history-http.json", JSON.stringify({ first, second, browser_requests: requests.map(params => Object.fromEntries(params.entries())) }, null, 2));
 });

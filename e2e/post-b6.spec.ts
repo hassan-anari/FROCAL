@@ -67,12 +67,15 @@ test("blank invite notifications explain the next action and navigate without cr
 
 test("History preserves row nodes during foreground refresh and duplicate pagination", async ({ page }) => {
   await prepareClan(page);
-  const row = (id: number) => ({ id, source_type: "CREATOR", context: "NETWORK_GROUP", player_amount: 20, occurred_at: "2026-10-16T10:10:00Z" });
+  const row = (id: number, source_type = "DAILY") => ({ id, source_type, context: "NETWORK_GROUP", player_amount: 20, occurred_at: "2026-10-16T10:10:00Z" });
   let release: (() => void) | undefined;
   let held: Promise<void> | undefined;
   let pageTwoCalls = 0;
   await page.route("**/api/v1/rewards/history?*", async route => {
-    const cursor = new URL(route.request().url()).searchParams.get("cursor");
+    const params = new URL(route.request().url()).searchParams;
+    if (params.get("category") === "network") return route.fulfill({ json: { items: [row(20, "CREATOR")], next_cursor: null } });
+    expect(params.has("category")).toBe(false);
+    const cursor = params.get("cursor");
     if (cursor) pageTwoCalls++;
     await held;
     return route.fulfill({ json: { items: cursor ? [row(19)] : [row(20)], next_cursor: cursor ? null : 20 } });
@@ -107,20 +110,20 @@ for (const width of [320, 390, 460]) test(`dissolution warning defaults to cance
   await dialog.getByRole("button", { name: "Cancel", exact: true }).click();
   expect(f.calls.every(call => call.method === "GET")).toBe(true);
 });
-test("the compact Network preview and full sheet share filtered, signed and zero reward rows", async ({ page }) => {
+test("the compact Network preview stays filtered while global History retains other signed rewards", async ({ page }) => {
   await prepareClan(page);
   const items = [0, -2, 7].map((player_amount, i) => ({ id: 30 - i, source_type: i % 2 ? "NETWORK_SPEAKER" : "CREATOR", context: "NETWORK_GROUP", player_amount, occurred_at: "2026-10-16T10:10:00Z" }));
   let reads = 0;
   await page.route("**/api/v1/rewards/history?*", route => {
-    expect(new URL(route.request().url()).searchParams.get("category")).toBe("network"); reads++;
-    return route.fulfill({ json: { items, next_cursor: null } });
+    const network = new URL(route.request().url()).searchParams.get("category") === "network"; reads++;
+    return route.fulfill({ json: { items: network ? items : [{ ...items[0], id: 40, source_type: "DAILY", player_amount: 9 }, ...items], next_cursor: null } });
   });
   await page.goto(launch("/earn")); await page.getByRole("button", { name: "Network", exact: true }).click();
   const preview = page.locator("section").filter({ has: page.getByRole("heading", { name: "Network History", exact: true }) });
   await expect(preview.locator("article em")).toHaveText(["0 XP", "-2 XP", "+7 XP"]);
   await page.getByRole("button", { name: "History", exact: true }).click();
-  await expect(page.getByRole("dialog", { name: "Earn history" }).locator("article em")).toHaveText(["0 XP", "-2 XP", "+7 XP"]);
-  expect(reads).toBe(1);
+  await expect(page.getByRole("dialog", { name: "Earn history" }).locator("article em")).toHaveText(["+9 XP", "0 XP", "-2 XP", "+7 XP"]);
+  expect(reads).toBe(2);
 });
 test("Arena refresh and reload use canonical Clan ranks/counts/own standing without filtering rows", async ({ page }) => {
   await prepareClan(page);

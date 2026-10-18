@@ -67,9 +67,9 @@ for (const width of [320, 390, 460]) test(`B6 preserved scenes and corrected asy
   finishHistory();
   await expect(page.getByRole("dialog")).toContainText(before ? "Rewards couldn't load." : "Earnings couldn't load."); await shot("history-error");
   historyState = "empty"; await page.reload(); await page.getByRole("button", { name: "History", exact: true }).click();
-  await expect(page.getByRole("dialog")).toContainText(before ? "No rewards yet." : "No Network earnings yet"); await shot("history-empty");
+  await expect(page.getByRole("dialog")).toContainText(before ? "No rewards yet." : "No rewards yet"); await shot("history-empty");
   historyState = "rows"; await page.reload(); await page.getByRole("button", { name: "History", exact: true }).click();
-  await expect(page.getByRole("dialog").locator("article")).toHaveCount(before ? 3 : 2); await shot("history-filtered");
+  await expect(page.getByRole("dialog").locator("article")).toHaveCount(3); await shot("history-filtered");
   const b6Standing = JSON.parse(readFileSync("src/integrations/api/fixtures/b6/clan-standing-http.json", "utf8"));
   const b6Applicants = JSON.parse(readFileSync("src/integrations/api/fixtures/b6/applicants-http.json", "utf8"));
   const b6Activity = JSON.parse(readFileSync("src/integrations/api/fixtures/b6/activity-http.json", "utf8"));

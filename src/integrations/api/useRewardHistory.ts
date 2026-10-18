@@ -7,14 +7,14 @@ import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import { historyRows, loadRewardHistory } from "./rewardHistory";
 
 /** Individual ledger queries are scoped by account and server category. */
-export function useRewardHistory(category?: "network") {
+export function useRewardHistory(category?: "network", active = true) {
   const { scope, bootstrap } = useBootstrap();
   const { adapter } = useTelegram();
   const initData = adapter.getInitData();
   const client = useQueryClient();
   const queryKey = category === "network" ? queryKeys.networkRewardHistory(scope) : queryKeys.rewardHistory(scope);
   const nextPageLock = useRef(false);
-  const enabled = isRemoteDataSource() && adapter.isTelegram && Boolean(initData) && scope.player !== "unverified" && Boolean(bootstrap.data);
+  const enabled = active && isRemoteDataSource() && adapter.isTelegram && Boolean(initData) && scope.player !== "unverified" && Boolean(bootstrap.data);
   const history = useInfiniteQuery({
     queryKey,
     queryFn: ({ pageParam, signal }) => loadRewardHistory(initData, pageParam, signal, category),
@@ -37,7 +37,7 @@ export function useRewardHistory(category?: "network") {
     return () => { unsubscribe?.(); window.removeEventListener("focus", resume); document.removeEventListener("visibilitychange", resume); };
   }, [enabled, adapter, client, scope.session, scope.player, scope.season, scope.config, category]);
   const fetchNextPage = async () => {
-    if (nextPageLock.current || !history.hasNextPage || client.isFetching({ queryKey, exact: true })) return;
+    if (!enabled || nextPageLock.current || !history.hasNextPage || client.isFetching({ queryKey, exact: true })) return;
     nextPageLock.current = true;
     try { return await history.fetchNextPage({ cancelRefetch: false }); }
     finally { nextPageLock.current = false; }
