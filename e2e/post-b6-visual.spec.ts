@@ -18,12 +18,24 @@ for (const width of [320, 390, 460]) test(`post-B6 mobile visual comparison ${wi
   const header = page.locator("main > header");
   const dimensions = await header.evaluate(el => {
     const box = el.getBoundingClientRect(), title = el.querySelector("h1")!, button = el.querySelector("button")!;
-    const subtitle = el.querySelector("p")!;
+    const subtitle = el.querySelector("p")!, copy = el.querySelector("h1")!.parentElement!;
     const titleBox = title.getBoundingClientRect(), subtitleBox = subtitle.getBoundingClientRect();
-    return { height: box.height, titleWidth: titleBox.width, titleScrollWidth: title.scrollWidth, buttonHeight: button.getBoundingClientRect().height, subtitleGap: subtitleBox.top - titleBox.bottom, overflow: document.documentElement.scrollWidth > innerWidth };
+    const buttonBox = button.getBoundingClientRect(), copyBox = copy.getBoundingClientRect();
+    const nextBox = el.nextElementSibling!.getBoundingClientRect();
+    return { height: box.height, titleWidth: titleBox.width, titleScrollWidth: title.scrollWidth, buttonHeight: buttonBox.height, subtitleGap: subtitleBox.top - titleBox.bottom, cardGap: nextBox.top - box.bottom, buttonBottomGap: box.bottom - buttonBox.bottom, buttonRightGap: box.right - buttonBox.right, textButtonOverlap: copyBox.right > buttonBox.left + 1, overflow: document.documentElement.scrollWidth > innerWidth };
   });
   writeFileSync(`${dir}/${before ? "before" : "after"}-header.json`, JSON.stringify(dimensions, null, 2));
-  if (!before) { expect(dimensions.buttonHeight).toBe(38); expect(dimensions.overflow).toBe(false); expect(dimensions.subtitleGap).toBeGreaterThanOrEqual(0); expect(dimensions.subtitleGap).toBeLessThanOrEqual(10); }
+  if (!before) {
+    expect(dimensions.buttonHeight).toBe(38);
+    expect(dimensions.overflow).toBe(false);
+    expect(dimensions.subtitleGap).toBeGreaterThanOrEqual(0);
+    expect(dimensions.subtitleGap).toBeLessThanOrEqual(10);
+    expect(dimensions.cardGap).toBeGreaterThanOrEqual(0);
+    expect(dimensions.cardGap).toBeLessThanOrEqual(25);
+    expect(Math.abs(dimensions.buttonBottomGap)).toBeLessThanOrEqual(2);
+    expect(dimensions.buttonRightGap).toBeLessThanOrEqual(4);
+    expect(dimensions.textButtonOverlap).toBe(false);
+  }
   await page.getByText("FACILITIES", { exact: true }).scrollIntoViewIfNeeded();
   await shot("clan-equipment");
   f.identity.name = "Intercontinental Clan Headquarters and Expedition Command";
