@@ -5,7 +5,7 @@ import { analyticsConfig, CONSENT_KEY, createAnalytics, maskReplayAttribute, pla
 
 const config = { enabled: true, key: "test-token", host: "https://ingest.test", replay: true };
 const settle = async () => { for (let i = 0; i < 10; i++) await Promise.resolve(); };
-function harness(overrides = config) {
+function harness(overrides: Parameters<typeof createAnalytics>[0] = config) {
   let options: Partial<PostHogConfig> = {};
   const sent: CaptureResult[] = [];
   const sdk = {
@@ -44,8 +44,8 @@ describe("configuration and identity", () => {
     expect(id).not.toContain("9001");
     for (const invalid of ["unverified", "mock-player", "0", "-1", "09001", "9.1", "9007199254740992"]) expect(await playerPseudonym(invalid)).toBeNull();
   });
-  it("never imports/initializes/captures before consent, verification or when disabled", async () => {
-    const { a, load, hash, sdk } = harness();
+  it("never imports/initializes/captures before explicit consent, verification or when disabled", async () => {
+    const { a, load, hash, sdk } = harness({ ...config, requireConsent: true });
     a.page("base"); a.setPlayer("9001", 1); a.feature("earn_history_opened"); await settle();
     expect(load).not.toHaveBeenCalled(); expect(hash).not.toHaveBeenCalled();
     a.setPlayer(null, 2); a.setConsent("replay"); await settle();
@@ -76,6 +76,34 @@ describe("configuration and identity", () => {
     const b = createAnalytics(config, { load, hash: () => new Promise(done => { finishHash = done; }) });
     b.setConsent("analytics"); b.setPlayer("9001", 1); b.setPlayer(null, 2); finishHash("stale"); await settle();
     expect(load).toHaveBeenCalledOnce();
+  });
+});
+
+describe("default demo replay and consent-required rollout", () => {
+  it("defaults new demo players to replay while respecting an existing withdrawal", async () => {
+    const { a, load, sdk } = harness();
+    expect(a.getConsent()).toBe("replay");
+    a.setPlayer("9001", 1);
+    await settle();
+    expect(load).toHaveBeenCalledWith(true);
+    expect(sdk.startSessionRecording).toHaveBeenCalledWith({ sampling: true });
+    a.setConsent("declined");
+    expect(localStorage.getItem(CONSENT_KEY)).toBe("declined");
+    const returning = harness();
+    expect(returning.a.getConsent()).toBe("declined");
+    returning.a.setPlayer("9001", 1);
+    await settle();
+    expect(returning.load).not.toHaveBeenCalled();
+  });
+  it("requires an explicit opt-in when the public consent gate is enabled", async () => {
+    const { a, load } = harness({ ...config, requireConsent: true });
+    expect(a.getConsent()).toBe("unknown");
+    a.setPlayer("9001", 1);
+    await settle();
+    expect(load).not.toHaveBeenCalled();
+    a.setConsent("replay");
+    await settle();
+    expect(load).toHaveBeenCalledWith(true);
   });
 });
 

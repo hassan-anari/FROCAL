@@ -42,7 +42,9 @@ export function AnalyticsConsent() {
     window.addEventListener("storage", changed);
     return () => window.removeEventListener("storage", changed);
   }, []);
-  if (!analytics.config.enabled || !verified) return null;
+  // Current demo autostarts for verified players; keep this mounted for page/active-time tracking.
+  // The informed choice and withdrawal UI remain available for a future consent-required rollout.
+  if (!analytics.config.enabled || !verified || !analytics.config.requireConsent) return null;
   const choose = (next: Consent) => { analytics.setConsent(next); setEditing(false); };
   return <aside className={`${styles.consent} ph-no-capture`} aria-label="Demo privacy">
     {consent === "unknown" || editing ? <div className={styles.panel}>

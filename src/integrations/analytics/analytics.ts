@@ -33,6 +33,7 @@ export function analyticsConfig(env: Partial<ImportMetaEnv>) {
     enabled: Boolean(env.PROD && env.MODE !== "test" && env.VITE_DATA_SOURCE !== "local" && env.VITE_DATA_SOURCE !== "msw"
       && env.VITE_POSTHOG_ENABLED !== "false" && key && validHost),
     key: key ?? "", host: host ?? "", replay: env.VITE_POSTHOG_REPLAY_ENABLED !== "false",
+    requireConsent: env.VITE_POSTHOG_REQUIRE_CONSENT === "true",
   };
 }
 
@@ -46,7 +47,7 @@ export async function playerPseudonym(telegramId: string): Promise<string | null
   return `frocal:player:v1:${Array.from(new Uint8Array(hash), b => b.toString(16).padStart(2, "0")).join("")}`;
 }
 
-type Config = ReturnType<typeof analyticsConfig>;
+type Config = Omit<ReturnType<typeof analyticsConfig>, "requireConsent"> & { requireConsent?: boolean };
 type Dependencies = {
   load: (replay: boolean) => Promise<PostHog>;
   hash: typeof playerPseudonym;
@@ -89,7 +90,10 @@ export function maskReplayAttribute(name: string, value: string, element?: Eleme
 }
 
 export function createAnalytics(config: Config, deps: Dependencies = { load: loadSdk, hash: playerPseudonym }) {
+  // In the configured demo, new verified players use the full masked replay mode.
+  // Explicit saved preferences (especially an earlier withdrawal) always win.
   let consent = readConsent();
+  if (consent === "unknown" && !config.requireConsent) consent = "replay";
   let player: string | null = null;
   let session = 0;
   let generation = 0;
@@ -214,9 +218,10 @@ export function createAnalytics(config: Config, deps: Dependencies = { load: loa
     getConsent: () => consent,
     isReady: () => ready,
     setConsent(next: Consent, persist = true) {
-      if (next === consent) return;
-      consent = next; ++generation; stop();
-      if (persist) try { localStorage.setItem(CONSENT_KEY, next); } catch { /* Session choice still applies. */ }
+      const effective = next === "unknown" && !config.requireConsent ? "replay" : next;
+      if (effective === consent) return;
+      consent = effective; ++generation; stop();
+      if (persist) try { localStorage.setItem(CONSENT_KEY, effective); } catch { /* Session choice still applies. */ }
       void connect();
     },
     setPlayer(verifiedTelegramId: string | null, authenticatedSession: number) {
