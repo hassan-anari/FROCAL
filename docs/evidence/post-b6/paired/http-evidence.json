@@ -3,170 +3,170 @@
     "first": {
       "items": [
         {
-          "id": 120,
+          "id": 129,
           "source_type": "NETWORK_SPEAKER",
           "context": "TEST",
           "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:08.127Z"
+          "occurred_at": "2026-10-18T08:39:25.301Z"
+        },
+        {
+          "id": 128,
+          "source_type": "CREATOR",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:39:24.640Z"
+        },
+        {
+          "id": 127,
+          "source_type": "NETWORK_SPEAKER",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:39:23.984Z"
+        },
+        {
+          "id": 126,
+          "source_type": "CREATOR",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:39:23.329Z"
+        },
+        {
+          "id": 125,
+          "source_type": "NETWORK_SPEAKER",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:39:22.668Z"
+        },
+        {
+          "id": 124,
+          "source_type": "CREATOR",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:39:22.000Z"
+        },
+        {
+          "id": 123,
+          "source_type": "NETWORK_SPEAKER",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:39:21.348Z"
+        },
+        {
+          "id": 122,
+          "source_type": "CREATOR",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:39:20.651Z"
+        },
+        {
+          "id": 121,
+          "source_type": "NETWORK_SPEAKER",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:39:19.958Z"
+        },
+        {
+          "id": 120,
+          "source_type": "CREATOR",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:39:19.230Z"
         },
         {
           "id": 119,
-          "source_type": "CREATOR",
+          "source_type": "NETWORK_SPEAKER",
           "context": "TEST",
           "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:07.412Z"
+          "occurred_at": "2026-10-18T08:39:18.541Z"
         },
         {
           "id": 118,
-          "source_type": "NETWORK_SPEAKER",
+          "source_type": "CREATOR",
           "context": "TEST",
           "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:06.719Z"
+          "occurred_at": "2026-10-18T08:39:17.858Z"
         },
         {
           "id": 117,
-          "source_type": "CREATOR",
+          "source_type": "NETWORK_SPEAKER",
           "context": "TEST",
           "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:06.029Z"
+          "occurred_at": "2026-10-18T08:39:17.208Z"
         },
         {
           "id": 116,
-          "source_type": "NETWORK_SPEAKER",
+          "source_type": "CREATOR",
           "context": "TEST",
           "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:05.346Z"
+          "occurred_at": "2026-10-18T08:39:16.551Z"
         },
         {
           "id": 115,
-          "source_type": "CREATOR",
+          "source_type": "NETWORK_SPEAKER",
           "context": "TEST",
           "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:04.659Z"
+          "occurred_at": "2026-10-18T08:39:15.894Z"
         },
         {
           "id": 114,
-          "source_type": "NETWORK_SPEAKER",
+          "source_type": "CREATOR",
           "context": "TEST",
           "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:03.965Z"
+          "occurred_at": "2026-10-18T08:39:15.236Z"
         },
         {
           "id": 113,
-          "source_type": "CREATOR",
+          "source_type": "NETWORK_SPEAKER",
           "context": "TEST",
           "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:03.258Z"
+          "occurred_at": "2026-10-18T08:39:14.572Z"
         },
         {
           "id": 112,
-          "source_type": "NETWORK_SPEAKER",
+          "source_type": "CREATOR",
           "context": "TEST",
           "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:02.588Z"
+          "occurred_at": "2026-10-18T08:39:13.909Z"
         },
         {
           "id": 111,
-          "source_type": "CREATOR",
+          "source_type": "NETWORK_SPEAKER",
           "context": "TEST",
           "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:01.919Z"
+          "occurred_at": "2026-10-18T08:39:13.255Z"
         },
         {
           "id": 110,
-          "source_type": "NETWORK_SPEAKER",
-          "context": "TEST",
-          "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:01.258Z"
-        },
-        {
-          "id": 109,
           "source_type": "CREATOR",
           "context": "TEST",
           "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:00.598Z"
-        },
-        {
-          "id": 108,
-          "source_type": "NETWORK_SPEAKER",
-          "context": "TEST",
-          "player_amount": 1,
-          "occurred_at": "2026-10-18T08:01:59.939Z"
-        },
-        {
-          "id": 107,
-          "source_type": "CREATOR",
-          "context": "TEST",
-          "player_amount": 1,
-          "occurred_at": "2026-10-18T08:01:59.263Z"
-        },
-        {
-          "id": 106,
-          "source_type": "NETWORK_SPEAKER",
-          "context": "TEST",
-          "player_amount": 1,
-          "occurred_at": "2026-10-18T08:01:58.591Z"
-        },
-        {
-          "id": 105,
-          "source_type": "CREATOR",
-          "context": "TEST",
-          "player_amount": 1,
-          "occurred_at": "2026-10-18T08:01:57.910Z"
-        },
-        {
-          "id": 104,
-          "source_type": "NETWORK_SPEAKER",
-          "context": "TEST",
-          "player_amount": 1,
-          "occurred_at": "2026-10-18T08:01:57.224Z"
-        },
-        {
-          "id": 103,
-          "source_type": "CREATOR",
-          "context": "TEST",
-          "player_amount": 1,
-          "occurred_at": "2026-10-18T08:01:56.520Z"
-        },
-        {
-          "id": 102,
-          "source_type": "NETWORK_SPEAKER",
-          "context": "TEST",
-          "player_amount": 1,
-          "occurred_at": "2026-10-18T08:01:55.849Z"
-        },
-        {
-          "id": 101,
-          "source_type": "CREATOR",
-          "context": "TEST",
-          "player_amount": 1,
-          "occurred_at": "2026-10-18T08:01:55.183Z"
+          "occurred_at": "2026-10-18T08:39:12.600Z"
         }
       ],
-      "next_cursor": 101
+      "next_cursor": 110
     },
     "second": {
       "items": [
         {
-          "id": 100,
+          "id": 109,
           "source_type": "NETWORK_SPEAKER",
           "context": "TEST",
           "player_amount": 1,
-          "occurred_at": "2026-10-18T08:01:54.515Z"
+          "occurred_at": "2026-10-18T08:39:11.935Z"
         },
         {
-          "id": 99,
+          "id": 108,
           "source_type": "CREATOR",
           "context": "TEST",
           "player_amount": 1,
-          "occurred_at": "2026-10-18T08:01:53.859Z"
+          "occurred_at": "2026-10-18T08:39:11.272Z"
         },
         {
-          "id": 98,
+          "id": 107,
           "source_type": "NETWORK_SPEAKER",
           "context": "TEST",
           "player_amount": 1,
-          "occurred_at": "2026-10-18T08:01:53.206Z"
+          "occurred_at": "2026-10-18T08:39:10.614Z"
         }
       ],
       "next_cursor": null
@@ -178,147 +178,147 @@
     "base": {
       "items": [
         {
+          "id": 154,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:39:42.054Z"
+        },
+        {
+          "id": 153,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:39:41.398Z"
+        },
+        {
+          "id": 152,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:39:40.746Z"
+        },
+        {
+          "id": 151,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:39:40.086Z"
+        },
+        {
+          "id": 150,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:39:39.424Z"
+        },
+        {
+          "id": 149,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:39:38.769Z"
+        },
+        {
+          "id": 148,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:39:38.107Z"
+        },
+        {
+          "id": 147,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:39:37.441Z"
+        },
+        {
+          "id": 146,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:39:36.786Z"
+        },
+        {
           "id": 145,
           "source_type": "DAILY",
           "context": "TEST",
           "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:24.994Z"
+          "occurred_at": "2026-10-18T08:39:36.131Z"
         },
         {
           "id": 144,
           "source_type": "DAILY",
           "context": "TEST",
           "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:24.338Z"
+          "occurred_at": "2026-10-18T08:39:35.468Z"
         },
         {
           "id": 143,
           "source_type": "DAILY",
           "context": "TEST",
           "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:23.682Z"
+          "occurred_at": "2026-10-18T08:39:34.808Z"
         },
         {
           "id": 142,
           "source_type": "DAILY",
           "context": "TEST",
           "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:23.032Z"
+          "occurred_at": "2026-10-18T08:39:34.153Z"
         },
         {
           "id": 141,
           "source_type": "DAILY",
           "context": "TEST",
           "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:22.369Z"
+          "occurred_at": "2026-10-18T08:39:33.484Z"
         },
         {
           "id": 140,
           "source_type": "DAILY",
           "context": "TEST",
           "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:21.714Z"
+          "occurred_at": "2026-10-18T08:39:32.742Z"
         },
         {
           "id": 139,
           "source_type": "DAILY",
           "context": "TEST",
           "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:21.039Z"
+          "occurred_at": "2026-10-18T08:39:32.020Z"
         },
         {
           "id": 138,
           "source_type": "DAILY",
           "context": "TEST",
           "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:20.370Z"
+          "occurred_at": "2026-10-18T08:39:31.305Z"
         },
         {
           "id": 137,
           "source_type": "DAILY",
           "context": "TEST",
           "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:19.698Z"
+          "occurred_at": "2026-10-18T08:39:30.594Z"
         },
         {
           "id": 136,
           "source_type": "DAILY",
           "context": "TEST",
           "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:19.047Z"
+          "occurred_at": "2026-10-18T08:39:29.932Z"
         },
         {
           "id": 135,
           "source_type": "DAILY",
           "context": "TEST",
           "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:18.389Z"
-        },
-        {
-          "id": 134,
-          "source_type": "DAILY",
-          "context": "TEST",
-          "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:17.729Z"
-        },
-        {
-          "id": 133,
-          "source_type": "DAILY",
-          "context": "TEST",
-          "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:17.067Z"
-        },
-        {
-          "id": 132,
-          "source_type": "DAILY",
-          "context": "TEST",
-          "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:16.409Z"
-        },
-        {
-          "id": 131,
-          "source_type": "DAILY",
-          "context": "TEST",
-          "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:15.740Z"
-        },
-        {
-          "id": 130,
-          "source_type": "DAILY",
-          "context": "TEST",
-          "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:15.078Z"
-        },
-        {
-          "id": 129,
-          "source_type": "DAILY",
-          "context": "TEST",
-          "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:14.188Z"
-        },
-        {
-          "id": 128,
-          "source_type": "DAILY",
-          "context": "TEST",
-          "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:13.524Z"
-        },
-        {
-          "id": 127,
-          "source_type": "DAILY",
-          "context": "TEST",
-          "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:12.868Z"
-        },
-        {
-          "id": 126,
-          "source_type": "DAILY",
-          "context": "TEST",
-          "player_amount": 1,
-          "occurred_at": "2026-10-18T08:02:12.212Z"
+          "occurred_at": "2026-10-18T08:39:29.271Z"
         }
       ],
-      "next_cursor": 126
+      "next_cursor": 135
     }
   },
   "immediate": {
@@ -374,7 +374,7 @@
           "blocked_reason": "CLAN_GOVERNANCE_INSUFFICIENT_VOTERS",
           "eligible_count": 1,
           "existing_case_id": null,
-          "target_membership_id": 42
+          "target_membership_id": 47
         }
       ]
     },
@@ -412,21 +412,21 @@
             "blocked_reason": null,
             "eligible_count": 3,
             "existing_case_id": null,
-            "target_membership_id": 44
+            "target_membership_id": 49
           },
           {
             "can_open": true,
             "blocked_reason": null,
             "eligible_count": 3,
             "existing_case_id": null,
-            "target_membership_id": 45
+            "target_membership_id": 50
           },
           {
             "can_open": true,
             "blocked_reason": null,
             "eligible_count": 3,
             "existing_case_id": null,
-            "target_membership_id": 46
+            "target_membership_id": 51
           }
         ]
       },
@@ -443,7 +443,7 @@
       "id": 2,
       "case_type": "CAPTAIN_DISSOLUTION",
       "status": "OPEN",
-      "voting_deadline": "2026-10-19T08:02:36.128Z",
+      "voting_deadline": "2026-10-19T08:39:54.232Z",
       "quorum_bps": 4000,
       "approval_bps": 6000,
       "minimum_eligible_voters": 3,
@@ -467,14 +467,14 @@
           "deep_link": {
             "path": "/clan"
           },
-          "id": "b3f94513-94ba-4756-9874-e7f07fe8f980",
+          "id": "0515c5bc-4e3b-4850-90a8-750a91263a28",
           "type": "CLAN_INVITE_READY",
           "title": "Clan invitation ready",
           "body": "Open Clan Status in the app to securely access your personal invitation. Joining Telegram still requires membership verification.",
           "payload": {
             "invite_id": 21
           },
-          "created_at": "2026-10-18T08:02:37.962Z",
+          "created_at": "2026-10-18T08:39:56.791Z",
           "read_at": null,
           "unread": true
         },
@@ -482,12 +482,12 @@
           "deep_link": {
             "path": "/clan"
           },
-          "id": "dc96e7e4-169e-4700-903b-4b313b2e6345",
+          "id": "3e4f33c0-b4f1-4be5-99fb-d2edbef0ec21",
           "type": "CLAN_JOIN_ACCEPTED",
           "title": "Clan request accepted",
           "body": "Your request was accepted. Open Clan Status to check your invitation and next steps.",
           "payload": {},
-          "created_at": "2026-10-18T08:02:37.926Z",
+          "created_at": "2026-10-18T08:39:56.686Z",
           "read_at": null,
           "unread": true
         }
@@ -499,15 +499,15 @@
       "deep_link": {
         "path": "/clan"
       },
-      "id": "b3f94513-94ba-4756-9874-e7f07fe8f980",
+      "id": "0515c5bc-4e3b-4850-90a8-750a91263a28",
       "type": "CLAN_INVITE_READY",
       "title": "Clan invitation ready",
       "body": "Open Clan Status in the app to securely access your personal invitation. Joining Telegram still requires membership verification.",
       "payload": {
         "invite_id": 21
       },
-      "created_at": "2026-10-18T08:02:37.962Z",
-      "read_at": "2026-10-18T08:02:38.055Z",
+      "created_at": "2026-10-18T08:39:56.791Z",
+      "read_at": "2026-10-18T08:39:57.163Z",
       "unread": false
     }
   },
@@ -516,14 +516,14 @@
       "deep_link": {
         "path": "/clan"
       },
-      "id": "63415bb0-7507-462b-80fd-2cf505537e21",
+      "id": "6a3cdc70-39bd-4d2e-b52d-84a6bc18700a",
       "type": "CLAN_INVITE_READY",
       "title": "Clan invitation ready",
       "body": "Open Clan Status in the app to securely access your personal invitation. Joining Telegram still requires membership verification.",
       "payload": {
         "path": "/clan"
       },
-      "created_at": "2026-10-18T08:02:38.724Z",
+      "created_at": "2026-10-18T08:39:57.896Z",
       "read_at": null,
       "unread": true
     },
@@ -531,15 +531,15 @@
       "deep_link": {
         "path": "/clan"
       },
-      "id": "63415bb0-7507-462b-80fd-2cf505537e21",
+      "id": "6a3cdc70-39bd-4d2e-b52d-84a6bc18700a",
       "type": "CLAN_INVITE_READY",
       "title": "Clan invitation ready",
       "body": "Open Clan Status in the app to securely access your personal invitation. Joining Telegram still requires membership verification.",
       "payload": {
         "path": "/clan"
       },
-      "created_at": "2026-10-18T08:02:38.724Z",
-      "read_at": "2026-10-18T08:02:38.780Z",
+      "created_at": "2026-10-18T08:39:57.896Z",
+      "read_at": "2026-10-18T08:39:57.954Z",
       "unread": false
     }
   }

@@ -1,0 +1,132 @@
+{
+  "before": {
+    "season": "paired-64a10c44",
+    "season_status": "ACTIVE",
+    "archived": false,
+    "as_of": "2026-10-18T08:39:01.054Z",
+    "total_count": 11,
+    "next_offset": 1,
+    "items": [
+      {
+        "rank": 1,
+        "clan_id": "34",
+        "name": "Successor live ranking",
+        "tag": "ffc2b75d",
+        "crest": null,
+        "hq_level": 5,
+        "member_count": 1,
+        "capacity": 50,
+        "competitive_score": 10000000
+      }
+    ],
+    "own_standing": {
+      "rank": 1,
+      "clan_id": "34",
+      "name": "Successor live ranking",
+      "tag": "ffc2b75d",
+      "crest": null,
+      "hq_level": 5,
+      "member_count": 1,
+      "capacity": 50,
+      "competitive_score": 10000000
+    },
+    "offset": 0,
+    "limit": 1
+  },
+  "first": {
+    "season": "paired-64a10c44",
+    "season_status": "ACTIVE",
+    "archived": false,
+    "as_of": "2026-10-18T08:39:01.802Z",
+    "total_count": 10,
+    "next_offset": 1,
+    "items": [
+      {
+        "rank": 1,
+        "clan_id": "35",
+        "name": "Successor live ranking",
+        "tag": "e62e62da",
+        "crest": null,
+        "hq_level": 5,
+        "member_count": 1,
+        "capacity": 50,
+        "competitive_score": 9000000
+      }
+    ],
+    "own_standing": null,
+    "offset": 0,
+    "limit": 1
+  },
+  "next": {
+    "season": "paired-64a10c44",
+    "season_status": "ACTIVE",
+    "archived": false,
+    "as_of": "2026-10-18T08:39:01.843Z",
+    "total_count": 10,
+    "next_offset": 2,
+    "items": [
+      {
+        "rank": 2,
+        "clan_id": "36",
+        "name": "Successor live ranking",
+        "tag": "2af91f77",
+        "crest": null,
+        "hq_level": 5,
+        "member_count": 1,
+        "capacity": 50,
+        "competitive_score": 8000000
+      }
+    ],
+    "own_standing": null,
+    "offset": 1,
+    "limit": 1
+  },
+  "rebuilt": {
+    "season": "paired-64a10c44",
+    "season_status": "ACTIVE",
+    "archived": false,
+    "as_of": "2026-10-18T08:39:01.961Z",
+    "total_count": 10,
+    "next_offset": 1,
+    "items": [
+      {
+        "rank": 1,
+        "clan_id": "35",
+        "name": "Successor live ranking",
+        "tag": "e62e62da",
+        "crest": null,
+        "hq_level": 5,
+        "member_count": 1,
+        "capacity": 50,
+        "competitive_score": 9000000
+      }
+    ],
+    "own_standing": null,
+    "offset": 0,
+    "limit": 1
+  },
+  "historical": {
+    "season": "paired-archive-d794a9c010b8",
+    "season_status": "ARCHIVED",
+    "archived": true,
+    "as_of": "2026-10-18T08:39:02.066Z",
+    "total_count": 1,
+    "next_offset": null,
+    "items": [
+      {
+        "rank": 1,
+        "clan_id": "37",
+        "name": "Successor live ranking",
+        "tag": "ffc2b75d",
+        "crest": null,
+        "hq_level": 1,
+        "member_count": 0,
+        "capacity": 20,
+        "competitive_score": 123
+      }
+    ],
+    "own_standing": null,
+    "offset": 0,
+    "limit": 30
+  }
+}

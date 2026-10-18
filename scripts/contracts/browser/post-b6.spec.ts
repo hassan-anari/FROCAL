@@ -62,8 +62,12 @@ for (const width of [320, 390, 460]) {
     expect((await api(captain, "/eligible-groups")).some((row: any) => row.id === old.id)).toBe(false);
     await launch(page, captain); await expect(page.getByText(/A one-time Captain recreation is available/)).toBeVisible();
     await page.getByRole("button").filter({ hasText: "Paired Clan home" }).click();
-    await page.getByLabel("Clan name", { exact: true }).fill(`QA recreated ${width}`); await page.getByLabel("Tag", { exact: true }).fill(`R${width}`);
-    await shot(page, width, "successor-qa-registration"); await page.getByRole("button", { name: "Register clan headquarters", exact: true }).click();
+    await page.getByLabel("Clan name", { exact: true }).fill(`QA recreated ${width}`); await page.getByLabel("Tag", { exact: true }).fill(fresh.id.toString(36).padStart(4, "0").slice(-4).toUpperCase());
+    await page.getByRole("heading", { name: "Finish the registration", exact: true }).evaluate(el => el.closest("section")!.scrollIntoView({ block: "start", behavior: "instant" }));
+    await expect(page.getByText(/A one-time Captain recreation is available/)).toBeInViewport({ ratio: 1 });
+    await shot(page, width, "successor-qa-registration");
+    const registration = page.waitForResponse(response => response.request().method() === "POST" && new URL(response.url()).pathname === "/api/v1/clans/");
+    await page.getByRole("button", { name: "Register clan headquarters", exact: true }).click(); expect((await registration).status()).toBe(200);
     await expect(page.getByRole("navigation", { name: "Clan headquarters sections" })).toBeVisible();
     expect((await api(captain, "/membership/current")).clan_id).not.toBeNull();
     expect((await api(captain, "/state")).qa_recreation_authorization_available).toBe(false);

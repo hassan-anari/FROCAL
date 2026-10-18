@@ -10,6 +10,14 @@ These captures accompany [Draft PR #10](https://github.com/hassan-anari/FROCAL/p
 
 Each width also includes before/after equipment and protected Base/Profile/Arena captures, successful Soldier cooldown and a 640px-high dissolution confirmation. [Empty Inventory](390/facilities-empty.png), [owned Inventory](390/facilities-owned.png) and [preserved History](390/history-preserved.png) supplement those comparisons.
 
+| Width | Reconciled live Arena | One-use registration | New Headquarters after reload |
+| --- | --- | --- | --- |
+| 320 | [Arena](paired/320/successor-live-rankings.png) | [Registration](paired/320/successor-qa-registration.png) | [Headquarters](paired/320/successor-qa-created.png) |
+| 390 | [Arena](paired/390/successor-live-rankings.png) | [Registration](paired/390/successor-qa-registration.png) | [Headquarters](paired/390/successor-qa-created.png) |
+| 460 | [Arena](paired/460/successor-live-rankings.png) | [Registration](paired/460/successor-qa-registration.png) | [Headquarters](paired/460/successor-qa-created.png) |
+
 [Actual HTTP responses](paired/http-evidence.json) cover filtered pagination, unchanged Base rewards, all dissolution outcomes and meaningful/legacy notification presentation. They contain synthetic fixture identities, no invitation credentials or private QA account identifier.
 
-The actual-backend captures and paired results use **07876b3ebfa7ef4ede8d354682ae49add7a23150**. They establish the original-contract baseline only. Final ENDED-Clan projection, archive and single-use recreation-permit acceptance awaits WEDCAL's newly required successor SHA. No production operation or physical-device certification is claimed.
+[Ranking responses](paired/successor-rankings-http.json) verify removal, compact ranks, counts, page boundaries, null former-Captain standing, cold rebuild and immutable archived score. [Authorization responses](paired/successor-qa-http.json) show the default, explicitly authorized and consumed states; command replay cannot replenish the grant.
+
+The actual-backend captures and final paired results use **7c09f8f7e715339ac98e68b7b001bfe724a25a61**: 374 backend, 31 HTTP/client and 36 browser tests passed locally. Source provenance and artifact hashes are in the manifest; hosted CI results are linked on Draft #10. No production operation or physical-device certification is claimed. The earlier 07876b3 baseline is retained in Git history and is not presented as final acceptance.

@@ -33,13 +33,13 @@ it("removes a dissolved #1 through projection consumption and preserves ranks/co
   writeFileSync("work/post-b6-paired/successor-rankings-http.json", JSON.stringify({ before, first, next, rebuilt, historical }, null, 2));
 }, 120_000);
 it("consumes an isolated owner-authorized permit once through ordinary creation, preserving default restrictions and group binding", async () => {
-  const owner = await world(50); expect((await owner.api.state()).qa_recreation_authorization_available).toBe(false);
+  const owner = await world(50); const before = await owner.api.state(); expect(before.qa_recreation_authorization_available).toBe(false);
   await owner.api.dissolve();
   const next = await control({ action: "b5-group", player: owner.player }); await owner.api.verifyGroup(next.id);
   const input = { telegram_group_id: next.id, name: "One permitted recreation", tag: crypto.randomUUID().slice(0, 8) };
   await expect(owner.api.create(input)).rejects.toMatchObject({ code: "CLAN_RECREATION_BLOCKED" });
   await control({ action: "post-b6-qa-grant", player: owner.player });
-  expect((await owner.api.state()).qa_recreation_authorization_available).toBe(true);
+  const authorized = await owner.api.state(); expect(authorized.qa_recreation_authorization_available).toBe(true);
   expect((await owner.api.eligibleGroups()).some(row => row.id === owner.group.id)).toBe(false);
   await expect(owner.api.create({ ...input, telegram_group_id: owner.group.id })).rejects.toMatchObject({ status: 403 });
   expect((await owner.api.state()).qa_recreation_authorization_available).toBe(true);
@@ -47,10 +47,12 @@ it("consumes an isolated owner-authorized permit once through ordinary creation,
   expect((await clanApi(stranger.initData).state()).qa_recreation_authorization_available).toBe(false);
   const created = await owner.api.create(input); expect(created.id).not.toBe(owner.clan.id);
   expect((await owner.api.create(input)).id).toBe(created.id);
-  expect((await owner.api.state()).qa_recreation_authorization_available).toBe(false);
+  const consumed = await owner.api.state(); expect(consumed.qa_recreation_authorization_available).toBe(false);
   expect((await owner.api.recovery()).governance?.dissolution.outcome).toBe("IMMEDIATE");
   await owner.api.dissolve(); await control({ action: "post-b6-qa-grant", player: owner.player }); // Replay never replenishes.
   expect((await owner.api.state()).qa_recreation_authorization_available).toBe(false);
   const third = await control({ action: "b5-group", player: owner.player }); await owner.api.verifyGroup(third.id);
   await expect(owner.api.create({ ...input, telegram_group_id: third.id, tag: crypto.randomUUID().slice(0, 8) })).rejects.toMatchObject({ code: "CLAN_RECREATION_BLOCKED" });
+  mkdirSync("work/post-b6-paired", { recursive: true });
+  writeFileSync("work/post-b6-paired/successor-qa-http.json", JSON.stringify({ before, authorized, created, consumed, replayed_grant_available: (await owner.api.state()).qa_recreation_authorization_available }, null, 2));
 }, 120_000);

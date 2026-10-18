@@ -1,9 +1,11 @@
 {
-  "status": "Baseline evidence; final WEDCAL successor acceptance pending",
-  "frontend_runtime_source_commit": "a03d9a4ccea820fe70bb141769349e43735d5c59",
+  "status": "Exact successor local acceptance passed; hosted final-head checks linked on Draft PR #10",
+  "frontend_runtime_source_commit": "82f595759d50abf4920b260673710975bf910df7",
+  "mock_capture_source_commit": "64bc5891b91f06e1cbfe3a60ae60369ac0159f1c",
   "immutable_before_commit": "e481ffa7e14b980b7e1922cc2d71e64374014596",
-  "backend_baseline_commit": "07876b3ebfa7ef4ede8d354682ae49add7a23150",
-  "backend_successor_commit": null,
+  "backend_commit": "7c09f8f7e715339ac98e68b7b001bfe724a25a61",
+  "superseded_backend_baseline_commit": "07876b3ebfa7ef4ede8d354682ae49add7a23150",
+  "openapi_sha256": "2db1d8094036cd5c963bf6e68215ce30031250f45e4de7d5879696765deed2b6",
   "browser": "Chromium 154.0.8037.57 on Debian 13, local system executable",
   "platform": "Playwright mobile/touch WebView emulation; physical Telegram devices not certified",
   "viewports": [
@@ -35,17 +37,26 @@
     }
   ],
   "results": {
-    "unit_tests": 370,
+    "unit_tests": 371,
     "unit_files": 50,
     "hotfix_browser_tests": 14,
-    "baseline_paired_backend_tests": 360,
-    "baseline_paired_http_client_tests": 29,
-    "baseline_paired_browser_tests": 30
+    "general_browser_tests": 134,
+    "paired_backend_tests": 374,
+    "paired_http_client_tests": 31,
+    "paired_browser_tests": 36,
+    "paired_browser_retries": 0,
+    "paired_browser_skips": 0,
+    "paired_browser_flakes": 0,
+    "focused_qa_capture_tests": 3
   },
   "provenance": {
     "before-*": "Immutable latest-main worktree, synthetic authenticated fixtures",
-    "after-*, facilities-*, history-preserved.png, soldier-left.png, dissolution-warning.png": "Hotfix runtime, synthetic authenticated fixtures; dissolution-warning.png uses height640",
-    "paired/*": "Actual isolated pinned Django HTTP backend with PostgreSQL/Redis; synthetic accounts and Telegram service boundary"
+    "after-*, facilities-*, history-preserved.png, soldier-left.png, dissolution-warning.png": "Pinned mock-capture frontend source, synthetic authenticated fixtures; dissolution-warning.png height640",
+    "paired/*": "Actual isolated exact-successor Django HTTP backend with PostgreSQL/Redis; synthetic accounts, normal operator/creation paths, external Telegram boundary only"
+  },
+  "capture_test_sources": {
+    "scripts/contracts/browser/post-b6.spec.ts": "5554534a781df35690fe21b782c3917623cbf31fd00207ac7f140bacec22308d",
+    "scripts/contracts/post-b6/arena-successor.paired.test.ts": "ced6732706bfee339a819dafe0ad50d716a10032da26d5905b53493b85e1a68a"
   },
   "files": {
     "320/after-clan-equipment.png": {
@@ -177,24 +188,24 @@
       "bytes": 349959
     },
     "390/facilities-owned.png": {
-      "sha256": "058eefdb64dd7f9d45f7e1e4d23a2fb23a67d5a6736c19a4d0e3d79c3e3f91b0",
-      "bytes": 360464
+      "sha256": "336824790202e90735353f3fbc5bd003d3c0eae65a45734751f8147d6d249924",
+      "bytes": 457464
     },
     "390/history-preserved.png": {
       "sha256": "f0639074a040bfeb04e2a61c83f4550a148d47dfb540545ac623cbee33d64aa1",
       "bytes": 199173
     },
     "390/soldier-left.png": {
-      "sha256": "530b24a515c131dafdb3d72c0a1dcd57f582d357324adb44a13d54921c41662a",
-      "bytes": 96126
+      "sha256": "e51acdd836f04d4e6025e423e2a031234c29d47be8c0d54ac74cde84b48030a6",
+      "bytes": 96611
     },
     "460/after-clan-equipment.png": {
       "sha256": "8215d1f19f05fdc3f92c25a4a64991e55184813bae937d68452e5eefdd0e28b6",
       "bytes": 213455
     },
     "460/after-clan-header.png": {
-      "sha256": "9c02cbbc90012e9b61a0e6a58a368b57e219ab27454be46be9d3693d234526e1",
-      "bytes": 307282
+      "sha256": "f47220e211f78a7c31434eb0f37b3bcbcb1fcbe5a3064e7212c948152ad22bbc",
+      "bytes": 307283
     },
     "460/after-clan-long-title.png": {
       "sha256": "f2ad29690dceec60679b143ccfd0218cd9d912be22199eae337bcc4b286c52d3",
@@ -205,16 +216,16 @@
       "bytes": 122
     },
     "460/after-preserved-arena.png": {
-      "sha256": "6afbb24b2c012fce99ea8bb51d7b1c2742b77a0938e67f038f27e530eb4cde69",
-      "bytes": 305482
+      "sha256": "e1e9532d3fd9e854c274b488bc45608bf2fb7e98a94cef71daf9c4f5ded928a0",
+      "bytes": 305505
     },
     "460/after-preserved-base.png": {
       "sha256": "7b8b24594a4e99b25e09945a49fcc25896326c91645920455964c72d640e60b3",
       "bytes": 234877
     },
     "460/after-preserved-profile.png": {
-      "sha256": "803c3538056c67aaa696900317a8ae1e3cfb7f7f4ae5a9b9970532327250d82a",
-      "bytes": 232413
+      "sha256": "b885efadbd610c3c9f3290921ceb87da369f6834f62b8720174547647f6ae3e3",
+      "bytes": 232286
     },
     "460/before-clan-equipment.png": {
       "sha256": "cde63722e98c5b8726f1e236f5943adcccdf3daecc395b836db48328fdf150ae",
@@ -253,68 +264,112 @@
       "bytes": 104275
     },
     "paired/320/blocked-electorate.png": {
-      "sha256": "6f33af00d7e8442e1f7b6d7fda501a08f20ee3411d923ac65c26fdfcaf6d8903",
-      "bytes": 121310
+      "sha256": "ab9af57ae3c008d37af99990187d6d840ce75a598cc2f91e4072d5ebdf4be384",
+      "bytes": 121330
     },
     "paired/320/immediate-armed.png": {
-      "sha256": "3e08efde165039dcfa6f0b459f083611bc58bc5b52660beb1982e2c025b764c9",
-      "bytes": 119810
+      "sha256": "6b851f7d54b53b3c1cab7cb473eee473f7547ec9f72cbd476ccc626080bf774a",
+      "bytes": 119838
     },
     "paired/320/immediate-complete.png": {
-      "sha256": "c02f44bf5a6612f73eb12d6f2339af8d9fcb93a8478f8824c26b9c86b6a57a68",
-      "bytes": 102124
+      "sha256": "5b5def2eae1394dbb9ff8a560096f7eac3d7d20fc04965d68428864ad4ab7934",
+      "bytes": 102062
     },
     "paired/320/immediate-warning.png": {
-      "sha256": "c8617c713a2050592a0738f47f98786c41aa545c303db0e63046d4c087479c8b",
-      "bytes": 125816
+      "sha256": "ea34617f0ba0258210abb7d33ba9c239a27e2f52066674dd5332ceb003c39a12",
+      "bytes": 125844
+    },
+    "paired/320/successor-live-rankings.png": {
+      "sha256": "bd37669f3feb0eeddb7f314a286e7e2d0d6bf110f2fb9be6ea3966c524d1cd11",
+      "bytes": 170776
+    },
+    "paired/320/successor-qa-created.png": {
+      "sha256": "aaa9982fef9d0d07e1a6aa3faac2ab475d1e898bc4426c9398a9fd667d08ec88",
+      "bytes": 182641
+    },
+    "paired/320/successor-qa-registration.png": {
+      "sha256": "5e77015b81b8a0c74f277e372c204c39b1e452bb79863ad6263211c167c56b1e",
+      "bytes": 157182
     },
     "paired/320/vote-required.png": {
-      "sha256": "68047e009c338eb764f45b5dccc6cc2060e3416c5b11a3f60ed4f3ad7ff91a3c",
-      "bytes": 121302
+      "sha256": "8991a1fb2b47bc0e2e9c887dd7a132d8b43d6ca3ae84451c9084d371508f4043",
+      "bytes": 121332
     },
     "paired/390/blocked-electorate.png": {
-      "sha256": "52b5f19d829e4abf12d1771ffb1810274e54e6c628fc6daae3f85107bcb4ac8b",
-      "bytes": 135821
+      "sha256": "02f14452d7708089a6063674fb3bf2a232c44e95d13c1fd20c46d10bc1b16ca8",
+      "bytes": 135827
     },
     "paired/390/immediate-armed.png": {
-      "sha256": "b64138003c02421bc91a7db13a14f7e18cb5a390b66f8c039c3333ca7d693911",
-      "bytes": 128595
+      "sha256": "071d99d4f987bdc8dd17a5420f4da17d8d710844c71bf7fca73cafc0b3ddfdce",
+      "bytes": 128643
     },
     "paired/390/immediate-complete.png": {
-      "sha256": "de5268d33734e4a05d38a26d17788612a03b79bb6b4ef27bf282ec17268bd9f1",
-      "bytes": 114052
+      "sha256": "a538be7d830ce63611028899de1b02211d49cdcf087707cb0f896d10fc671ae6",
+      "bytes": 113972
     },
     "paired/390/immediate-warning.png": {
-      "sha256": "e9077996885aa098e71e79f9c0193cd600640dc184e4a399627a9b357df641aa",
-      "bytes": 137970
+      "sha256": "e5fc4d94a9295b990125e7f93852f859ceb30bfa652439e73f9a6d581adddf2e",
+      "bytes": 138008
+    },
+    "paired/390/successor-live-rankings.png": {
+      "sha256": "48007f915f03f58078bbd5365340ddadb3ef921bd1e528c493eb5e134ea6476a",
+      "bytes": 196392
+    },
+    "paired/390/successor-qa-created.png": {
+      "sha256": "a6b08432d60e368974a01cd2f1f93f4fe757132bf8b8afd76a02d47798c61448",
+      "bytes": 272057
+    },
+    "paired/390/successor-qa-registration.png": {
+      "sha256": "5c0cefaf9132c7c2cee1c759cb5c5eec1e4eb2bce83dfdf10a3515e0b81d40e5",
+      "bytes": 176856
     },
     "paired/390/vote-required.png": {
-      "sha256": "6426809abd88ccd3ceef0b108d4e786da0ab115837367d8b7cd47828bfe9d8d6",
-      "bytes": 129573
+      "sha256": "399561a2ba50ce3f4aad023f6512d313cc16636db214ec6e101326e3ef4cbbb1",
+      "bytes": 129619
     },
     "paired/460/blocked-electorate.png": {
-      "sha256": "f2e3b507c84d23b7ee0e663444b9165836898c742dd4c019d091a3107bdedd74",
-      "bytes": 148053
+      "sha256": "1bf26b321d6db405bbda1f97ef844b58985871173e50d12c94d66747b7e7692f",
+      "bytes": 148025
     },
     "paired/460/immediate-armed.png": {
-      "sha256": "b302ef034ab7cc224ca58f514ca96ee8967619d783512d765700768f07b7431d",
-      "bytes": 139099
+      "sha256": "1bc5992e4ff1a6524688f58a3ff5e7706a49949396536e9b5023be775d465df3",
+      "bytes": 139125
     },
     "paired/460/immediate-complete.png": {
-      "sha256": "5bc75b0f468aa23fd35e13405165cfc30ccd48f851a228780f6fa58156acffe9",
-      "bytes": 120227
+      "sha256": "aff6e9cc2fe96280d2cabdc3171512b2861bf6ecb4c63b01bcb06b6e647c2ebc",
+      "bytes": 120603
     },
     "paired/460/immediate-warning.png": {
-      "sha256": "bd5a7aca0b2e760b0e0c5687f07c10d452ce19682bd88ca2f2988c47077c38fb",
-      "bytes": 136187
+      "sha256": "37e6a55fe42edeaa729edb32b2e4125881d1fe11b31c5b060cc787fa6ae1da0d",
+      "bytes": 149297
+    },
+    "paired/460/successor-live-rankings.png": {
+      "sha256": "e75f87929164de9cc44cce488c9deabca62119b5e0c98029e0c49c2e32229de0",
+      "bytes": 212472
+    },
+    "paired/460/successor-qa-created.png": {
+      "sha256": "def1a0bc5836e1f580d0763d1c65531c97a561ead39c66fb583606a6f3e762a5",
+      "bytes": 298760
+    },
+    "paired/460/successor-qa-registration.png": {
+      "sha256": "b60f2216eeb12bc587ac59c7565105d6a1492ca38de1829bff9418fb527aa0d7",
+      "bytes": 197090
     },
     "paired/460/vote-required.png": {
-      "sha256": "428621684d61a2757418fddc320f5b92cfe02129a8a4bc2535e8b0720ad92938",
-      "bytes": 141398
+      "sha256": "966a9ad4e033c13e0c6531ccff5e073d96e5e14ee9c1dff9091e44cec0d40120",
+      "bytes": 141420
     },
     "paired/http-evidence.json": {
-      "sha256": "e2695516e11702c9cbf9c83998665d05c71f5ab69f77859403b1b7c2f9b0d6e0",
-      "bytes": 15546
+      "sha256": "b10efdf0511bf6b3076c10f96383a7bca3a11c9e0de566afce4ac4559fdaf034",
+      "bytes": 15548
+    },
+    "paired/successor-qa-http.json": {
+      "sha256": "372cd8a1999b684450839f133d9b04629f3aa4b9a40fe876e4b0f864157cc873",
+      "bytes": 1313
+    },
+    "paired/successor-rankings-http.json": {
+      "sha256": "162319e2e4d60a79e30da3bab9ccce89696d413d1f1753ed0f6da05368bb4115",
+      "bytes": 2925
     }
   }
 }
