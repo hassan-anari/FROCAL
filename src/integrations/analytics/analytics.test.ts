@@ -5,7 +5,7 @@ import { analyticsConfig, CONSENT_KEY, createAnalytics, maskReplayAttribute, pla
 
 const config = { enabled: true, key: "test-token", host: "https://ingest.test", replay: true };
 const settle = async () => { for (let i = 0; i < 10; i++) await Promise.resolve(); };
-function harness(overrides = config) {
+function harness(overrides: Parameters<typeof createAnalytics>[0] = config) {
   let options: Partial<PostHogConfig> = {};
   const sent: CaptureResult[] = [];
   const sdk = {
