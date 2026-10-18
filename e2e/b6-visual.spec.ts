@@ -4,6 +4,10 @@ import { prepareClan } from "./b6-fixture";
 import { launch } from "./b4-fixture";
 const before = Boolean(process.env.B6_BASELINE);
 const phase = before ? "before" : "after";
+const buttonDesign = (el: Element) => {
+  const s = getComputedStyle(el);
+  return { height: s.height, padding: s.padding, border: s.border, background: s.backgroundColor, radius: s.borderRadius, fontSize: s.fontSize, fontWeight: s.fontWeight, gap: s.gap };
+};
 for (const width of [320, 390, 460]) test(`B6 preserved scenes and corrected async surfaces ${phase} ${width}`, async ({ page }) => {
   test.setTimeout(120_000);
   await page.setViewportSize({ width, height: 844 });
@@ -25,9 +29,10 @@ for (const width of [320, 390, 460]) test(`B6 preserved scenes and corrected asy
   await shot("clan-initial"); finish();
   await expect(page.getByRole("navigation", { name: "Clan headquarters sections" })).toBeVisible();
   const status = page.getByRole("button", { name: "Clan status", exact: true });
+  const statusDesign = await status.evaluate(buttonDesign);
   const dimensions = await status.evaluate(el => ({ height: el.getBoundingClientRect().height, width: el.getBoundingClientRect().width, right: el.getBoundingClientRect().right, headerRight: el.closest("header")!.getBoundingClientRect().right, iconCount: el.querySelectorAll("svg").length }));
   writeFileSync(`${dir}/${phase}-computed.json`, JSON.stringify(dimensions, null, 2) + "\n");
-  if (!before) { expect(dimensions.height).toBe(32); expect(dimensions.width).toBeLessThan(150); expect(dimensions.iconCount).toBe(1); expect(Math.abs(dimensions.right - dimensions.headerRight)).toBeLessThan(3); }
+  if (!before) { expect(dimensions.width).toBeLessThan(150); expect(dimensions.iconCount).toBe(1); expect(Math.abs(dimensions.right - dimensions.headerRight)).toBeLessThan(3); }
   await shot("captain-hq");
   // Crop the immutable HQ scene to prove header/status changes do not alter the approved scene.
   await page.locator('section').filter({ has: page.locator('h2').filter({ hasText: f.identity.name }) }).first().screenshot({ path: `${dir}/${phase}-hq-scene.png`, animations: "disabled" });
@@ -62,7 +67,10 @@ for (const width of [320, 390, 460]) test(`B6 preserved scenes and corrected asy
     return route.fulfill({ json: { items: historyState === "empty" ? [] : (new URL(route.request().url()).searchParams.get("category") === "network" ? ["CREATOR", "NETWORK_SPEAKER"] : ["CREATOR", "NETWORK_SPEAKER", "DAILY"]).map((source_type, i) => ({ id: 10 - i, source_type, context: "NETWORK_GROUP", player_amount: 20 - i, occurred_at: "2026-10-16T10:10:00Z" })), next_cursor: null } });
   });
   await page.goto(launch("/earn"));
-  await page.getByRole("button", { name: "History", exact: true }).click();
+  const history = page.getByRole("button", { name: "History", exact: true });
+  // Clan status follows the approved live Earn History design at each width.
+  if (!before) expect(statusDesign).toEqual(await history.evaluate(buttonDesign));
+  await history.click();
   await expect(page.getByRole("dialog", { name: "Earn history" })).toBeVisible(); await shot("history-loading");
   finishHistory();
   await expect(page.getByRole("dialog")).toContainText(before ? "Rewards couldn't load." : "Earnings couldn't load."); await shot("history-error");

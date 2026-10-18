@@ -45,7 +45,6 @@
 
 .headerTop { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
 .headerTop > span { color: #78e8ff; font-size: .68rem; font-weight: 850; letter-spacing: .15em; }
-.statusButton { flex: 0 0 auto; width: auto; min-height: 36px; height: 36px; padding: .4rem .65rem; gap: .35rem; font-size: .66rem; }
 .registerButton { height: 46px; min-height: 46px; padding-block: .3rem; }
 .registerButton > span:last-child { width: 32px; height: 32px; border-radius: 11px; }
 
@@ -1327,10 +1326,26 @@
 .rankingList > * { contain-intrinsic-size: auto 68px; }
 
 /* Production WebView header: compact rhythm and full, wrapping Clan names. */
-.pageHeader:has(.headerTop) { margin: .3rem 0 .65rem; gap: .22rem; min-width: 0; }
+.pageHeader:has(.headerTop) { margin: .3rem 0 .65rem; gap: .22rem .52rem; min-width: 0; grid-template-columns: minmax(0, 1fr) auto; align-items: end; }
+.pageHeader .headerTop,
+.pageHeader:has(.headerTop) h1 { grid-column: 1 / -1; }
 .headerTop { min-width: 0; gap: .4rem; }
 .headerTop > span { font-size: clamp(.5rem, 2.1vw, .6rem); letter-spacing: .12em; line-height: 1.2; }
-.pageHeader .statusButton { min-height: 32px; height: 32px; padding: .3rem .5rem; }
+/* Earn History is the visual reference; keep these values in sync. */
+.pageHeader > .statusButton {
+  display: inline-flex;
+  align-items: center;
+  gap: .24rem;
+  height: 38px;
+  padding: 0 .72rem;
+  border: 1px solid rgba(133, 175, 241, .16);
+  border-radius: 13px;
+  color: rgba(219, 229, 250, .72);
+  background: rgba(5, 12, 29, .66);
+  font-size: .58rem;
+  font-weight: 760;
+  white-space: nowrap;
+}
 .pageHeader:has(.headerTop) h1 { white-space: normal; overflow-wrap: anywhere; text-wrap: balance; font-size: clamp(1.4rem, 6vw, 1.9rem); line-height: 1.1; letter-spacing: -.045em; }
 .pageHeader:has(.headerTop) p { margin: 0; line-height: 1.35; }
 .homeHeroMetrics strong { min-width: 0; overflow-wrap: anywhere; }

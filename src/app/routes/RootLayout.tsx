@@ -4,6 +4,7 @@ import { InitialApplicationState } from "@/design-system/components/InitialAppli
 import { AppErrorBoundary } from "@/design-system/components/AppErrorBoundary";
 import styles from "./RootLayout.module.css";
 import { ClientReleaseNotice } from "../ClientReleaseNotice";
+import { AnalyticsConsent } from "@/integrations/analytics/AnalyticsConsent";
 
 const DevScenarioPanel = import.meta.env.DEV
   ? lazy(() => import("@/design-system/components/DevScenarioPanel").then((module) => ({ default: module.DevScenarioPanel })))
@@ -16,6 +17,7 @@ export function RootLayout() {
         <div className={`dalexio-app-viewport ${styles.viewport}`}>
           <InitialApplicationState><Outlet /></InitialApplicationState>
           <ClientReleaseNotice />
+          <AnalyticsConsent />
           {DevScenarioPanel ? <Suspense fallback={null}><DevScenarioPanel /></Suspense> : null}
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { analytics } from "@/integrations/analytics/analytics";
 import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useBootstrap } from "./BootstrapProvider";
 import { useTelegram } from "@/integrations/telegram/TelegramProvider";
@@ -108,6 +109,8 @@ export function useClanRemote() {
         showFeedback(error instanceof ClanApiError ? error.message : "Your Clan couldn't be updated. Please refresh and try again.");
         await refresh(); return undefined;
       }
+      if (action === "create") analytics.featureFor(scope.player, scope.session, "clan_registration_completed");
+      if (action === "join") analytics.featureFor(scope.player, scope.session, "clan_join_request_submitted");
       if (action === "create") {
         void client.resetQueries({ queryKey: [...queryKeys.player(scope), "arena", "rankings", "clans"] }).catch(() => {});
       }
@@ -144,7 +147,11 @@ export function useClanRemote() {
   };
   const economic = async (action: "purchase" | "activate", item: string) => {
     if (!enabled || locks.current.size || !membership.data) return undefined;
-    return run(`${action}:${item}`, () => clanEconomicIntent(localStorage, { player: scope.player, season: scope.season, membership: membership.data!.membership_id }, action, item, key => api[action](item, key)));
+    return run(`${action}:${item}`, () => clanEconomicIntent(localStorage, { player: scope.player, season: scope.season, membership: membership.data!.membership_id }, action, item, async key => {
+      const result = await api[action](item, key);
+      if (!result.replayed) analytics.featureFor(scope.player, scope.session, action === "purchase" ? "clan_shop_purchase_completed" : "clan_shop_activation_completed", String(result.id));
+      return result;
+    }));
   };
   const clock = useMemo(() => ({ at: equipment.data?.server_time ? Date.parse(equipment.data.server_time) : bootstrap.data?.serverTime ? Date.parse(bootstrap.data.serverTime) : Date.now(), tick: performance.now() }), [equipment.data, bootstrap.data?.serverTime]);
   const serverNow = () => clock.at + Math.max(0, performance.now() - clock.tick);

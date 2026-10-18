@@ -1,4 +1,5 @@
 import { readPlayerOnboarding } from "@/app/storageRelease";
+import { analytics } from "@/integrations/analytics/analytics";
 import { canonicalKey } from "./canonical";
 import type { CanonicalState } from "./b3Contracts";
 import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
@@ -52,6 +53,11 @@ export function BootstrapProvider({ children }: { children: ReactNode }) {
     config: bootstrap.data?.remote ? configCacheScope(bootstrap.data.remote.config) : source,
   };
   const scopeKey = JSON.stringify(scope);
+  const verifiedAnalyticsPlayer = source === "remote" && launchState === "ready" && adapter.isTelegram
+    && bootstrap.isSuccess && !bootstrap.isPlaceholderData && bootstrap.data?.remote ? bootstrap.data.player.id : null;
+  // Keep the privacy boundary outside the keyed child tree, so a session change
+  // stops recording even while the next authenticated screen is being prepared.
+  useLayoutEffect(() => { analytics.setPlayer(verifiedAnalyticsPlayer, session); }, [verifiedAnalyticsPlayer, session]);
   const [prepared, setPrepared] = useState("");
 
   useEffect(() => {

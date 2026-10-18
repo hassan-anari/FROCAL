@@ -66,7 +66,7 @@ export function ClanStatusSheet({ live, onClose }: { live: ClanRemote; onClose: 
     } finally { submitLock.current = false; setChecking(false); }
   };
   if (mode !== "status") return (
-    <ClanModal eyebrow="Clan governance" title={mode === "leave" ? "Leave Clan" : mode === "dissolve" ? "Request dissolution" : "Propose member removal"} onClose={onClose} footer={
+    <ClanModal sensitive eyebrow="Clan governance" title={mode === "leave" ? "Leave Clan" : mode === "dissolve" ? "Request dissolution" : "Propose member removal"} onClose={onClose} footer={
       <div className={styles.doubleActions}>
         <Button size="sm" tone="secondary" onClick={() => setMode("status")} disabled={busy}>{mode === "dissolve" ? "Cancel" : "Go back"}</Button>
         <Button size="sm" className={mode === "dissolve" ? styles.destructiveAction : undefined} disabled={busy || (mode === "leave" ? !leaveAllowed : !captain || stale || !readinessAvailable || !currentAction?.can_open || (mode === "dissolve" ? !dissolutionAcknowledged || dissolution?.outcome === "BLOCKED" : !target || !reason.trim()))} onClick={() => void submit()}>{mode === "dissolve" ? dissolution?.outcome === "IMMEDIATE" ? "Dissolve now" : dissolution?.outcome === "VOTE_REQUIRED" ? "Open dissolution vote" : "Unavailable" : "Confirm"}</Button>
@@ -97,7 +97,7 @@ export function ClanStatusSheet({ live, onClose }: { live: ClanRemote; onClose: 
     </ClanModal>
   );
   return (
-    <ClanModal eyebrow="Clan membership and governance" title="Clan status" onClose={onClose}>
+    <ClanModal sensitive eyebrow="Clan membership and governance" title="Clan status" onClose={onClose}>
       <div className={styles.detailList}>
         <div><span>Role</span><strong>{words(state?.role)}</strong></div>
         <div><span>Membership</span><strong>{member ? words(member.access_state) : "No active membership"}</strong></div>

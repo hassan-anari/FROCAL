@@ -21,7 +21,7 @@ for (const width of [320, 390, 460]) test(`post-B6 mobile visual comparison ${wi
     return { height: box.height, titleWidth: title.getBoundingClientRect().width, titleScrollWidth: title.scrollWidth, buttonHeight: button.getBoundingClientRect().height, overflow: document.documentElement.scrollWidth > innerWidth };
   });
   writeFileSync(`${dir}/${before ? "before" : "after"}-header.json`, JSON.stringify(dimensions, null, 2));
-  if (!before) { expect(dimensions.buttonHeight).toBe(32); expect(dimensions.overflow).toBe(false); }
+  if (!before) { expect(dimensions.buttonHeight).toBe(38); expect(dimensions.overflow).toBe(false); }
   await page.getByText("FACILITIES", { exact: true }).scrollIntoViewIfNeeded();
   await shot("clan-equipment");
   f.identity.name = "Intercontinental Clan Headquarters and Expedition Command";

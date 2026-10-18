@@ -23,6 +23,7 @@ interface ClanModalProps {
   onClose: () => void;
   children: ReactNode;
   footer?: ReactNode;
+  sensitive?: boolean;
 }
 
 const focusableSelector = [
@@ -34,7 +35,7 @@ const focusableSelector = [
   '[tabindex]:not([tabindex="-1"])',
 ].join(",");
 
-export function ClanModal({ eyebrow, title, onClose, children, footer }: ClanModalProps) {
+export function ClanModal({ eyebrow, title, onClose, children, footer, sensitive }: ClanModalProps) {
   const titleId = useId();
   const sheetRef = useRef<HTMLElement | null>(null);
   const closeRef = useRef(onClose);
@@ -115,6 +116,7 @@ export function ClanModal({ eyebrow, title, onClose, children, footer }: ClanMod
         ref={sheetRef}
         className={styles.sheet}
         role="dialog"
+        data-ph-sensitive={sensitive ? "" : undefined}
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}

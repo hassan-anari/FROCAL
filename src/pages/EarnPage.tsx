@@ -1,4 +1,6 @@
 import { AppLoader } from "@/design-system/components/AppLoader";
+import { analytics } from "@/integrations/analytics/analytics";
+import { useAnalyticsPage } from "@/integrations/analytics/AnalyticsConsent";
 import { configuredBotUrl, clanAddBotUrl } from "@/integrations/telegram/botLinks";
 import { useRewardHistory, useNetworkRewardHistory } from "@/integrations/api/useRewardHistory";
 import { rewardHistoryView } from "@/integrations/api/rewardHistory";
@@ -174,6 +176,7 @@ export function EarnPage() {
     const stored = readSessionPreference(earnTabStorageKey);
     return stored === "network" || stored === "typing" ? stored : "earn";
   });
+  useAnalyticsPage(activeTab);
   useQueryFeedback(live.remote ? activeTab === "earn" ? live.daily.error ?? live.missions.error : activeTab === "typing" ? live.typing.error : live.referrals.error ?? live.invitees.error ?? live.network.error ?? live.groups.error : null,
     activeTab === "earn" ? "Rewards couldn't load. Please try again." : activeTab === "typing" ? "Typing Arena couldn't load. Please try again." : "Your network couldn't load. Please try again.");
   const [guideOpen, setGuideOpen] = useState<NetworkGuideKind | null>(null);
@@ -367,7 +370,7 @@ export function EarnPage() {
             <h1>Grow your journey.</h1>
             <p>Claim daily rewards, complete missions, expand your network and sharpen your skills.</p>
           </div>
-          <button type="button" onClick={() => setHistoryOpen(true)}>
+          <button type="button" onClick={() => { analytics.feature("earn_history_opened"); setHistoryOpen(true); }}>
             <HugeiconsIcon icon={TransactionHistoryIcon} size={14} strokeWidth={1.7} />
             History
           </button>
