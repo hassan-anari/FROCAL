@@ -1,30 +1,55 @@
 # Post-B6 production QA hotfix
 
-Base: FROCAL main `e481ffa7e14b980b7e1922cc2d71e64374014596` (B6 merged, PR #7 API routing retained). Branch: `hotfix/post-b6-production-qa`. Draft only; no merge or deploy.
+FROCAL Draft PR [#10](https://github.com/hassan-anari/FROCAL/pull/10), branch `hotfix/post-b6-production-qa`, starts from merged main **`e481ffa7e14b980b7e1922cc2d71e64374014596`**. Keep Draft, unmerged and undeployed pending owner approval.
 
-## Independent frontend corrections
+## Required successor handoff
 
-- History keeps confirmed row DOM through background refresh and pagination. Initial loading appears only without confirmed rows. Load More owns pagination progress and is disabled during any fetch; a synchronous guard also prevents manual/intersection duplicates.
-- FACILITIES uses the authoritative equipment response: real names of distinct effective TIMED items, `name +N`, or the sum of unused owned quantities (including zero). Effect categories from one item do not inflate the facility count; expired, future, ineffective and CONTEXT effects are excluded. EFFECTS consistently counts effective timed effect rows, separate from distinct items.
-- The equipment display uses the current server anchor on each tick, after refresh and foreground resume. Existing Shop/Inventory permissions and prices remain authoritative.
-- The Clan header has a smaller top margin, a compact aligned status button, balanced spacing and wrapping long names. Hero, branded typography/colors, artwork, navigation and motion remain.
-- Confirmed leave, including 204/null, fences old membership immediately, cancels old reads, removes obsolete Clan caches and refreshes current role/membership/requests. Old scoped failures and nonessential account refreshes cannot turn success into a mutation error. A real write failure retains meaningful error feedback. Only an essential current-state read failure reports successful leave with a refresh notice.
-- Backend notification titles/bodies remain preferred. Blank legacy fields have safe display fallbacks; CLAN_INVITE_READY explains the invitation and Clan Status. Invite-ready navigation always uses `/clan`; payload URLs/credentials are never used. Credential-bearing legacy copy is replaced safely.
+The owner subsequently required a NEW WEDCAL successor for ENDED Clan removal from live Arena projections and a single-use account-scoped QA recreation permit. **07876b3 is baseline evidence only, not final paired acceptance.** The exact successor pin, contract artifacts, ranking/permit acceptance and final CI must be updated before this hotfix is declared complete. No client leaderboard filtering or public QA account identifier is introduced.
 
-## Contract-dependent work — pending published handoff
+## Baseline integration
 
-The owner confirmed the WEDCAL post-B6 contract is not published yet. The formal process is WEDCAL handoff in FROCAL Issue #8, then explicit consumer acknowledgement, exact pin and paired acceptance. Coordination request: WEDCAL Issue #32.
+- WEDCAL runtime/contract checkout: **`07876b3ebfa7ef4ede8d354682ae49add7a23150`**, [Draft #33](https://github.com/hassan-anari/WEDCAL/pull/33).
+- [Published contract](https://github.com/hassan-anari/WEDCAL/blob/07876b3ebfa7ef4ede8d354682ae49add7a23150/docs/POST_B6_HOTFIX_CONTRACT.md); OpenAPI SHA-256 **`53c6bd407741156e6d81a8cfb9b4c856c7420c97a3f251dd1c60a5702c7a960d`**.
+- [Formal handoff](https://github.com/hassan-anari/FROCAL/issues/8#issuecomment-6244411819), [consumer acknowledgement](https://github.com/hassan-anari/FROCAL/issues/8#issuecomment-6244416908), [six green backend checks](https://github.com/hassan-anari/FROCAL/issues/8#issuecomment-6247316643). Backend hosted: 1132 tests, separate opt-in benchmark passed.
+- Separate `scripts/contracts/post-b6-pin.json`, verbatim source/OpenAPI copies and generated `postB6Schemas.ts` protect this integration. Historical B2–B6 pins and schemas remain unchanged. No backend edit, migration, configuration/economic change, deployment or live Telegram operation.
 
-The existing B6 checkout pin **`589210a8e28436c2110fa60b1ee9e12ddb05ccc8`** remains unchanged. It is not a post-B6 pin. No speculative backend fields/error codes or early category requests are introduced.
+## Resulting behavior
 
-Pending: server-filtered Network History cache/query and returned cursor, governance readiness/actionable conflicts, exact successor OpenAPI/fixtures/runtime pin and fresh paired tests. Until that handoff, the retained client filter and unfiltered History endpoint are known existing limitations. Base individual rewards and `/clans/activity` remain separate.
+**Network History.** Every page uses `category=network`; SQL filtering precedes pagination. The query/cache is separate from Base's unfiltered individual ledger and scoped by authenticated session/player/Season/config/category. The returned cursor is passed unchanged, with a repeated/increasing-cursor safety stop. Null terminates pagination. No client source filtering or scanning through unrelated pages remains. Compact preview and full sheet share the filtered query, including signed and zero XP.
 
-## Validation in progress
+Confirmed History row DOM remains mounted during refresh, pagination and continuation errors. Only initial empty loading uses the list loader. Load More owns pagination progress. Fetch-time disabling plus a synchronous query/observer guard prevents manual/intersection duplicates. Native activation, visibility and focus coalesce a foreground refresh; no account's rows become another account's placeholder data.
 
-- Focused: 6 files / 50 tests passed.
-- Retained B6 async/history: 14 browser scenarios passed.
-- Full `npm run check`: 49 files / 358 tests passed; build/bundle completion pending.
-- Main baseline captures: 3 widths passed (320/390/460 px, 740 px height), immutable base checkout.
-- New mobile functional/visual checks and complete hosted CI pending. Screenshots in `docs/evidence/post-b6/`.
+**Clan equipment.** FACILITIES displays real authoritative TIMED item names: one name, or `name +N` distinct additional items. Multiple effect categories from one item count once. Without effective timed items it sums owned unused quantities, including `0 items`; Shop availability and consumed CONTEXT uses do not become inventory. Expired, not-yet-started and ineffective effects are excluded. EFFECTS consistently counts effective timed **effect rows**, separate from distinct facility items. Current server time plus monotonic elapsed time updates the metrics after query refresh, activation/purchase reconciliation, expiry and foreground resume. Inventory permissions, prices and economic calculations remain server-owned.
 
-The local browser is system Chromium because the environment policy denied the Playwright CDN download. Hosted CI installs Playwright's browser normally. Physical Telegram-device testing is not claimed.
+**Header.** Reduced top margin, an aligned 32px status control, tighter title/subtitle rhythm and wrapping long Clan names preserve the branded typography, hero, artwork, icons, animations and navigation. At 320/390/460px, header height changed from 87.2/91.1/96.3px to 79.7/80.8/85.4px. Long-name and short WebView checks assert no horizontal overflow. Base/Profile/Arena comparisons remain within the existing 0.2% visual threshold.
+
+**Soldier leave.** A confirmed POST, including 204/null, is final success. Departed membership is fenced before reconciliation; old reads are cancelled and obsolete Clan caches removed. Late old membership responses and 401/403 from obsolete scoped reads cannot flash Headquarters or turn success into a failed mutation. Current role/membership/requests refresh independently of nonessential account projections. A genuine mutation failure preserves membership and meaningful feedback. Only essential current-state recovery failure adds a successful-leave refresh notice. Successful immediate dissolution uses the same committed-departure cleanup.
+
+**Arena freshness.** Native Telegram activation, visibility and focus coalesce one ranking refresh. Confirmed departure discards the complete cached live Clan-ranking snapshot. No individual rows are filtered, and the server's ranks, counts and cursors remain unchanged. Unit/browser coverage deliberately retains a server-ranked zero-member Clan, then verifies the replacement response on foreground and SPA reload. This demonstrates frontend freshness, not the pending backend lifecycle correction. `arena-successor.acceptance.ts` is prepared but deliberately excluded from pairing until the successor contract is published; it checks actual projection consumption, ranks, count, pagination, own standing and cold rebuild. Archive and QA-permit acceptance remain pending the exact successor contract.
+
+**Governance and irreversible dissolution.** Server readiness supplies actual pinned policy, minimum/current electorate, per-target removal counts, blocked codes and existing cases. No quorum or singleton decision is calculated from roster size. Captain/eligibility/moderation/recovery restrictions remain. Missing readiness disables destructive actions, including against historical backend versions.
+
+- IMMEDIATE explicitly says dissolution happens now without a vote and displays the server's same-Season recreation warning. Cancellation/close is the default; an unchecked acknowledgement is required before the distinct destructive **Dissolve now** action.
+- VOTE_REQUIRED explains that confirmation opens a case while the Clan stays active. The action says **Open dissolution vote**.
+- BLOCKED disables action and displays the server-derived reason and required/current voter counts. Removal uses its target-specific electorate.
+
+Opening confirmation refreshes preflight; submission refreshes again. Acknowledgement is bound to the exact config/action snapshot. Changed outcome/count/policy/warning requires renewed review; blocked or failed preflight cannot POST. The backend still revalidates under its own locks. A real 409 race stays rejected, shows actionable feedback and refreshes readiness; no case, member removal or dissolution is fabricated optimistically.
+
+**Notifications.** Meaningful server title/body remains preferred. Blank legacy fields use the published 15-event Clan copy catalog, with safe generic fallbacks for unknown events. Invite-ready explains secure Clan Status and membership verification. Notification navigation consumes only safe internal deep links; invite-ready always uses `/clan`. Payload URLs/credentials never enter copy or navigation; credential-bearing legacy copy is replaced safely. Existing sequential numbering and read IDs remain unchanged.
+
+**Distinct feeds and routing.** Network Creator/Speaker history, Base individual rewards and canonical authenticated `/clans/activity` remain separate. `vercel.json` is byte-identical to main (Git blob `aabb865152cba4e42a455323ccefa57fbf71510d`); PR #7 slash routing and B6 SPA behavior remain.
+
+## Validation and evidence
+
+- Full local `npm run check`: **370 unit tests / 50 files**, structure/assets/import/motion, production/routing policy, all exact pin/schema drift checks, TypeScript, production build and bundle exclusion passed. Official Telegram SDK validation and Python bootstrap fixture checks passed.
+- Retained B6 async/history browser selection passed 14 cases before server-filter integration; retained B5 data/browser selection passed **9** after separate-cache integration.
+- Immutable-main baseline: **3 widths**, 320/390/460 x 740, from the exact base checkout. Hotfix browser checks and exact-backend pairing are reported in the final PR CI table.
+- Latest local hotfix browser/visual run: **14 passed**, including foreground/reload Arena refresh, History DOM preservation, equipment expiry and 640px-high destructive confirmation at all three widths. [Review gallery](evidence/post-b6/README.md) and [hash manifest](evidence/post-b6/manifest.json).
+- `docs/evidence/post-b6/` contains before/after header, long-title, equipment, preserved Base/Profile/Arena, Soldier cooldown, History and destructive-warning images. Final manifest records hashes and provenance. Fresh actual-backend HTTP and mobile evidence are retained by the paired CI artifact.
+- Local **baseline** post-B6 pairing against exact `07876b3`: **360 backend tests, 29 HTTP/client tests, 30 browser tests passed**. The dedicated job uses the exact detached checkout, isolated PostgreSQL/Redis, real authenticated Django HTTP/client schemas and synthetic external Telegram boundaries. It retains B5/B6 lifecycle/economy/source-time suites and adds filtering/legacy-copy/all-three-dissolution-state/stale-preflight/409 coverage. Sanitized HTTP responses and 15 actual-backend mobile captures are in `docs/evidence/post-b6/paired/`. These are not final successor acceptance.
+
+Initial local validation caught test-only mistakes (an unadvanced server-time fixture, Testing Library option types, a paired actor type and an accidental notification-count expectation). They were corrected without weakening assertions. One simultaneous preview attempt hit an occupied test port; the baseline server completed and the isolated rerun passed. Local system Chromium is used because the environment denied the Playwright CDN; hosted CI installs the pinned Playwright browser.
+
+Hosted run `39109346091` passed five jobs but exposed three test issues: per-project Playwright ignores overrode the general hotfix exclusion; a retained B6 ballot assertion read before the actual write completed; and the new HTTP fixture's 49 real reward writes exceeded its initial 30-second budget. Explicit project exclusions, polling for the committed ballot and a bounded 120-second budget for that multi-write case correct those issues. The full replacement run is linked from PR #10; no failed or older run is presented as final green CI.
+
+Physical Telegram-device certification is not claimed. Production still needs separately approved compatible backend/frontend rollout; an older backend can ignore the new category parameter. No merge/deploy is authorized by this report.

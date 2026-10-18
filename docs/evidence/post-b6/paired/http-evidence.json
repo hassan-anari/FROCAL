@@ -1,0 +1,546 @@
+{
+  "network": {
+    "first": {
+      "items": [
+        {
+          "id": 120,
+          "source_type": "NETWORK_SPEAKER",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:08.127Z"
+        },
+        {
+          "id": 119,
+          "source_type": "CREATOR",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:07.412Z"
+        },
+        {
+          "id": 118,
+          "source_type": "NETWORK_SPEAKER",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:06.719Z"
+        },
+        {
+          "id": 117,
+          "source_type": "CREATOR",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:06.029Z"
+        },
+        {
+          "id": 116,
+          "source_type": "NETWORK_SPEAKER",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:05.346Z"
+        },
+        {
+          "id": 115,
+          "source_type": "CREATOR",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:04.659Z"
+        },
+        {
+          "id": 114,
+          "source_type": "NETWORK_SPEAKER",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:03.965Z"
+        },
+        {
+          "id": 113,
+          "source_type": "CREATOR",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:03.258Z"
+        },
+        {
+          "id": 112,
+          "source_type": "NETWORK_SPEAKER",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:02.588Z"
+        },
+        {
+          "id": 111,
+          "source_type": "CREATOR",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:01.919Z"
+        },
+        {
+          "id": 110,
+          "source_type": "NETWORK_SPEAKER",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:01.258Z"
+        },
+        {
+          "id": 109,
+          "source_type": "CREATOR",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:00.598Z"
+        },
+        {
+          "id": 108,
+          "source_type": "NETWORK_SPEAKER",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:01:59.939Z"
+        },
+        {
+          "id": 107,
+          "source_type": "CREATOR",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:01:59.263Z"
+        },
+        {
+          "id": 106,
+          "source_type": "NETWORK_SPEAKER",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:01:58.591Z"
+        },
+        {
+          "id": 105,
+          "source_type": "CREATOR",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:01:57.910Z"
+        },
+        {
+          "id": 104,
+          "source_type": "NETWORK_SPEAKER",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:01:57.224Z"
+        },
+        {
+          "id": 103,
+          "source_type": "CREATOR",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:01:56.520Z"
+        },
+        {
+          "id": 102,
+          "source_type": "NETWORK_SPEAKER",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:01:55.849Z"
+        },
+        {
+          "id": 101,
+          "source_type": "CREATOR",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:01:55.183Z"
+        }
+      ],
+      "next_cursor": 101
+    },
+    "second": {
+      "items": [
+        {
+          "id": 100,
+          "source_type": "NETWORK_SPEAKER",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:01:54.515Z"
+        },
+        {
+          "id": 99,
+          "source_type": "CREATOR",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:01:53.859Z"
+        },
+        {
+          "id": 98,
+          "source_type": "NETWORK_SPEAKER",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:01:53.206Z"
+        }
+      ],
+      "next_cursor": null
+    },
+    "empty": {
+      "items": [],
+      "next_cursor": null
+    },
+    "base": {
+      "items": [
+        {
+          "id": 145,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:24.994Z"
+        },
+        {
+          "id": 144,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:24.338Z"
+        },
+        {
+          "id": 143,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:23.682Z"
+        },
+        {
+          "id": 142,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:23.032Z"
+        },
+        {
+          "id": 141,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:22.369Z"
+        },
+        {
+          "id": 140,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:21.714Z"
+        },
+        {
+          "id": 139,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:21.039Z"
+        },
+        {
+          "id": 138,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:20.370Z"
+        },
+        {
+          "id": 137,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:19.698Z"
+        },
+        {
+          "id": 136,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:19.047Z"
+        },
+        {
+          "id": 135,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:18.389Z"
+        },
+        {
+          "id": 134,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:17.729Z"
+        },
+        {
+          "id": 133,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:17.067Z"
+        },
+        {
+          "id": 132,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:16.409Z"
+        },
+        {
+          "id": 131,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:15.740Z"
+        },
+        {
+          "id": 130,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:15.078Z"
+        },
+        {
+          "id": 129,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:14.188Z"
+        },
+        {
+          "id": 128,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:13.524Z"
+        },
+        {
+          "id": 127,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:12.868Z"
+        },
+        {
+          "id": 126,
+          "source_type": "DAILY",
+          "context": "TEST",
+          "player_amount": 1,
+          "occurred_at": "2026-10-18T08:02:12.212Z"
+        }
+      ],
+      "next_cursor": 126
+    }
+  },
+  "immediate": {
+    "governance": {
+      "config_version": "b2-paired",
+      "config_checksum": "148b8fd1602e184d1ae021222ef83fcf3d212f41c7205eb26db9851ce79507e7",
+      "minimum_eligible_voters": 3,
+      "quorum_bps": 4000,
+      "approval_bps": 6000,
+      "vote_duration_hours": 24,
+      "dissolution": {
+        "can_open": true,
+        "blocked_reason": null,
+        "eligible_count": 1,
+        "existing_case_id": null,
+        "direct": true,
+        "outcome": "IMMEDIATE",
+        "same_season_recreation_allowed": false,
+        "confirmation_warning": "Dissolution permanently ends this ClanSeason. You cannot create another Clan in the same Season."
+      },
+      "removal_targets": []
+    },
+    "reasons": [],
+    "captain_authority_lost_at": null,
+    "can_verify_authority": true,
+    "state": "ACTIVE",
+    "reason": "",
+    "started_at": null,
+    "bot_admin_restore_deadline": null,
+    "home_integrity_available": true
+  },
+  "blocked": {
+    "governance": {
+      "config_version": "b2-paired",
+      "config_checksum": "148b8fd1602e184d1ae021222ef83fcf3d212f41c7205eb26db9851ce79507e7",
+      "minimum_eligible_voters": 3,
+      "quorum_bps": 4000,
+      "approval_bps": 6000,
+      "vote_duration_hours": 24,
+      "dissolution": {
+        "can_open": false,
+        "blocked_reason": "CLAN_GOVERNANCE_INSUFFICIENT_VOTERS",
+        "eligible_count": 2,
+        "existing_case_id": null,
+        "direct": false,
+        "outcome": "BLOCKED",
+        "same_season_recreation_allowed": false,
+        "confirmation_warning": "Dissolution permanently ends this ClanSeason. You cannot create another Clan in the same Season."
+      },
+      "removal_targets": [
+        {
+          "can_open": false,
+          "blocked_reason": "CLAN_GOVERNANCE_INSUFFICIENT_VOTERS",
+          "eligible_count": 1,
+          "existing_case_id": null,
+          "target_membership_id": 42
+        }
+      ]
+    },
+    "reasons": [],
+    "captain_authority_lost_at": null,
+    "can_verify_authority": true,
+    "state": "ACTIVE",
+    "reason": "",
+    "started_at": null,
+    "bot_admin_restore_deadline": null,
+    "home_integrity_available": true
+  },
+  "vote": {
+    "readiness": {
+      "governance": {
+        "config_version": "b2-paired",
+        "config_checksum": "148b8fd1602e184d1ae021222ef83fcf3d212f41c7205eb26db9851ce79507e7",
+        "minimum_eligible_voters": 3,
+        "quorum_bps": 4000,
+        "approval_bps": 6000,
+        "vote_duration_hours": 24,
+        "dissolution": {
+          "can_open": true,
+          "blocked_reason": null,
+          "eligible_count": 4,
+          "existing_case_id": null,
+          "direct": false,
+          "outcome": "VOTE_REQUIRED",
+          "same_season_recreation_allowed": false,
+          "confirmation_warning": "Dissolution permanently ends this ClanSeason. You cannot create another Clan in the same Season."
+        },
+        "removal_targets": [
+          {
+            "can_open": true,
+            "blocked_reason": null,
+            "eligible_count": 3,
+            "existing_case_id": null,
+            "target_membership_id": 44
+          },
+          {
+            "can_open": true,
+            "blocked_reason": null,
+            "eligible_count": 3,
+            "existing_case_id": null,
+            "target_membership_id": 45
+          },
+          {
+            "can_open": true,
+            "blocked_reason": null,
+            "eligible_count": 3,
+            "existing_case_id": null,
+            "target_membership_id": 46
+          }
+        ]
+      },
+      "reasons": [],
+      "captain_authority_lost_at": null,
+      "can_verify_authority": true,
+      "state": "ACTIVE",
+      "reason": "",
+      "started_at": null,
+      "bot_admin_restore_deadline": null,
+      "home_integrity_available": true
+    },
+    "opened": {
+      "id": 2,
+      "case_type": "CAPTAIN_DISSOLUTION",
+      "status": "OPEN",
+      "voting_deadline": "2026-10-19T08:02:36.128Z",
+      "quorum_bps": 4000,
+      "approval_bps": 6000,
+      "minimum_eligible_voters": 3,
+      "eligible_count": 4,
+      "reason": "CAPTAIN_REQUEST",
+      "target_membership_id": null,
+      "target_first_name": null,
+      "target_username": null,
+      "is_eligible_voter": true,
+      "own_vote": null,
+      "yes_count": null,
+      "no_count": null,
+      "valid_cast_count": null,
+      "result": null
+    }
+  },
+  "notifications": {
+    "list": {
+      "items": [
+        {
+          "deep_link": {
+            "path": "/clan"
+          },
+          "id": "b3f94513-94ba-4756-9874-e7f07fe8f980",
+          "type": "CLAN_INVITE_READY",
+          "title": "Clan invitation ready",
+          "body": "Open Clan Status in the app to securely access your personal invitation. Joining Telegram still requires membership verification.",
+          "payload": {
+            "invite_id": 21
+          },
+          "created_at": "2026-10-18T08:02:37.962Z",
+          "read_at": null,
+          "unread": true
+        },
+        {
+          "deep_link": {
+            "path": "/clan"
+          },
+          "id": "dc96e7e4-169e-4700-903b-4b313b2e6345",
+          "type": "CLAN_JOIN_ACCEPTED",
+          "title": "Clan request accepted",
+          "body": "Your request was accepted. Open Clan Status to check your invitation and next steps.",
+          "payload": {},
+          "created_at": "2026-10-18T08:02:37.926Z",
+          "read_at": null,
+          "unread": true
+        }
+      ],
+      "next_cursor": null,
+      "unread_count": 2
+    },
+    "read": {
+      "deep_link": {
+        "path": "/clan"
+      },
+      "id": "b3f94513-94ba-4756-9874-e7f07fe8f980",
+      "type": "CLAN_INVITE_READY",
+      "title": "Clan invitation ready",
+      "body": "Open Clan Status in the app to securely access your personal invitation. Joining Telegram still requires membership verification.",
+      "payload": {
+        "invite_id": 21
+      },
+      "created_at": "2026-10-18T08:02:37.962Z",
+      "read_at": "2026-10-18T08:02:38.055Z",
+      "unread": false
+    }
+  },
+  "legacy_notification": {
+    "list": {
+      "deep_link": {
+        "path": "/clan"
+      },
+      "id": "63415bb0-7507-462b-80fd-2cf505537e21",
+      "type": "CLAN_INVITE_READY",
+      "title": "Clan invitation ready",
+      "body": "Open Clan Status in the app to securely access your personal invitation. Joining Telegram still requires membership verification.",
+      "payload": {
+        "path": "/clan"
+      },
+      "created_at": "2026-10-18T08:02:38.724Z",
+      "read_at": null,
+      "unread": true
+    },
+    "read": {
+      "deep_link": {
+        "path": "/clan"
+      },
+      "id": "63415bb0-7507-462b-80fd-2cf505537e21",
+      "type": "CLAN_INVITE_READY",
+      "title": "Clan invitation ready",
+      "body": "Open Clan Status in the app to securely access your personal invitation. Joining Telegram still requires membership verification.",
+      "payload": {
+        "path": "/clan"
+      },
+      "created_at": "2026-10-18T08:02:38.724Z",
+      "read_at": "2026-10-18T08:02:38.780Z",
+      "unread": false
+    }
+  }
+}
