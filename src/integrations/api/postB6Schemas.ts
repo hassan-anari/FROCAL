@@ -2,6 +2,7 @@
 import { z } from "zod";
 
 export const StateOut = z.object({
+  "qa_recreation_authorization_available": z.boolean().optional(),
   "enabled": z.boolean(),
   "eligible": z.boolean(),
   "role": z.union([z.string(), z.null()]),

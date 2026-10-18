@@ -147,6 +147,9 @@ if B6:
 def control(data):
     global offset, config, season
     action = data.get("action", "player")
+    if B6 and os.environ.get("POST_B6_BACKEND_ROOT") and action in {"post-b6-qa-grant", "post-b6-archive"}:
+        from post_b6_controls import control as successor_control
+        return successor_control(data, globals())
     if B6 and os.environ.get("POST_B6_BACKEND_ROOT") and action == "post-b6-legacy-notification":
         from apps.notifications.models import Notification
         owner = Player.objects.get(telegram_user_id=int(data["player"]))

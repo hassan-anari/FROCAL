@@ -454,6 +454,8 @@ function CaptainFounding({
   const [tag, setTag] = useState("");
   const [motto, setMotto] = useState("Move together. Hold the line.");
   const [accent, setAccent] = useState<ClanSummary["accent"]>("cyan");
+  const recreationNotice = live?.state.data?.qa_recreation_authorization_available === true
+    ? <p role="status" className={styles.foundingIntro}>A one-time Captain recreation is available this Season. Choose a different eligible Telegram group. Successful registration uses this permission.</p> : null;
 
   const selectGroup = async (group: ClanEligibleGroup) => {
     let selected = group;
@@ -499,6 +501,7 @@ function CaptainFounding({
             <p>
               Captain is a seasonal leadership path. Choose a Telegram group already known to Dalexio where the bot is an admin and you have admin authority. We verify the group from backend data; you never need to enter a Chat ID manually.
             </p>
+            {recreationNotice}
           </div>
         </section>
 
@@ -559,6 +562,7 @@ function CaptainFounding({
       <section className={styles.panel}>
         <SectionTitle eyebrow="CLAN IDENTITY" title="Finish the registration" />
         <p className={styles.foundingIntro}>The Telegram group remains the real home. These fields create the seasonal Clan identity shown inside Dexo Land.</p>
+        {recreationNotice}
         <div className={styles.formGrid}>
           <label><span>Clan name</span><input value={name} maxLength={28} onChange={(event) => setName(event.target.value)} /></label>
           <label><span>Tag</span><input value={tag} maxLength={4} onChange={(event) => setTag(event.target.value.toUpperCase())} /></label>

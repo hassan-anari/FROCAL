@@ -1,20 +1,20 @@
 {
   "repository": "hassan-anari/WEDCAL",
-  "commit": "07876b3ebfa7ef4ede8d354682ae49add7a23150",
-  "runtime_commit": "07876b3ebfa7ef4ede8d354682ae49add7a23150",
-  "status": "Original post-B6 baseline acknowledged in FROCAL Issue #8. Final acceptance awaits a NEW successor SHA for live ENDED-Clan rankings and the account-scoped single-use QA recreation permit. Historical B2\u2013B6 pins unchanged.",
+  "commit": "7c09f8f7e715339ac98e68b7b001bfe724a25a61",
+  "runtime_commit": "7c09f8f7e715339ac98e68b7b001bfe724a25a61",
+  "status": "Successor contract acknowledged in FROCAL Issue #8; all six exact-head backend checks green. Matching paired acceptance in progress. Historical B2\u2013B6 pins unchanged.",
   "files": {
     "scripts/contracts/post-b6/source/docs/POST_B6_HOTFIX_CONTRACT.md": {
       "path": "docs/POST_B6_HOTFIX_CONTRACT.md",
-      "blob": "33ab364a2aa8413b9f7c0e2d4e65a3d9b8e3f56c"
+      "blob": "48aa3d5f742cbf493524f344d22f2476f6736b9b"
     },
     "scripts/contracts/post-b6/source/apps/clans/api.py": {
       "path": "apps/clans/api.py",
-      "blob": "3a36097d3ca600d266e3d4fb4d15b17b2410bb7e"
+      "blob": "7a0ab0c99f0b7b4f5f78a8c20b3df3d07a31bdc9"
     },
     "scripts/contracts/post-b6/source/apps/clans/governance.py": {
       "path": "apps/clans/governance.py",
-      "blob": "b502ae7d28bd12d45442f333058845ef8a3a5b10"
+      "blob": "f393d2db0d690503d55babac6814c3fc789e0cd2"
     },
     "scripts/contracts/post-b6/source/apps/clans/notifications.py": {
       "path": "apps/clans/notifications.py",
@@ -50,7 +50,55 @@
     },
     "src/integrations/api/fixtures/post-b6/openapi.json": {
       "path": "docs/fixtures/b6/openapi.json",
-      "blob": "f3d5d1374c6e07ebacb7c5de9905eee3452bc69b"
+      "blob": "6db8b7a09b6782ab45989f50ea8d42c6c851656c"
+    },
+    "scripts/contracts/post-b6/source/docs/POST_B6_SUCCESSOR_OPERATOR_GUIDE.md": {
+      "path": "docs/POST_B6_SUCCESSOR_OPERATOR_GUIDE.md",
+      "blob": "bb53f3ba9154a1f7f43d74b5c2c70072e2740746"
+    },
+    "scripts/contracts/post-b6/source/apps/arena/api.py": {
+      "path": "apps/arena/api.py",
+      "blob": "50585cf41b657d42f625f112294d79939d11e0ff"
+    },
+    "scripts/contracts/post-b6/source/apps/arena/services.py": {
+      "path": "apps/arena/services.py",
+      "blob": "2e0134f1a76bf099cb7ca43f37251a745b4766b1"
+    },
+    "scripts/contracts/post-b6/source/apps/arena/management/commands/rebuild_live_clan_rankings.py": {
+      "path": "apps/arena/management/commands/rebuild_live_clan_rankings.py",
+      "blob": "896060ab481d6dfbf0fc890ddf2de8d068fad5c5"
+    },
+    "scripts/contracts/post-b6/source/apps/arena/tests/test_post_b6_dissolved_rankings.py": {
+      "path": "apps/arena/tests/test_post_b6_dissolved_rankings.py",
+      "blob": "039e57cc7ad75a4d79361c624e7c8c85692d8e56"
+    },
+    "scripts/contracts/post-b6/source/apps/clans/management/commands/grant_qa_clan_recreation.py": {
+      "path": "apps/clans/management/commands/grant_qa_clan_recreation.py",
+      "blob": "8d6055b01a2b1d7bb6deb9ed0ebb7983d23e76dc"
+    },
+    "scripts/contracts/post-b6/source/apps/clans/qa_recreation.py": {
+      "path": "apps/clans/qa_recreation.py",
+      "blob": "685e41e2748a660509a3be6b4757bd8d9d18ce5e"
+    },
+    "scripts/contracts/post-b6/source/apps/clans/services.py": {
+      "path": "apps/clans/services.py",
+      "blob": "04e7caa545b294bc0268f119eddbe4cdd02dddf8"
+    },
+    "scripts/contracts/post-b6/source/apps/clans/models.py": {
+      "path": "apps/clans/models.py",
+      "blob": "44b285268f11d31d04bcbc8dc79851e2de8cdb06"
+    },
+    "scripts/contracts/post-b6/source/apps/clans/migrations/0020_qa_recreation_grant.py": {
+      "path": "apps/clans/migrations/0020_qa_recreation_grant.py",
+      "blob": "cb4a95e8e77ca47f7cb6df8c81e087f3b09d076a"
+    },
+    "scripts/contracts/post-b6/source/apps/clans/migrations/0021_qa_grant_history_guard.py": {
+      "path": "apps/clans/migrations/0021_qa_grant_history_guard.py",
+      "blob": "857e00f584f1563115e6837043220a81761a377d"
+    },
+    "scripts/contracts/post-b6/source/apps/clans/tests/test_qa_recreation_grant.py": {
+      "path": "apps/clans/tests/test_qa_recreation_grant.py",
+      "blob": "5fbc3c2ebb6f6963c13706cd6597620839587b58"
     }
   }
 }

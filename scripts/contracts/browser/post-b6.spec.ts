@@ -9,16 +9,58 @@ async function soldier(captain: any, clan: any, group: any, activate = true) {
   const request = await api(actor, `/${clan.id}/join-requests`, "POST"); await api(captain, `/join-requests/${request.id}/decision`, "POST", { accept: true });
   if (activate) await control({ action: "b5-presence", player: actor.player, group: group.id }); return actor;
 }
-async function world(count: number) {
+async function world(count: number, name = "Actual hotfix Clan") {
   const captain = await control({ action: "player", points: 2500 }); await api(captain, "/role", "POST", { role: "CAPTAIN" }); const group = await control({ action: "b5-group", player: captain.player }); await api(captain, `/eligible-groups/${group.id}/verify`, "POST");
-  const clan = await api(captain, "/", "POST", { telegram_group_id: group.id, name: "Actual hotfix Clan", tag: crypto.randomUUID().slice(0, 8) });
+  const clan = await api(captain, "/", "POST", { telegram_group_id: group.id, name, tag: crypto.randomUUID().slice(0, 8) });
   for (let i = 0; i < count; i++) await soldier(captain, clan, group); return { captain, clan, group };
 }
-async function enter(page: Page, captain: any) {
+async function launch(page: Page, captain: any, path = "/clan") {
   await page.addInitScript(player => localStorage.setItem(`dalexio-onboarding-v1:player:${player}`, JSON.stringify({ version: 1, state: { status: "completed", step: "ready", guideIndex: 3, completedAt: "2026-01-01T00:00:00Z" } })), captain.player);
   await page.route("**/*", route => new URL(route.request().url()).hostname === "127.0.0.1" ? route.fallback() : route.abort());
-  await page.goto(`/clan#tgWebAppData=${encodeURIComponent(captain.initData)}&tgWebAppPlatform=android&tgWebAppVersion=8.0`);
+  await page.goto(`${path}#tgWebAppData=${encodeURIComponent(captain.initData)}&tgWebAppPlatform=android&tgWebAppVersion=8.0`);
+}
+async function enter(page: Page, captain: any) {
+  await launch(page, captain);
   await expect(page.getByRole("navigation", { name: "Clan headquarters sections" })).toBeVisible(); await page.getByRole("button", { name: "Clan status", exact: true }).click();
+}
+for (const width of [320, 390, 460]) {
+  test(`successor live Arena removes dissolved leader on foreground and reload at ${width}`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 740 });
+    const leader = await world(0, `Ended leader ${width}`), survivor = await world(0, `Surviving Clan ${width}`);
+    for (const [owner, gross] of [[leader, 100_000_000 + width * 1000], [survivor, 80_000_000 + width * 1000]] as const)
+      await control({ action: "b6-settle", player: owner.captain.player, gross, key: crypto.randomUUID() });
+    await control({ action: "b6-rankings", player: leader.captain.player });
+    const ranks = async () => { const r = await fetch(origin + "/api/v1/arena/rankings/clans", { headers: { Authorization: `tma ${leader.captain.initData}` } }); expect(r.ok).toBe(true); return r.json(); };
+    const before = await ranks(); expect(before.items[0]).toMatchObject({ clan_id: leader.clan.id, rank: 1 });
+    await launch(page, leader.captain, "/arena");
+    const open = async () => { await page.getByRole("button", { name: "Rankings", exact: true }).click(); await page.getByRole("button", { name: "Clans", exact: true }).click(); };
+    await open(); await expect(page.getByText(`Ended leader ${width}`, { exact: true }).first()).toBeVisible();
+    await api(leader.captain, "/dissolution", "POST"); await control({ action: "post-b6-ranking-projections" });
+    await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+    await expect(page.getByText(`Ended leader ${width}`, { exact: true })).toHaveCount(0);
+    await expect(page.getByText("No clan standing yet", { exact: true })).toBeVisible();
+    const after = await ranks(); expect(after.total_count).toBe(before.total_count - 1); expect(after.own_standing).toBeNull();
+    expect(after.items[0]).toMatchObject({ clan_id: survivor.clan.id, rank: 1 });
+    expect(after.items.map((row: any) => row.rank)).toEqual(after.items.map((_: any, i: number) => i + 1));
+    await page.reload(); await open(); await expect(page.getByText(`Ended leader ${width}`, { exact: true })).toHaveCount(0);
+    await expect(page.getByText(`Surviving Clan ${width}`, { exact: true })).toBeVisible(); await shot(page, width, "successor-live-rankings");
+  });
+  test(`successor single-use QA recreation uses the ordinary mobile registration at ${width}`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 740 }); const { captain, group: old } = await world(0);
+    await api(captain, "/dissolution", "POST"); await control({ action: "post-b6-qa-grant", player: captain.player });
+    const fresh = await control({ action: "b5-group", player: captain.player });
+    expect((await api(captain, "/eligible-groups")).some((row: any) => row.id === old.id)).toBe(false);
+    await launch(page, captain); await expect(page.getByText(/A one-time Captain recreation is available/)).toBeVisible();
+    await page.getByRole("button").filter({ hasText: "Paired Clan home" }).click();
+    await page.getByLabel("Clan name", { exact: true }).fill(`QA recreated ${width}`); await page.getByLabel("Tag", { exact: true }).fill(`R${width}`);
+    await shot(page, width, "successor-qa-registration"); await page.getByRole("button", { name: "Register clan headquarters", exact: true }).click();
+    await expect(page.getByRole("navigation", { name: "Clan headquarters sections" })).toBeVisible();
+    expect((await api(captain, "/membership/current")).clan_id).not.toBeNull();
+    expect((await api(captain, "/state")).qa_recreation_authorization_available).toBe(false);
+    expect((await api(captain, "/recovery")).governance.dissolution.outcome).toBe("IMMEDIATE");
+    await page.reload(); await expect(page.getByRole("navigation", { name: "Clan headquarters sections" })).toBeVisible();
+    expect(fresh.id).not.toBe(old.id); await shot(page, width, "successor-qa-created");
+  });
 }
 async function shot(page: Page, width: number, name: string) { const dir = `work/post-b6-paired/mobile/${width}`; mkdirSync(dir, { recursive: true }); await page.screenshot({ path: `${dir}/${name}.png`, animations: "disabled" }); expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true); }
 for (const width of [320, 390, 460]) {
