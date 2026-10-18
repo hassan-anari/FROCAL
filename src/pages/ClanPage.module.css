@@ -1347,5 +1347,6 @@
   white-space: nowrap;
 }
 .pageHeader:has(.headerTop) h1 { white-space: normal; overflow-wrap: anywhere; text-wrap: balance; font-size: clamp(1.4rem, 6vw, 1.9rem); line-height: 1.1; letter-spacing: -.045em; }
-.pageHeader:has(.headerTop) p { margin: 0; line-height: 1.35; }
+/* The 38px status button must not pull the shorter subtitle down in its grid row. */
+.pageHeader:has(.headerTop) > p { margin: 0; line-height: 1.35; align-self: start; }
 .homeHeroMetrics strong { min-width: 0; overflow-wrap: anywhere; }
