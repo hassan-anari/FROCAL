@@ -48,4 +48,16 @@ test.describe("Phase 3.1 Earn Center", () => {
     await page.getByRole("button", { name: /History/i }).click();
     await expect(page.getByRole("heading", { name: /Your recent progress/i })).toBeVisible();
   });
+  test("demo History retains every existing history type while the Network preview stays scoped", async ({ page }) => {
+    await openEarn(page);
+    const history = ["daily", "mission", "typing", "referral", "group", "system"].map((type, i) => ({ id: `demo-${i}`, type, title: `Existing ${type} reward`, description: "Local history", xp: i === 1 ? -3 : 7, createdAt: "2026-10-18T10:00:00Z" }));
+    await page.evaluate(items => localStorage.setItem("dalexio-earn-state-v2", JSON.stringify({ version: 0, state: { history: items } })), history);
+    await page.reload(); await page.getByRole("button", { name: "History", exact: true }).click();
+    const sheet = page.getByRole("dialog", { name: "Earn history" });
+    await expect(sheet.locator("article strong")).toHaveText(history.map(item => item.title));
+    await expect(sheet).toContainText("-3 XP"); await sheet.evaluate(el => el.parentElement!.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true })));
+    await page.getByRole("button", { name: "Network", exact: true }).click();
+    const preview = page.locator("section").filter({ has: page.getByRole("heading", { name: "Network History", exact: true }) });
+    await expect(preview.locator("article strong")).toHaveText(["Existing group reward"]);
+  });
 });

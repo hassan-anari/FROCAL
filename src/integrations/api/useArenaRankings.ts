@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { useTelegram } from "@/integrations/telegram/TelegramProvider";
 import { showFeedback } from "@/design-system/components/TransientFeedback";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { loadRankings } from "./arena";
@@ -7,6 +8,8 @@ import { isRemoteDataSource } from "./bootstrap";
 import { queryKeys } from "./queryKeys";
 export function useArenaRankings(mode: "players" | "clans") {
   const { scope, bootstrap } = useBootstrap();
+  const { adapter } = useTelegram();
+  const lastResume = useRef(-Infinity);
   const enabled = isRemoteDataSource() && scope.player !== "unverified" && Boolean(bootstrap.data?.featureFlags.arena && bootstrap.data.remote?.season);
   const query = useInfiniteQuery({
     queryKey: [...queryKeys.player(scope), "arena", "rankings", mode],
@@ -18,16 +21,16 @@ export function useArenaRankings(mode: "players" | "clans") {
   });
   useEffect(() => {
     if (!enabled) return;
-    let last = 0;
     const refresh = () => {
-      if (document.hidden || Date.now() - last < 1000) return;
-      last = Date.now();
+      if (document.hidden || performance.now() - lastResume.current < 1000) return;
+      lastResume.current = performance.now();
       void query.refetch({ cancelRefetch: false });
     };
+    const unsubscribe = adapter.subscribe?.("activated", refresh);
     window.addEventListener("focus", refresh);
     document.addEventListener("visibilitychange", refresh);
-    return () => { window.removeEventListener("focus", refresh); document.removeEventListener("visibilitychange", refresh); };
-  }, [enabled, query.refetch]);
+    return () => { unsubscribe?.(); window.removeEventListener("focus", refresh); document.removeEventListener("visibilitychange", refresh); };
+  }, [enabled, query.refetch, adapter]);
   useEffect(() => { if (query.error) showFeedback("Rankings couldn't load. Please try again."); }, [query.error]);
   return query;
 }

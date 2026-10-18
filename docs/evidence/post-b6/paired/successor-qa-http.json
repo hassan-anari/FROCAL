@@ -1,0 +1,54 @@
+{
+  "before": {
+    "qa_recreation_authorization_available": false,
+    "enabled": true,
+    "eligible": true,
+    "role": "CAPTAIN",
+    "cooldown_until": null,
+    "voluntary_leave_count": 0,
+    "unlock_level": 5,
+    "max_voluntary_leaves": 3,
+    "leave_cooldown_hours": 48,
+    "owner_decisions_pending": []
+  },
+  "authorized": {
+    "qa_recreation_authorization_available": true,
+    "enabled": true,
+    "eligible": true,
+    "role": "CAPTAIN",
+    "cooldown_until": null,
+    "voluntary_leave_count": 0,
+    "unlock_level": 5,
+    "max_voluntary_leaves": 3,
+    "leave_cooldown_hours": 48,
+    "owner_decisions_pending": []
+  },
+  "created": {
+    "id": 101,
+    "name": "One permitted recreation",
+    "tag": "ed7e156e",
+    "motto": "",
+    "member_count": 1,
+    "capacity": 20,
+    "accepting_members": true,
+    "rank": null,
+    "rank_status": "RECONCILING",
+    "level": 1,
+    "score": 0,
+    "state": "ACTIVE",
+    "image_url": null
+  },
+  "consumed": {
+    "qa_recreation_authorization_available": false,
+    "enabled": true,
+    "eligible": true,
+    "role": "CAPTAIN",
+    "cooldown_until": null,
+    "voluntary_leave_count": 0,
+    "unlock_level": 5,
+    "max_voluntary_leaves": 3,
+    "leave_cooldown_hours": 48,
+    "owner_decisions_pending": []
+  },
+  "replayed_grant_available": false
+}

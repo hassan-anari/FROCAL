@@ -3,7 +3,7 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import type { ReactNode } from "react";
 import { queryKeys } from "./queryKeys";
-import { useRewardHistory } from "./useRewardHistory";
+import { useRewardHistory, useNetworkRewardHistory } from "./useRewardHistory";
 const state = vi.hoisted(() => ({ player: "9001", initData: "synthetic-auth", remote: true }));
 vi.mock("./BootstrapProvider", () => ({ useBootstrap: () => ({ scope: { session: 1, player: state.player, season: "s1", config: "v1" }, bootstrap: { data: {} } }) }));
 vi.mock("./bootstrap", () => ({ isRemoteDataSource: () => state.remote }));
@@ -56,4 +56,75 @@ it("exposes errors without local rewards and prevents repeated or increasing cur
   await act(() => hook.result.current.refetch());
   await waitFor(() => expect(hook.result.current.isError).toBe(true));
   expect(hook.result.current.items).toHaveLength(1); hook.unmount(); client.clear();
+});
+it("blocks duplicate manual/intersection pagination and retains rows through an in-flight next page", async () => {
+  load.mockResolvedValueOnce({ items: [row], next_cursor: 50 });
+  const { client, wrapper } = setup(); const hook = renderHook(() => useRewardHistory(), { wrapper });
+  await waitFor(() => expect(hook.result.current.items).toHaveLength(1));
+  let finish!: (value: any) => void;
+  load.mockImplementationOnce(() => new Promise(done => { finish = done; }));
+  let first!: Promise<unknown>;
+  act(() => { first = hook.result.current.fetchNextPage(); void hook.result.current.fetchNextPage(); });
+  expect(load).toHaveBeenCalledTimes(2); expect(hook.result.current.items).toEqual([row]);
+  await act(async () => { finish({ items: [{ ...row, id: 49 }], next_cursor: null }); await first; });
+  await waitFor(() => expect(hook.result.current.items.map(item => item.id)).toEqual([50, 49]));
+  hook.unmount(); client.clear();
+});
+it("coalesces foreground refresh and keeps confirmed rows during that refresh", async () => {
+  load.mockResolvedValueOnce({ items: [row], next_cursor: null });
+  const { client, wrapper } = setup(); const hook = renderHook(() => useRewardHistory(), { wrapper });
+  await waitFor(() => expect(hook.result.current.items).toEqual([row]));
+  let finish!: (value: any) => void;
+  load.mockImplementationOnce(() => new Promise(done => { finish = done; }));
+  act(() => { window.dispatchEvent(new Event("focus")); document.dispatchEvent(new Event("visibilitychange")); });
+  expect(load).toHaveBeenCalledTimes(2); expect(hook.result.current.items).toEqual([row]);
+  await act(async () => { finish({ items: [row], next_cursor: null }); });
+  hook.unmount(); client.clear();
+});
+
+it("separates Network and Base caches and resets pagination when changing category", async () => {
+  load.mockImplementation(async (_auth, _cursor, _signal, category) => ({ items: [{ ...row, source_type: category === "network" ? "CREATOR" : "DAILY" }], next_cursor: null }));
+  const { client, wrapper } = setup();
+  const base = renderHook(() => useRewardHistory(), { wrapper });
+  const network = renderHook(() => useNetworkRewardHistory(), { wrapper });
+  await waitFor(() => expect(base.result.current.items[0]?.source_type).toBe("DAILY"));
+  await waitFor(() => expect(network.result.current.items[0]?.source_type).toBe("CREATOR"));
+  expect(load).toHaveBeenCalledTimes(2);
+  const next = renderHook(() => useNetworkRewardHistory(), { wrapper });
+  expect(next.result.current.items[0]?.source_type).toBe("CREATOR"); expect(load).toHaveBeenCalledTimes(2);
+  base.unmount(); network.unmount(); next.unmount(); client.clear();
+});
+
+it("loads global history lazily, suspends foreground reads while closed and reuses confirmed pages when reopened", async () => {
+  load.mockResolvedValue({ items: [row], next_cursor: null });
+  const { client, wrapper } = setup();
+  const hook = renderHook(({ open }) => useRewardHistory(undefined, open), { wrapper, initialProps: { open: false } });
+  act(() => { window.dispatchEvent(new Event("focus")); });
+  expect(load).not.toHaveBeenCalled();
+  hook.rerender({ open: true });
+  await waitFor(() => expect(hook.result.current.items).toEqual([row]));
+  expect(load).toHaveBeenCalledWith("synthetic-auth", null, expect.any(AbortSignal), undefined);
+  hook.rerender({ open: false });
+  act(() => { window.dispatchEvent(new Event("focus")); document.dispatchEvent(new Event("visibilitychange")); });
+  expect(load).toHaveBeenCalledTimes(1);
+  hook.rerender({ open: true });
+  expect(hook.result.current.items).toEqual([row]); expect(load).toHaveBeenCalledTimes(1);
+  hook.unmount(); client.clear();
+});
+
+it("paginates global and Network histories independently using each returned cursor", async () => {
+  load.mockImplementation(async (_auth, cursor, _signal, category) => ({ items: [{ ...row, id: cursor === null ? category ? 70 : 50 : cursor - 1, source_type: category ? "CREATOR" : "DAILY" }], next_cursor: cursor === null ? category ? 70 : 50 : null }));
+  const { client, wrapper } = setup();
+  const global = renderHook(() => useRewardHistory(), { wrapper });
+  const network = renderHook(() => useNetworkRewardHistory(), { wrapper });
+  await waitFor(() => expect(network.result.current.items[0]?.id).toBe(70));
+  await waitFor(() => expect(global.result.current.items[0]?.id).toBe(50));
+  await act(() => global.result.current.fetchNextPage());
+  await waitFor(() => expect(global.result.current.items.map(item => item.id)).toEqual([50, 49]));
+  expect(network.result.current.items.map(item => item.id)).toEqual([70]);
+  await act(() => network.result.current.fetchNextPage());
+  await waitFor(() => expect(network.result.current.items.map(item => item.id)).toEqual([70, 69]));
+  expect(load).toHaveBeenCalledWith("synthetic-auth", 50, expect.any(AbortSignal), undefined);
+  expect(load).toHaveBeenCalledWith("synthetic-auth", 70, expect.any(AbortSignal), "network");
+  global.unmount(); network.unmount(); client.clear();
 });

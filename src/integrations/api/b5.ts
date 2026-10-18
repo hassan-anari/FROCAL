@@ -1,10 +1,11 @@
+import { governanceReason } from "./governance";
 import { z } from "zod";
 import { apiRequest, ApiError } from "./client";
-import * as c from "./b6Schemas";
+import * as c from "./postB6Schemas";
 const errorSchema = z.object({ code: z.string(), retryable: z.boolean().optional(), retry_after_seconds: z.number().nullable().optional() });
 export class ClanApiError extends Error {
   constructor(readonly code: string, readonly status: number, readonly retryable = false, readonly retryAfter: number | null = null) {
-    super(status === 403 ? "This Clan action isn't available to your account." : code === "CLAN_RECREATION_BLOCKED" ? "A Captain cannot found another Clan in the same Season." : code === "CLAN_OWNER_DECISION_REQUIRED" ? "This Clan action is awaiting a product decision." : "Your Clan couldn't be updated. Please refresh and try again.");
+    super(governanceReason(code) ?? (status === 403 ? "This Clan action isn't available to your account." : code === "CLAN_RECREATION_BLOCKED" ? "A Captain cannot found another Clan in the same Season." : code === "CLAN_OWNER_DECISION_REQUIRED" ? "This Clan action is awaiting a product decision." : "Your Clan couldn't be updated. Please refresh and try again."));
   }
 }
 async function request<T>(initData: string | null, path: string, schema: z.ZodType<T>, options: { method?: "GET" | "POST" | "DELETE"; body?: unknown; signal?: AbortSignal } = {}): Promise<T> {

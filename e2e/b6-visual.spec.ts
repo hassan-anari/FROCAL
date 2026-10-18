@@ -27,7 +27,7 @@ for (const width of [320, 390, 460]) test(`B6 preserved scenes and corrected asy
   const status = page.getByRole("button", { name: "Clan status", exact: true });
   const dimensions = await status.evaluate(el => ({ height: el.getBoundingClientRect().height, width: el.getBoundingClientRect().width, right: el.getBoundingClientRect().right, headerRight: el.closest("header")!.getBoundingClientRect().right, iconCount: el.querySelectorAll("svg").length }));
   writeFileSync(`${dir}/${phase}-computed.json`, JSON.stringify(dimensions, null, 2) + "\n");
-  if (!before) { expect(dimensions.height).toBe(36); expect(dimensions.width).toBeLessThan(150); expect(dimensions.iconCount).toBe(1); expect(Math.abs(dimensions.right - dimensions.headerRight)).toBeLessThan(3); }
+  if (!before) { expect(dimensions.height).toBe(32); expect(dimensions.width).toBeLessThan(150); expect(dimensions.iconCount).toBe(1); expect(Math.abs(dimensions.right - dimensions.headerRight)).toBeLessThan(3); }
   await shot("captain-hq");
   // Crop the immutable HQ scene to prove header/status changes do not alter the approved scene.
   await page.locator('section').filter({ has: page.locator('h2').filter({ hasText: f.identity.name }) }).first().screenshot({ path: `${dir}/${phase}-hq-scene.png`, animations: "disabled" });
@@ -59,7 +59,7 @@ for (const width of [320, 390, 460]) test(`B6 preserved scenes and corrected asy
   await page.route("**/api/v1/rewards/history?*", async route => {
     await historyGate;
     if (historyState === "error") return route.fulfill({ status: 503, json: { code: "UNAVAILABLE" } });
-    return route.fulfill({ json: { items: historyState === "empty" ? [] : ["CREATOR", "NETWORK_SPEAKER", "DAILY"].map((source_type, i) => ({ id: 10 - i, source_type, context: "NETWORK_GROUP", player_amount: 20 - i, occurred_at: "2026-10-16T10:10:00Z" })), next_cursor: null } });
+    return route.fulfill({ json: { items: historyState === "empty" ? [] : (new URL(route.request().url()).searchParams.get("category") === "network" ? ["CREATOR", "NETWORK_SPEAKER"] : ["CREATOR", "NETWORK_SPEAKER", "DAILY"]).map((source_type, i) => ({ id: 10 - i, source_type, context: "NETWORK_GROUP", player_amount: 20 - i, occurred_at: "2026-10-16T10:10:00Z" })), next_cursor: null } });
   });
   await page.goto(launch("/earn"));
   await page.getByRole("button", { name: "History", exact: true }).click();
@@ -67,9 +67,9 @@ for (const width of [320, 390, 460]) test(`B6 preserved scenes and corrected asy
   finishHistory();
   await expect(page.getByRole("dialog")).toContainText(before ? "Rewards couldn't load." : "Earnings couldn't load."); await shot("history-error");
   historyState = "empty"; await page.reload(); await page.getByRole("button", { name: "History", exact: true }).click();
-  await expect(page.getByRole("dialog")).toContainText(before ? "No rewards yet." : "No Network earnings yet"); await shot("history-empty");
+  await expect(page.getByRole("dialog")).toContainText(before ? "No rewards yet." : "No rewards yet"); await shot("history-empty");
   historyState = "rows"; await page.reload(); await page.getByRole("button", { name: "History", exact: true }).click();
-  await expect(page.getByRole("dialog").locator("article")).toHaveCount(before ? 3 : 2); await shot("history-filtered");
+  await expect(page.getByRole("dialog").locator("article")).toHaveCount(3); await shot("history-filtered");
   const b6Standing = JSON.parse(readFileSync("src/integrations/api/fixtures/b6/clan-standing-http.json", "utf8"));
   const b6Applicants = JSON.parse(readFileSync("src/integrations/api/fixtures/b6/applicants-http.json", "utf8"));
   const b6Activity = JSON.parse(readFileSync("src/integrations/api/fixtures/b6/activity-http.json", "utf8"));

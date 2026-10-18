@@ -1,3 +1,4 @@
+import { governanceFixture } from "../../../e2e/post-b6-fixture";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, fireEvent, render, renderHook, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
@@ -8,7 +9,7 @@ import { ClanApiError } from "./b5";
 import { OwnRequestOut } from "./b5Schemas";
 import fixture from "./fixtures/b5/clan-http.json";
 import lifecycle from "./fixtures/b5/lifecycle-http.json";
-const api = vi.hoisted(() => Object.fromEntries(["state", "membership", "ownRequests", "discover", "preview", "home", "roster", "treasury", "equipment", "missions", "trophies", "governance", "recovery", "invite", "cancelRequest", "join", "applicants", "eligibleGroups"].map(key => [key, vi.fn()])));
+const api = vi.hoisted(() => Object.fromEntries(["leave", "activity", "state", "membership", "ownRequests", "discover", "preview", "home", "roster", "treasury", "equipment", "missions", "trophies", "governance", "recovery", "invite", "cancelRequest", "join", "applicants", "eligibleGroups"].map(key => [key, vi.fn()])));
 const native = vi.hoisted(() => ({ resume: null as null | (() => void) }));
 const feedback = vi.hoisted(() => vi.fn());
 const scope = { session: 1, player: "9001", season: "s1", config: "v1" };
@@ -33,6 +34,7 @@ beforeEach(() => {
   api.ownRequests.mockImplementation(async () => rows); api.discover.mockResolvedValue([]); api.preview.mockResolvedValue({ id: 1 });
   for (const name of ["home", "roster", "treasury", "equipment", "missions", "trophies", "governance", "recovery"]) api[name].mockResolvedValue((fixture as any)[name]);
   api.invite.mockResolvedValue({ state: "ACTIVE", invite_link: "https://t.me/+PRIVATE_TEST_CREDENTIAL", delivery_state: "PENDING" });
+  api.activity.mockResolvedValue({ items: [], next_cursor: null, as_of: "2026-10-18T00:00:00Z" });
   api.applicants.mockResolvedValue([]); api.eligibleGroups.mockResolvedValue([]);
   localStorage.clear(); sessionStorage.clear();
 });
@@ -190,4 +192,115 @@ it.each([401, 403])("hides stale membership after definitive authorization denia
   await act(async () => { await hook.result.current.refresh(); });
   await waitFor(() => expect(hook.result.current.membershipDenied).toBe(true));
   expect(hook.result.current.member).toBe(false); expect(hook.result.current.applicationsBlocked).toBe(true);
+});
+
+it.each([null, "unauthorized"])("treats confirmed leave as final and removes old Clan content (%s)", async oldReads => {
+  rows = []; member = { ...fixture["membership/current"], role: "SOLDIER" };
+  const { wrapper } = setup(); const hook = renderHook(() => useClanRemote(), { wrapper });
+  await waitFor(() => expect(hook.result.current.home.isSuccess).toBe(true));
+  const oldCalls = api.home.mock.calls.length;
+  api.leave.mockImplementationOnce(async () => {
+    member = null; api.state.mockResolvedValue({ ...fixture.state, role: "SOLDIER", cooldown_until: "2026-10-18T10:00:00Z", voluntary_leave_count: 1 });
+    for (const name of ["home", "roster", "treasury", "equipment", "missions", "trophies", "governance", "recovery"]) api[name].mockRejectedValue(new ClanApiError("CLAN_FORBIDDEN", oldReads ? 403 : 401));
+    return null;
+  });
+  let outcome: unknown;
+  await act(async () => { outcome = await hook.result.current.run("leave", () => hook.result.current.api.leave()); });
+  expect(outcome).toBeNull(); expect(hook.result.current.member).toBe(false); expect(hook.result.current.membership.data).toBeNull();
+  expect(hook.result.current.state.data?.cooldown_until).toBe("2026-10-18T10:00:00Z");
+  expect(api.home.mock.calls.length).toBe(oldCalls);
+  expect(feedback).toHaveBeenCalledWith("You left the Clan.", "success");
+  expect(feedback).not.toHaveBeenCalledWith(expect.stringContaining("couldn't"), expect.anything());
+  await act(async () => { native.resume?.(); });
+  expect(hook.result.current.member).toBe(false); expect(api.home.mock.calls.length).toBe(oldCalls);
+});
+it("fences stale membership responses after leave without inventing a new role or cooldown", async () => {
+  rows = []; member = { ...fixture["membership/current"], role: "SOLDIER" };
+  const { wrapper } = setup(); const hook = renderHook(() => useClanRemote(), { wrapper });
+  await waitFor(() => expect(hook.result.current.member).toBe(true)); api.leave.mockResolvedValueOnce(null);
+  await act(async () => { await hook.result.current.run("leave", () => hook.result.current.api.leave()); });
+  expect(hook.result.current.member).toBe(false); expect(hook.result.current.membership.data).toBeNull();
+  await act(async () => { await hook.result.current.refresh(); });
+  expect(hook.result.current.member).toBe(false); expect(hook.result.current.membership.data).toBeNull();
+});
+it("reports actual mutation failure and preserves membership", async () => {
+  rows = []; member = { ...fixture["membership/current"], role: "SOLDIER" };
+  const { wrapper } = setup(); const hook = renderHook(() => useClanRemote(), { wrapper });
+  await waitFor(() => expect(hook.result.current.member).toBe(true));
+  api.leave.mockRejectedValueOnce(new ClanApiError("CLAN_FORBIDDEN", 403));
+  await act(async () => { expect(await hook.result.current.run("leave", () => hook.result.current.api.leave())).toBeUndefined(); });
+  expect(hook.result.current.member).toBe(true); expect(feedback).toHaveBeenCalledWith(expect.stringContaining("isn't available"));
+  expect(feedback).not.toHaveBeenCalledWith("You left the Clan.", "success");
+});
+it("shows a refresh warning only when essential new status fails after the leave committed", async () => {
+  rows = []; member = { ...fixture["membership/current"], role: "SOLDIER" };
+  const { wrapper } = setup(); const hook = renderHook(() => useClanRemote(), { wrapper });
+  await waitFor(() => expect(hook.result.current.member).toBe(true));
+  api.leave.mockImplementationOnce(async () => { member = null; api.state.mockRejectedValue(new Error("state unavailable")); return null; });
+  await act(async () => { expect(await hook.result.current.run("leave", () => hook.result.current.api.leave())).toBeNull(); });
+  expect(hook.result.current.member).toBe(false);
+  expect(feedback).toHaveBeenCalledWith("You left the Clan. Current status couldn't refresh. Retry from Clan status.", "info");
+});
+it.each([401, 403])("accepts obsolete membership denial %s after a confirmed departure", async status => {
+  rows = []; member = { ...fixture["membership/current"], role: "SOLDIER" };
+  const { wrapper } = setup(); const hook = renderHook(() => useClanRemote(), { wrapper });
+  await waitFor(() => expect(hook.result.current.member).toBe(true));
+  api.leave.mockImplementationOnce(async () => {
+    api.membership.mockRejectedValue(new ClanApiError("CLAN_FORBIDDEN", status));
+    api.state.mockResolvedValue({ ...fixture.state, role: "SOLDIER", cooldown_until: "2026-10-18T10:00:00Z" });
+    return null;
+  });
+  await act(async () => { await hook.result.current.run("leave", () => hook.result.current.api.leave()); });
+  expect(hook.result.current.membership.isError).toBe(false); expect(hook.result.current.member).toBe(false);
+  expect(feedback).toHaveBeenCalledWith("You left the Clan.", "success");
+});
+it("defaults dissolution to cancellation and requires acknowledgement of the Season restriction", async () => {
+  rows = []; member = fixture["membership/current"]; api.state.mockResolvedValue(fixture.state);
+  api.recovery.mockResolvedValue({ ...fixture.recovery, governance: governanceFixture() });
+  const { wrapper } = setup(); render(<Status />, { wrapper });
+  const start = await screen.findByRole("button", { name: "Request dissolution" });
+  await waitFor(() => expect(start).toBeEnabled()); fireEvent.click(start);
+  expect(screen.getByRole("dialog")).toHaveTextContent("You cannot create another Clan in the same Season");
+  expect(screen.getByRole("button", { name: "Dissolve now" })).toBeDisabled();
+  fireEvent.click(screen.getByRole("checkbox", { name: "I understand the current-Season recreation restriction." }));
+  expect(screen.getByRole("button", { name: "Dissolve now" })).toBeEnabled();
+  fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+  fireEvent.click(await screen.findByRole("button", { name: "Request dissolution" }));
+  expect(screen.getByRole("button", { name: "Dissolve now" })).toBeDisabled();
+});
+it.each(["IMMEDIATE", "VOTE_REQUIRED", "BLOCKED"] as const)("uses authoritative %s dissolution readiness rather than roster size", async outcome => {
+  rows = []; member = fixture["membership/current"]; api.state.mockResolvedValue(fixture.state);
+  api.recovery.mockResolvedValue({ ...fixture.recovery, governance: governanceFixture(outcome) });
+  const { wrapper } = setup(); render(<Status />, { wrapper });
+  const start = await screen.findByRole("button", { name: "Request dissolution" });
+  if (outcome === "BLOCKED") {
+    await waitFor(() => expect(screen.getByLabelText("Governance prerequisites")).toHaveTextContent("not enough eligible voters"));
+    expect(start).toBeDisabled(); expect(screen.getByLabelText("Governance prerequisites")).toHaveTextContent("3"); return;
+  }
+  await waitFor(() => expect(start).toBeEnabled()); fireEvent.click(start);
+  await waitFor(() => expect(screen.getByRole("checkbox")).toBeEnabled());
+  const confirm = screen.getByRole("button", { name: outcome === "IMMEDIATE" ? "Dissolve now" : "Open dissolution vote" });
+  expect(confirm).toBeDisabled();
+  expect(screen.getByRole("dialog")).toHaveTextContent(outcome === "IMMEDIATE" ? "There is no vote" : "opens a governance vote");
+});
+it("revalidates changed readiness at submit and never posts an immediate dissolution based on an older confirmation", async () => {
+  rows = []; member = fixture["membership/current"]; api.state.mockResolvedValue(fixture.state);
+  api.recovery.mockResolvedValue({ ...fixture.recovery, governance: governanceFixture("IMMEDIATE") });
+  const { wrapper } = setup(); render(<Status />, { wrapper });
+  const start = await screen.findByRole("button", { name: "Request dissolution" }); await waitFor(() => expect(start).toBeEnabled()); fireEvent.click(start);
+  const checkbox = screen.getByRole("checkbox"); await waitFor(() => expect(checkbox).toBeEnabled()); fireEvent.click(checkbox);
+  api.recovery.mockResolvedValue({ ...fixture.recovery, governance: governanceFixture("VOTE_REQUIRED") });
+  fireEvent.click(screen.getByRole("button", { name: "Dissolve now" }));
+  await waitFor(() => expect(screen.getByRole("button", { name: "Open dissolution vote" })).toBeDisabled());
+  expect(screen.getByRole("checkbox")).not.toBeChecked();
+  expect(feedback).toHaveBeenCalledWith(expect.stringContaining("Clan status changed"), "info");
+});
+it.each(["leave", "create"])("discards the complete stale Clan ranking cache after confirmed %s without filtering rows", async action => {
+  rows = []; member = { ...fixture["membership/current"], role: "SOLDIER" };
+  const { wrapper } = setup(); const hook = renderHook(() => useClanRemote(), { wrapper });
+  await waitFor(() => expect(hook.result.current.member).toBe(true));
+  const key = ["player", scope.session, scope.player, scope.season, scope.config, "arena", "rankings", "clans"];
+  client.setQueryData(key, { pages: [{ items: [{ clan_id: 1, rank: 1 }], own_standing: { rank: 1 }, total_count: 1 }] });
+  await act(async () => { await hook.result.current.run(action, async () => { if (action === "leave") member = null; return action === "leave" ? null : { id: 2 }; }); });
+  expect(client.getQueryData(key)).toBeUndefined();
 });

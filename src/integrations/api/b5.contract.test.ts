@@ -74,3 +74,8 @@ it("uses the actual single-application conflict envelope without exposing backen
   vi.mocked(apiRequest).mockResolvedValueOnce(new Response(JSON.stringify(application.second_clan_conflict), { status: 409 }));
   await expect(clanApi("synthetic-auth").join(2)).rejects.toMatchObject({ code: "CLAN_STATE_CONFLICT", status: 409, retryable: false });
 });
+
+it.each([204, 200])("accepts confirmed Soldier leave success with %s/null", async status => {
+  vi.mocked(apiRequest).mockResolvedValueOnce(new Response(status === 204 ? null : "null", { status }));
+  await expect(clanApi("synthetic-auth").leave()).resolves.toBeNull();
+});

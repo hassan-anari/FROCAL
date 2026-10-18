@@ -46,6 +46,9 @@ jobs:
       - run: npm run test:visual:b6-baseline
       - run: npm run test:visual:b6-activity-baseline
       - run: npm run test:e2e:b6
+      - run: git worktree add --detach work/post-b6-main e481ffa7e14b980b7e1922cc2d71e64374014596
+      - run: POST_B6_BASELINE=1 npx playwright test --config playwright.post-b6.config.ts
+      - run: npm run test:e2e:post-b6
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -58,6 +61,10 @@ jobs:
             docs/evidence/b5/
             docs/evidence/b6/
             docs/evidence/b6-zero-net/
+            docs/evidence/post-b6/
+            work/post-b6-before-results.json
+            work/post-b6-after-results.json
+            work/test-results-post-b6/
             work/test-results-b6/
             work/test-results-b5/
           retention-days: 14
@@ -324,4 +331,60 @@ jobs:
         with:
           name: b6-paired-contract-results
           path: work/b6-paired/
+          retention-days: 14
+
+  paired-post-b6-contract:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: frocal_b6_ci
+          POSTGRES_USER: b6_test
+          POSTGRES_PASSWORD: isolated-test-only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U b6_test -d frocal_b6_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      POSTGRES_DB: frocal_b6_ci
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: '5432'
+      POSTGRES_USER: b6_test
+      POSTGRES_PASSWORD: isolated-test-only
+      POST_B6_BACKEND_ROOT: work/backend-post-b6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: hassan-anari/WEDCAL
+          ref: 7c09f8f7e715339ac98e68b7b001bfe724a25a61
+          path: work/backend-post-b6
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.8.22'
+      - run: uv sync --frozen --python 3.13
+        working-directory: work/backend-post-b6
+      - run: npm ci
+      - run: npm run validate:contracts
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:paired:post-b6
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: post-b6-paired-contract-results
+          path: |
+            work/post-b6-paired/
+            work/b6-paired/
           retention-days: 14

@@ -15,6 +15,7 @@ import { useTapSession } from "@/game/base/tapV2/TapSessionProvider";
 import { isRemoteDataSource } from "@/integrations/api/bootstrap";
 import {
   loadNotifications,
+  notificationDisplay,
   markNotificationRead,
   markAllNotificationsRead,
   type LiveNotification,
@@ -192,7 +193,7 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
     if (item.unread && !await markRead(item.id)) return;
     // Only the documented deep_link can select an existing internal route.
     // Payload URLs are never consumed, even when the link is absent or unsafe.
-    const link = item.deep_link?.path;
+    const link = item.type === "CLAN_INVITE_READY" ? "/clan" : item.deep_link?.path;
     const destination = link?.startsWith("/") ? safeDestination(link) : null;
     if (destination?.kind === "internal") {
       setNotificationsOpen(false);
@@ -272,6 +273,7 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
                   ) : (
                     notificationItems.map((item, index) => {
                       const tone = notificationTone(item.type);
+                      const copy = notificationDisplay(item);
                       return (
                         <button
                           key={item.id}
@@ -281,8 +283,8 @@ export function GameHeader({ compact = false }: GameHeaderProps) {
                         >
                           <span className={`${styles.notificationGlyph} ${styles[tone]}`}>{String(index + 1).padStart(2, "0")}</span>
                           <span className={styles.notificationCopy}>
-                            <span>{item.title}</span>
-                            <strong>{item.body}</strong>
+                            <span>{copy.title}</span>
+                            <strong>{copy.body}</strong>
                             <small>{relativeTime(item.created_at)} ago</small>
                           </span>
                           <HugeiconsIcon icon={ArrowRight01Icon} size={16} strokeWidth={1.7} />

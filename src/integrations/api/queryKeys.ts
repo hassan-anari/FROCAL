@@ -5,6 +5,7 @@ export const queryKeys = {
   player: (scope: PlayerScope) => ["player", scope.session, scope.player, scope.season, scope.config] as const,
   profileOverview: (scope: PlayerScope) => [...queryKeys.player(scope), "profile", "overview"] as const,
   rewardHistory: (scope: PlayerScope) => [...queryKeys.player(scope), "rewards", "history"] as const,
+  networkRewardHistory: (scope: PlayerScope) => [...queryKeys.rewardHistory(scope), "network"] as const,
   notifications: (scope: PlayerScope) => [...queryKeys.player(scope), "notifications", "feed"] as const,
   dlxBalance: (scope: PlayerScope) => [...queryKeys.player(scope), "arena", "dlx", "balance"] as const,
 };

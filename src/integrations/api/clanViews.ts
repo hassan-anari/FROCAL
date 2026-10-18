@@ -32,3 +32,13 @@ export function clanTrophy(row: c.TrophyOut): ClanAchievement {
   const editorial = clanAchievements.find(item => item.id === row.key);
   return { id: row.key, name: editorial?.name ?? row.key.replaceAll("-", " "), description: editorial?.description ?? "", current: row.available ? row.current : null, target: row.available ? row.target : null, unlocked: row.unlocked, available: row.available };
 }
+
+/** Effects counts effect rows; facilities counts distinct currently effective timed items. */
+export function clanEquipmentMetrics(equipment: c.EquipmentOut, now: number) {
+  const timed = new Map(equipment.items.filter(item => item.activation === "TIMED").map(item => [item.item_id, item]));
+  const effects = equipment.active_effects.filter(effect => timed.has(effect.item_id) && effect.effective && Date.parse(effect.starts_at) <= now && Date.parse(effect.expires_at) > now);
+  const activeItems = [...new Set(effects.map(effect => effect.item_id))];
+  const quantity = equipment.items.reduce((total, item) => total + item.quantity, 0);
+  const first = activeItems[0];
+  return { facilities: first ? `${timed.get(first)!.name}${activeItems.length > 1 ? ` +${activeItems.length - 1}` : ""}` : `${quantity} items`, effects: effects.length };
+}

@@ -1,0 +1,418 @@
+{
+  "status": "Exact successor local acceptance plus complete-ledger extension passed; final expanded-scope hosted checks linked on Draft PR #10",
+  "frontend_runtime_source_commit": "82f595759d50abf4920b260673710975bf910df7",
+  "mock_capture_source_commit": "552fab7e07e1a877ceab02c918acd0f4a66becd6",
+  "immutable_before_commit": "e481ffa7e14b980b7e1922cc2d71e64374014596",
+  "backend_commit": "7c09f8f7e715339ac98e68b7b001bfe724a25a61",
+  "superseded_backend_baseline_commit": "07876b3ebfa7ef4ede8d354682ae49add7a23150",
+  "openapi_sha256": "2db1d8094036cd5c963bf6e68215ce30031250f45e4de7d5879696765deed2b6",
+  "browser": "Chromium 154.0.8037.57 on Debian 13, local system executable",
+  "platform": "Playwright mobile/touch WebView emulation; physical Telegram devices not certified",
+  "viewports": [
+    {
+      "width": 320,
+      "height": 740
+    },
+    {
+      "width": 390,
+      "height": 740
+    },
+    {
+      "width": 460,
+      "height": 740
+    }
+  ],
+  "short_confirmation_viewports": [
+    {
+      "width": 320,
+      "height": 640
+    },
+    {
+      "width": 390,
+      "height": 640
+    },
+    {
+      "width": 460,
+      "height": 640
+    }
+  ],
+  "results": {
+    "unit_tests": 374,
+    "unit_files": 50,
+    "hotfix_browser_tests": 18,
+    "general_browser_tests": 134,
+    "paired_backend_tests": 374,
+    "paired_http_client_tests": 31,
+    "paired_browser_tests": 36,
+    "paired_browser_retries": 0,
+    "paired_browser_skips": 0,
+    "paired_browser_flakes": 0,
+    "focused_qa_capture_tests": 3,
+    "focused_global_history_paired_browser_tests": 1,
+    "focused_demo_browser_tests": 12,
+    "focused_equipment_boundary_browser_tests": 1
+  },
+  "provenance": {
+    "before-*": "Immutable latest-main worktree, synthetic authenticated fixtures",
+    "after-*, facilities-*, history-preserved.png, soldier-left.png, dissolution-warning.png": "Pinned mock-capture frontend source, synthetic authenticated fixtures; dissolution-warning.png height640",
+    "paired/*": "Actual isolated exact-successor Django HTTP backend with PostgreSQL/Redis; synthetic accounts, normal operator/creation paths, external Telegram boundary only",
+    "earn-history-button.png, global-history-mixed.png": "Additional global-history source commit; synthetic mixed ledger, canonical pagination, left official Hugeicons geometry; 320/390/460 x740",
+    "paired/390/global-history-ledger.png, paired/global-history-http.json": "Additional global-history source commit; focused actual-backend acceptance at the exact successor pin, all-source settlement records and filtered Network preview"
+  },
+  "capture_test_sources": {
+    "scripts/contracts/browser/post-b6.spec.ts": "8777ae6798005929faa2f21af6068f29083e51bbd0fd9399e878d32ec82de642",
+    "scripts/contracts/post-b6/arena-successor.paired.test.ts": "ced6732706bfee339a819dafe0ad50d716a10032da26d5905b53493b85e1a68a",
+    "e2e/post-b6-history.spec.ts": "ac7f2bc563d8c20ddf907119f92df94388b6d40cde1a1fa606e8dd4dd77a750a",
+    "src/integrations/api/useRewardHistory.ts": "b661b5668e1bf3f1a1053ea20dfcc87c833d76a0d43bab1c243f7629314a01be",
+    "src/pages/EarnPage.tsx": "ca09f40c82f36e200689142eb50984e3178812d5e8c4cc4ad981581edf905c82",
+    "e2e/post-b6.spec.ts": "550f7ca63d05a48663a1b5f0c23e60a00c4c1fef139f7ad39ef6e4b671212151"
+  },
+  "files": {
+    "320/after-clan-equipment.png": {
+      "sha256": "a6ef81e36695dff46e6eebd123499b88ef026c9a7ef6457395180312cad528e8",
+      "bytes": 167242
+    },
+    "320/after-clan-header.png": {
+      "sha256": "41d2f7f202c317a38a050c007eab2ef1321f0746654292c7ef2d4849362fff83",
+      "bytes": 230599
+    },
+    "320/after-clan-long-title.png": {
+      "sha256": "c969cf629c948c37d597450ade5708017a3d2830fe7b28801df2579396d75c7c",
+      "bytes": 238633
+    },
+    "320/after-header.json": {
+      "sha256": "aa0b382bc07be5032920eea5e6eaec8a91a56bb658ddd8950f59d33169c7b692",
+      "bytes": 121
+    },
+    "320/after-preserved-arena.png": {
+      "sha256": "d64e110e1b799d144c941ba6bdfe0883a3f7cfcb8464bf21c183e6441121f2d8",
+      "bytes": 229027
+    },
+    "320/after-preserved-base.png": {
+      "sha256": "0f0c061f76227bfaa7eec851e7146bcf91be20b93f1ce2e6994d9db9dbdbd3e1",
+      "bytes": 190790
+    },
+    "320/after-preserved-profile.png": {
+      "sha256": "b6f503a9d2fe226b7719a63ae365237b7d4f58e2891833cf4c6de59e661eca27",
+      "bytes": 193094
+    },
+    "320/before-clan-equipment.png": {
+      "sha256": "72ad2e811eb1d8145f8f2bf2519be543161522e19d06f3bd9531cbed5034aec7",
+      "bytes": 168203
+    },
+    "320/before-clan-header.png": {
+      "sha256": "926f999712a0a321fb0aab23181e676232c909a06ad48087e646dbed6939796a",
+      "bytes": 231742
+    },
+    "320/before-clan-long-title.png": {
+      "sha256": "863a1497297ceffed88a09541c9a5e66c789066c104d71035af12a8310baa1c5",
+      "bytes": 233105
+    },
+    "320/before-header.json": {
+      "sha256": "29d8f3604994e9e73c9fa3ec6c424d60631da5de73505e40eadd8d4cec68f90a",
+      "bytes": 120
+    },
+    "320/before-preserved-arena.png": {
+      "sha256": "d64e110e1b799d144c941ba6bdfe0883a3f7cfcb8464bf21c183e6441121f2d8",
+      "bytes": 229027
+    },
+    "320/before-preserved-base.png": {
+      "sha256": "0f0c061f76227bfaa7eec851e7146bcf91be20b93f1ce2e6994d9db9dbdbd3e1",
+      "bytes": 190790
+    },
+    "320/before-preserved-profile.png": {
+      "sha256": "b6f503a9d2fe226b7719a63ae365237b7d4f58e2891833cf4c6de59e661eca27",
+      "bytes": 193094
+    },
+    "320/dissolution-warning.png": {
+      "sha256": "09bdd7334b7debc1e512f7d479ac1cc45b67936766d63af515b45f2514784ce8",
+      "bytes": 103878
+    },
+    "320/earn-history-button.png": {
+      "sha256": "fca023a8fbb243379f099d8d2ad3e114981f65722c7b412e571682fb0fdd4572",
+      "bytes": 175351
+    },
+    "320/global-history-mixed.png": {
+      "sha256": "b70550104e7ef0081461f3b4c059bf9449bbf07453e2edecca64c45395dda9df",
+      "bytes": 138080
+    },
+    "320/soldier-left.png": {
+      "sha256": "b57ff8523197ad07309b4b95d86c0586723f624f9dc033d4c9ab68b9306486f6",
+      "bytes": 105976
+    },
+    "390/after-clan-equipment.png": {
+      "sha256": "ca074e14a4e6234edc844dabe2871060a47838f52b700f2c87ae2bf199b6926b",
+      "bytes": 199186
+    },
+    "390/after-clan-header.png": {
+      "sha256": "f23a1f4ee4189b44d5687501c87a556e4ebba5d065268542c8ccffb7bdb097b1",
+      "bytes": 280133
+    },
+    "390/after-clan-long-title.png": {
+      "sha256": "ad94b3ad3752b841e6ce146f81a0e18c1fe5fb42de912e5312639fbc5ee57708",
+      "bytes": 293557
+    },
+    "390/after-header.json": {
+      "sha256": "90c9993e387f84daae2809f2d999af8bd6d2fb76e9b9078f8bf2721424dd4a3d",
+      "bytes": 118
+    },
+    "390/after-preserved-arena.png": {
+      "sha256": "72080345b3d8aec8176bff62d2f333bfe4ff3eb9242ac87fc434ef3e08ff2a28",
+      "bytes": 279074
+    },
+    "390/after-preserved-base.png": {
+      "sha256": "fca7d0d62ed065645b84cc2b21769be3c74a3f04eb9f1171453abdd1cace7d86",
+      "bytes": 221878
+    },
+    "390/after-preserved-profile.png": {
+      "sha256": "fc08ce0c64c3758a8b5c23719ef9212ee0ff2866b0acdb751b0ad57a00e8c1ce",
+      "bytes": 213939
+    },
+    "390/before-clan-equipment.png": {
+      "sha256": "c6a33ae03f71ea30cb4eb8d584dd71aa509fa8f5fc4e024bdd7d1d65f6135e39",
+      "bytes": 198319
+    },
+    "390/before-clan-header.png": {
+      "sha256": "60dd8c3478e86ce48e345134ed9281ec8d8fbe08011adef1b0fefea856e7ed9e",
+      "bytes": 279699
+    },
+    "390/before-clan-long-title.png": {
+      "sha256": "6364d902d315dd775be3d2925add337dd1b918632b45d396629b8d11b33a0030",
+      "bytes": 282708
+    },
+    "390/before-header.json": {
+      "sha256": "99626b0f1240b2264a2b25772d283cacbefe20e73c915ec946c233e797386209",
+      "bytes": 121
+    },
+    "390/before-preserved-arena.png": {
+      "sha256": "72080345b3d8aec8176bff62d2f333bfe4ff3eb9242ac87fc434ef3e08ff2a28",
+      "bytes": 279074
+    },
+    "390/before-preserved-base.png": {
+      "sha256": "fca7d0d62ed065645b84cc2b21769be3c74a3f04eb9f1171453abdd1cace7d86",
+      "bytes": 221878
+    },
+    "390/before-preserved-profile.png": {
+      "sha256": "ccb8dede3e050854e2d1d29be8d1bab5aacb7a5959fbf2d7bdbe2fa0ad4fca6d",
+      "bytes": 213912
+    },
+    "390/dissolution-warning.png": {
+      "sha256": "327133d01dde2457af786f3ccd87c2871b28b6aaf1a2dc47dbfae4b57e8eae49",
+      "bytes": 115695
+    },
+    "390/earn-history-button.png": {
+      "sha256": "eff7b5f71d06ac1a37326e9055b2e46a53eaf83b87518361fb19241f686d3ab2",
+      "bytes": 197314
+    },
+    "390/facilities-empty.png": {
+      "sha256": "b136a1d1a1c2713d4567c813a25366d478ddc42e6d280b72c11bfc7b20849ddf",
+      "bytes": 344865
+    },
+    "390/facilities-owned.png": {
+      "sha256": "058eefdb64dd7f9d45f7e1e4d23a2fb23a67d5a6736c19a4d0e3d79c3e3f91b0",
+      "bytes": 360464
+    },
+    "390/global-history-mixed.png": {
+      "sha256": "57b18e6aff6938c274709927eab30f7fa749e2fedee706a50228e0af270e8596",
+      "bytes": 157972
+    },
+    "390/history-preserved.png": {
+      "sha256": "9221780d923e47675e585f8083f2a8c42931e8e02a673352c174844f04e01ac6",
+      "bytes": 198685
+    },
+    "390/soldier-left.png": {
+      "sha256": "e51acdd836f04d4e6025e423e2a031234c29d47be8c0d54ac74cde84b48030a6",
+      "bytes": 96611
+    },
+    "460/after-clan-equipment.png": {
+      "sha256": "8215d1f19f05fdc3f92c25a4a64991e55184813bae937d68452e5eefdd0e28b6",
+      "bytes": 213455
+    },
+    "460/after-clan-header.png": {
+      "sha256": "f47220e211f78a7c31434eb0f37b3bcbcb1fcbe5a3064e7212c948152ad22bbc",
+      "bytes": 307283
+    },
+    "460/after-clan-long-title.png": {
+      "sha256": "f2ad29690dceec60679b143ccfd0218cd9d912be22199eae337bcc4b286c52d3",
+      "bytes": 325214
+    },
+    "460/after-header.json": {
+      "sha256": "3037ec1ea37f8e07a4aef1c55ec21698cbed18129bb038da8dd2411a16935ac0",
+      "bytes": 122
+    },
+    "460/after-preserved-arena.png": {
+      "sha256": "59811004821fa41fa9c528eec6ceb4e6939cbbc0e31ffd6cd9bf360ff9c2f7aa",
+      "bytes": 305484
+    },
+    "460/after-preserved-base.png": {
+      "sha256": "7b8b24594a4e99b25e09945a49fcc25896326c91645920455964c72d640e60b3",
+      "bytes": 234877
+    },
+    "460/after-preserved-profile.png": {
+      "sha256": "803c3538056c67aaa696900317a8ae1e3cfb7f7f4ae5a9b9970532327250d82a",
+      "bytes": 232413
+    },
+    "460/before-clan-equipment.png": {
+      "sha256": "cde63722e98c5b8726f1e236f5943adcccdf3daecc395b836db48328fdf150ae",
+      "bytes": 212636
+    },
+    "460/before-clan-header.png": {
+      "sha256": "3d5094eea0f68364188aab00fb0822cb0fae9922f85121000dfa111b1611c637",
+      "bytes": 307604
+    },
+    "460/before-clan-long-title.png": {
+      "sha256": "58ef55e3841a4e62e5aa8c6d1dc50c5cd7f5dec2cc968082755fa3529841e5f0",
+      "bytes": 311777
+    },
+    "460/before-header.json": {
+      "sha256": "531425a65b3a29e2b9d450a291e75aed2fabf0cb94ea8771f29a8e259ae76f5a",
+      "bytes": 121
+    },
+    "460/before-preserved-arena.png": {
+      "sha256": "59811004821fa41fa9c528eec6ceb4e6939cbbc0e31ffd6cd9bf360ff9c2f7aa",
+      "bytes": 305484
+    },
+    "460/before-preserved-base.png": {
+      "sha256": "7b8b24594a4e99b25e09945a49fcc25896326c91645920455964c72d640e60b3",
+      "bytes": 234877
+    },
+    "460/before-preserved-profile.png": {
+      "sha256": "803c3538056c67aaa696900317a8ae1e3cfb7f7f4ae5a9b9970532327250d82a",
+      "bytes": 232413
+    },
+    "460/dissolution-warning.png": {
+      "sha256": "c31242d4abce88923d22c7bb42c263d697acc48031fbc4d618532d01ccb61ea2",
+      "bytes": 122988
+    },
+    "460/earn-history-button.png": {
+      "sha256": "ebced0fc00b9eef6d040451c157236d30190954188a994543bd2e2a76a1abcc1",
+      "bytes": 213938
+    },
+    "460/global-history-mixed.png": {
+      "sha256": "76c05d14262767b8958acae93adaea6ad8af71ad8a09bef1cf411ecf3af48107",
+      "bytes": 178013
+    },
+    "460/soldier-left.png": {
+      "sha256": "72c25da6ba7d0183edf70164b501e6eff13b3243367dbde5fa67b64bbc9b9850",
+      "bytes": 104275
+    },
+    "paired/320/blocked-electorate.png": {
+      "sha256": "ab9af57ae3c008d37af99990187d6d840ce75a598cc2f91e4072d5ebdf4be384",
+      "bytes": 121330
+    },
+    "paired/320/immediate-armed.png": {
+      "sha256": "6b851f7d54b53b3c1cab7cb473eee473f7547ec9f72cbd476ccc626080bf774a",
+      "bytes": 119838
+    },
+    "paired/320/immediate-complete.png": {
+      "sha256": "5b5def2eae1394dbb9ff8a560096f7eac3d7d20fc04965d68428864ad4ab7934",
+      "bytes": 102062
+    },
+    "paired/320/immediate-warning.png": {
+      "sha256": "ea34617f0ba0258210abb7d33ba9c239a27e2f52066674dd5332ceb003c39a12",
+      "bytes": 125844
+    },
+    "paired/320/successor-live-rankings.png": {
+      "sha256": "bd37669f3feb0eeddb7f314a286e7e2d0d6bf110f2fb9be6ea3966c524d1cd11",
+      "bytes": 170776
+    },
+    "paired/320/successor-qa-created.png": {
+      "sha256": "aaa9982fef9d0d07e1a6aa3faac2ab475d1e898bc4426c9398a9fd667d08ec88",
+      "bytes": 182641
+    },
+    "paired/320/successor-qa-registration.png": {
+      "sha256": "5e77015b81b8a0c74f277e372c204c39b1e452bb79863ad6263211c167c56b1e",
+      "bytes": 157182
+    },
+    "paired/320/vote-required.png": {
+      "sha256": "8991a1fb2b47bc0e2e9c887dd7a132d8b43d6ca3ae84451c9084d371508f4043",
+      "bytes": 121332
+    },
+    "paired/390/blocked-electorate.png": {
+      "sha256": "02f14452d7708089a6063674fb3bf2a232c44e95d13c1fd20c46d10bc1b16ca8",
+      "bytes": 135827
+    },
+    "paired/390/global-history-ledger.png": {
+      "sha256": "dcd2dbc5d3e3c15737978c4698d8b667af9ece7fb762bcab0b3ca6574800d114",
+      "bytes": 159067
+    },
+    "paired/390/immediate-armed.png": {
+      "sha256": "071d99d4f987bdc8dd17a5420f4da17d8d710844c71bf7fca73cafc0b3ddfdce",
+      "bytes": 128643
+    },
+    "paired/390/immediate-complete.png": {
+      "sha256": "a538be7d830ce63611028899de1b02211d49cdcf087707cb0f896d10fc671ae6",
+      "bytes": 113972
+    },
+    "paired/390/immediate-warning.png": {
+      "sha256": "e5fc4d94a9295b990125e7f93852f859ceb30bfa652439e73f9a6d581adddf2e",
+      "bytes": 138008
+    },
+    "paired/390/successor-live-rankings.png": {
+      "sha256": "48007f915f03f58078bbd5365340ddadb3ef921bd1e528c493eb5e134ea6476a",
+      "bytes": 196392
+    },
+    "paired/390/successor-qa-created.png": {
+      "sha256": "a6b08432d60e368974a01cd2f1f93f4fe757132bf8b8afd76a02d47798c61448",
+      "bytes": 272057
+    },
+    "paired/390/successor-qa-registration.png": {
+      "sha256": "5c0cefaf9132c7c2cee1c759cb5c5eec1e4eb2bce83dfdf10a3515e0b81d40e5",
+      "bytes": 176856
+    },
+    "paired/390/vote-required.png": {
+      "sha256": "399561a2ba50ce3f4aad023f6512d313cc16636db214ec6e101326e3ef4cbbb1",
+      "bytes": 129619
+    },
+    "paired/460/blocked-electorate.png": {
+      "sha256": "1bf26b321d6db405bbda1f97ef844b58985871173e50d12c94d66747b7e7692f",
+      "bytes": 148025
+    },
+    "paired/460/immediate-armed.png": {
+      "sha256": "1bc5992e4ff1a6524688f58a3ff5e7706a49949396536e9b5023be775d465df3",
+      "bytes": 139125
+    },
+    "paired/460/immediate-complete.png": {
+      "sha256": "aff6e9cc2fe96280d2cabdc3171512b2861bf6ecb4c63b01bcb06b6e647c2ebc",
+      "bytes": 120603
+    },
+    "paired/460/immediate-warning.png": {
+      "sha256": "37e6a55fe42edeaa729edb32b2e4125881d1fe11b31c5b060cc787fa6ae1da0d",
+      "bytes": 149297
+    },
+    "paired/460/successor-live-rankings.png": {
+      "sha256": "e75f87929164de9cc44cce488c9deabca62119b5e0c98029e0c49c2e32229de0",
+      "bytes": 212472
+    },
+    "paired/460/successor-qa-created.png": {
+      "sha256": "def1a0bc5836e1f580d0763d1c65531c97a561ead39c66fb583606a6f3e762a5",
+      "bytes": 298760
+    },
+    "paired/460/successor-qa-registration.png": {
+      "sha256": "b60f2216eeb12bc587ac59c7565105d6a1492ca38de1829bff9418fb527aa0d7",
+      "bytes": 197090
+    },
+    "paired/460/vote-required.png": {
+      "sha256": "966a9ad4e033c13e0c6531ccff5e073d96e5e14ee9c1dff9091e44cec0d40120",
+      "bytes": 141420
+    },
+    "paired/global-history-http.json": {
+      "sha256": "adc5866620bfc39bdd457055545cd949809f04df2895393588f0b6c500f76fe6",
+      "bytes": 4819
+    },
+    "paired/http-evidence.json": {
+      "sha256": "b10efdf0511bf6b3076c10f96383a7bca3a11c9e0de566afce4ac4559fdaf034",
+      "bytes": 15548
+    },
+    "paired/successor-qa-http.json": {
+      "sha256": "372cd8a1999b684450839f133d9b04629f3aa4b9a40fe876e4b0f864157cc873",
+      "bytes": 1313
+    },
+    "paired/successor-rankings-http.json": {
+      "sha256": "162319e2e4d60a79e30da3bab9ccce89696d413d1f1753ed0f6da05368bb4115",
+      "bytes": 2925
+    }
+  },
+  "additional_global_history_source_commit": "552fab7e07e1a877ceab02c918acd0f4a66becd6",
+  "focused_equipment_boundary_source_commit": "3ae5968d6a9f7cc76fd10f8b1d59e809d5de6ca8"
+}

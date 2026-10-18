@@ -4,16 +4,20 @@ import { mkdirSync } from "node:fs";
 // Synthetic responses for existing WEDCAL APIs; not a B5 backend handoff/fixture.
 const reward = (id: number) => ({ id, source_type: id % 3 === 0 ? "CREATOR" : id % 3 === 1 ? "NETWORK_SPEAKER" : id % 2 ? "MISSION" : "DAILY", context: "PLAYER", player_amount: id + 7, occurred_at: "2026-10-16T10:10:00Z" });
 for (const width of [320, 390, 460]) {
-  test(`real data presentation and shared history ${width}`, async ({ page }) => {
+  test(`shared Base/global and distinct Network history ${width}`, async ({ page }) => {
     await page.setViewportSize({ width, height: 844 });
     const state = await prepareB4(page);
     state.missions = Array.from({ length: 4 }, (_, i) => ({ ...state.missions[0], key: `synthetic-${i}` })).map((m: any, i: number) => ({ ...m, title: ["Server available", "Server in progress", "Server ready", "Server unavailable"][i], available: i !== 3, state: ["AVAILABLE", "IN_PROGRESS", "REWARD_READY", "UNAVAILABLE"][i], reward_amount: 71 + i }));
     let historyReads = 0;
     await page.route("**/api/v1/rewards/history?*", route => {
       expect(route.request().headers().authorization).toBe(`tma ${auth}`);
-      const cursor = new URL(route.request().url()).searchParams.get("cursor");
+      const params = new URL(route.request().url()).searchParams;
       historyReads++;
-      return route.fulfill({ json: cursor ? { items: [reward(80), reward(79)], next_cursor: null } : { items: Array.from({ length: 20 }, (_, i) => reward(100 - i)), next_cursor: 81 } });
+      const all = Array.from({ length: 34 }, (_, i) => reward(100 - i));
+      const filtered = params.get("category") === "network" ? all.filter(row => ["CREATOR", "NETWORK_SPEAKER"].includes(row.source_type)) : all;
+      const remaining = filtered.filter(row => !params.has("cursor") || row.id < Number(params.get("cursor")));
+      const items = remaining.slice(0, 20);
+      return route.fulfill({ json: { items, next_cursor: remaining.length > 20 ? items.at(-1)!.id : null } });
     });
     await page.goto(launch("/base"));
     const objectives = page.locator('section[aria-label="Next objectives"]');
@@ -34,13 +38,13 @@ for (const width of [320, 390, 460]) {
     await page.getByRole("button", { name: "History", exact: true }).click();
     const sheet = page.getByRole("dialog", { name: "Earn history", exact: true });
     await expect(sheet).toContainText("+107 XP");
-    // Navigation within the app observes the same fresh query, without a second first-page read.
-    expect(historyReads).toBe(1);
+    // Network has its own first page; global History reuses Base's unfiltered cache.
+    expect(historyReads).toBe(2);
     const rows = sheet.locator("article");
     await rows.last().scrollIntoViewIfNeeded();
-    await expect(rows).toHaveCount(15);
-    expect(historyReads).toBe(2);
-    await expect(rows.last()).toContainText("+86 XP");
+    await expect(rows).toHaveCount(34);
+    expect(historyReads).toBe(3);
+    await expect(rows.last()).toContainText("+74 XP");
     await rows.first().scrollIntoViewIfNeeded();
     await page.screenshot({ path: `${dir}/after-earn-history.png`, animations: "disabled" });
   });
@@ -55,7 +59,7 @@ test("empty and error history never fabricate recent rewards; fewer missions sta
   await expect(page.getByRole("region", { name: "Recent rewards" })).toHaveCount(0);
   await page.getByRole("button", { name: "All missions" }).click();
   await page.getByRole("button", { name: "History", exact: true }).click();
-  await expect(page.getByRole("dialog", { name: "Earn history" })).toContainText("No Network earnings yet");
+  await expect(page.getByRole("dialog", { name: "Earn history" })).toContainText("No rewards yet");
   failed = true;
   await page.reload();
   await page.getByRole("button", { name: "History", exact: true }).click();
@@ -65,7 +69,7 @@ test("empty and error history never fabricate recent rewards; fewer missions sta
   await page.getByRole("dialog", { name: "Earn history" }).evaluate(el => el.parentElement!.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true })));
   await expect(page.getByRole("dialog", { name: "Earn history" })).toHaveCount(0);
   await page.getByRole("button", { name: "History", exact: true }).click();
-  await expect(page.getByRole("dialog", { name: "Earn history" })).toContainText("No Network earnings yet");
+  await expect(page.getByRole("dialog", { name: "Earn history" })).toContainText("No rewards yet");
 });
 test("Notification Center numbering follows the flattened page order while mutations use ledger-independent notification IDs", async ({ page }) => {
   const state = await prepareB4(page);
@@ -99,6 +103,7 @@ test("history displays pending and continuation-error states without a replaceme
   let finish!: () => void;
   const gate = new Promise<void>(done => { finish = done; });
   await page.route("**/api/v1/rewards/history?*", async route => {
+    if (new URL(route.request().url()).searchParams.get("category") === "network") return route.fulfill({ json: { items: [reward(99)], next_cursor: null } });
     if (new URL(route.request().url()).searchParams.has("cursor")) return route.fulfill({ status: 503, json: { detail: "private diagnostic" } });
     await gate;
     return route.fulfill({ json: { items: Array.from({ length: 20 }, (_, i) => reward(100 - i)), next_cursor: 81 } });
@@ -108,10 +113,10 @@ test("history displays pending and continuation-error states without a replaceme
   const sheet = page.getByRole("dialog", { name: "Earn history" });
   await expect(sheet).toContainText("Loading earnings…");
   finish();
-  await expect(sheet.locator("article")).toHaveCount(14);
+  await expect(sheet.locator("article")).toHaveCount(20);
   await sheet.locator("article").last().scrollIntoViewIfNeeded();
   await expect(sheet).toContainText("More earnings couldn't load.");
-  await expect(sheet.locator("article")).toHaveCount(14);
+  await expect(sheet.locator("article")).toHaveCount(20);
   await expect(sheet).not.toContainText("private diagnostic");
 });
 test("external HTTPS banner uses Telegram openLink with its full query string", async ({ page }) => {

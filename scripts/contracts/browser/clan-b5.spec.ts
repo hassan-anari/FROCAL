@@ -167,6 +167,20 @@ test("approved governance sheet uses real roster targets, reason codes, electora
   }
   await enter(page, captain);
   await page.getByRole("button", { name: "Clan status", exact: true }).click();
+  const readiness = (await api(captain, "/clans/recovery")).governance;
+  if (!readiness) {
+    await expect(page.getByRole("button", { name: "Propose removal", exact: true })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Request dissolution", exact: true })).toBeDisabled();
+    await expect(page.getByRole("dialog")).toContainText("Governance readiness is unavailable");
+    const existing = await api(captain, "/clans/removal-cases", "POST", { target_membership_id: members[0].membership_id, reason: "COMMUNITY_REASON" });
+    await page.getByRole("button", { name: "Refresh status", exact: true }).click();
+    await expect(page.getByRole("dialog")).toContainText("Soldier removal");
+    await page.getByRole("button", { name: "Vote yes", exact: true }).click();
+    await expect.poll(async () => (await api(captain, "/clans/governance")).find((row: any) => row.id === existing.id).own_vote).toBe("YES");
+    await expect(page.getByRole("button", { name: "Vote yes", exact: true })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Vote no", exact: true })).toBeDisabled();
+    return;
+  }
   await page.getByRole("button", { name: "Propose removal", exact: true }).click();
   await page.getByLabel("Member", { exact: true }).selectOption(String(members[0].membership_id));
   await page.getByLabel("Reason", { exact: true }).selectOption("COMMUNITY_REASON");
@@ -179,7 +193,9 @@ test("approved governance sheet uses real roster targets, reason codes, electora
   for (const width of [320, 390, 460]) { await page.setViewportSize({ width, height: 844 }); await snapshot(page, width, "immutable-vote"); }
   await page.getByRole("button", { name: "Request dissolution", exact: true }).click();
   for (const width of [320, 390, 460]) { await page.setViewportSize({ width, height: 844 }); await snapshot(page, width, "dissolution-confirmation"); }
-  await page.getByRole("button", { name: "Confirm", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Open dissolution vote", exact: true })).toBeDisabled();
+  await page.getByRole("checkbox", { name: "I understand the current-Season recreation restriction." }).check();
+  await page.getByRole("button", { name: "Open dissolution vote", exact: true }).click();
   await expect(page.getByRole("dialog")).toContainText("Captain dissolution");
 });
 test("server item effect units retain the approved shop sheet at every mobile width", async ({ page }) => {

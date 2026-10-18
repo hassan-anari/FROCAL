@@ -1325,3 +1325,12 @@
 .facilityCard { contain-intrinsic-size: auto 110px; }
 .memberList > *,
 .rankingList > * { contain-intrinsic-size: auto 68px; }
+
+/* Production WebView header: compact rhythm and full, wrapping Clan names. */
+.pageHeader:has(.headerTop) { margin: .3rem 0 .65rem; gap: .22rem; min-width: 0; }
+.headerTop { min-width: 0; gap: .4rem; }
+.headerTop > span { font-size: clamp(.5rem, 2.1vw, .6rem); letter-spacing: .12em; line-height: 1.2; }
+.pageHeader .statusButton { min-height: 32px; height: 32px; padding: .3rem .5rem; }
+.pageHeader:has(.headerTop) h1 { white-space: normal; overflow-wrap: anywhere; text-wrap: balance; font-size: clamp(1.4rem, 6vw, 1.9rem); line-height: 1.1; letter-spacing: -.045em; }
+.pageHeader:has(.headerTop) p { margin: 0; line-height: 1.35; }
+.homeHeroMetrics strong { min-width: 0; overflow-wrap: anywhere; }
