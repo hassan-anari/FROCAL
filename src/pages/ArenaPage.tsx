@@ -1,3 +1,4 @@
+import { analytics } from "@/integrations/analytics/analytics";
 import { useArenaRankings } from "@/integrations/api/useArenaRankings";
 import { QueryContinuation } from "@/design-system/performance/QueryContinuation";
 import { AvatarContent } from "@/design-system/components/AvatarContent";
@@ -14,7 +15,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { motion } from "motion/react";
-import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useId, useMemo, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { preloadAssets } from "@/assets/preload";
 import { AssetImage } from "@/design-system/components/AssetImage";
 import { mobileMotion } from "@/design-system/motion/mobileMotion";
@@ -511,6 +512,11 @@ function ClanPodium({ clans }: { clans: RankedClan[] }) {
 
 function Rankings({ mode, onMode, rankedClans, ownClan, level, currentName, currentPhotoUrl, showSeasonHero = false }: { mode: ArenaRankingMode; onMode: (mode: ArenaRankingMode) => void; rankedClans: ClanSummary[]; ownClan: ClanSummary | null; level: number; currentName: string; currentPhotoUrl?: string | null; showSeasonHero?: boolean }) {
   const live = useArenaRankings(mode);
+  const analyticsReady = useSyncExternalStore(analytics.subscribe, analytics.isReady);
+  const viewId = useId();
+  useEffect(() => {
+    if (analyticsReady && live.isSuccess) analytics.feature("arena_leaderboard_viewed", `${viewId}:${mode}`, mode);
+  }, [analyticsReady, live.isSuccess, mode]);
   const { bootstrap } = useBootstrap();
   const remote = isRemoteDataSource();
   const pages = live.data?.pages ?? [];

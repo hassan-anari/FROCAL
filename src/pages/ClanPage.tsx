@@ -1,3 +1,4 @@
+import { analytics } from "@/integrations/analytics/analytics";
 import { ClanRecentActivity } from "@/features/clan/ClanRecentActivity";
 import { clanRankLabel } from "@/integrations/api/clanActivity";
 import { ClanQueryState } from "@/features/clan/ClanQueryState";
@@ -1127,7 +1128,8 @@ function RemoteClanPage() {
   return <main className={styles.page}>
     <header className={`${styles.pageHeader} ${member ? styles.pageHeaderCompact : ""} ${ready && !role ? styles.pageHeaderWrap : ""}`}>
       <div className={styles.headerTop}><span>{role === "captain" && member ? "CAPTAIN COMMAND" : "CLAN NETWORK"}</span>
-      {ready && role ? <Button className={styles.statusButton} size="sm" tone="secondary" leadingIcon={<HugeiconsIcon icon={SquareActivityIcon} size={17} strokeWidth={1.8} />} onClick={() => setOverlay({ type: "status" })}>Clan status</Button> : null}</div><h1>{title}</h1><p>{subtitle}</p>
+      </div><h1>{title}</h1><p>{subtitle}</p>
+      {ready && role ? <button type="button" className={styles.statusButton} onClick={() => { analytics.feature("clan_status_opened"); setOverlay({ type: "status" }); }}><HugeiconsIcon icon={SquareActivityIcon} size={14} strokeWidth={1.7} />Clan status</button> : null}
     </header>
     {locked ? <LockedClan level={level} minLevel={minLevel} /> : null}
     {resolving ? <section className={styles.panel}><ClanQueryState loading title="Connecting to your Clan…" /></section> : null}

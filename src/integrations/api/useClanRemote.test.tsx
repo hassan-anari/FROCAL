@@ -4,12 +4,13 @@ import { act, fireEvent, render, renderHook, screen, waitFor } from "@testing-li
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import type { ReactNode } from "react";
 import { useClanRemote } from "./useClanRemote";
+import { analytics } from "@/integrations/analytics/analytics";
 import { ClanStatusSheet } from "@/features/clan/ClanStatusSheet";
 import { ClanApiError } from "./b5";
 import { OwnRequestOut } from "./b5Schemas";
 import fixture from "./fixtures/b5/clan-http.json";
 import lifecycle from "./fixtures/b5/lifecycle-http.json";
-const api = vi.hoisted(() => Object.fromEntries(["leave", "activity", "state", "membership", "ownRequests", "discover", "preview", "home", "roster", "treasury", "equipment", "missions", "trophies", "governance", "recovery", "invite", "cancelRequest", "join", "applicants", "eligibleGroups"].map(key => [key, vi.fn()])));
+const api = vi.hoisted(() => Object.fromEntries(["create", "purchase", "activate", "leave", "activity", "state", "membership", "ownRequests", "discover", "preview", "home", "roster", "treasury", "equipment", "missions", "trophies", "governance", "recovery", "invite", "cancelRequest", "join", "applicants", "eligibleGroups"].map(key => [key, vi.fn()])));
 const native = vi.hoisted(() => ({ resume: null as null | (() => void) }));
 const feedback = vi.hoisted(() => vi.fn());
 const scope = { session: 1, player: "9001", season: "s1", config: "v1" };
@@ -39,6 +40,23 @@ beforeEach(() => {
   localStorage.clear(); sessionStorage.clear();
 });
 afterEach(() => { client?.clear(); vi.restoreAllMocks(); });
+it("captures successful Clan writes only and excludes failed/replayed economics", async () => {
+  const track = vi.spyOn(analytics, "featureFor");
+  member = fixture["membership/current"]; rows = [];
+  const { wrapper } = setup(); const hook = renderHook(() => useClanRemote(), { wrapper });
+  await waitFor(() => expect(hook.result.current.member).toBe(true));
+  await act(async () => { await hook.result.current.run("join", async () => { throw new Error("denied"); }); });
+  expect(track).not.toHaveBeenCalled();
+  await act(async () => { await hook.result.current.run("create", async () => ({ id: 123 })); });
+  await act(async () => { await hook.result.current.run("join", async () => ({ id: 123 })); });
+  api.purchase.mockResolvedValue({ id: 9, replayed: false });
+  await act(async () => { await hook.result.current.economic("purchase", "test-item"); });
+  api.purchase.mockResolvedValue({ id: 9, replayed: true });
+  await act(async () => { await hook.result.current.economic("purchase", "test-item"); });
+  api.activate.mockResolvedValue({ id: 10, replayed: false });
+  await act(async () => { await hook.result.current.economic("activate", "test-item"); });
+  expect(track.mock.calls.map(call => call[2])).toEqual(["clan_registration_completed", "clan_join_request_submitted", "clan_shop_purchase_completed", "clan_shop_activation_completed"]);
+});
 it("blocks joins until the authenticated request read succeeds and selects the older accepted record rather than newer history", async () => {
   let finish!: (value: typeof rows) => void;
   api.ownRequests.mockImplementationOnce(() => new Promise(done => { finish = done; }));

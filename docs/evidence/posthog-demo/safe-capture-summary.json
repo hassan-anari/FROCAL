@@ -1,0 +1,29 @@
+{
+  "events": [
+    {
+      "event": "$identify"
+    },
+    {
+      "event": "$pageview",
+      "section": "clan"
+    },
+    {
+      "event": "clan_status_opened"
+    },
+    {
+      "event": "$snapshot"
+    },
+    {
+      "event": "clan_status_opened"
+    }
+  ],
+  "snapshotTypes": [
+    4,
+    2,
+    5,
+    3
+  ],
+  "allAttributed": true,
+  "sentinelsAbsent": true,
+  "stoppedOnWithdrawal": true
+}

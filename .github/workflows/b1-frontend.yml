@@ -38,6 +38,7 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      - run: npm run test:e2e:analytics
       - run: npm run test:visual:b4-baseline
       - run: npm run test:e2e:b4
       - run: npm run test:visual:b5-baseline
@@ -65,6 +66,9 @@ jobs:
             work/post-b6-before-results.json
             work/post-b6-after-results.json
             work/test-results-post-b6/
+            work/test-results-analytics/
+            work/analytics-browser-results.json
+            docs/evidence/posthog-demo/
             work/test-results-b6/
             work/test-results-b5/
           retention-days: 14

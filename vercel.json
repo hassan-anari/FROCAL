@@ -80,7 +80,8 @@
     "deploymentEnabled": {
       "ai/b1-frontend-foundation": false,
       "ai/b2-frontend-instant-tap": false,
-      "ai/b3-frontend-integration": false
+      "ai/b3-frontend-integration": false,
+      "feat/posthog-demo-clan-header": false
     }
   }
 }

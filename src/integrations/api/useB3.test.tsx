@@ -9,6 +9,7 @@ import { mapRemoteBootstrap } from "./bootstrap";
 import { queryKeys } from "./queryKeys";
 import { canonicalKey } from "./canonical";
 import { useB3 } from "./useB3";
+import { analytics } from "@/integrations/analytics/analytics";
 const remote = remoteBootstrapSchema.parse(fixture.bootstrap);
 const scope = {
   session: 1,
@@ -66,6 +67,7 @@ afterEach(() => {
   localStorage.clear();
 });
 it("coalesces repeated Daily clicks and never commits an optimistic reward", async () => {
+  const track = vi.spyOn(analytics, "featureFor");
   let finish!: (v: unknown) => void;
   const gate = new Promise((resolve) => {
     finish = resolve;
@@ -96,8 +98,51 @@ it("coalesces repeated Daily clicks and never commits an optimistic reward", asy
   });
   expect(h.result.current.message).toBeNull();
   expect(h.result.current.rewardEvent).toBeNull();
+  expect(track).not.toHaveBeenCalled(); track.mockRestore();
   h.unmount();
   h.client.clear();
+});
+it("captures newly confirmed Daily claims once and excludes errors and duplicate responses", async () => {
+  const track = vi.spyOn(analytics, "featureFor");
+  let fail = true;
+  let duplicate = false;
+  const h = setup(async () => {
+    if (fail) throw new Error("network failure");
+    return { ...fixture.daily_claim.response, created: !duplicate };
+  });
+  await waitFor(() => expect(h.result.current.daily.data?.claimable).toBe(true));
+  await act(async () => { await h.result.current.claimDaily(); });
+  expect(track).not.toHaveBeenCalled();
+  fail = false;
+  await act(async () => { await h.result.current.claimDaily(); });
+  expect(track).toHaveBeenCalledExactlyOnceWith(scope.player, scope.session, "daily_reward_claimed", fixture.daily_claim.response.claim_period);
+  duplicate = true;
+  await act(async () => { await h.result.current.claimDaily(); });
+  expect(track).toHaveBeenCalledTimes(1);
+  track.mockRestore(); h.unmount(); h.client.clear();
+});
+it("tracks confirmed mission/typing results and Network intents without forwarding text, tokens or destinations", async () => {
+  const track = vi.spyOn(analytics, "featureFor");
+  let typingCreated = true;
+  const h = setup(async path => {
+    if (path.endsWith("/claim")) return fixture.mission_claim.response;
+    if (path.endsWith("/submit")) return { ...fixture.typing_submit.response, created: typingCreated };
+    if (path === "/network/groups/intents") return { url: "https://t.me/test?start=PRIVATE_INTENT" };
+    return fixture.mission_start.response;
+  });
+  await waitFor(() => expect(h.result.current.missions.data).toBeTruthy());
+  await act(async () => { await h.result.current.missionAction("visit-dalexio"); });
+  expect(track).not.toHaveBeenCalled(); // Opening a mission is not claiming it.
+  act(() => { h.client.setQueryData([...queryKeys.player(scope), "b3", "missions"], [{ ...fixture.mission_list[0], state: "REWARD_READY" }]); });
+  await waitFor(() => expect(h.result.current.missions.data?.[0].state).toBe("REWARD_READY"));
+  await act(async () => { await h.result.current.missionAction("visit-dalexio"); });
+  await act(async () => { await h.result.current.submitTyping("attempt-1", "PRIVATE_TYPED_INPUT"); });
+  typingCreated = false;
+  await act(async () => { await h.result.current.submitTyping("attempt-1", "PRIVATE_TYPED_INPUT"); });
+  await act(async () => { await h.result.current.registerGroup(); });
+  expect(track.mock.calls.map(call => call[2])).toEqual(["mission_claimed", "typing_session_completed", "network_group_registration_initiated"]);
+  expect(JSON.stringify(track.mock.calls)).not.toContain("PRIVATE");
+  track.mockRestore(); h.unmount(); h.client.clear();
 });
 it("retains a lost Typing claim key across unmount, then replays the original key", async () => {
   const keys: string[] = [];

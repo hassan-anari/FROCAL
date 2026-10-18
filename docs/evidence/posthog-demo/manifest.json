@@ -1,0 +1,198 @@
+{
+  "base_sha": "20ffc4e6e7971c75ecfeaf57103ab161318c3542",
+  "date": "2026-10-18",
+  "command": "PLAYWRIGHT_CHROMIUM_EXECUTABLE=/usr/bin/chromium npm run test:e2e:analytics",
+  "synthetic_only": true,
+  "files": [
+    {
+      "path": "320/captain-geometry.json",
+      "bytes": 868,
+      "sha256": "d0d873e6be138eb3760cb82175b83eee32968b793a81c33af0667ebb71fae511"
+    },
+    {
+      "path": "320/captain-registration-geometry.json",
+      "bytes": 870,
+      "sha256": "1570262c521e518f019b6e077de0915c00ccea613b76948dba343f199099701f"
+    },
+    {
+      "path": "320/clan-captain-registration.png",
+      "bytes": 187209,
+      "sha256": "55eebaa6aa8722aeb59364ee936eb685a47993810e7944ca24113f48f5d946c8"
+    },
+    {
+      "path": "320/clan-captain.png",
+      "bytes": 217143,
+      "sha256": "ec54a3952b4f04b45153fd3ff9f6dcb9fcbbf3b19bdccb318f268f5a3b9c12a1"
+    },
+    {
+      "path": "320/clan-long-name.png",
+      "bytes": 227659,
+      "sha256": "3bca1b969dcd563f9047c568c1861a323fb98cdb025a54f5ba36ad6a1d7c44c5"
+    },
+    {
+      "path": "320/clan-soldier-discovery.png",
+      "bytes": 198412,
+      "sha256": "9dbcbb1bb26dce9eb8deab287051a10c91326ffb0c57b55e3c571801d1b7da7e"
+    },
+    {
+      "path": "320/clan-soldier.png",
+      "bytes": 227714,
+      "sha256": "66734fd0c786120688c74a605f880234442aba80be78e7dbd3d47eebb689fed3"
+    },
+    {
+      "path": "320/earn-reference.png",
+      "bytes": 160156,
+      "sha256": "de9d0bb10888475c5f605a15d8dfe71427f7d719919748b989178e0149c65971"
+    },
+    {
+      "path": "320/long-name-geometry.json",
+      "bytes": 864,
+      "sha256": "6daa707e895dc3409b66ebd3cb8ed7bf4ef3965481f15eaa533fd27a35d51672"
+    },
+    {
+      "path": "320/soldier-discovery-geometry.json",
+      "bytes": 863,
+      "sha256": "4b66d1441f07044ac692c841eba3a6b7368d5d8881081f8adcafdefc479225b1"
+    },
+    {
+      "path": "320/soldier-geometry.json",
+      "bytes": 864,
+      "sha256": "6daa707e895dc3409b66ebd3cb8ed7bf4ef3965481f15eaa533fd27a35d51672"
+    },
+    {
+      "path": "390/captain-geometry.json",
+      "bytes": 868,
+      "sha256": "e30f50227fc1094642536e519cbf5e563fbc29ebeb4b8dc0a68ffd42908741e7"
+    },
+    {
+      "path": "390/captain-registration-geometry.json",
+      "bytes": 861,
+      "sha256": "030977f813ee3ed6ce77ff34e0bf814bc2c7a70447f092b8ab9817c8122d3850"
+    },
+    {
+      "path": "390/clan-captain-registration.png",
+      "bytes": 209811,
+      "sha256": "9141dd7dcd64192fa0eb22287efd808e0cb323ba32da7a26b501761b75b56514"
+    },
+    {
+      "path": "390/clan-captain.png",
+      "bytes": 268210,
+      "sha256": "0d6216494b32e3f26fee6a6cfc976c1f118c8c0564b8de8c6e3baa1e2d0d02ea"
+    },
+    {
+      "path": "390/clan-long-name.png",
+      "bytes": 271091,
+      "sha256": "cf6fd1b4cac92a76125ac7a79b759f6de25faf440818fe4d3e0b345bebb826ba"
+    },
+    {
+      "path": "390/clan-soldier-discovery.png",
+      "bytes": 222868,
+      "sha256": "d63169c3ad75a78dfc8c1ebfc08e3c325c21edea013e46ee6fb087597ce19036"
+    },
+    {
+      "path": "390/clan-soldier.png",
+      "bytes": 271063,
+      "sha256": "83e7003664db761cfb487f124e5f43ef1d794e00af7d67d44aaf1112221bb385"
+    },
+    {
+      "path": "390/earn-reference.png",
+      "bytes": 180833,
+      "sha256": "7069e7d8403994cf309e57048fd27bc719cfedb8adfa4f03f3f8636172d6c2f1"
+    },
+    {
+      "path": "390/long-name-geometry.json",
+      "bytes": 865,
+      "sha256": "758b9356331cc0150726cbba12add25348670da622cebe9b091c8f7654eb5b0e"
+    },
+    {
+      "path": "390/soldier-discovery-geometry.json",
+      "bytes": 861,
+      "sha256": "030977f813ee3ed6ce77ff34e0bf814bc2c7a70447f092b8ab9817c8122d3850"
+    },
+    {
+      "path": "390/soldier-geometry.json",
+      "bytes": 865,
+      "sha256": "758b9356331cc0150726cbba12add25348670da622cebe9b091c8f7654eb5b0e"
+    },
+    {
+      "path": "460/captain-geometry.json",
+      "bytes": 872,
+      "sha256": "b598bbb2dd0b690e70fc2874534a4d4e175aa150c48e3571411d4a82d4a720a1"
+    },
+    {
+      "path": "460/captain-registration-geometry.json",
+      "bytes": 873,
+      "sha256": "f49b327a2cfac2e0cd6f42231041f8f59dea71c27366e6839d7f1b1d87ca5cef"
+    },
+    {
+      "path": "460/clan-captain-registration.png",
+      "bytes": 227048,
+      "sha256": "77af3cf3b9c52494f78f2c46641419dc3175d2b67183d666ba103f822bf0478c"
+    },
+    {
+      "path": "460/clan-captain.png",
+      "bytes": 288816,
+      "sha256": "3f3fefa75ad9f8698e98fccf7f7aee6e54f872cbff6f3373b4ddff3b5667dc25"
+    },
+    {
+      "path": "460/clan-long-name.png",
+      "bytes": 289470,
+      "sha256": "a0df3ae0f6c3ec17d141627d8ce80cd4acb194175aa2b202c265602d12a9520e"
+    },
+    {
+      "path": "460/clan-soldier-discovery.png",
+      "bytes": 237696,
+      "sha256": "00e8a2a7f590f498938ae8073cfcbd04d0ad4cb941c6b3d366855055e8ee506a"
+    },
+    {
+      "path": "460/clan-soldier.png",
+      "bytes": 289485,
+      "sha256": "22bc3027cf2eed443642eb758af3ad85ef9d4198e17291a36e21f1b7ad0af939"
+    },
+    {
+      "path": "460/earn-reference.png",
+      "bytes": 196010,
+      "sha256": "30a5e5b0e6af75ca083b8fee95b283fc03bc100a9df5f31ca2af36c719cb2491"
+    },
+    {
+      "path": "460/long-name-geometry.json",
+      "bytes": 874,
+      "sha256": "8a9672edfbef24f6c0b4962a9063491029abcad089718c4a00fd6e8d4cba5bbf"
+    },
+    {
+      "path": "460/soldier-discovery-geometry.json",
+      "bytes": 872,
+      "sha256": "b598bbb2dd0b690e70fc2874534a4d4e175aa150c48e3571411d4a82d4a720a1"
+    },
+    {
+      "path": "460/soldier-geometry.json",
+      "bytes": 874,
+      "sha256": "8a9672edfbef24f6c0b4962a9063491029abcad089718c4a00fd6e8d4cba5bbf"
+    },
+    {
+      "path": "README.md",
+      "bytes": 2350,
+      "sha256": "e49989c23e2a3ed5ce4f3838f3cf66d721a6a3cf5bb2299fb525efdfa8487d22"
+    },
+    {
+      "path": "consent-preferences.png",
+      "bytes": 301868,
+      "sha256": "4fcca78849fde6d33f0e6f1677b220ef0beaf138f50f6bbf0b2c79c75f84e75f"
+    },
+    {
+      "path": "consent-prompt.png",
+      "bytes": 228652,
+      "sha256": "cbde4f9f7fddac81fcd0a7e7b57ae8e333eaac8b8b469c286e656d64fb3b13cf"
+    },
+    {
+      "path": "masked-replay.png",
+      "bytes": 222596,
+      "sha256": "089536a4f4d217fb9e84d14aa7c46299581f0aa514eee1a60856e032a0ae3a6d"
+    },
+    {
+      "path": "safe-capture-summary.json",
+      "bytes": 399,
+      "sha256": "9e96dd07a3391e63e790ea91d5cd489da53dc9d3779c3592e9b2a141f2f2dacf"
+    }
+  ]
+}

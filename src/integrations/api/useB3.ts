@@ -1,4 +1,5 @@
 import { showFeedback } from "@/design-system/components/TransientFeedback";
+import { analytics } from "@/integrations/analytics/analytics";
 import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
@@ -198,6 +199,7 @@ export function useB3() {
       const result = await b3Request("/daily/claim", c.dailyClaimSchema, {
         body: {},
       });
+      if (result.created) analytics.featureFor(scope.player, scope.session, "daily_reward_claimed", result.claim_period);
       await client.cancelQueries(
         { queryKey: key("daily"), exact: true },
         { revert: false },
@@ -223,6 +225,7 @@ export function useB3() {
         const result = await b3Request(`${path}/claim`, c.missionClaimSchema, {
           body: {},
         });
+        if (result.created) analytics.featureFor(scope.player, scope.session, "mission_claimed", `${id}:${result.version}:${result.claimed_at}`);
         await settle(result.canonical);
         reveal(result.created, `mission:${id}:${result.version}:${result.claimed_at}`, result.reward_amount, m.title, m.key as MissionId, before, result.canonical, result.reward);
         return;
@@ -244,9 +247,11 @@ export function useB3() {
       if (result.state !== "REWARD_READY") showFeedback("This mission is still in progress. Complete the activity and check again.", "info");
     });
   const registerGroup = () =>
-    run("group-register", () =>
-      b3Request("/network/groups/intents", c.intentSchema, { body: {} }),
-    );
+    run("group-register", async () => {
+      const intent = await b3Request("/network/groups/intents", c.intentSchema, { body: {} });
+      analytics.featureFor(scope.player, scope.session, "network_group_registration_initiated");
+      return intent;
+    });
   const requestKey = (kind: string) => {
     const storageKey = `dexo-b3-request:${scope.player}:${scope.season}:${kind}`;
     let value: string | null = null;
@@ -293,6 +298,7 @@ export function useB3() {
         c.submitSchema,
         { body: { typed_text } },
       );
+      if (r.created && r.status === "VALID") analytics.featureFor(scope.player, scope.session, "typing_session_completed", id);
       await client.cancelQueries(
         { queryKey: key("typing"), exact: true },
         { revert: false },

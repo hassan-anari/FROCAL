@@ -6,6 +6,10 @@ interface ImportMetaEnv {
   readonly VITE_API_BASE_PATH?: string;
   readonly VITE_ENABLE_DEV_PANEL?: string;
   readonly VITE_TELEGRAM_BOT_URL?: string;
+  readonly VITE_POSTHOG_KEY?: string;
+  readonly VITE_POSTHOG_HOST?: string;
+  readonly VITE_POSTHOG_ENABLED?: string;
+  readonly VITE_POSTHOG_REPLAY_ENABLED?: string;
 }
 
 interface ImportMeta {
