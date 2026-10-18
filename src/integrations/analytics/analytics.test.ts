@@ -79,6 +79,34 @@ describe("configuration and identity", () => {
   });
 });
 
+describe("default demo replay and consent-required rollout", () => {
+  it("defaults new demo players to replay while respecting an existing withdrawal", async () => {
+    const { a, load, sdk } = harness();
+    expect(a.getConsent()).toBe("replay");
+    a.setPlayer("9001", 1);
+    await settle();
+    expect(load).toHaveBeenCalledWith(true);
+    expect(sdk.startSessionRecording).toHaveBeenCalledWith({ sampling: true });
+    a.setConsent("declined");
+    expect(localStorage.getItem(CONSENT_KEY)).toBe("declined");
+    const returning = harness();
+    expect(returning.a.getConsent()).toBe("declined");
+    returning.a.setPlayer("9001", 1);
+    await settle();
+    expect(returning.load).not.toHaveBeenCalled();
+  });
+  it("requires an explicit opt-in when the public consent gate is enabled", async () => {
+    const { a, load } = harness({ ...config, requireConsent: true });
+    expect(a.getConsent()).toBe("unknown");
+    a.setPlayer("9001", 1);
+    await settle();
+    expect(load).not.toHaveBeenCalled();
+    a.setConsent("replay");
+    await settle();
+    expect(load).toHaveBeenCalledWith(true);
+  });
+});
+
 describe("consent, replay and data boundary", () => {
   it("persists preferences, starts replay only with replay consent and stops all tracking on withdrawal", async () => {
     const { a, sdk, load, sent, options } = harness();
