@@ -47,7 +47,9 @@ jobs:
       - run: npm run test:visual:b6-baseline
       - run: npm run test:visual:b6-activity-baseline
       - run: npm run test:e2e:b6
-      - run: git worktree add --detach work/post-b6-main e481ffa7e14b980b7e1922cc2d71e64374014596
+      - run: |
+          git fetch --depth=1 origin e481ffa7e14b980b7e1922cc2d71e64374014596
+          git worktree add --detach work/post-b6-main e481ffa7e14b980b7e1922cc2d71e64374014596
       - run: POST_B6_BASELINE=1 npx playwright test --config playwright.post-b6.config.ts
       - run: npm run test:e2e:post-b6
       - uses: actions/upload-artifact@v4
