@@ -1,7 +1,7 @@
 import { AppLoader } from "@/design-system/components/AppLoader";
 import { configuredBotUrl, clanAddBotUrl } from "@/integrations/telegram/botLinks";
-import { useRewardHistory } from "@/integrations/api/useRewardHistory";
-import { networkRewardHistory, rewardHistoryView } from "@/integrations/api/rewardHistory";
+import { useNetworkRewardHistory } from "@/integrations/api/useRewardHistory";
+import { rewardHistoryView } from "@/integrations/api/rewardHistory";
 import { useQueryFeedback } from "@/design-system/components/TransientFeedback";
 import { readSessionPreference, writeSessionPreference } from "@/app/storageRelease";
 import { useB3, missionView } from "@/integrations/api/useB3";
@@ -152,7 +152,7 @@ export function EarnPage() {
   const { adapter } = useTelegram();
   const localEarn = useEarnStore();
   const live = useB3();
-  const rewardHistory = useRewardHistory();
+  const rewardHistory = useNetworkRewardHistory();
   const earn = live.remote ? { ...localEarn,
     missions: Object.fromEntries((live.missions.data ?? []).map(m => [m.key, missionView(m)])) as Record<string, EarnMission>,
     streak: live.daily.data?.current_streak ?? 0,
@@ -190,7 +190,7 @@ export function EarnPage() {
   const referralCode = telegramUser?.id ?? "explorer";
   const referralLink = live.remote ? (live.referrals.data?.enabled && safeDestination(live.referrals.data.link)?.kind === "telegram" ? live.referrals.data.link ?? "" : "") : (() => { const url = configuredBotUrl(); if (!url) return ""; const link = new URL(url); link.searchParams.set("start", `dexoairdrop_${referralCode}`); return link.href; })();
   const groupLink = clanAddBotUrl();
-  const networkEarnings = networkRewardHistory(rewardHistory.items).map(rewardHistoryView);
+  const networkEarnings = rewardHistory.items.map(rewardHistoryView);
   const networkHistory = (live.remote ? networkEarnings : earn.history.filter(entry => entry.type === "group")).slice(0, 5);
   const tier = live.remote ? live.referrals.data?.current_tier ?? "No tier yet" : referralTier(earn.verifiedReferrals);
 

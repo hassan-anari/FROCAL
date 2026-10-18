@@ -1,0 +1,56 @@
+{
+  "repository": "hassan-anari/WEDCAL",
+  "commit": "07876b3ebfa7ef4ede8d354682ae49add7a23150",
+  "runtime_commit": "07876b3ebfa7ef4ede8d354682ae49add7a23150",
+  "status": "Formal handoff acknowledged in FROCAL Issue #8; paired acceptance pending final backend CI. Historical B2\u2013B6 pins unchanged.",
+  "files": {
+    "scripts/contracts/post-b6/source/docs/POST_B6_HOTFIX_CONTRACT.md": {
+      "path": "docs/POST_B6_HOTFIX_CONTRACT.md",
+      "blob": "33ab364a2aa8413b9f7c0e2d4e65a3d9b8e3f56c"
+    },
+    "scripts/contracts/post-b6/source/apps/clans/api.py": {
+      "path": "apps/clans/api.py",
+      "blob": "3a36097d3ca600d266e3d4fb4d15b17b2410bb7e"
+    },
+    "scripts/contracts/post-b6/source/apps/clans/governance.py": {
+      "path": "apps/clans/governance.py",
+      "blob": "b502ae7d28bd12d45442f333058845ef8a3a5b10"
+    },
+    "scripts/contracts/post-b6/source/apps/clans/notifications.py": {
+      "path": "apps/clans/notifications.py",
+      "blob": "eb2009f827041366d2efd52706a3bbbdefe911f1"
+    },
+    "scripts/contracts/post-b6/source/apps/notifications/clan_copy.py": {
+      "path": "apps/notifications/clan_copy.py",
+      "blob": "50ef6fac01e40d1f310742c6cebf435a6eafdb1c"
+    },
+    "scripts/contracts/post-b6/source/apps/notifications/api.py": {
+      "path": "apps/notifications/api.py",
+      "blob": "920062f5e6434dfe016956ac47a8a2c8e218cf6a"
+    },
+    "scripts/contracts/post-b6/source/apps/notifications/services.py": {
+      "path": "apps/notifications/services.py",
+      "blob": "67e764c753306fb1e243627496e05cc153bd6741"
+    },
+    "scripts/contracts/post-b6/source/apps/rewards/api.py": {
+      "path": "apps/rewards/api.py",
+      "blob": "0134e5b714c760f0268f5c7323b80e699b0ba66f"
+    },
+    "scripts/contracts/post-b6/source/apps/clans/tests/test_post_b6_governance.py": {
+      "path": "apps/clans/tests/test_post_b6_governance.py",
+      "blob": "0ad3e5db8310289cdcfd4ee6f615b56c8577920f"
+    },
+    "scripts/contracts/post-b6/source/apps/notifications/tests/test_post_b6_clan_copy.py": {
+      "path": "apps/notifications/tests/test_post_b6_clan_copy.py",
+      "blob": "b8e94263b153fb2807e8444744008e76f4f74964"
+    },
+    "scripts/contracts/post-b6/source/apps/rewards/tests/test_post_b6_history.py": {
+      "path": "apps/rewards/tests/test_post_b6_history.py",
+      "blob": "20e294d25b403fb1cbbcb7721d722a60bb85d0c3"
+    },
+    "src/integrations/api/fixtures/post-b6/openapi.json": {
+      "path": "docs/fixtures/b6/openapi.json",
+      "blob": "f3d5d1374c6e07ebacb7c5de9905eee3452bc69b"
+    }
+  }
+}

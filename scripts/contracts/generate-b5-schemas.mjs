@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
-const batch = process.argv.includes("--b6") ? "b6" : "b5";
+const batch = process.argv.includes("--post-b6") ? "post-b6" : process.argv.includes("--b6") ? "b6" : "b5";
 const input = `src/integrations/api/fixtures/${batch}/openapi.json`;
-const output = `src/integrations/api/${batch}Schemas.ts`;
+const output = `src/integrations/api/${batch === "post-b6" ? "postB6" : batch}Schemas.ts`;
 const definitions = JSON.parse(readFileSync(input, "utf8")).components.schemas;
 const selected = ["StateOut", "RoleOut", "GroupOut", "ClanOut", "RequestOut", "OwnRequestOut", "ApplicantOut", "MembershipOut", "InviteOut", "ClanHomeOut", "ContributionOut", "TreasuryOut", "EquipmentOut", "InventoryOut", "ShopItemOut", "MutationOut", "ClanMissionOut", "TrophyOut", "GovernanceOut", "RecoveryOut", "RosterPage", "RoleIn", "ClanCreateIn", "DecisionIn", "RemovalCaseIn", "VoteIn", "IdempotencyIn"];
 const emitted = new Map();
@@ -11,6 +11,7 @@ function ref(name) {
   return name;
 }
 function emit(value) {
+  if (Object.hasOwn(value, "const")) return `z.literal(${JSON.stringify(value.const)})`;
   if (value.$ref) return ref(value.$ref.split("/").at(-1));
   if (value.anyOf) return `z.union([${value.anyOf.map(emit).join(", ")}])`;
   if (value.enum) return value.enum.length === 1 ? `z.literal(${JSON.stringify(value.enum[0])})` : `z.enum(${JSON.stringify(value.enum)})`;
@@ -31,7 +32,7 @@ function emit(value) {
   }
   throw new Error(`Unsupported B5 schema: ${JSON.stringify(value)}`);
 }
-if (batch === "b6") selected.push("ClanActivityOut", "ClanActivityPage");
+if (batch !== "b5") selected.push("ClanActivityOut", "ClanActivityPage");
 selected.forEach(ref);
 const text = `// Generated from the exact ${batch.toUpperCase()} pin's OpenAPI; do not hand-edit.\nimport { z } from "zod";\n\n` + Array.from(emitted.values()).join("\n\n") + "\n";
 if (process.argv.includes("--check")) {

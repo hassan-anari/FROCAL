@@ -109,7 +109,7 @@ export function useClanRemote() {
         await refresh(); return undefined;
       }
       // A successful leave is final, including 204/null. Old Clan reads are obsolete.
-      if (action === "leave") {
+      if (action === "leave" || (action === "dissolve" && value === null)) {
         const departed = membership.data?.membership_id ?? null;
         departedMembership.current = departed;
         setLeftMembership(departed);
@@ -130,7 +130,8 @@ export function useClanRemote() {
           client.invalidateQueries({ queryKey: ["bootstrap", scope.session] }),
         ]);
         const recovered = essential.every(result => result.status === "fulfilled");
-        showFeedback(recovered ? "You left the Clan." : "You left the Clan. Current status couldn't refresh. Retry from Clan status.", recovered ? "success" : "info");
+        const success = action === "leave" ? "You left the Clan." : "Your Clan dissolved. You cannot create another Clan during the current Season.";
+        showFeedback(recovered ? success : `${success} Current status couldn't refresh. Retry from Clan status.`, recovered ? "success" : "info");
       } else if (!await refresh()) showFeedback("Clan updated. Some details couldn't refresh. Retry from Clan status.", "info");
       return value;
     }

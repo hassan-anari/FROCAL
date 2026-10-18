@@ -91,7 +91,7 @@ export function HistorySheet({ open, onClose, history, remote = false, loading =
       </header>
       <div className={styles.historyList} data-reward-history aria-busy={loading && !history.length}>
         {remote && loading && !history.length ? <AppLoader compact label="Loading earnings…" /> : null}
-        {remote && !history.length && !loading && !fetching && !error ? <div className={styles.historyState} role="status"><strong>{hasNext ? "No Network earnings in these records" : "No Network earnings yet"}</strong><span>{hasNext ? "Continue through earlier history to find Network and Speaker earnings." : "Your confirmed Network and Speaker earnings will appear here."}</span></div> : null}
+        {remote && !history.length && !loading && !fetching && !error ? <div className={styles.historyState} role="status"><strong>No Network earnings yet</strong><span>Your confirmed Network and Speaker earnings will appear here.</span></div> : null}
         {history.map((item) => (
           <article key={item.id}>
             <i className={styles[`history_${item.type}`]} />

@@ -1,3 +1,4 @@
+import { governanceFixture } from "../../../e2e/post-b6-fixture";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, fireEvent, render, renderHook, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
@@ -255,14 +256,42 @@ it.each([401, 403])("accepts obsolete membership denial %s after a confirmed dep
 });
 it("defaults dissolution to cancellation and requires acknowledgement of the Season restriction", async () => {
   rows = []; member = fixture["membership/current"]; api.state.mockResolvedValue(fixture.state);
+  api.recovery.mockResolvedValue({ ...fixture.recovery, governance: governanceFixture() });
   const { wrapper } = setup(); render(<Status />, { wrapper });
   const start = await screen.findByRole("button", { name: "Request dissolution" });
   await waitFor(() => expect(start).toBeEnabled()); fireEvent.click(start);
-  expect(screen.getByRole("dialog")).toHaveTextContent("you cannot create another Clan as Captain during the current Season");
-  expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
+  expect(screen.getByRole("dialog")).toHaveTextContent("You cannot create another Clan in the same Season");
+  expect(screen.getByRole("button", { name: "Dissolve now" })).toBeDisabled();
   fireEvent.click(screen.getByRole("checkbox", { name: "I understand the current-Season recreation restriction." }));
-  expect(screen.getByRole("button", { name: "Confirm" })).toBeEnabled();
+  expect(screen.getByRole("button", { name: "Dissolve now" })).toBeEnabled();
   fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
   fireEvent.click(await screen.findByRole("button", { name: "Request dissolution" }));
-  expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Dissolve now" })).toBeDisabled();
+});
+it.each(["IMMEDIATE", "VOTE_REQUIRED", "BLOCKED"] as const)("uses authoritative %s dissolution readiness rather than roster size", async outcome => {
+  rows = []; member = fixture["membership/current"]; api.state.mockResolvedValue(fixture.state);
+  api.recovery.mockResolvedValue({ ...fixture.recovery, governance: governanceFixture(outcome) });
+  const { wrapper } = setup(); render(<Status />, { wrapper });
+  const start = await screen.findByRole("button", { name: "Request dissolution" });
+  if (outcome === "BLOCKED") {
+    await waitFor(() => expect(screen.getByLabelText("Governance prerequisites")).toHaveTextContent("not enough eligible voters"));
+    expect(start).toBeDisabled(); expect(screen.getByLabelText("Governance prerequisites")).toHaveTextContent("3"); return;
+  }
+  await waitFor(() => expect(start).toBeEnabled()); fireEvent.click(start);
+  await waitFor(() => expect(screen.getByRole("checkbox")).toBeEnabled());
+  const confirm = screen.getByRole("button", { name: outcome === "IMMEDIATE" ? "Dissolve now" : "Open dissolution vote" });
+  expect(confirm).toBeDisabled();
+  expect(screen.getByRole("dialog")).toHaveTextContent(outcome === "IMMEDIATE" ? "There is no vote" : "opens a governance vote");
+});
+it("revalidates changed readiness at submit and never posts an immediate dissolution based on an older confirmation", async () => {
+  rows = []; member = fixture["membership/current"]; api.state.mockResolvedValue(fixture.state);
+  api.recovery.mockResolvedValue({ ...fixture.recovery, governance: governanceFixture("IMMEDIATE") });
+  const { wrapper } = setup(); render(<Status />, { wrapper });
+  const start = await screen.findByRole("button", { name: "Request dissolution" }); await waitFor(() => expect(start).toBeEnabled()); fireEvent.click(start);
+  const checkbox = screen.getByRole("checkbox"); await waitFor(() => expect(checkbox).toBeEnabled()); fireEvent.click(checkbox);
+  api.recovery.mockResolvedValue({ ...fixture.recovery, governance: governanceFixture("VOTE_REQUIRED") });
+  fireEvent.click(screen.getByRole("button", { name: "Dissolve now" }));
+  await waitFor(() => expect(screen.getByRole("button", { name: "Open dissolution vote" })).toBeDisabled());
+  expect(screen.getByRole("checkbox")).not.toBeChecked();
+  expect(feedback).toHaveBeenCalledWith(expect.stringContaining("Clan status changed"), "info");
 });

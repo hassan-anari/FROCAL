@@ -59,7 +59,7 @@ for (const width of [320, 390, 460]) test(`B6 preserved scenes and corrected asy
   await page.route("**/api/v1/rewards/history?*", async route => {
     await historyGate;
     if (historyState === "error") return route.fulfill({ status: 503, json: { code: "UNAVAILABLE" } });
-    return route.fulfill({ json: { items: historyState === "empty" ? [] : ["CREATOR", "NETWORK_SPEAKER", "DAILY"].map((source_type, i) => ({ id: 10 - i, source_type, context: "NETWORK_GROUP", player_amount: 20 - i, occurred_at: "2026-10-16T10:10:00Z" })), next_cursor: null } });
+    return route.fulfill({ json: { items: historyState === "empty" ? [] : (new URL(route.request().url()).searchParams.get("category") === "network" ? ["CREATOR", "NETWORK_SPEAKER"] : ["CREATOR", "NETWORK_SPEAKER", "DAILY"]).map((source_type, i) => ({ id: 10 - i, source_type, context: "NETWORK_GROUP", player_amount: 20 - i, occurred_at: "2026-10-16T10:10:00Z" })), next_cursor: null } });
   });
   await page.goto(launch("/earn"));
   await page.getByRole("button", { name: "History", exact: true }).click();

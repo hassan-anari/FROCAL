@@ -332,3 +332,59 @@ jobs:
           name: b6-paired-contract-results
           path: work/b6-paired/
           retention-days: 14
+
+  paired-post-b6-contract:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: frocal_b6_ci
+          POSTGRES_USER: b6_test
+          POSTGRES_PASSWORD: isolated-test-only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U b6_test -d frocal_b6_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      POSTGRES_DB: frocal_b6_ci
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: '5432'
+      POSTGRES_USER: b6_test
+      POSTGRES_PASSWORD: isolated-test-only
+      POST_B6_BACKEND_ROOT: work/backend-post-b6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: hassan-anari/WEDCAL
+          ref: 07876b3ebfa7ef4ede8d354682ae49add7a23150
+          path: work/backend-post-b6
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.8.22'
+      - run: uv sync --frozen --python 3.13
+        working-directory: work/backend-post-b6
+      - run: npm ci
+      - run: npm run validate:contracts
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:paired:post-b6
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: post-b6-paired-contract-results
+          path: |
+            work/post-b6-paired/
+            work/b6-paired/
+          retention-days: 14

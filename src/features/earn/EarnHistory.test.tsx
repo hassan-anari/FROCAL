@@ -10,7 +10,7 @@ it("retains the History sheet through loading, failure, retry, filtered-empty pa
   const retry = vi.fn(); view.rerender(<HistorySheet {...props} error retry={retry} />);
   fireEvent.click(screen.getByRole("button", { name: "Retry" })); expect(retry).toHaveBeenCalledOnce();
   const more = vi.fn(); view.rerender(<HistorySheet {...props} hasNext loadMore={more} />);
-  expect(screen.getByRole("status")).toHaveTextContent("No Network earnings in these records");
+  expect(screen.getByRole("status")).toHaveTextContent("No Network earnings yet");
   fireEvent.click(screen.getByRole("button", { name: "Load more" })); expect(more).toHaveBeenCalledOnce();
   view.rerender(<HistorySheet {...props} />); expect(screen.getByRole("status")).toHaveTextContent("No Network earnings yet");
 });

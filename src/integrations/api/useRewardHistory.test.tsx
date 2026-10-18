@@ -3,7 +3,7 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import type { ReactNode } from "react";
 import { queryKeys } from "./queryKeys";
-import { useRewardHistory } from "./useRewardHistory";
+import { useRewardHistory, useNetworkRewardHistory } from "./useRewardHistory";
 const state = vi.hoisted(() => ({ player: "9001", initData: "synthetic-auth", remote: true }));
 vi.mock("./BootstrapProvider", () => ({ useBootstrap: () => ({ scope: { session: 1, player: state.player, season: "s1", config: "v1" }, bootstrap: { data: {} } }) }));
 vi.mock("./bootstrap", () => ({ isRemoteDataSource: () => state.remote }));
@@ -80,4 +80,17 @@ it("coalesces foreground refresh and keeps confirmed rows during that refresh", 
   expect(load).toHaveBeenCalledTimes(2); expect(hook.result.current.items).toEqual([row]);
   await act(async () => { finish({ items: [row], next_cursor: null }); });
   hook.unmount(); client.clear();
+});
+
+it("separates Network and Base caches and resets pagination when changing category", async () => {
+  load.mockImplementation(async (_auth, _cursor, _signal, category) => ({ items: [{ ...row, source_type: category === "network" ? "CREATOR" : "DAILY" }], next_cursor: null }));
+  const { client, wrapper } = setup();
+  const base = renderHook(() => useRewardHistory(), { wrapper });
+  const network = renderHook(() => useNetworkRewardHistory(), { wrapper });
+  await waitFor(() => expect(base.result.current.items[0]?.source_type).toBe("DAILY"));
+  await waitFor(() => expect(network.result.current.items[0]?.source_type).toBe("CREATOR"));
+  expect(load).toHaveBeenCalledTimes(2);
+  const next = renderHook(() => useNetworkRewardHistory(), { wrapper });
+  expect(next.result.current.items[0]?.source_type).toBe("CREATOR"); expect(load).toHaveBeenCalledTimes(2);
+  base.unmount(); network.unmount(); next.unmount(); client.clear();
 });

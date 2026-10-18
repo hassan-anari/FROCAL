@@ -1,12 +1,12 @@
 import { expect, it, vi } from "vitest";
-import { formatXp, historyRows, loadRewardHistory, networkRewardHistory, rewardHistorySchema, rewardHistoryView } from "./rewardHistory";
+import { formatXp, historyRows, loadRewardHistory, rewardHistorySchema, rewardHistoryView } from "./rewardHistory";
 vi.mock("./client", async original => ({ ...(await original<typeof import("./client")>()), apiRequest: vi.fn() }));
 import { apiRequest } from "./client";
 const item = { id: 41, source_type: "MISSION", context: "PLAYER", player_amount: 71, occurred_at: "2026-10-16T10:10:00Z" };
-it("includes only canonical creator and Speaker settlements while preserving general history", () => {
-  const items = ["DAILY", "MISSION", "TYPING", "CLAN_ACTIVITY", "CLAN_MISSION", "REFERRAL", "CREATOR", "NETWORK_SPEAKER", "NETWORK_SPEAKER_FAKE"].map((source_type, id) => ({ ...item, id: id + 1, source_type }));
-  expect(networkRewardHistory(items).map(row => row.source_type)).toEqual(["CREATOR", "NETWORK_SPEAKER"]);
-  expect(historyRows([{ items, next_cursor: null }])).toEqual(items);
+it("requests server filtering on every Network page and retains the supplied cursor", async () => {
+  vi.mocked(apiRequest).mockResolvedValue(new Response(JSON.stringify({ items: [{ ...item, source_type: "CREATOR" }], next_cursor: 41 })));
+  await loadRewardHistory("synthetic-launch", 60, undefined, "network");
+  expect(apiRequest).toHaveBeenCalledWith("/rewards/history?limit=20&category=network&cursor=60", expect.objectContaining({ initData: "synthetic-launch", cache: "no-store" }));
 });
 it("reads the existing endpoint with authenticated cursor pagination and abort propagation", async () => {
   vi.mocked(apiRequest).mockResolvedValue(new Response(JSON.stringify({ items: [item], next_cursor: 41 })));

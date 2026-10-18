@@ -1,3 +1,4 @@
+import { governanceFixture } from "./post-b6-fixture";
 import { expect, test } from "@playwright/test";
 import { prepareClan } from "./b6-fixture";
 import { launch } from "./b4-fixture";
@@ -92,16 +93,17 @@ test("History preserves row nodes during foreground refresh and duplicate pagina
 for (const width of [320, 390, 460]) test(`dissolution warning defaults to cancellation at ${width}`, async ({ page }) => {
   await page.setViewportSize({ width, height: 640 });
   const f = await prepareClan(page);
+  f.data.recovery.governance = governanceFixture();
   await page.goto(launch("/clan")); await page.getByRole("button", { name: "Clan status", exact: true }).click();
   await page.getByRole("button", { name: "Request dissolution", exact: true }).click();
   const dialog = page.getByRole("dialog");
-  await expect(dialog).toContainText("you cannot create another Clan as Captain during the current Season");
-  await expect(dialog.getByRole("button", { name: "Confirm", exact: true })).toBeDisabled();
+  await expect(dialog).toContainText("You cannot create another Clan in the same Season");
+  await expect(dialog.getByRole("button", { name: "Dissolve now", exact: true })).toBeDisabled();
   await expect(dialog.getByRole("checkbox")).not.toBeChecked();
   await expect(dialog.getByRole("button", { name: "Cancel", exact: true })).toBeEnabled();
   await page.screenshot({ path: `docs/evidence/post-b6/${width}/dissolution-warning.png`, animations: "disabled" });
   await dialog.getByRole("checkbox").check();
-  await expect(dialog.getByRole("button", { name: "Confirm", exact: true })).toBeEnabled();
+  await expect(dialog.getByRole("button", { name: "Dissolve now", exact: true })).toBeEnabled();
   await dialog.getByRole("button", { name: "Cancel", exact: true }).click();
   expect(f.calls.every(call => call.method === "GET")).toBe(true);
 });
