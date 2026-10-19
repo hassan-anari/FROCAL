@@ -19,8 +19,10 @@ for (const viewport of [{ width: 320, height: 700 }, { width: 390, height: 844 }
     const shot = async (name: string, preserved = false) => {
       await page.waitForTimeout(1000);
       await page.evaluate(async () => { await document.fonts.ready; await Promise.all(Array.from(document.images).filter(img => img.complete).map(img => img.decode().catch(() => undefined))); });
-      await page.screenshot({ path: `${dir}/${phase}-${name}.png`, animations: "disabled" });
-      if (phase === "after" && preserved) await expect(page).toHaveScreenshot([String(viewport.width), `before-${name}.png`], { animations: "disabled", maxDiffPixelRatio: .002 });
+      // Phase 4 changes only these Season labels; preserve the surrounding pixel gate.
+      const mask = name === "profile" ? [page.locator('[class*="identityCopy"] > span')] : name === "arena-warfront" ? [page.locator("main > header > p")] : [];
+      await page.screenshot({ mask, path: `${dir}/${phase}-${name}.png`, animations: "disabled" });
+      if (phase === "after" && preserved) await expect(page).toHaveScreenshot([String(viewport.width), `before-${name}.png`], { mask, animations: "disabled", maxDiffPixelRatio: .002 });
     };
     await page.goto(launch("/earn"));
     await page.getByRole("button", { name: "Network", exact: true }).click();

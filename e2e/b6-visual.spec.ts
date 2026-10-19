@@ -13,11 +13,13 @@ for (const width of [320, 390, 460]) test(`B6 preserved scenes and corrected asy
   await page.setViewportSize({ width, height: 844 });
   const f = await prepareClan(page);
   const dir = `docs/evidence/b6/${width}`; mkdirSync(dir, { recursive: true });
+  // Phase 4 authorizes the Season eyebrow and intro copy, with no design changes.
+  const masks = (name: string) => name === "preserved-profile" ? [page.locator('[class*="identityCopy"] > span')] : name === "preserved-arena" ? [page.locator("main > header > p")] : [];
   const shot = async (name: string) => {
     // Let the existing 450ms artwork fade finish; this is capture stabilization only.
     await page.waitForTimeout(650);
     await page.evaluate(async () => { await document.fonts.ready; await Promise.all(Array.from(document.images).filter(img => img.complete).map(img => img.decode().catch(() => {}))); });
-    await page.screenshot({ path: `${dir}/${phase}-${name}.png`, animations: "disabled" });
+    await page.screenshot({ mask: masks(name), path: `${dir}/${phase}-${name}.png`, animations: "disabled" });
   };
   const finish = f.hold("/state");
   await page.goto(launch("/clan"));
@@ -102,6 +104,6 @@ for (const width of [320, 390, 460]) test(`B6 preserved scenes and corrected asy
     if (path === "/arena") await expect(page.getByRole("button", { name: "Unlocks in Season 2" })).toBeDisabled();
     await page.waitForTimeout(400);
     await shot(`preserved-${path.slice(1)}`);
-    if (!before) await expect(page).toHaveScreenshot([String(width), `before-preserved-${path.slice(1)}.png`], { animations: "disabled", maxDiffPixelRatio: .002 });
+    if (!before) await expect(page).toHaveScreenshot([String(width), `before-preserved-${path.slice(1)}.png`], { mask: masks(`preserved-${path.slice(1)}`), animations: "disabled", maxDiffPixelRatio: .002 });
   }
 });
