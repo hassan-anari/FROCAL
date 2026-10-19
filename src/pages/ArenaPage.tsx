@@ -536,8 +536,8 @@ function Rankings({ mode, onMode, rankedClans, ownClan, level, currentName, curr
   const currentClan = remote ? standing && "clan_id" in standing ? toClan(standing) : null : ownClan;
   const ownRank = remote ? standing?.rank : arenaSeason.playerRank;
   const ownScore = remote ? standing && "season_points" in standing ? standing.season_points : null : arenaSeason.playerScore;
-  const season = bootstrap.data?.remote?.season;
-  const seasonName = remote ? bootstrap.data?.season.name ?? "" : `Season ${String(arenaSeason.number).padStart(2, "0")}`;
+  const season = live.season;
+  const seasonName = remote ? season?.title ?? "Historical standings" : `Season ${String(arenaSeason.number).padStart(2, "0")}`;
   const { serverNow, seasonState } = useGameplayAvailability();
   const now = serverNow();
   const start = Date.parse(season?.starts_at ?? "");
@@ -545,10 +545,11 @@ function Rankings({ mode, onMode, rankedClans, ownClan, level, currentName, curr
   const timingKnown = Number.isFinite(now) && Number.isFinite(start) && Number.isFinite(end) && end > start;
   const daysLeft = remote ? timingKnown ? Math.max(0, Math.ceil((end - now) / 86400000)) : null : arenaSeason.daysLeft;
   const earningDaysLeft = Math.max(0, Math.ceil((seasonState.economicEnd - now) / 86400000));
+  const seasonStatus = season?.status === "ARCHIVED" ? "ARCHIVED" : seasonState.status;
   const progress = remote ? timingKnown ? Math.max(0, Math.min(1, (now - start) / (end - start))) : 0 : arenaSeason.progress;
   return (
     <div className={styles.stack}>
-      {showSeasonHero ? <section className={styles.seasonHero}><div><span>{remote ? seasonState.status : "FOUNDING SEASON"}</span><h2>{seasonName}</h2><p>{!remote ? "Every verified action moves your seasonal score. Finish as high as you can before the reset." : seasonState.closed ? "Season earning has ended. Historical standings remain available." : seasonState.closing ? "New earning has ended. Previously vested rewards may still be claimed." : Number.isFinite(seasonState.economicEnd) ? "Verified actions earn XP while the server permits Season earning." : "Economic timing is unavailable. Earning availability comes from the server."}</p><div><strong>{daysLeft === null ? "—" : `${daysLeft} ${daysLeft === 1 ? "day" : "days"}${remote ? " in season" : " left"}`}</strong><span>{remote && Number.isFinite(seasonState.economicEnd) && !seasonState.closed && !seasonState.closing ? `${earningDaysLeft} earning ${earningDaysLeft === 1 ? "day" : "days"} left` : `${Math.round(progress * 100)}% complete`}</span></div><ProgressBar value={progress * 100} /></div><AssetImage assetKey="arena.rewardCapsule" /></section> : null}
+      {showSeasonHero ? <section className={styles.seasonHero}><div><span>{remote ? seasonStatus : "FOUNDING SEASON"}</span><h2>{seasonName}</h2><p>{!remote ? "Every verified action moves your seasonal score. Finish as high as you can before the reset." : seasonState.closed ? "Season earning has ended. Historical standings remain available." : seasonState.closing ? "New earning has ended. Previously vested rewards may still be claimed." : Number.isFinite(seasonState.economicEnd) ? "Verified actions earn XP while the server permits Season earning." : "Economic timing is unavailable. Earning availability comes from the server."}</p><div><strong>{daysLeft === null ? "—" : `${daysLeft} ${daysLeft === 1 ? "day" : "days"}${remote ? " in season" : " left"}`}</strong><span>{remote && Number.isFinite(seasonState.economicEnd) && !seasonState.closed && !seasonState.closing ? `${earningDaysLeft} earning ${earningDaysLeft === 1 ? "day" : "days"} left` : `${Math.round(progress * 100)}% complete`}</span></div><ProgressBar value={progress * 100} /></div><AssetImage assetKey="arena.rewardCapsule" /></section> : null}
       <DeferredMount minHeight={520}>
       <section className={styles.panel}>
         <SectionTitle eyebrow="GLOBAL STANDINGS" title="Season Leaderboard" />
@@ -632,7 +633,7 @@ export function ArenaPage() {
             <header className={styles.pageHeader}>
               <span>ARENA · COMPETITION HUB</span>
               <h1>Compete. Rise. Prepare.</h1>
-              <p>{remote ? `${bootstrap.data?.season.name ?? "The current Season"} ranks players and clans. Season 2 turns the Arena into a live clan Warfront.` : "Season 1 ranks players and clans. Season 2 turns the Arena into a live clan Warfront."}</p>
+              <p>{remote ? `${bootstrap.data?.remote?.season ? `${bootstrap.data.remote.season.title} ranks players and clans.` : "View historical player and Clan rankings."} Season 2 turns the Arena into a live clan Warfront.` : "Season 1 ranks players and clans. Season 2 turns the Arena into a live clan Warfront."}</p>
             </header>
 
             <nav className={`${styles.arenaTabs} ${styles.arenaTabsTwo}`} aria-label={remote ? "Arena sections" : "Arena Season 1 sections"}>

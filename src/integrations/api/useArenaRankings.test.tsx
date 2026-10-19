@@ -3,15 +3,15 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import type { ReactNode } from "react";
 import { useArenaRankings } from "./useArenaRankings";
-const native = vi.hoisted(() => ({ resume: null as (() => void) | null }));
-vi.mock("./BootstrapProvider", () => ({ useBootstrap: () => ({ scope: { session: 1, player: "verified", season: "s1", config: "v1" }, bootstrap: { data: { featureFlags: { arena: true }, remote: { season: { code: "s1" } } } } }) }));
+const native = vi.hoisted(() => ({ resume: null as (() => void) | null, archive: false }));
+vi.mock("./BootstrapProvider", () => ({ useBootstrap: () => ({ scope: { session: 1, player: "verified", season: "s1", config: "v1" }, bootstrap: { data: { featureFlags: { arena: true }, remote: { season: native.archive ? null : { code: "s1" } } } } }) }));
 vi.mock("./bootstrap", () => ({ isRemoteDataSource: () => true }));
-vi.mock("./arena", () => ({ loadRankings: vi.fn() }));
+vi.mock("./arena", () => ({ loadRankings: vi.fn(), loadArenaState: vi.fn() }));
 vi.mock("@/integrations/telegram/TelegramProvider", () => ({ useTelegram: () => ({ adapter: { subscribe: (_event: string, handler: () => void) => { native.resume = handler; return () => { native.resume = null; }; } } }) }));
 vi.mock("@/design-system/components/TransientFeedback", () => ({ showFeedback: vi.fn() }));
-import { loadRankings } from "./arena";
+import { loadArenaState, loadRankings } from "./arena";
 let client: QueryClient;
-afterEach(() => { client?.clear(); vi.clearAllMocks(); });
+afterEach(() => { client?.clear(); native.archive = false; vi.clearAllMocks(); });
 it("consumes canonical ranks/counts unchanged and replaces stale live standings on native foreground", async () => {
   const row = { rank: 1, clan_id: "1", name: "Server-ranked Clan", tag: "API", crest: null, hq_level: 1, member_count: 0, capacity: 50, competitive_score: 100 };
   vi.mocked(loadRankings).mockResolvedValueOnce({ items: [row], own_standing: row, total_count: 1, offset: 0, limit: 30, next_offset: null });
@@ -23,4 +23,16 @@ it("consumes canonical ranks/counts unchanged and replaces stale live standings 
   await act(async () => { native.resume?.(); window.dispatchEvent(new Event("focus")); document.dispatchEvent(new Event("visibilitychange")); });
   await waitFor(() => expect(hook.result.current.data?.pages[0]).toMatchObject({ items: [], own_standing: null, total_count: 0 }));
   expect(loadRankings).toHaveBeenCalledTimes(2); hook.unmount(); expect(native.resume).toBeNull();
+});
+
+it("reads the backend-ordered historical Season when Bootstrap has no active Season", async () => {
+  native.archive = true;
+  vi.mocked(loadArenaState).mockResolvedValue({ season: null, seasons: [{ code: "archived-server-season", title: "Archived Server Season", status: "ARCHIVED", starts_at: "2026-01-01T00:00:00Z", ends_at: "2026-01-18T00:00:00Z" }], warfront: { state: "LOCKED", available_season: 2, message: "Warfront arrives in Season 2" }, wallet_enabled: false, account_link_enabled: false });
+  vi.mocked(loadRankings).mockResolvedValue({ season: "archived-server-season", season_status: "ARCHIVED", archived: true, items: [], own_standing: null, offset: 0, limit: 30, next_offset: null });
+  client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const hook = renderHook(() => useArenaRankings("players"), { wrapper: ({ children }: { children: ReactNode }) => <QueryClientProvider client={client}>{children}</QueryClientProvider> });
+  await waitFor(() => expect(hook.result.current.isSuccess).toBe(true));
+  expect(hook.result.current.season?.title).toBe("Archived Server Season");
+  expect(loadRankings).toHaveBeenCalledWith("players", 0, expect.any(AbortSignal), "archived-server-season");
+  hook.unmount();
 });

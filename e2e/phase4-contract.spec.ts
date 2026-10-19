@@ -89,3 +89,20 @@ test("new Mission keys remain visible and unsupported internal semantics cannot 
   await expect(external.getByRole("button", { name: "Start mission", exact: true })).toBeEnabled();
   expect(state.calls.filter(c => c.method === "POST" && c.path.startsWith("/missions"))).toHaveLength(0);
 });
+
+test("actual Closed backend shape: null Bootstrap Season retains archived standings and confirmed balances", async ({ page }) => {
+  const state = await prepareB4(page); configure(state);
+  state.bootstrap.season = null;
+  state.bootstrap.features.season = false;
+  const archived = { ...two.season, code: "historical-server-season", title: "Archived Configurable", status: "ARCHIVED" };
+  await page.route("**/api/v1/arena/state", route => route.fulfill({ json: { season: null, seasons: [archived], warfront: { state: "LOCKED", available_season: 2, message: "Warfront arrives in Season 2" }, wallet_enabled: false, account_link_enabled: false } }));
+  await page.goto(launch("/arena"));
+  await page.getByRole("button", { name: "Rankings", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Archived Configurable", exact: true })).toBeVisible();
+  await expect(page.getByText("ARCHIVED", { exact: true })).toBeVisible();
+  await expect(page.getByText("Explorer 1", { exact: true })).toBeVisible();
+  expect(state.calls.some(c => c.path === "/arena/rankings/players" && c.query.includes("season=historical-server-season"))).toBe(true);
+  await page.goto(launch("/base"));
+  await expect(page.getByRole("button", { name: "Interact with Dexo", exact: true })).toBeDisabled();
+  await expect.poll(() => state.calls.some(c => c.path === "/arena/dlx")).toBe(true);
+});

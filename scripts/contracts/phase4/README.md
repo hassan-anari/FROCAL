@@ -22,8 +22,10 @@ The existing Tap controller, leases, journal, pointer authority and reconciliati
 its existing availability wrapper now shares the same earning gate as the UI.
 
 The old full-page Season gate is removed: lack of an earning Season is not a reason to hide
-historical records, confirmed balances or ordinary navigation. Authentication, backend feature
-availability, and existing Tap recovery remain enforced.
+historical records, confirmed balances or ordinary navigation. When Bootstrap returns no active
+Season after Close, the existing read-only Arena state supplies the backend-ordered archived
+Season identity; rankings are requested explicitly for that identity. No archive selector is added.
+Authentication, backend feature availability, and existing Tap recovery remain enforced.
 
 ## Isolated paired checks
 

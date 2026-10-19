@@ -173,7 +173,7 @@ test("reviewed Arena availability retains the approved locked S2 preview", async
   const fixture = b1Fixture;
   await mockApi(page, () => ({ body: fixture }));
   await page.goto(launch("/arena"));
-  await expect(page.getByRole("navigation", { name: "Arena Season 1 sections" })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Arena sections", exact: true })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Arena Season 2 sections" })).toHaveCount(0);
   await expect(page.getByText("Warfront", { exact: true }).first()).toBeVisible();
   await expect(page.getByRole("button", { name: /Deploy attack|Find target/i })).toHaveCount(0);

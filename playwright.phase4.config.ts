@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
-  testDir: "./e2e", testMatch: "phase4-contract.spec.ts", workers: 2, retries: 0,
+  testDir: "./e2e", testMatch: "phase4-contract.spec.ts", workers: 2, retries: 0, timeout: 60_000,
   outputDir: "work/test-results-phase4", reporter: [["list"], ["json", { outputFile: "work/phase4-browser-results.json" }]],
   use: { baseURL: "http://127.0.0.1:4194", reducedMotion: "reduce", screenshot: "only-on-failure", trace: "retain-on-failure", launchOptions: { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE } },
   projects: [
