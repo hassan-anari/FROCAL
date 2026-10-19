@@ -20,6 +20,7 @@ const scope = {
 vi.mock("./BootstrapProvider", () => ({
   useBootstrap: () => ({
     scope,
+    authorityReady: true,
     bootstrap: { data: mapRemoteBootstrap(remote, "telegram", null, null) },
   }),
 }));
@@ -44,7 +45,7 @@ function setup(post: (path: string, options: any) => Promise<any>) {
   const reads: Record<string, unknown> = {
     "/daily": fixture.daily_available,
     "/missions": fixture.mission_list,
-    "/typing": fixture.typing_state,
+    "/typing": { ...fixture.typing_state, claimable_balance: fixture.typing_claim.response.amount },
     "/typing/history?period=current&limit=20": { period: "current", period_key: "2026-10-15T00:00:00+00:00", period_start: "2026-10-15T00:00:00Z", period_end: "2026-10-16T00:00:00Z", items: [], next_cursor: null },
     "/referrals": fixture.referral,
     "/referrals/invitees?offset=0&limit=30": fixture.invitees_empty,

@@ -1,14 +1,15 @@
-export type MissionId =
+export type KnownMissionId =
   | "visit-dalexio"
   | "view-x-update"
   | "join-telegram"
   | "typing-session"
   | "complete-profile"
   | "read-season-brief";
+export type MissionId = KnownMissionId | (string & {});
 
 export type MissionStatus = "available" | "in-progress" | "completed" | "claimed";
 export type MissionCategory = "ecosystem" | "social" | "skill" | "profile" | "season";
-export type MissionAction = "external" | "typing" | "profile";
+export type MissionAction = "external" | "typing" | "profile" | "unavailable";
 
 export interface EarnMission {
   id: MissionId;

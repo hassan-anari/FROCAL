@@ -220,6 +220,7 @@ export function BasePage() {
   };
 
   const triggerReaction = () => {
+    if (remoteData && !canEarn("base_tap")) return;
     if (remoteData && adapter.isTelegram && tapAvailable && !baseTap.tap()) return;
 
     const reaction = reactionOrder[reactionCursor.current % reactionOrder.length];
@@ -288,6 +289,7 @@ export function BasePage() {
             effect="base"
             showParticles={false}
             interactive
+            disabled={remoteData && !tapAvailable}
             multiTouch={remoteData && adapter.isTelegram}
             onPress={triggerReaction}
             ariaLabel="Interact with Dexo"

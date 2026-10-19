@@ -41,6 +41,7 @@ export function mapRemoteBootstrap(
   return bootstrapPayloadSchema.parse({
     requestId: payload.request_id ?? requestId ?? `remote-bootstrap-${Date.now()}`,
     serverTime,
+    clockReceivedAt: performance.now(),
     environment,
     remote: payload,
     season: season

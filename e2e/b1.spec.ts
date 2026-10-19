@@ -122,12 +122,15 @@ test("bounded transient API retries succeed without substituting demo data", asy
   expect(api.attempts()).toBe(3);
 });
 
-test("no active Season preserves Profile and blocks playable routes", async ({ page }) => {
+test("no active Season preserves Profile and read access while disabling new earning", async ({ page }) => {
   await mockApi(page, () => ({ body: { ...legacyBootstrap, season: null } }));
   await page.goto(launch("/profile"));
   await expect(page.getByRole("heading", { name: "Verified" })).toBeVisible();
   await page.getByRole("navigation", { name: "Primary game navigation" }).getByRole("button", { name: "Earn", exact: true }).click();
-  await expect(page.locator('[data-initial-state="SEASON_UNAVAILABLE"]')).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Grow your journey.", exact: true })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Primary game navigation" })).toBeVisible();
+  await expect(page.locator('[data-initial-state="SEASON_UNAVAILABLE"]')).toHaveCount(0);
+  await expect(page.locator('section[aria-label="Daily claim"]').getByRole("button")).toBeDisabled();
 });
 
 test("credential switching isolates identity and player data on the same page", async ({ page }) => {

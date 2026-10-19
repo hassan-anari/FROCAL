@@ -25,6 +25,7 @@ jobs:
           python-version: '3.13'
       - run: python -m pip install -r scripts/contracts/requirements.txt
       - run: python scripts/contracts/generate_bootstrap_fixture.py --check
+      - run: python scripts/contracts/phase4/check.py
       - run: npm run check
       - run: npm run validate:telegram-sdk
   browser:
@@ -38,6 +39,7 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      - run: npm run test:e2e:phase4
       - run: npm run test:e2e:analytics
       - run: npm run test:visual:b4-baseline
       - run: npm run test:e2e:b4
@@ -57,6 +59,8 @@ jobs:
         with:
           name: frontend-playwright-evidence
           path: |
+            work/phase4-browser-results.json
+            work/test-results-phase4/
             playwright-report/
             test-results/
             test-results-b4/

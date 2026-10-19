@@ -79,6 +79,7 @@ function statusLabel(mission: EarnMission): string {
 }
 
 function missionActionLabel(mission: EarnMission, remote = false): string {
+  if ("unavailable" in mission && mission.unavailable) return "Unavailable";
   if (remote && mission.status === "in-progress") return "Verify";
   if (mission.status === "claimed") return "Completed";
   if (mission.status === "completed") return `Claim ${mission.rewardXp} XP`;
@@ -171,7 +172,9 @@ export function EarnPage() {
   const groupRows = live.remote ? (live.groups.data?.items ?? []).map(v => ({ id: v.public_id, name: v.title, photoUrl: v.photo_url, members: v.unique_speakers, admin: v.bot_admin, status: v.state.replaceAll("_", " "), earnedXp: v.earned_points, meta: `${v.qualified_characters} qualified characters · ${v.verification_retrying ? "Check pending" : v.creator_verified_at ? "Creator verified" : "Creator check pending"}`, tone: "cyan" })) : demoGroupRows;
   const typingMission = earn.missions["typing-session"];
   const typingLimit = live.remote ? live.typing.data?.attempt_limit ?? 0 : TYPING_DAILY_LIMIT;
-  const { canEarn } = useGameplayAvailability();
+  const { canEarn, canClaimVested } = useGameplayAvailability();
+  const missionAllowed = (mission: EarnMission) => live.remote && mission.status === "completed"
+    ? canClaimVested("missions", true) : canEarn("missions");
   const [activeTab, setActiveTab] = useState<EarnTab>(() => {
     const stored = readSessionPreference(earnTabStorageKey);
     return stored === "network" || stored === "typing" ? stored : "earn";
@@ -254,7 +257,7 @@ export function EarnPage() {
 
   const handleMissionAction = async (mission: EarnMission) => {
     if (live.remote) {
-      if (!canEarn("missions")) return;
+      if (!missionAllowed(mission)) return;
       const next = await live.missionAction(mission.id);
       if (next?.action === "typing") openTypingArena();
       else if (next?.action === "profile") void navigate({ to: "/profile" });
@@ -295,9 +298,8 @@ export function EarnPage() {
   };
 
   const handleTypingMissionAction = () => {
-    if (!canEarn("typing") || !canEarn("missions")) return;
     const mission = earn.missions["typing-session"];
-    if (!mission) return;
+    if (!mission || !missionAllowed(mission)) return;
     if (live.remote) { void handleMissionAction(mission); return; }
     if (mission.status === "claimed") return;
     if (mission.status === "completed") {
@@ -335,10 +337,10 @@ export function EarnPage() {
   const renderMission = (mission: EarnMission, index: number, compact = false) => (
     <article
       key={mission.id}
-      className={`${styles.missionCard} ${styles[`mission_${(missionTone[mission.id] ?? "cyan")}`]} ${compact ? styles.missionCompact : ""}`}
+      className={`${styles.missionCard} ${styles[`mission_${(Object.hasOwn(missionTone, mission.id) ? missionTone[mission.id] : "cyan")}`]} ${compact ? styles.missionCompact : ""}`}
     >
       <div className={styles.missionHeader}>
-        <span className={styles.missionNumber}>{missionNumber[mission.id] ?? String(index + 1).padStart(2,"0")}</span>
+        <span className={styles.missionNumber}>{Object.hasOwn(missionNumber, mission.id) ? missionNumber[mission.id] : String(index + 1).padStart(2,"0")}</span>
         <div>
           <span>{mission.category}</span>
           <h3>{mission.title}</h3>
@@ -351,7 +353,7 @@ export function EarnPage() {
         <button
           type="button"
           className={styles.missionAction}
-          disabled={mission.status === "claimed" || !canEarn("missions") || (live.remote && (live.isPending(`mission:${mission.id}`) || ("unavailable" in mission && Boolean(mission.unavailable))))}
+          disabled={mission.status === "claimed" || !missionAllowed(mission) || (live.remote && (live.isPending(`mission:${mission.id}`) || ("unavailable" in mission && Boolean(mission.unavailable))))}
           onClick={() => handleMissionAction(mission)}
         >
           <span>{live.isPending(`mission:${mission.id}`) ? "Please wait…" : missionActionLabel(mission, live.remote)}</span>
@@ -406,8 +408,8 @@ export function EarnPage() {
                   <header>
                     <div>
                       <span>DAILY CORE</span>
-                      <h2>{live.remote && !live.daily.data ? "Daily reward unavailable." : dailyAvailable ? "Your reward is ready." : "Claimed today"}</h2>
-                      <p>{live.remote && !live.daily.data ? "Please check your connection and try again." : dailyAvailable ? "Claim today’s XP and continue your streak." : "Return after the reset to extend your daily chain."}</p>
+                      <h2>{live.remote && !live.daily.data ? "Daily reward unavailable." : live.remote && !canEarn("daily") ? "Season earning is unavailable." : dailyAvailable ? "Your reward is ready." : "Claimed today"}</h2>
+                      <p>{live.remote && !live.daily.data ? "Please check your connection and try again." : live.remote && !canEarn("daily") ? "Your confirmed rewards and history remain available." : dailyAvailable ? "Claim today’s XP and continue your streak." : "Return after the reset to extend your daily chain."}</p>
                     </div>
                     <strong>{live.remote ? live.daily.data ? `+${live.daily.data.reward_amount} XP` : "—" : "+40 XP"}</strong>
                   </header>
@@ -426,7 +428,7 @@ export function EarnPage() {
                     trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={18} strokeWidth={1.8} />}
                     onClick={claimDailyCore}
                   >
-                    {live.isPending("daily") ? "Please wait…" : live.remote && !live.daily.data ? "Unavailable" : dailyAvailable ? "Claim daily core" : "Claimed today"}
+                    {live.isPending("daily") ? "Please wait…" : live.remote && !live.daily.data ? "Unavailable" : live.remote && !canEarn("daily") ? "Earning unavailable" : dailyAvailable ? "Claim daily core" : "Claimed today"}
                   </Button>
                 </section>
 
@@ -553,7 +555,7 @@ export function EarnPage() {
                     <p>Connect a Telegram community, make Dalexio an admin and earn from verified member activity.</p>
                   </div>
                   <div className={styles.groupStats}><span>Connected <strong>{earn.connectedGroups}</strong></span><span>Active <strong>{earn.activeGroups}</strong></span><span>Earned <strong>{formatNumber(earn.groupXpEarned)} XP</strong></span></div>
-                  <Button className={styles.addBotCta} disabled={live.remote && (!live.network.data?.can_register || live.isPending("group-register"))} trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={17} strokeWidth={1.8} />} onClick={addToGroup}>Add bot to a group</Button>
+                  <Button className={styles.addBotCta} disabled={live.remote && (!canEarn("network") || !live.network.data?.can_register || live.isPending("group-register"))} trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={17} strokeWidth={1.8} />} onClick={addToGroup}>Add bot to a group</Button>
                 </section>
 
                 <section className={styles.groupRoster}>
@@ -599,7 +601,7 @@ export function EarnPage() {
                   </Button>
                 </section>
 
-                {live.remote && (live.typing.data?.claimable_balance ?? 0) > 0 ? <Button disabled={live.isPending("typing-claim") || !canEarn("typing")} onClick={() => { void live.claimTyping(); }}>Claim {live.typing.data?.claimable_balance} XP</Button> : null}
+                {live.remote && (live.typing.data?.claimable_balance ?? 0) > 0 ? <Button disabled={live.isPending("typing-claim") || !canClaimVested("typing", (live.typing.data?.claimable_balance ?? 0) > 0)} onClick={() => { void live.claimTyping(); }}>Claim {live.typing.data?.claimable_balance} XP</Button> : null}
                 <section className={styles.typingStats}>
                   <div><span>Best WPM</span><strong>{earn.typingBest ? Math.round(earn.typingBest.wpm) : "—"}</strong></div>
                   <div><span>Best accuracy</span><strong>{earn.typingBest ? `${Math.round(earn.typingBest.accuracy)}%` : "—"}</strong></div>
@@ -608,7 +610,7 @@ export function EarnPage() {
 
                 {typingMission ? <section className={styles.typingMissionCard}>
                   <div><span>ARENA MISSION</span><h2>{typingMission.title}</h2><p>{typingMission.description}</p></div>
-                  <button type="button" disabled={typingMission.status === "claimed" || !canEarn("typing") || !canEarn("missions")} onClick={handleTypingMissionAction}>
+                  <button type="button" disabled={typingMission.status === "claimed" || !missionAllowed(typingMission) || live.isPending(`mission:${typingMission.id}`) || ("unavailable" in typingMission && Boolean(typingMission.unavailable))} onClick={handleTypingMissionAction}>
                     {missionActionLabel(typingMission, live.remote)}
                     <HugeiconsIcon icon={ArrowRight01Icon} size={15} strokeWidth={1.8} />
                   </button>

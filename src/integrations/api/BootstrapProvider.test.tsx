@@ -105,3 +105,81 @@ it("separates read availability from server reward eligibility without treating 
   await act(async () => { await client.invalidateQueries({ queryKey: ["bootstrap"] }); });
   await waitFor(() => expect(screen.getByTestId("tap-eligible")).toHaveTextContent("true"));
 });
+
+it("retains pinned timing through canonical merges, config turnover and audited gate refresh", async () => {
+  const fixture = (await import("./fixtures/phase4/registered-2.json")).default;
+  vi.stubEnv("VITE_DATA_SOURCE", "remote");
+  window.Telegram = { WebApp: { initData: "timing-session", platform: "android" } };
+  let changed = false;
+  vi.stubGlobal("fetch", vi.fn().mockImplementation(() => Promise.resolve(new Response(JSON.stringify({ ...fixture,
+    config: { ...fixture.config, version: changed ? "prospective-tuning" : fixture.config.version },
+    season: { ...fixture.season, timing: { ...fixture.season.timing, settlement_start_epoch: changed ? 2 : 1 } },
+  })))));
+  const client = mount(); await screen.findByText("Dexo");
+  const key = ["bootstrap", 1, "remote", "new-user", "telegram"];
+  // Use the actual mounted key so platform/scenario selection remains production-owned.
+  const mounted = client.getQueryCache().findAll({ queryKey: ["bootstrap"] })[0].queryKey;
+  const { commitCanonical } = await import("./canonical");
+  const { configCacheScope } = await import("./bootstrapContract");
+  const scope = { session: 1, player: fixture.player.id, season: fixture.season.code, config: configCacheScope(fixture.config) };
+  act(() => { commitCanonical(client, scope, { ...fixture.canonical, receipt_cursor: 10, season_points: 12, progression: { ...fixture.progression, dexo_stage: "newborn" } }); });
+  expect(client.getQueryData(mounted)).toMatchObject({ remote: { season: { timing: fixture.season.timing }, gameplay: { reward_earning_allowed: false } } });
+  await act(async () => { await client.invalidateQueries({ queryKey: ["bootstrap"] }); });
+  expect(client.getQueryData(mounted)).toMatchObject({ remote: { canonical: { receipt_cursor: 10 }, season: { timing: fixture.season.timing } } });
+  changed = true;
+  await act(async () => { await client.invalidateQueries({ queryKey: ["bootstrap"] }); });
+  expect(client.getQueryData(mounted)).toMatchObject({ remote: { config: { version: "prospective-tuning" }, season: { starts_at: fixture.season.starts_at, ends_at: fixture.season.ends_at, timing: { ...fixture.season.timing, settlement_start_epoch: 2 } } } });
+  expect(client.getQueryData(key)).toBeDefined();
+});
+
+it("pauses earning on background resume until fresh backend authority arrives, then retains denial", async () => {
+  const fixture = (await import("./fixtures/bootstrap-b1.json")).default;
+  vi.stubEnv("VITE_DATA_SOURCE", "remote");
+  window.Telegram = { WebApp: { initData: "resume-session", platform: "android" } };
+  let finish!: (value: Response) => void;
+  let delayed = false;
+  vi.stubGlobal("fetch", vi.fn().mockImplementation(() => delayed
+    ? new Promise<Response>(resolve => { finish = resolve; }) : Promise.resolve(new Response(JSON.stringify(fixture)))));
+  mount(); await screen.findByText("Verified");
+  expect(screen.getByTestId("tap-eligible")).toHaveTextContent("true");
+  delayed = true;
+  act(() => { document.dispatchEvent(new Event("visibilitychange")); });
+  expect(screen.getByTestId("tap-eligible")).toHaveTextContent("false");
+  await waitFor(() => expect(finish).toBeTypeOf("function"));
+  await act(async () => { finish(new Response(JSON.stringify({ ...fixture, gameplay: { moderation_state: "ACTIVE", reward_earning_allowed: false } }))); });
+  await waitFor(() => expect(screen.getByTestId("tap-eligible")).toHaveTextContent("false"));
+  expect(screen.getByTestId("arena-readable")).toHaveTextContent("true");
+});
+
+it("does not let an older Bootstrap grant overwrite a newer server denial", async () => {
+  const fixture = (await import("./fixtures/bootstrap-b1.json")).default;
+  vi.stubEnv("VITE_DATA_SOURCE", "remote");
+  window.Telegram = { WebApp: { initData: "ordered-authority", platform: "android" } };
+  let stale = false;
+  vi.stubGlobal("fetch", vi.fn().mockImplementation(() => Promise.resolve(new Response(JSON.stringify({ ...fixture,
+    server_time: stale ? "2026-10-13T12:00:00Z" : fixture.server_time,
+    gameplay: { moderation_state: "ACTIVE", reward_earning_allowed: stale },
+  })))));
+  const client = mount(); await screen.findByText("Verified");
+  expect(screen.getByTestId("tap-eligible")).toHaveTextContent("false");
+  stale = true;
+  await act(async () => { await client.invalidateQueries({ queryKey: ["bootstrap"] }); });
+  expect(screen.getByTestId("tap-eligible")).toHaveTextContent("false");
+});
+
+it("replaces timing on player and Season turnover without copying an earlier topology", async () => {
+  const two = (await import("./fixtures/phase4/registered-2.json")).default;
+  const six = (await import("./fixtures/phase4/registered-6.json")).default;
+  vi.stubEnv("VITE_DATA_SOURCE", "remote");
+  window.Telegram = { WebApp: { initData: "timing-first", platform: "android" } };
+  vi.stubGlobal("fetch", vi.fn().mockImplementation((_url, options: RequestInit) => {
+    const second = new Headers(options.headers).get("Authorization") === "tma timing-second";
+    return Promise.resolve(new Response(JSON.stringify(second ? { ...six, player: { ...six.player, id: "940002", telegram_user_id: 940002, first_name: "Next" }, season: { ...six.season, code: "next-season" }, canonical: { ...six.canonical, player_id: "940002", season_id: "next-season" } } : two)));
+  }));
+  const client = mount(); await screen.findByText("Dexo");
+  expect(client.getQueryCache().findAll({ queryKey: ["bootstrap"] })[0].state.data).toMatchObject({ remote: { season: { timing: two.season.timing } } });
+  act(() => { window.Telegram!.WebApp!.initData = "timing-second"; });
+  await screen.findByText("Next");
+  await waitFor(() => expect(client.getQueryCache().findAll({ queryKey: ["bootstrap", 1] })).toHaveLength(0));
+  expect(client.getQueryCache().findAll({ queryKey: ["bootstrap", 2] })[0].state.data).toMatchObject({ remote: { season: { timing: six.season.timing } } });
+});

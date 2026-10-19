@@ -36,7 +36,9 @@
     "test:visual:b6-baseline": "node scripts/capture-b6-baseline.mjs",
     "test:visual:b6-activity-baseline": "node scripts/capture-b6-activity-review.mjs",
     "test:paired:post-b6": "node scripts/contracts/run-paired-post-b6.mjs",
-    "test:paired:b6": "node scripts/contracts/run-paired-b6.mjs"
+    "test:paired:b6": "node scripts/contracts/run-paired-b6.mjs",
+    "test:paired:phase4": "python scripts/contracts/phase4/check.py && vitest run src/integrations/api/phase4.contract.test.ts src/integrations/api/phase4.actions.test.tsx",
+    "test:e2e:phase4": "playwright test --config playwright.phase4.config.ts"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.6",

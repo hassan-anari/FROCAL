@@ -287,7 +287,7 @@ export function ProfilePage() {
                   <div className={styles.identityTop}>
                     <ProfileAvatar owner={player?.id} firstName={firstName} photoUrl={photoUrl} frameId={profile.activeFrameId} size="lg" />
                     <div className={styles.identityCopy}>
-                      <span>SEASON ONE EXPLORER</span>
+                      <span>{remoteData ? `${bootstrap.data?.remote?.season?.title ?? "Season"} Explorer` : "SEASON ONE EXPLORER"}</span>
                       <h2>{firstName}</h2>
                       {username ? <small>@{username}</small> : null}
                       <strong className={styles.activeTitle}>{activeTitle.name}</strong>
