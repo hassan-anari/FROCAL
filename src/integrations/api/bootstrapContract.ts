@@ -25,6 +25,16 @@ export const bootstrapGameplaySchema = z.object({
   reward_earning_allowed: z.boolean(),
 });
 
+export const seasonTimingSchema = z.object({
+  product_period_days: z.number().int().positive(),
+  epoch_count: z.number().int().positive(),
+  epoch_days: z.number().int().positive(),
+  closing_days: z.number().int().nonnegative(),
+  economic_ends_at: z.string().datetime({ offset: true }),
+  settlement_start_epoch: z.number().int().positive(),
+}).refine(t => t.product_period_days === t.epoch_count * t.epoch_days + t.closing_days
+  && t.settlement_start_epoch <= t.epoch_count, "Inconsistent Season timing");
+
 // PR #26 / cadc257: additions are optional only to support the deployed legacy API.
 // When an additive object is present, validate all of its reviewed schema fields.
 export const remoteBootstrapSchema = z.object({
@@ -47,7 +57,14 @@ export const remoteBootstrapSchema = z.object({
   season: z.object({
     code: z.string(), title: z.string(), status: z.string(), starts_at: z.string(), ends_at: z.string(),
     season_points: z.number().int().nonnegative(),
-  }).nullable(),
+    timing: seasonTimingSchema.nullish(),
+  }).refine(season => {
+    if (!season.timing) return true;
+    const start = Date.parse(season.starts_at), end = Date.parse(season.ends_at);
+    const economicEnd = Date.parse(season.timing.economic_ends_at);
+    return end - start === season.timing.product_period_days * 86_400_000
+      && economicEnd - start === season.timing.epoch_count * season.timing.epoch_days * 86_400_000;
+  }, "Season dates do not match pinned timing").nullable(),
   config: z.object({
     version: z.string(), effective_at: z.string(),
     schema_version: z.number().int().positive().optional(), payload_checksum: z.string().optional(),

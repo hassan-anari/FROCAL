@@ -34,3 +34,10 @@ it.each([
 it.each(["https://evil.test:444/path", "https://good.test@evil.test/", "https://evil.test/%0d%0aLocation:bad", "https://evil.test/\\x", "https://evil.test/\u0000", "//evil.test/path", "http://evil.test/path"])("retains strict external URL rejection: %s", value => {
   expect(safeDestination(value)).toBeNull();
 });
+it("reports Telegram navigation failures without claiming that the destination opened", () => {
+  const navigate = vi.fn();
+  for (const openTelegramLink of [vi.fn(() => false), vi.fn(() => { throw new Error("Native unavailable"); })]) {
+    expect(navigateSafely("https://t.me/reviewed_channel", { openTelegramLink, openExternalLink: vi.fn() }, navigate)).toBe(false);
+  }
+  expect(navigate).not.toHaveBeenCalled();
+});

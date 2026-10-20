@@ -20,6 +20,7 @@ const scope = {
 vi.mock("./BootstrapProvider", () => ({
   useBootstrap: () => ({
     scope,
+    authorityReady: true,
     bootstrap: { data: mapRemoteBootstrap(remote, "telegram", null, null) },
   }),
 }));
@@ -33,7 +34,7 @@ vi.mock("./b3", async (importOriginal) => ({
 }));
 import { b3Request, B3Error } from "./b3";
 const request = vi.mocked(b3Request);
-function setup(post: (path: string, options: any) => Promise<any>) {
+function setup(post: (path: string, options: any) => Promise<any>, missionRows: unknown = fixture.mission_list) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false, gcTime: Infinity } },
   });
@@ -43,8 +44,8 @@ function setup(post: (path: string, options: any) => Promise<any>) {
   );
   const reads: Record<string, unknown> = {
     "/daily": fixture.daily_available,
-    "/missions": fixture.mission_list,
-    "/typing": fixture.typing_state,
+    "/missions": missionRows,
+    "/typing": { ...fixture.typing_state, claimable_balance: fixture.typing_claim.response.amount },
     "/typing/history?period=current&limit=20": { period: "current", period_key: "2026-10-15T00:00:00+00:00", period_start: "2026-10-15T00:00:00Z", period_end: "2026-10-16T00:00:00Z", items: [], next_cursor: null },
     "/referrals": fixture.referral,
     "/referrals/invitees?offset=0&limit=30": fixture.invitees_empty,
@@ -60,7 +61,7 @@ function setup(post: (path: string, options: any) => Promise<any>) {
       <QueryClientProvider client={client}>{children}</QueryClientProvider>
     ),
   });
-  return { ...hook, client };
+  return { ...hook, client, reads };
 }
 afterEach(() => {
   vi.clearAllMocks();
@@ -270,5 +271,108 @@ it("deduplicates published ledger events across remounts and never reveals a nul
   localStorage.clear();
   await act(async () => { await h.result.current.claimDaily(); });
   expect(h.result.current.rewardEvent).toBeNull();
+  h.unmount(); h.client.clear();
+});
+
+const telegramMission = { ...fixture.mission_list[0], key: "join-reviewed-channel", title: "Join the reviewed channel", verification_family: "TELEGRAM", destination_url: "https://t.me/reviewed_channel", state: "AVAILABLE" };
+const telegramStart = { ...fixture.mission_start.response, key: telegramMission.key, destination_url: null, open_token: null };
+
+async function telegramSetup(post: (path: string, options: any) => Promise<any>, initial = telegramMission) {
+  const h = setup(post, [initial]);
+  await waitFor(() => expect(h.result.current.missions.data?.[0].key).toBe(initial.key));
+  return h;
+}
+it("opens Telegram from the matching refreshed list after a successful null-destination Start without verification or reward", async () => {
+  const h = await telegramSetup(async () => {
+    h.reads["/missions"] = [{ ...telegramMission, state: "IN_PROGRESS" }];
+    return telegramStart;
+  });
+  let next: unknown;
+  await act(async () => { next = await h.result.current.missionAction(telegramMission.key); });
+  expect(next).toEqual({ destination: telegramMission.destination_url, action: "external" });
+  expect(h.result.current.missions.data?.[0].state).toBe("IN_PROGRESS");
+  expect(request.mock.calls.filter(c => c[2]?.body !== undefined).map(c => c[0])).toEqual([`/missions/${telegramMission.key}/start`]);
+  expect(h.result.current.rewardEvent).toBeNull();
+  h.unmount(); h.client.clear();
+});
+it("reopens an in-progress Telegram destination with a fresh matching definition and no Start or Verify", async () => {
+  const h = await telegramSetup(async () => { throw new Error("Unexpected mutation"); }, { ...telegramMission, state: "IN_PROGRESS" });
+  let next: unknown;
+  await act(async () => { next = await h.result.current.missionAction(telegramMission.key, "reopen"); });
+  expect(next).toEqual({ destination: telegramMission.destination_url, action: "external" });
+  expect(request.mock.calls.filter(c => c[2]?.body !== undefined)).toEqual([]);
+  h.unmount(); h.client.clear();
+});
+it("retains TIMED_EXTERNAL Start destinations and open-token verification semantics", async () => {
+  const token = "server-open-token";
+  const destination = "https://reviewed-partner.example/offer?campaign=phase4";
+  const h = setup(async path => path.endsWith("/start") ? { ...fixture.mission_start.response, open_token: token, destination_url: destination } : fixture.mission_dwell_wait.response);
+  await waitFor(() => expect(h.result.current.missions.data).toBeTruthy());
+  let next: unknown;
+  await act(async () => { next = await h.result.current.missionAction("visit-dalexio"); });
+  expect(next).toEqual({ destination, action: "external" });
+  h.reads["/missions"] = [{ ...fixture.mission_list[0], state: "IN_PROGRESS" }];
+  await act(async () => { await h.result.current.missions.refetch(); });
+  await waitFor(() => expect(h.result.current.missions.data?.[0].state).toBe("IN_PROGRESS"));
+  await act(async () => { await h.result.current.missionAction("visit-dalexio"); });
+  expect(request.mock.calls.find(c => c[0].endsWith("/verify"))?.[2]?.body).toEqual({ open_token: token });
+  expect(h.result.current.rewardEvent).toBeNull();
+  h.unmount(); h.client.clear();
+});
+it("never returns a destination after failed Start", async () => {
+  const h = await telegramSetup(async () => { throw new Error("Start failed"); });
+  let next: unknown;
+  await act(async () => { next = await h.result.current.missionAction(telegramMission.key); });
+  expect(next).toBeUndefined();
+  expect(h.result.current.missions.data?.[0].state).toBe("AVAILABLE");
+  expect(h.result.current.rewardEvent).toBeNull();
+  h.unmount(); h.client.clear();
+});
+it.each([
+  { key: "another-key" }, { version: 2 }, { state: "CLAIMED" },
+])("rejects a mismatched Start response: %j", mismatch => {
+  return (async () => {
+    const h = await telegramSetup(async () => ({ ...telegramStart, ...mismatch }));
+    let next: unknown;
+    await act(async () => { next = await h.result.current.missionAction(telegramMission.key); });
+    expect(next).toBeUndefined(); expect(h.result.current.message).toContain("mission changed");
+    expect(h.result.current.rewardEvent).toBeNull();
+    h.unmount(); h.client.clear();
+  })();
+});
+it.each([
+  [], [{ ...telegramMission, version: 2, state: "IN_PROGRESS" }],
+  [{ ...telegramMission, key: "replacement-key", state: "IN_PROGRESS" }],
+  [{ ...telegramMission, destination_url: "https://t.me/changed_channel", state: "IN_PROGRESS" }],
+  [{ ...telegramMission, verification_family: "TIMED_EXTERNAL", state: "IN_PROGRESS" }],
+  [{ ...telegramMission, available: false, state: "IN_PROGRESS" }],
+].map(rows => ({ rows })))("fails safely when the refreshed Telegram definition differs: %j", ({ rows }) => {
+  return (async () => {
+    const h = await telegramSetup(async () => { h.reads["/missions"] = rows; return telegramStart; });
+    let next: unknown;
+    await act(async () => { next = await h.result.current.missionAction(telegramMission.key); });
+    expect(next).toBeUndefined(); expect(h.result.current.message).toBeTruthy();
+    expect(h.result.current.rewardEvent).toBeNull();
+    h.unmount(); h.client.clear();
+  })();
+});
+it.each([null, "javascript:alert(1)", "https://t.me.evil.example/channel", "https://t.me/", "https://user:pass@t.me/channel", "https://t.me/%0aevil"])("never returns a missing or unsafe Telegram destination: %s", async destination_url => {
+  const initial = { ...telegramMission, destination_url } as typeof telegramMission;
+  const h = await telegramSetup(async () => { h.reads["/missions"] = [{ ...initial, state: "IN_PROGRESS" }]; return telegramStart; }, initial);
+  let next: unknown;
+  await act(async () => { next = await h.result.current.missionAction(telegramMission.key); });
+  expect(next).toBeUndefined(); expect(h.result.current.rewardEvent).toBeNull();
+  h.unmount(); h.client.clear();
+});
+it("refuses stale destinations when the list refresh fails", async () => {
+  const h = await telegramSetup(async () => telegramStart);
+  const original = request.getMockImplementation()!;
+  request.mockImplementation(async (path, schema, options) => {
+    if (path === "/missions") throw new Error("Mission read failed");
+    return original(path, schema, options);
+  });
+  let next: unknown;
+  await act(async () => { next = await h.result.current.missionAction(telegramMission.key); });
+  expect(next).toBeUndefined(); expect(h.result.current.message).toContain("couldn't be refreshed");
   h.unmount(); h.client.clear();
 });

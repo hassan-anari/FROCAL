@@ -10,12 +10,22 @@ import { b3Request, B3Error } from "./b3";
 import * as c from "./b4Contracts";
 import { commitCanonical } from "./canonical";
 import type { EarnMission, MissionId, RewardEvent, LevelUpEvent } from "@/game/earn/types";
+import { safeDestination } from "./safeNavigation";
+import { useGameplayAvailability } from "./useGameplayAvailability";
+
+class MissionNavigationError extends Error {}
 
 export function missionView(
   m: c.Mission,
 ): EarnMission & { unavailable: boolean } {
+  const destination = safeDestination(m.destination_url);
+  const action = m.verification_family === "INTERNAL"
+    ? m.key === "typing-session" ? "typing" : m.key === "complete-profile" ? "profile" : "unavailable"
+    : m.verification_family === "TELEGRAM"
+      ? destination?.kind === "telegram" ? "external" : "unavailable"
+      : destination && ["external", "telegram"].includes(destination.kind) ? "external" : "unavailable";
   return {
-    id: m.key as MissionId,
+    id: m.key,
     title: m.title || m.key.replaceAll("-", " "),
     description: m.description,
     rewardXp: m.reward_amount,
@@ -36,21 +46,17 @@ export function missionView(
         : m.verification_family === "INTERNAL"
           ? "skill"
           : "ecosystem",
-    action:
-      m.key === "typing-session"
-        ? "typing"
-        : m.key === "complete-profile"
-          ? "profile"
-          : "external",
+    action,
     href: m.destination_url ?? undefined,
-    unavailable: !m.available || m.state === "UNAVAILABLE",
+    unavailable: m.state !== "REWARD_READY" && (!m.available || m.state === "UNAVAILABLE" || action === "unavailable"),
   };
 }
 /** All reads share the B2 authenticated scope. No production scenario fallback. */
 export function useB3() {
-  const { scope, bootstrap } = useBootstrap();
+  const { scope, bootstrap, denyEarning } = useBootstrap();
   const client = useQueryClient();
   const remote = isRemoteDataSource();
+  const { canEarn, canClaimVested } = useGameplayAvailability();
   const enabled =
     remote && scope.player !== "unverified" && Boolean(bootstrap.data);
   const key = (name: string) => [...queryKeys.player(scope), "b3", name];
@@ -179,9 +185,10 @@ export function useB3() {
     try {
       return await operation();
     } catch (error) {
+      if (error instanceof B3Error && ["SEASON_UNAVAILABLE", "PLAYER_RESTRICTED"].includes(error.code)) denyEarning();
       if (error instanceof B3Error && error.retryAfter)
         blockedUntil.current[action] = Date.now() + error.retryAfter * 1000;
-      const text = error instanceof B3Error ? error.message : "We couldn't connect right now. Please try again.";
+      const text = error instanceof B3Error || error instanceof MissionNavigationError ? error.message : "We couldn't connect right now. Please try again.";
       setMessage(text);
       showFeedback(text);
     } finally {
@@ -195,6 +202,7 @@ export function useB3() {
   };
   const claimDaily = () =>
     run("daily", async () => {
+      if (!canEarn("daily") || !daily.data?.claimable) return;
       const before = previousCanonical();
       const result = await b3Request("/daily/claim", c.dailyClaimSchema, {
         body: {},
@@ -209,19 +217,20 @@ export function useB3() {
       reveal(result.created, `daily:${result.claim_period}`, result.reward_amount, "Daily Core", "daily", before, result.canonical, result.reward);
       return result;
     });
-  const missionAction = (id: string) =>
+  const missionAction = (id: string, intent: "act" | "reopen" = "act") =>
     run(`mission:${id}`, async () => {
       const before = previousCanonical();
       const m = missions.data?.find((v) => v.key === id);
       if (
         !m ||
-        !m.available ||
         m.state === "UNAVAILABLE" ||
         m.state === "CLAIMED"
       )
         return;
+      if (intent === "reopen" && (m.verification_family !== "TELEGRAM" || m.state !== "IN_PROGRESS")) return;
       const path = `/missions/${encodeURIComponent(id)}`;
       if (m.state === "REWARD_READY") {
+        if (!canClaimVested("missions", true)) return;
         const result = await b3Request(`${path}/claim`, c.missionClaimSchema, {
           body: {},
         });
@@ -230,15 +239,54 @@ export function useB3() {
         reveal(result.created, `mission:${id}:${result.version}:${result.claimed_at}`, result.reward_amount, m.title, m.key as MissionId, before, result.canonical, result.reward);
         return;
       }
+      if (!canEarn("missions") || missionView(m).unavailable) return;
+      const refreshedMission = async () => {
+        const refreshed = await missions.refetch();
+        const current = refreshed.data?.find(candidate => candidate.key === id);
+        if (refreshed.isError || !current || current.version !== m.version || current.verification_family !== m.verification_family || current.destination_url !== m.destination_url) {
+          throw new MissionNavigationError("This mission changed or couldn't be refreshed. Please review it and try again.");
+        }
+        return current;
+      };
+      const telegramDestination = (current: c.Mission) => {
+        const destination = safeDestination(current.destination_url);
+        if (current.state !== "IN_PROGRESS" || missionView(current).unavailable || destination?.kind !== "telegram" || new URL(destination.url).pathname === "/") {
+          throw new MissionNavigationError("This mission's Telegram destination is unavailable. Please try again later.");
+        }
+        return { destination: destination.url, action: "external" as const };
+      };
+      if (intent === "reopen") {
+        if (m.verification_family !== "TELEGRAM" || m.state !== "IN_PROGRESS") return;
+        const current = await refreshedMission();
+        if (!canEarn("missions")) return;
+        return telegramDestination(current);
+      }
       const opened = await b3Request(`${path}/start`, c.missionStartSchema, {
         body: {},
       });
-      if (m.state === "AVAILABLE") {
+      if (m.verification_family !== "INTERNAL" && (opened.key !== m.key || opened.version !== m.version || opened.state !== "IN_PROGRESS")) {
         await missions.refetch();
+        throw new MissionNavigationError("This mission changed. Please review it and try again.");
+      }
+      if (m.state === "AVAILABLE") {
+        if (m.verification_family === "TELEGRAM") {
+          const current = await refreshedMission();
+          if (!canEarn("missions")) return;
+          return telegramDestination(current);
+        }
+        if (m.verification_family === "TIMED_EXTERNAL") await refreshedMission();
+        else await missions.refetch();
+        if (!canEarn("missions")) return;
+        if (missionView({ ...m, destination_url: opened.destination_url }).unavailable) return;
         return {
           destination: opened.destination_url,
           action: missionView(m).action,
         };
+      }
+      if (!canEarn("missions")) return;
+      if (m.verification_family === "TELEGRAM") {
+        const current = await refreshedMission();
+        if (current.state !== "IN_PROGRESS" || missionView(current).unavailable || !canEarn("missions")) return;
       }
       const result = await b3Request(`${path}/verify`, c.missionVerifySchema, {
         body: { open_token: opened.open_token },
@@ -248,6 +296,7 @@ export function useB3() {
     });
   const registerGroup = () =>
     run("group-register", async () => {
+      if (!canEarn("network") || !network.data?.can_register) return;
       const intent = await b3Request("/network/groups/intents", c.intentSchema, { body: {} });
       analytics.featureFor(scope.player, scope.session, "network_group_registration_initiated");
       return intent;
@@ -282,6 +331,7 @@ export function useB3() {
   const pendingKeys = useRef<Record<string, string>>({});
   const startTyping = () =>
     run("typing-start", async () => {
+      if (!canEarn("typing")) return;
       const k = requestKey("typing-start");
       const r = await b3Request("/typing/attempts/start", c.attemptSchema, {
         body: {},
@@ -293,6 +343,7 @@ export function useB3() {
     });
   const submitTyping = (id: string, typed_text: string) =>
     run("typing-submit", async () => {
+      if (!canEarn("typing")) return;
       const r = await b3Request(
         `/typing/attempts/${encodeURIComponent(id)}/submit`,
         c.submitSchema,
@@ -310,6 +361,7 @@ export function useB3() {
     });
   const claimTyping = () =>
     run("typing-claim", async () => {
+      if (!canClaimVested("typing", (typing.data?.claimable_balance ?? 0) > 0)) return;
       const before = previousCanonical();
       const k = requestKey("typing-claim");
       const r = await b3Request("/typing/claim", c.typingClaimSchema, {

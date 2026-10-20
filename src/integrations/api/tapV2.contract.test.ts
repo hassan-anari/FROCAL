@@ -62,3 +62,34 @@ it("keeps a pinned lease config separate from the current progression config", (
   expect(normalized.config).toBe("new-current-progression-config");
   expect(normalized.grant!.scope.config).toBe(fixture.initial_state.lease.config_version);
 });
+
+it("cutoff forbids fresh lease issuance even if an older Tap state still permits earning", async () => {
+  const calls: string[] = [];
+  vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+    calls.push(url);
+    return new Response(JSON.stringify({ ...fixture.initial_state, lease: null, cooldown_until: null, burst_remaining: 50 }));
+  }));
+  const journal = journalSchema.parse({ version: 1, player: "100", session: fixture.lease_request.session_id, events: [], batches: [] });
+  await createTapPort("100", "isolated", ["100"], () => false).synchronize(journal, new AbortController().signal);
+  expect(calls).toHaveLength(1);
+  expect(calls[0]).toContain("tap-state");
+});
+
+it.each(["committed", "expired"])("reconciles an exact %s batch after cutoff without issuing a lease", async mode => {
+  const calls: Array<{ url: string; body: unknown }> = [];
+  const snapshot = normalizeTapState(fixture.initial_state);
+  const sequences = Array.from({ length: fixture.batch_request.tap_count }, (_, i) => fixture.batch_request.sequence_start + i);
+  const batch = { scope: snapshot.grant!.scope, key: fixture.batch_request.idempotency_key, sequences, attempts: 1, blocked: false };
+  const journal = journalSchema.parse({ version: 1, player: "100", session: fixture.lease_request.session_id, events: sequences.map(sequence => ({ scope: batch.scope, sequence })), batches: [batch] });
+  vi.stubGlobal("fetch", vi.fn(async (url: string, options: RequestInit) => {
+    calls.push({ url, body: options.body ? JSON.parse(String(options.body)) : undefined });
+    if (url.endsWith("tap-batches")) return mode === "committed" ? new Response(JSON.stringify(fixture.duplicate_response))
+      : new Response(JSON.stringify({ code: "LEASE_EXPIRED", detail: "expired", retryable: false, retry_after_ms: null }), { status: 409 });
+    return new Response(JSON.stringify({ ...fixture.batch_response.snapshot, lease: null, reward_earning_allowed: false }));
+  }));
+  const result = await createTapPort("100", "isolated", ["100"], () => false).synchronize(journal, new AbortController().signal);
+  expect(calls.filter(c => c.url.endsWith("tap-batches"))).toEqual([{ url: "/api/v1/base/v2/tap-batches", body: fixture.batch_request }]);
+  expect(calls.some(c => c.url.endsWith("tap-leases"))).toBe(false);
+  if (mode === "committed") expect(result.receipts[0]).toMatchObject({ key: batch.key, accepted: fixture.batch_response.accepted_taps });
+  else expect(result.rejections[0]).toMatchObject({ key: batch.key, code: "LEASE_EXPIRED" });
+});

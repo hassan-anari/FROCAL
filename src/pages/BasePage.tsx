@@ -1,4 +1,5 @@
 import { baseObjectives, missionStateLabel } from "@/integrations/api/baseObjectives";
+import { useQueryFeedback } from "@/design-system/components/TransientFeedback";
 import { useRewardHistory } from "@/integrations/api/useRewardHistory";
 import { rewardHistoryView, formatXp, rewardTimestamp } from "@/integrations/api/rewardHistory";
 import { BasePromoBanner } from "@/design-system/components/BasePromoBanner";
@@ -98,6 +99,7 @@ export function BasePage() {
   const live = useB3();
   const streak = live.remote ? live.daily.data?.current_streak ?? 0 : localStreak;
   const localMissions = useEarnStore((state) => state.missions);
+  useQueryFeedback(live.remote ? live.missions.error : null, "Objectives couldn't load. Please try again.");
   const history = useRewardHistory();
   const recentRewards = history.items.filter(item => item.player_amount !== 0).slice(0, 3).map(rewardHistoryView);
   const objectives = live.remote ? baseObjectives(live.missions.data).map(m => ({ id: m.key, title: m.title, rewardXp: m.reward_amount, label: missionStateLabel(m.state) })) : Object.values(localMissions).filter(m => m.status !== "claimed").slice(0, 3).map(m => ({ ...m, label: m.status === "completed" ? "Reward ready" : m.status === "in-progress" ? "In progress" : "Available" }));
@@ -220,6 +222,7 @@ export function BasePage() {
   };
 
   const triggerReaction = () => {
+    if (remoteData && !canEarn("base_tap")) return;
     if (remoteData && adapter.isTelegram && tapAvailable && !baseTap.tap()) return;
 
     const reaction = reactionOrder[reactionCursor.current % reactionOrder.length];
@@ -288,6 +291,7 @@ export function BasePage() {
             effect="base"
             showParticles={false}
             interactive
+            disabled={remoteData && !tapAvailable}
             multiTouch={remoteData && adapter.isTelegram}
             onPress={triggerReaction}
             ariaLabel="Interact with Dexo"
@@ -297,6 +301,7 @@ export function BasePage() {
           {remoteData && adapter.isTelegram ? <BaseTapFeedback tapCount={tapCount} /> : null}
 
           <div className={styles.progressFooter}>
+            {remoteData && !tapAvailable && baseTap.unresolvedEvents > 0 ? <span role="status">Saved taps are awaiting server confirmation.</span> : null}
             <div className={styles.xpLabels}>
               <span>Growth progress</span>
               <div className={styles.progressValue}>
@@ -323,7 +328,7 @@ export function BasePage() {
         </section>
 
 
-        <section className={styles.objectives} aria-label="Next objectives">
+        {objectives.length > 0 ? <section className={styles.objectives} aria-label="Next objectives">
           <header className={styles.sectionHeader}>
             <h2>Next Objective</h2>
             <button
@@ -352,7 +357,7 @@ export function BasePage() {
               </article>
             ))}
           </div>
-        </section>
+        </section> : null}
 
         <DeferredMount minHeight={220}>
           {recentRewards.length > 0 ? <section className={styles.lastVisit} aria-label="Recent rewards">

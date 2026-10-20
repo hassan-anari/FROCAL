@@ -247,7 +247,7 @@ export function TypingChallengePage() {
           <textarea
             ref={inputRef}
             value={input}
-            disabled={!started || result !== null || attemptsRemaining <= 0}
+            disabled={!started || result !== null || attemptsRemaining <= 0 || !canEarn("typing")}
             onChange={(event) => setInput(event.target.value.slice(0, target.length))}
             placeholder={attemptsRemaining <= 0 ? "Daily play limit reached." : started ? "Start typing here…" : "Tap Start when you are ready."}
             autoCapitalize="off"
@@ -283,12 +283,12 @@ export function TypingChallengePage() {
             </motion.section>
           ) : (
             <motion.div key="controls" className={styles.controls} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={mobileMotion.tab}>
-              {pending && live.remote ? <Button size="lg" disabled={live.busy} onClick={() => { void finish(); }}>Try Again</Button> : !started ? (
+              {pending && live.remote ? <Button size="lg" disabled={live.busy || !canEarn("typing")} onClick={() => { void finish(); }}>Try Again</Button> : !started ? (
                 <Button size="lg" disabled={attemptsRemaining <= 0 || live.busy || (live.remote && !canEarn("typing"))} trailingIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={18} strokeWidth={1.8} />} onClick={begin}>
                   {attemptsRemaining > 0 ? "Start arena run" : "Daily limit reached"}
                 </Button>
               ) : (
-                <Button tone="secondary" size="lg" disabled={live.busy} onClick={finish}>Finish now</Button>
+                <Button tone="secondary" size="lg" disabled={live.busy || !canEarn("typing")} onClick={finish}>Finish now</Button>
               )}
             </motion.div>
           )}

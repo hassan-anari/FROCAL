@@ -13,11 +13,13 @@ for (const width of [320, 390, 460]) test(`B6 preserved scenes and corrected asy
   await page.setViewportSize({ width, height: 844 });
   const f = await prepareClan(page);
   const dir = `docs/evidence/b6/${width}`; mkdirSync(dir, { recursive: true });
+  // Phase 4 authorizes the Season eyebrow and intro copy, with no design changes.
+  const masks = (name: string) => name === "preserved-profile" ? [page.locator('[class*="identityCopy"] > span')] : name === "preserved-arena" ? [page.locator("main > header > p")] : [];
   const shot = async (name: string) => {
     // Let the existing 450ms artwork fade finish; this is capture stabilization only.
     await page.waitForTimeout(650);
     await page.evaluate(async () => { await document.fonts.ready; await Promise.all(Array.from(document.images).filter(img => img.complete).map(img => img.decode().catch(() => {}))); });
-    await page.screenshot({ path: `${dir}/${phase}-${name}.png`, animations: "disabled" });
+    await page.screenshot({ mask: masks(name), path: `${dir}/${phase}-${name}.png`, animations: "disabled" });
   };
   const finish = f.hold("/state");
   await page.goto(launch("/clan"));
@@ -95,13 +97,16 @@ for (const width of [320, 390, 460]) test(`B6 preserved scenes and corrected asy
   await page.getByRole("heading", { name: "Recent activity", exact: true }).scrollIntoViewIfNeeded();
   if (!before) await expect(page.locator("[data-activity-id]")).toHaveCount(b6Activity[0].items.length);
   await shot("source-activity");
+  // Compare the unchanged positive-objective scene in both releases; Phase 4 separately tests removal of empty sections.
+  f.app.missions = [{ ...f.app.missions[0], title: "Server objective", available: true, state: "AVAILABLE" }];
   for (const path of ["/base", "/profile", "/arena"]) {
     await page.goto(launch(path));
     await expect(page.locator("main")).toBeVisible();
+    if (path === "/base") await expect(page.getByRole("region", { name: "Next objectives" }).locator("article h3")).toHaveText(["Server objective"]);
     if (path === "/profile") await expect(page.getByRole("button", { name: "Customize", exact: true })).toBeEnabled();
     if (path === "/arena") await expect(page.getByRole("button", { name: "Unlocks in Season 2" })).toBeDisabled();
     await page.waitForTimeout(400);
     await shot(`preserved-${path.slice(1)}`);
-    if (!before) await expect(page).toHaveScreenshot([String(width), `before-preserved-${path.slice(1)}.png`], { animations: "disabled", maxDiffPixelRatio: .002 });
+    if (!before) await expect(page).toHaveScreenshot([String(width), `before-preserved-${path.slice(1)}.png`], { mask: masks(`preserved-${path.slice(1)}`), animations: "disabled", maxDiffPixelRatio: .002 });
   }
 });

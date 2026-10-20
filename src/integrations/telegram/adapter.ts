@@ -37,7 +37,7 @@ export interface TelegramAdapter {
   hapticImpact(style?: HapticImpact): void;
   hapticNotice(type: HapticNotice): void;
   selectionChanged(): void;
-  openTelegramLink(url: string): void;
+  openTelegramLink(url: string): boolean | void;
   openExternalLink(url: string): void;
   setChromeColors(background: string, header?: string, bottomBar?: string): void;
   showBackButton(handler: () => void): () => void;
@@ -134,8 +134,14 @@ export function createTelegramAdapter(): TelegramAdapter {
       if (isTelegram) scheduleNativeFeedback(() => nativeCommand(() => app?.HapticFeedback?.selectionChanged()));
     },
     openTelegramLink: (url) => {
-      if (isTelegram && app?.openTelegramLink) app.openTelegramLink(url);
-      else window.open(url, "_blank", "noopener,noreferrer");
+      try {
+        if (isTelegram) {
+          if (!app?.openTelegramLink) return false;
+          app.openTelegramLink(url);
+          return true;
+        }
+        return Boolean(window.open(url, "_blank", "noopener,noreferrer"));
+      } catch { return false; }
     },
     openExternalLink: (url) => {
       if (isTelegram && app?.openLink) app.openLink(url);

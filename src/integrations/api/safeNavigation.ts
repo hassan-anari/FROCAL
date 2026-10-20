@@ -19,8 +19,10 @@ export function safeDestination(value: string | null | undefined, origin = windo
 export function navigateSafely(value: string | null | undefined, adapter: Pick<TelegramAdapter, "openTelegramLink" | "openExternalLink">, navigate: (path: GameDestination) => void) {
   const destination = safeDestination(value);
   if (!destination) return false;
-  if (destination.kind === "internal") navigate(destination.path);
-  else if (destination.kind === "telegram") adapter.openTelegramLink(destination.url);
-  else adapter.openExternalLink(destination.url);
-  return true;
+  try {
+    if (destination.kind === "internal") navigate(destination.path);
+    else if (destination.kind === "telegram") return adapter.openTelegramLink(destination.url) !== false;
+    else adapter.openExternalLink(destination.url);
+    return true;
+  } catch { return false; }
 }

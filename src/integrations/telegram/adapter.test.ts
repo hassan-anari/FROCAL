@@ -81,3 +81,16 @@ describe("Telegram adapter", () => {
     expect(exitFullscreen).toHaveBeenCalledOnce();
   });
 });
+
+it("reports whether the native Telegram link command could be invoked", () => {
+  window.Telegram = { WebApp: { initData: "query_id=test" } };
+  const adapter = createTelegramAdapter();
+  expect(adapter.openTelegramLink("https://t.me/reviewed_channel")).toBe(false);
+  window.Telegram.WebApp!.openTelegramLink = () => { throw new Error("Native unavailable"); };
+  expect(adapter.openTelegramLink("https://t.me/reviewed_channel")).toBe(false);
+  const open = vi.fn();
+  window.Telegram.WebApp!.openTelegramLink = open;
+  expect(adapter.openTelegramLink("https://t.me/reviewed_channel")).toBe(true);
+  expect(open).toHaveBeenCalledWith("https://t.me/reviewed_channel");
+  delete window.Telegram;
+});

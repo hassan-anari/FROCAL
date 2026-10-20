@@ -2,7 +2,7 @@ import { readPlayerOnboarding } from "@/app/storageRelease";
 import { analytics } from "@/integrations/analytics/analytics";
 import { canonicalKey } from "./canonical";
 import type { CanonicalState } from "./b3Contracts";
-import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { useQuery, useQueryClient, type UseQueryResult } from "@tanstack/react-query";
 import type { BootstrapPayload } from "@/game/domain/schemas";
 import { useScenarioStore } from "@/game/scenarios/scenarioStore";
@@ -17,6 +17,8 @@ interface BootstrapContextValue {
   scope: PlayerScope;
   refresh: () => Promise<unknown>;
   progressionPolicy: BootstrapProgressionPolicy | null;
+  authorityReady: boolean;
+  denyEarning: () => void;
 }
 const Context = createContext<BootstrapContextValue | null>(null);
 
@@ -33,10 +35,14 @@ export function BootstrapProvider({ children }: { children: ReactNode }) {
   }
   const session = sessionRef.current.id;
   const client = useQueryClient();
+  const [authorityReady, setAuthorityReady] = useState(true);
+  const authorityGeneration = useRef(0);
   const bootstrap = useQuery({
     queryKey: queryKeys.bootstrap(session, source, scenario, adapter.platform),
     queryFn: async ({ signal }) => {
       const value = await loadBootstrap(scenario, adapter.platform, initData, signal);
+      const previous = client.getQueryData<BootstrapPayload>(queryKeys.bootstrap(session, source, scenario, adapter.platform));
+      if (previous?.remote && value.remote && Date.parse(value.serverTime) < Date.parse(previous.serverTime)) return previous;
       const current = value.remote ? client.getQueryData<CanonicalState>(canonicalKey({ session, player: value.player.id, season: value.season.id, config: configCacheScope(value.remote.config) })) : undefined;
       if (!current || !value.remote || current.receipt_cursor <= (value.remote.canonical?.receipt_cursor ?? -1)) return value;
       const p = current.progression;
@@ -46,6 +52,25 @@ export function BootstrapProvider({ children }: { children: ReactNode }) {
     refetchOnWindowFocus: source === "remote",
     refetchInterval: source === "remote" ? 60_000 : false,
   });
+  const revalidateAuthority = useCallback(() => {
+    const generation = ++authorityGeneration.current;
+    setAuthorityReady(false);
+    if (document.hidden) return;
+    void client.cancelQueries({ queryKey: queryKeys.bootstrap(session, source, scenario, adapter.platform), exact: true })
+      .then(() => bootstrap.refetch()).then(result => {
+        if (generation === authorityGeneration.current) setAuthorityReady(!result.isError);
+      });
+  }, [client, session, source, scenario, adapter.platform, bootstrap.refetch]);
+  useEffect(() => {
+    if (source !== "remote") return;
+    document.addEventListener("visibilitychange", revalidateAuthority);
+    window.addEventListener("focus", revalidateAuthority);
+    return () => {
+      authorityGeneration.current++;
+      document.removeEventListener("visibilitychange", revalidateAuthority);
+      window.removeEventListener("focus", revalidateAuthority);
+    };
+  }, [source, revalidateAuthority]);
   const scope: PlayerScope = {
     session,
     player: bootstrap.data?.player.id ?? "unverified",
@@ -88,7 +113,12 @@ export function BootstrapProvider({ children }: { children: ReactNode }) {
   }, [scopeKey, source]);
 
   const refresh = () => bootstrap.refetch();
-  return <Context.Provider value={{ bootstrap, scope, refresh, progressionPolicy: bootstrap.data?.remote?.config.progression ?? null }}>
+  const denyEarning = () => {
+    // Cancel a Bootstrap read started before the rejection. Only a subsequent
+    // authenticated response may restore permission; local controls cannot do so.
+    revalidateAuthority();
+  };
+  return <Context.Provider value={{ bootstrap, scope, refresh, denyEarning, authorityReady: authorityReady && !bootstrap.isError, progressionPolicy: bootstrap.data?.remote?.config.progression ?? null }}>
     {prepared === scopeKey ? <div key={scopeKey} style={{ display: "contents" }}>{children}</div> : null}
   </Context.Provider>;
 }

@@ -8,9 +8,11 @@ for (const width of [320, 390, 460]) test(`post-B6 mobile visual comparison ${wi
   await page.setViewportSize({ width, height: 740 });
   const f = await prepareClan(page);
   const dir = `docs/evidence/post-b6/${width}`; mkdirSync(dir, { recursive: true });
+  // Only the Phase 4 Season eyebrow/intro text is excluded from pixel equality.
+  const masks = (name: string) => name === "preserved-profile" ? [page.locator('[class*="identityCopy"] > span')] : name === "preserved-arena" ? [page.locator("main > header > p")] : [];
   const shot = async (name: string) => {
     await page.waitForTimeout(700); await page.evaluate(() => document.fonts.ready);
-    await page.screenshot({ path: `${dir}/${before ? "before" : "after"}-${name}.png`, animations: "disabled" });
+    await page.screenshot({ mask: masks(name), path: `${dir}/${before ? "before" : "after"}-${name}.png`, animations: "disabled" });
   };
   await page.goto(launch("/clan"));
   await expect(page.getByRole("navigation", { name: "Clan headquarters sections" })).toBeVisible();
@@ -42,11 +44,14 @@ for (const width of [320, 390, 460]) test(`post-B6 mobile visual comparison ${wi
   await page.reload(); await expect(header.locator("h1")).toHaveText(f.identity.name); await header.scrollIntoViewIfNeeded();
   if (!before) { expect(await header.locator("h1").evaluate(el => el.scrollWidth <= el.clientWidth + 1)).toBe(true); expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true); }
   await shot("clan-long-title");
+  // Keep full pixel coverage of a real objective; the authorized empty-section removal has dedicated regressions.
+  f.app.missions = [{ ...f.app.missions[0], title: "Server objective", available: true, state: "AVAILABLE" }];
   for (const path of ["/base", "/profile", "/arena"]) {
     await page.goto(launch(path)); await expect(page.locator("main")).toBeVisible();
+    if (path === "/base") await expect(page.getByRole("region", { name: "Next objectives" }).locator("article h3")).toHaveText(["Server objective"]);
     if (path === "/profile") await expect(page.getByRole("button", { name: "Customize", exact: true })).toBeEnabled();
     if (path === "/arena") await expect(page.getByRole("button", { name: "Unlocks in Season 2" })).toBeDisabled();
     await shot(`preserved-${path.slice(1)}`);
-    if (!before) await expect(page).toHaveScreenshot([String(width), `before-preserved-${path.slice(1)}.png`], { animations: "disabled", maxDiffPixelRatio: .002 });
+    if (!before) await expect(page).toHaveScreenshot([String(width), `before-preserved-${path.slice(1)}.png`], { mask: masks(`preserved-${path.slice(1)}`), animations: "disabled", maxDiffPixelRatio: .002 });
   }
 });

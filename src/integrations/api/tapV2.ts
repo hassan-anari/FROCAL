@@ -80,7 +80,7 @@ function receiptFor(batch: Readonly<TapSubmission>, result: WireTapResult) {
 }
 
 /** Credentials stay in this authenticated lifetime's closure, never the journal. */
-export function createTapPort(player: string, initData: string | null, verifiedAliases: readonly string[] = [player]): TapPort {
+export function createTapPort(player: string, initData: string | null, verifiedAliases: readonly string[] = [player], canIssue: () => boolean = () => true): TapPort {
   async function read(session: string, signal: AbortSignal) {
     const state = tapStateSchema.parse(await call(`tap-state?session_id=${encodeURIComponent(session)}`, initData, signal));
     if (state.player_id !== player) throw new TapTransportError("terminal", 0, "PLAYER_MISMATCH");
@@ -127,6 +127,7 @@ export function createTapPort(player: string, initData: string | null, verifiedA
       throw conflict(state.ownership.status === "SESSION_MOVED" ? "LEASE_REVOKED" : "ACTIVE_SESSION");
     }
     if (switchGeneration !== undefined && state.ownership?.status !== "OWNED") {
+      if (!canIssue()) throw conflict("SEASON_UNAVAILABLE");
       if (!state.ownership || state.generation !== switchGeneration) throw conflict("GENERATION_STALE");
       try {
         state = tapStateSchema.parse(await call("tap-leases", initData, signal,
@@ -136,7 +137,7 @@ export function createTapPort(player: string, initData: string | null, verifiedA
         throw error;
       }
     }
-    if ((!state.lease || state.burst_remaining === 0) && state.issuance_enabled && state.reward_earning_allowed
+    if (canIssue() && (!state.lease || state.burst_remaining === 0) && state.issuance_enabled && state.reward_earning_allowed
       && (state.cooldown_until === null || Date.parse(state.cooldown_until) <= Date.parse(state.server_time))) {
       try {
         state = tapStateSchema.parse(await call("tap-leases", initData, signal, { session_id: journal.session, takeover: false, expected_generation: null }));

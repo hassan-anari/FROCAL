@@ -11,6 +11,7 @@ interface DexoStageProps {
   className?: string;
   effect?: "idle" | "reveal" | "acquired" | "base";
   interactive?: boolean;
+  disabled?: boolean;
   multiTouch?: boolean;
   onPress?: () => void;
   ariaLabel?: string;
@@ -28,6 +29,7 @@ export function DexoStage({
   className = "",
   effect = "idle",
   interactive = false,
+  disabled = false,
   multiTouch = false,
   onPress,
   ariaLabel = "Dexo companion",
@@ -93,6 +95,7 @@ export function DexoStage({
         {interactive ? (
           <button
             type="button"
+            disabled={disabled}
             className={styles.characterButton}
             style={multiTouch ? { touchAction: "none" } : undefined}
             onPointerDown={

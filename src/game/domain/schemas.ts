@@ -27,6 +27,8 @@ export const bootstrapPayloadSchema = z.object({
   remote: remoteBootstrapSchema.optional(),
   requestId: z.string(),
   serverTime: z.string().datetime(),
+  // Monotonic receipt time belongs to this Bootstrap sample, not canonical updates.
+  clockReceivedAt: z.number().optional(),
   environment: z.enum(["browser", "telegram"]),
   season: z.object({
     id: z.string(),

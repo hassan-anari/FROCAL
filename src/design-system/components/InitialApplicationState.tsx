@@ -1,3 +1,4 @@
+import { useGameplayAvailability } from "@/integrations/api/useGameplayAvailability";
 import { configuredBotUrl } from "@/integrations/telegram/botLinks";
 import type { ReactNode } from "react";
 import { useRef, useState } from "react";
@@ -20,6 +21,7 @@ export function InitialApplicationState({ children }: { children: ReactNode }) {
   const path = useRouterState({ select: (state) => state.location.pathname });
   const remote = isRemoteDataSource();
   const tap = useTapSession();
+  const { canEarn } = useGameplayAvailability();
   const submitting = useRef(false);
   const [retrying, setRetrying] = useState(false);
   const [confirmSwitch, setConfirmSwitch] = useState(false);
@@ -44,12 +46,6 @@ export function InitialApplicationState({ children }: { children: ReactNode }) {
   } else if (bootstrap.isError) {
     code = bootstrap.error instanceof ApiError ? bootstrap.error.code : "BOOTSTRAP_FAILED";
     ({ label, title, message, reopen } = sessionRecovery(code));
-  } else if (remote && bootstrap.data && path !== "/" && path !== "/onboarding" && path !== "/profile"
-    && (!bootstrap.data.featureFlags.season || bootstrap.data.season.id === "no-active-season" || bootstrap.data.season.status !== "live")) {
-    code = "SEASON_UNAVAILABLE";
-    label = "SEASON UNAVAILABLE";
-    title = bootstrap.data.season.id === "no-active-season" ? "Season unavailable" : bootstrap.data.season.name;
-    message = "This Season is not available for play. Your player profile and Lifetime XP are preserved. Retry for the latest Season state.";
   }
   if (!code && remote && bootstrap.data) {
     const feature = path === "/arena" ? "arena" : path === "/profile" ? "profile" : path === "/clan" ? "clan" : null;
@@ -65,7 +61,7 @@ export function InitialApplicationState({ children }: { children: ReactNode }) {
       message = "This feature is not available in the current game configuration. Retry for the latest availability.";
     }
   }
-  if (!code && remote && path === "/base" && tap && (
+  if (!code && remote && path === "/base" && canEarn("base_tap") && tap && (
     ["storage-blocked", "session-busy", "terminal"].includes(tap.view.status)
     || (tap.view.status === "paused" && tap.view.error
       && (!["COOLDOWN", "RATE_LIMITED"].includes(tap.view.error) || tap.view.canSwitchDevice))

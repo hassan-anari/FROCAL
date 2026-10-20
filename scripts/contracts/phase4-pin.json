@@ -1,0 +1,30 @@
+{
+  "repository": "hassan-anari/WEDCAL",
+  "pr": 38,
+  "commit": "cdd0aa372889956868708ba2c02bd29db5c1e1b7",
+  "frontend_baseline": "eb76307615322016bc39509c467f64be0268423a",
+  "fixture_note": "registered-2/6 copied exactly from backend runtime inspection; configurable-3 and missions are isolated synthetic schema variants. Historical pins remain unchanged.",
+  "files": {
+    "scripts/contracts/phase4/backend-bootstrap-schemas.py": {
+      "blob": "43eb9fce73d19e825c9256521474f97f6a5099f5"
+    },
+    "scripts/contracts/phase4/backend-mission-schemas.py": {
+      "blob": "74ecf4326e04f9ceac2f3734d9f026a14d427b99"
+    },
+    "scripts/contracts/phase4/FROCAL_HANDOFF.md": {
+      "blob": "f065bc0ff19fafb9060a2d4d93cc0de87c5f525b"
+    },
+    "src/integrations/api/fixtures/phase4/configurable-3.json": {
+      "blob": "50133a6ae17f4b992c7afa78b22c794f0fed9114"
+    },
+    "src/integrations/api/fixtures/phase4/missions.json": {
+      "blob": "04ed1b5a8c730db5dfb0a4a52248876bfac12162"
+    },
+    "src/integrations/api/fixtures/phase4/registered-2.json": {
+      "blob": "aaa2c8389b44f3a7fd873329f642084318a67c56"
+    },
+    "src/integrations/api/fixtures/phase4/registered-6.json": {
+      "blob": "4dbf474611390bd5cc0c81fd6901bf65658923b3"
+    }
+  }
+}

@@ -7,6 +7,7 @@ export interface TapView {
   status: "initializing" | "ready" | "paused" | "storage-blocked" | "session-busy" | "terminal" | "closed";
   committed: TapSnapshot | null;
   authorizedUnsent: number;
+  unresolvedEvents: number;
   lifetime: number | null;
   seasonPoints: number | null;
   remaining: number;
@@ -31,6 +32,7 @@ interface Dependencies {
   onCommitted?: (snapshot: TapSnapshot) => void;
   requestTimeoutMs?: number;
   retryJitterMs?: () => number;
+  canEarn?: () => boolean;
 }
 
 /** Authorized display and durable delivery; only server receipts commit events. */
@@ -87,7 +89,7 @@ export class TapController {
     const deadline = Math.max(this.localCooldown ?? 0, this.snapshot?.cooldownUntil ?? 0);
     const remaining = Math.max(0, deadline - this.serverNow());
     return {
-      status: this.status, committed: this.snapshot, authorizedUnsent: pending,
+      status: this.status, committed: this.snapshot, authorizedUnsent: pending, unresolvedEvents: this.journal.events.length,
       lifetime, seasonPoints: this.snapshot ? this.snapshot.seasonPoints + points : null,
       remaining: this.grant ? Math.max(0, this.grant.remaining - pending) : 0,
       progression: lifetime !== null && this.snapshot ? authorizedProgression(lifetime, this.snapshot.progression) : null,
@@ -309,7 +311,7 @@ export class TapController {
   /** Synchronous durable append precedes the immediate React notification. No HTTP wait. */
   touch(): boolean {
     const grant = this.grant;
-    if (this.status !== "ready" || !this.snapshot?.earningAllowed || !grant || grant.cooldownDuration === null) return false;
+    if (this.dependencies.canEarn?.() === false || this.status !== "ready" || !this.snapshot?.earningAllowed || !grant || grant.cooldownDuration === null) return false;
     if (this.serverNow() >= grant.expiresAt) { this.status = "paused"; this.emit(); return false; }
     const pending = this.journal.events.filter((event) => scopeId(event.scope) === scopeId(grant.scope) && event.sequence > grant.sequenceCursor);
     if (pending.length >= grant.remaining || (this.snapshot.cooldownUntil ?? 0) > this.serverNow()) return false;
