@@ -262,7 +262,7 @@ export function EarnPage() {
       if (next?.action === "typing") openTypingArena();
       else if (next?.action === "profile") void navigate({ to: "/profile" });
       else if (next?.destination && !navigateSafely(next.destination, adapter, to => { void navigate({ to }); })) {
-        showFeedback(safeDestination(next.destination)?.kind === "telegram" ? "Telegram couldn't open. Use Open Telegram to try again." : "The destination couldn't open. Please try the mission again.");
+        showFeedback(live.missions.data?.find(m => m.key === mission.id)?.verification_family === "TELEGRAM" ? "Telegram couldn't open. Use Open Telegram to try again." : "The destination couldn't open. Please try the mission again.");
       }
       return;
     }

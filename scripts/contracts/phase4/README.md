@@ -54,6 +54,9 @@ Existing browser/analytics/B4/B5/B6/post-B6 coverage remains enabled in CI. Visu
 mask only the authorized Profile Season eyebrow and Arena intro sentence, in both the pinned
 baseline and current rendering; their surrounding design still undergoes pixel comparison.
 New browser assertions separately verify the authoritative title/state copy.
+B6/post-B6 Base preservation comparisons supply the same eligible objective to both pinned
+and current releases and assert its title. Every Base pixel remains compared; dedicated
+320/390/460 regressions cover the authorized removal of empty objectives separately.
 
 ## Final owner corrections
 

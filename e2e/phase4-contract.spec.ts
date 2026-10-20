@@ -386,3 +386,17 @@ for (const mode of ["pending", "in-flight", "committed-lost", "expired-reload"])
   if (!receipt) expect(after.resolved[0]).toMatchObject({ sequences: [1], key: before.batches[0].key });
   await expect(page.getByRole("navigation", { name: "Primary game navigation" })).toBeVisible();
 });
+
+test("TIMED_EXTERNAL with a Telegram URL does not advertise a Telegram-Mission-only retry control", async ({ page }) => {
+  const state = await prepareB4(page);
+  await page.route("**/api/v1/missions/*/start", route => {
+    state.missions[0].state = "IN_PROGRESS";
+    return route.fulfill({ json: { ...fixture.mission_start.response, destination_url: "https://t.me/reviewed_partner" } });
+  });
+  await page.goto(launch("/earn"));
+  await page.evaluate(() => { window.Telegram!.WebApp!.openTelegramLink = () => { throw new Error("Isolated native failure"); }; });
+  await page.getByRole("button", { name: "Start mission", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("The destination couldn't open. Please try the mission again.");
+  await expect(page.getByRole("button", { name: "Open Telegram", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Verify", exact: true })).toBeEnabled();
+});

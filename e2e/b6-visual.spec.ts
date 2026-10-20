@@ -97,9 +97,12 @@ for (const width of [320, 390, 460]) test(`B6 preserved scenes and corrected asy
   await page.getByRole("heading", { name: "Recent activity", exact: true }).scrollIntoViewIfNeeded();
   if (!before) await expect(page.locator("[data-activity-id]")).toHaveCount(b6Activity[0].items.length);
   await shot("source-activity");
+  // Compare the unchanged positive-objective scene in both releases; Phase 4 separately tests removal of empty sections.
+  f.app.missions = [{ ...f.app.missions[0], title: "Server objective", available: true, state: "AVAILABLE" }];
   for (const path of ["/base", "/profile", "/arena"]) {
     await page.goto(launch(path));
     await expect(page.locator("main")).toBeVisible();
+    if (path === "/base") await expect(page.getByRole("region", { name: "Next objectives" }).locator("article h3")).toHaveText(["Server objective"]);
     if (path === "/profile") await expect(page.getByRole("button", { name: "Customize", exact: true })).toBeEnabled();
     if (path === "/arena") await expect(page.getByRole("button", { name: "Unlocks in Season 2" })).toBeDisabled();
     await page.waitForTimeout(400);

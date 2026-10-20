@@ -44,8 +44,11 @@ for (const width of [320, 390, 460]) test(`post-B6 mobile visual comparison ${wi
   await page.reload(); await expect(header.locator("h1")).toHaveText(f.identity.name); await header.scrollIntoViewIfNeeded();
   if (!before) { expect(await header.locator("h1").evaluate(el => el.scrollWidth <= el.clientWidth + 1)).toBe(true); expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true); }
   await shot("clan-long-title");
+  // Keep full pixel coverage of a real objective; the authorized empty-section removal has dedicated regressions.
+  f.app.missions = [{ ...f.app.missions[0], title: "Server objective", available: true, state: "AVAILABLE" }];
   for (const path of ["/base", "/profile", "/arena"]) {
     await page.goto(launch(path)); await expect(page.locator("main")).toBeVisible();
+    if (path === "/base") await expect(page.getByRole("region", { name: "Next objectives" }).locator("article h3")).toHaveText(["Server objective"]);
     if (path === "/profile") await expect(page.getByRole("button", { name: "Customize", exact: true })).toBeEnabled();
     if (path === "/arena") await expect(page.getByRole("button", { name: "Unlocks in Season 2" })).toBeDisabled();
     await shot(`preserved-${path.slice(1)}`);
