@@ -4,7 +4,7 @@ import { useAnalyticsPage } from "@/integrations/analytics/AnalyticsConsent";
 import { configuredBotUrl, clanAddBotUrl } from "@/integrations/telegram/botLinks";
 import { useRewardHistory, useNetworkRewardHistory } from "@/integrations/api/useRewardHistory";
 import { rewardHistoryView } from "@/integrations/api/rewardHistory";
-import { useQueryFeedback } from "@/design-system/components/TransientFeedback";
+import { showFeedback, useQueryFeedback } from "@/design-system/components/TransientFeedback";
 import { readSessionPreference, writeSessionPreference } from "@/app/storageRelease";
 import { useB3, missionView } from "@/integrations/api/useB3";
 import { currentTypingRuns } from "@/integrations/api/b4Contracts";
@@ -255,13 +255,15 @@ export function EarnPage() {
     startTransition(() => { void navigate({ to: "/earn/typing" }); });
   };
 
-  const handleMissionAction = async (mission: EarnMission) => {
+  const handleMissionAction = async (mission: EarnMission, intent: "act" | "reopen" = "act") => {
     if (live.remote) {
       if (!missionAllowed(mission)) return;
-      const next = await live.missionAction(mission.id);
+      const next = await live.missionAction(mission.id, intent);
       if (next?.action === "typing") openTypingArena();
       else if (next?.action === "profile") void navigate({ to: "/profile" });
-      else if (next?.destination) navigateSafely(next.destination, adapter, to => { void navigate({ to }); });
+      else if (next?.destination && !navigateSafely(next.destination, adapter, to => { void navigate({ to }); })) {
+        showFeedback(safeDestination(next.destination)?.kind === "telegram" ? "Telegram couldn't open. Use Open Telegram to try again." : "The destination couldn't open. Please try the mission again.");
+      }
       return;
     }
     if (!canEarn("missions")) return;
@@ -312,6 +314,7 @@ export function EarnPage() {
 
 
   const copyReferral = async () => {
+    if (!canEarn("referral") || !referralLink) return;
     try {
       await navigator.clipboard.writeText(referralLink);
       setCopied(true);
@@ -324,6 +327,7 @@ export function EarnPage() {
   };
 
   const shareReferral = () => {
+    if (!canEarn("referral") || !referralLink) return;
     if (!live.remote) earn.markReferralSent();
     adapter.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent("Join me in Dexo Land and grow through the season together.")}`);
   };
@@ -350,6 +354,12 @@ export function EarnPage() {
       {compact ? null : <p>{mission.description}</p>}
       <div className={styles.missionFooter}>
         <div className={styles.missionReward}><span>REWARD</span><strong>+{mission.rewardXp} XP</strong></div>
+        {live.remote && mission.status === "in-progress" && live.missions.data?.some(m => m.key === mission.id && m.verification_family === "TELEGRAM" && !missionView(m).unavailable) ? <button
+          type="button"
+          className={styles.missionAction}
+          disabled={!missionAllowed(mission) || live.isPending(`mission:${mission.id}`)}
+          onClick={() => handleMissionAction(mission, "reopen")}
+        >Open Telegram</button> : null}
         <button
           type="button"
           className={styles.missionAction}
@@ -491,8 +501,8 @@ export function EarnPage() {
                   </header>
                   <div className={styles.linkBox}><span>{referralLink ? referralLink.replace("https://", "") : "Invite link unavailable"}</span></div>
                   <div className={styles.networkActions}>
-                    <Button tone="secondary" disabled={live.remote && !referralLink} onClick={copyReferral}>{copied ? "Copied" : "Copy link"}</Button>
-                    <Button disabled={live.remote && !referralLink} onClick={shareReferral}>Share in Telegram</Button>
+                    <Button tone="secondary" disabled={!canEarn("referral") || (live.remote && !referralLink)} onClick={copyReferral}>{copied ? "Copied" : "Copy link"}</Button>
+                    <Button disabled={!canEarn("referral") || (live.remote && !referralLink)} onClick={shareReferral}>Share in Telegram</Button>
                   </div>
                   <small>{live.remote ? `Invite code: ${live.referrals.data?.code ?? "—"} · ${live.referrals.data?.attribution_status ?? "No referral attribution"}${live.referrals.data?.activation ? ` · Level ${live.referrals.data.activation.level} / ${live.referrals.data.activation.required_level} · Minimum account age ${live.referrals.data.activation.required_account_age_hours}h · ${live.referrals.data.activation.eligible ? "Eligible" : "Pending eligibility"}` : ""}` : earn.referralSent ? `${earn.referralShares} share actions recorded · new joins are verified after reaching Level 5.` : "Share your personal link to begin growing your network."}</small>
                 </section>

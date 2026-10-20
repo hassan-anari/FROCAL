@@ -18,8 +18,11 @@ clock sample across canonical updates. Background resume pauses economic actions
 Bootstrap response. Earlier server-time responses cannot replace newer Bootstrap authority.
 Economic rejection cancels any older in-flight Bootstrap read and refreshes authority. Action
 locks and existing server idempotency remain in place. No local reward fallback is introduced.
-The existing Tap controller, leases, journal, pointer authority and reconciliation are unchanged;
-its existing availability wrapper now shares the same earning gate as the UI.
+Tap input shares the same earning gate as the UI. Its authenticated controller remains alive
+after earning stops so exact durable requests can reconcile. Lease scope, ownership, journal
+identity, pointer authority and receipt validation remain unchanged; no fresh lease is requested
+when the frontend earning gate is closed. A pending-sync message distinguishes saved events from
+server-confirmed progression during Closing.
 
 The old full-page Season gate is removed: lack of an earning Season is not a reason to hide
 historical records, confirmed balances or ordinary navigation. When Bootstrap returns no active
@@ -51,6 +54,56 @@ Existing browser/analytics/B4/B5/B6/post-B6 coverage remains enabled in CI. Visu
 mask only the authorized Profile Season eyebrow and Arena intro sentence, in both the pinned
 baseline and current rendering; their surrounding design still undergoes pixel comparison.
 New browser assertions separately verify the authoritative title/state copy.
+
+## Final owner corrections
+
+Base renders the entire Next Objective section only for eligible titled rows, in the existing
+stable priority order and with a maximum of three. REWARD_READY survives `available: false`
+because new-start availability does not revoke a vested obligation. Pending/failed reads never
+become completion copy; failed reads use existing transient feedback and a later read can recover.
+
+Telegram Start intentionally returns no destination. Opening a new TELEGRAM Mission requires
+a successful matching Start, followed by a successful list refresh with the same key, version,
+verification family and destination. Only a safe Telegram URL from that list is opened through
+the adapter. IN_PROGRESS has a small Open Telegram action beside Verify; reopening refreshes
+the matching definition without another Start. Native failure reports that opening failed and
+leaves retry/Verify available. Membership, readiness, Claim and reward settlement remain server
+operations. TIMED_EXTERNAL keeps its Start destination, open token and dwell verification.
+
+Referral Copy/Share invitations use the existing `referral` feature and shared earning gate,
+including a fresh check inside each handler. Historical referral reads remain available.
+
+### Tap cutoff protocol limit
+
+Tap wire evidence stays pinned to WEDCAL B2 `34328c76ba3377396660b1549bf8e370ac514a71`;
+the Phase 4 timing pin remains `cdd0aa372889956868708ba2c02bd29db5c1e1b7`. The reviewed
+Phase 4 implementation in `apps/base_tap/v2.py` caps lease expiry at the economic/epoch boundary.
+`submit_batch` finds an existing exact-key receipt before eligibility, expiry or rollover checks.
+Thus a batch committed before cutoff but with a lost response can be replayed after cutoff
+without another credit. Without an existing receipt, server arrival at/after cutoff fails
+eligibility (SEASON_UNAVAILABLE), or an expired lease fails LEASE_EXPIRED. The client event
+contains only lease scope and sequence, with no trusted proof of when the physical touch occurred.
+
+The prior frontend earning-dependent provider closed/aborted the controller at cutoff, removed
+its authorized pending display and left durable events unreconciled until earning became enabled
+again. The correction stops input synchronously while allowing in-flight responses, exact replay,
+authoritative rejection and subsequent state reads. Unknown/ambiguous evidence and its original
+request identity remain durable across reload. Definitive server rejection is retained with its
+key and sequences in the existing resolved journal; it never becomes earned XP. Saved unresolved
+events are identified as awaiting confirmation. No client time, backdating, expiry extension,
+new lease, re-keying or local reward fallback is used to settle them.
+
+**Unresolved backend dependency:** a valid locally journaled touch that was never committed
+before the server cutoff cannot be guaranteed credit under this protocol. The frontend safely
+obtains rejection; it cannot promise conservation of provisional displayed XP. Guaranteeing that
+product promise requires an explicitly reviewed backend protocol with durable server evidence
+of pre-cutoff acceptance/reservation and final per-request outcomes after Close. Accepting client
+timestamps or a blanket post-cutoff grace period would not establish that proof. No such backend
+change or unsafe frontend workaround is included here.
+
+Focused coverage includes pending, in-flight, committed-response-lost, expired-lease and reload
+cases, matching/changed Mission definitions, native failure, and 320/390/460 objective/Mission
+layouts. Run the existing Tap unit suites and `npm run test:e2e:phase4` before complete CI.
 
 ## Remaining backend contract gaps
 

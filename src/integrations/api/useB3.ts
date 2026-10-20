@@ -13,6 +13,8 @@ import type { EarnMission, MissionId, RewardEvent, LevelUpEvent } from "@/game/e
 import { safeDestination } from "./safeNavigation";
 import { useGameplayAvailability } from "./useGameplayAvailability";
 
+class MissionNavigationError extends Error {}
+
 export function missionView(
   m: c.Mission,
 ): EarnMission & { unavailable: boolean } {
@@ -186,7 +188,7 @@ export function useB3() {
       if (error instanceof B3Error && ["SEASON_UNAVAILABLE", "PLAYER_RESTRICTED"].includes(error.code)) denyEarning();
       if (error instanceof B3Error && error.retryAfter)
         blockedUntil.current[action] = Date.now() + error.retryAfter * 1000;
-      const text = error instanceof B3Error ? error.message : "We couldn't connect right now. Please try again.";
+      const text = error instanceof B3Error || error instanceof MissionNavigationError ? error.message : "We couldn't connect right now. Please try again.";
       setMessage(text);
       showFeedback(text);
     } finally {
@@ -215,7 +217,7 @@ export function useB3() {
       reveal(result.created, `daily:${result.claim_period}`, result.reward_amount, "Daily Core", "daily", before, result.canonical, result.reward);
       return result;
     });
-  const missionAction = (id: string) =>
+  const missionAction = (id: string, intent: "act" | "reopen" = "act") =>
     run(`mission:${id}`, async () => {
       const before = previousCanonical();
       const m = missions.data?.find((v) => v.key === id);
@@ -225,6 +227,7 @@ export function useB3() {
         m.state === "CLAIMED"
       )
         return;
+      if (intent === "reopen" && (m.verification_family !== "TELEGRAM" || m.state !== "IN_PROGRESS")) return;
       const path = `/missions/${encodeURIComponent(id)}`;
       if (m.state === "REWARD_READY") {
         if (!canClaimVested("missions", true)) return;
@@ -237,11 +240,43 @@ export function useB3() {
         return;
       }
       if (!canEarn("missions") || missionView(m).unavailable) return;
+      const refreshedMission = async () => {
+        const refreshed = await missions.refetch();
+        const current = refreshed.data?.find(candidate => candidate.key === id);
+        if (refreshed.isError || !current || current.version !== m.version || current.verification_family !== m.verification_family || current.destination_url !== m.destination_url) {
+          throw new MissionNavigationError("This mission changed or couldn't be refreshed. Please review it and try again.");
+        }
+        return current;
+      };
+      const telegramDestination = (current: c.Mission) => {
+        const destination = safeDestination(current.destination_url);
+        if (current.state !== "IN_PROGRESS" || missionView(current).unavailable || destination?.kind !== "telegram" || new URL(destination.url).pathname === "/") {
+          throw new MissionNavigationError("This mission's Telegram destination is unavailable. Please try again later.");
+        }
+        return { destination: destination.url, action: "external" as const };
+      };
+      if (intent === "reopen") {
+        if (m.verification_family !== "TELEGRAM" || m.state !== "IN_PROGRESS") return;
+        const current = await refreshedMission();
+        if (!canEarn("missions")) return;
+        return telegramDestination(current);
+      }
       const opened = await b3Request(`${path}/start`, c.missionStartSchema, {
         body: {},
       });
-      if (m.state === "AVAILABLE") {
+      if (m.verification_family !== "INTERNAL" && (opened.key !== m.key || opened.version !== m.version || opened.state !== "IN_PROGRESS")) {
         await missions.refetch();
+        throw new MissionNavigationError("This mission changed. Please review it and try again.");
+      }
+      if (m.state === "AVAILABLE") {
+        if (m.verification_family === "TELEGRAM") {
+          const current = await refreshedMission();
+          if (!canEarn("missions")) return;
+          return telegramDestination(current);
+        }
+        if (m.verification_family === "TIMED_EXTERNAL") await refreshedMission();
+        else await missions.refetch();
+        if (!canEarn("missions")) return;
         if (missionView({ ...m, destination_url: opened.destination_url }).unavailable) return;
         return {
           destination: opened.destination_url,
@@ -249,6 +284,10 @@ export function useB3() {
         };
       }
       if (!canEarn("missions")) return;
+      if (m.verification_family === "TELEGRAM") {
+        const current = await refreshedMission();
+        if (current.state !== "IN_PROGRESS" || missionView(current).unavailable || !canEarn("missions")) return;
+      }
       const result = await b3Request(`${path}/verify`, c.missionVerifySchema, {
         body: { open_token: opened.open_token },
       });

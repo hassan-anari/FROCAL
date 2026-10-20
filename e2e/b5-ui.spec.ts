@@ -43,7 +43,12 @@ for (const viewport of [{ width: 320, height: 700 }, { width: 390, height: 844 }
     writeFileSync(`${dir}/${phase}-computed.json`, JSON.stringify({ ctaHeight, avatar: computed }, null, 2) + "\n");
     await shot("communities");
     await page.goto(launch("/base"));
-    await page.getByRole("heading", { name: "Next Objective", exact: true }).evaluate(el => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    if (phase === "after") {
+      // This fixture has no titled actionable objectives; the owner correction removes the whole section.
+      await expect(page.getByRole("heading", { name: "Next Objective", exact: true })).toHaveCount(0);
+      await expect(page.getByRole("button", { name: "All missions", exact: true })).toHaveCount(0);
+      await page.getByRole("region", { name: "Base status", exact: true }).scrollIntoViewIfNeeded();
+    } else await page.getByRole("heading", { name: "Next Objective", exact: true }).evaluate(el => el.scrollIntoView({ block: "center", behavior: "instant" }));
     await shot("base-objectives-rewards");
     await page.goto(launch("/earn"));
     if (phase === "after") {

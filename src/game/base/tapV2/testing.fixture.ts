@@ -25,7 +25,7 @@ export class MemoryStorage implements DurableStorage {
 export function internalHarness(options: {
   snapshot?: TapSnapshot; storage?: DurableStorage;
   submit?: TapPort["submit"]; synchronize?: TapPort["synchronize"];
-  onCommitted?: (snapshot: TapSnapshot) => void;
+  onCommitted?: (snapshot: TapSnapshot) => void; canEarn?: () => boolean;
 } = {}) {
   let snapshot = structuredClone(options.snapshot ?? internalSnapshot());
   let now = 0;
@@ -53,7 +53,7 @@ export function internalHarness(options: {
     player: snapshot.player, port: { submit: options.submit ?? settle, synchronize: options.synchronize ?? (async (_journal: Readonly<TapJournal>) => structuredClone(snapshot)) },
     storage: () => storage, ownership: { acquire: async () => true, release: () => undefined },
     monotonicNow: () => now, wallNow: () => wall,
-    requestKey: () => `internal-request-${++key}`, onCommitted: options.onCommitted,
+    requestKey: () => `internal-request-${++key}`, onCommitted: options.onCommitted, canEarn: options.canEarn,
   });
   return { controller, storage, submissions, settle,
     advance: (ms: number) => { now += ms; wall += ms; },

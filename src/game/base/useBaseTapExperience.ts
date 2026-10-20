@@ -18,6 +18,7 @@ export function useBaseTapExperience(input: { enabled: boolean; initData: string
     visualLifetime: newer ? canonical.progression.lifetime_points : view?.lifetime ?? input.serverLifetime,
     progression: canonicalProgression ?? view?.progression ?? null,
     seasonPoints: newer ? canonical.season_points : view?.seasonPoints ?? null,
+    unresolvedEvents: view?.unresolvedEvents ?? 0,
     isCoolingDown: view?.isCoolingDown ?? false,
     cooldownCycle: view?.cooldownUntil ?? 0,
     cooldownMs: view?.cooldownMs ?? 0,

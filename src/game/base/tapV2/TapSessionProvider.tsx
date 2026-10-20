@@ -55,15 +55,18 @@ export function TapSessionProvider({ children }: { children: ReactNode }) {
   const auth = adapter.getInitData();
   const key = JSON.stringify([scope, auth, attempt]); // Memory only; never serialized to storage/logs/query keys.
   const [session, setSession] = useState<{ key: string; controller: TapController } | null>(null);
-  const enabled = isRemoteDataSource() && launchState === "ready" && Boolean(auth) && scope.player !== "unverified"
-    && canEarn("base_tap");
+  // Input authority may end while an exact durable request is awaiting its receipt.
+  // Keep reconciliation alive for this authenticated scope; only identity turnover closes it.
+  const enabled = isRemoteDataSource() && launchState === "ready" && Boolean(auth) && scope.player !== "unverified" && Boolean(bootstrap.data);
+  const earningAllowed = canEarn("base_tap");
   const configVersion = bootstrap.data?.remote?.config.version;
   useEffect(() => {
     if (!enabled) { setSession(null); return; }
     const bridge = createTapCacheBridge(client, scope);
     let refreshed = false;
     const controller = new TapController({ player: scope.player, storage: () => localStorage,
-      ownership: browserTapOwnership(scope.player), port: createTapPort(scope.player, auth),
+      ownership: browserTapOwnership(scope.player), port: createTapPort(scope.player, auth, [scope.player], () => canEarn("base_tap")),
+      canEarn: () => canEarn("base_tap"),
       onCommitted: (snapshot) => {
         if ((snapshot.season !== scope.season || snapshot.config !== configVersion) && !refreshed) { refreshed = true; refresh(); }
         bridge(snapshot);
@@ -74,6 +77,9 @@ export function TapSessionProvider({ children }: { children: ReactNode }) {
     return bindTapLifecycle(controller);
     // Scope/credential turnover replaces and closes the entire authenticated controller.
   }, [key, enabled]);
+  useEffect(() => {
+    if (session?.key === key && !earningAllowed) session.controller.requestCanonicalRefresh();
+  }, [session, key, earningAllowed]);
   // Keep the same provider ancestry when earning stops; preserve the current tab/scroll.
   return <Session controller={session?.key === key && enabled ? session.controller : null} restart={() => setAttempt((value) => value + 1)}>{children}</Session>;
 }
